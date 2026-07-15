@@ -1,0 +1,27 @@
+{
+  "name": "tang-paper-cutout",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "assets:rasterize": "node scripts/rasterize-assets.mjs",
+    "dev": "remotion studio src/index.ts",
+    "check": "tsc --noEmit",
+    "bundle": "remotion bundle src/index.ts",
+    "render": "remotion render src/index.ts Tang-Paper-Cutout out/tang-paper-cutout.mp4",
+    "render:preview": "remotion render src/index.ts Tang-Paper-Cutout out/tang-paper-cutout-preview.mp4 --scale=0.5 --concurrency=8",
+    "render:frame": "remotion still src/index.ts Tang-Paper-Cutout out/preview-frame.png --frame=470"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.489",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "remotion": "4.0.489"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "sharp": "0.35.3",
+    "typescript": "5.9.3"
+  }
+}
