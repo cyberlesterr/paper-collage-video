@@ -8,9 +8,10 @@
     "dev": "remotion studio src/index.ts",
     "check": "tsc --noEmit",
     "bundle": "remotion bundle src/index.ts",
-    "render": "remotion render src/index.ts Tang-Paper-Cutout out/tang-paper-cutout.mp4",
-    "render:preview": "remotion render src/index.ts Tang-Paper-Cutout out/tang-paper-cutout-preview.mp4 --scale=0.5 --concurrency=8",
-    "render:frame": "remotion still src/index.ts Tang-Paper-Cutout out/preview-frame.png --frame=470"
+    "render": "remotion render src/index.ts Tang-Collage-Replica out/tang-collage-replica.mp4",
+    "render:preview": "remotion render src/index.ts Tang-Collage-Replica out/tang-collage-replica-preview.mp4 --scale=0.5 --concurrency=8",
+    "render:frame": "remotion still src/index.ts Tang-Collage-Replica out/replica-preview-frame.png --frame=470",
+    "render:prototype": "remotion render src/index.ts Tang-Paper-Cutout-Prototype out/tang-paper-cutout-prototype.mp4 --scale=0.5 --concurrency=8"
   },
   "dependencies": {
     "@remotion/cli": "4.0.489",
