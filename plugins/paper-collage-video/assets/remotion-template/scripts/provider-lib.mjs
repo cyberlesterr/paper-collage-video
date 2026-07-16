@@ -6,6 +6,8 @@ import {ROOT, SLUG_PATTERN, fileExists, readJson, writeJson} from './project-lib
 
 export const PROVIDER_CAPABILITIES = ['text', 'image', 'voice'];
 export const PROVIDER_ADAPTERS = ['host', 'command', 'manual'];
+export const PROVIDER_SCOPES = ['project', 'workspace'];
+const PROVIDER_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const isPlainObject = (value) =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -51,6 +53,38 @@ export const validateProviderConfig = (config) => {
         `${capability} 默认 provider ${definition.defaultProvider ?? '(empty)'} 不存在。`,
         `capabilities.${capability}.defaultProvider`,
       );
+    }
+    const selection = definition.selection;
+    if (selection !== undefined) {
+      const location = `capabilities.${capability}.selection`;
+      if (
+        selection?.status !== 'confirmed' ||
+        !selection.provider ||
+        typeof selection.confirmedAt !== 'string' ||
+        !PROVIDER_SCOPES.includes(selection.scope) ||
+        !selection.note
+      ) {
+        add(
+          'error',
+          'provider-selection',
+          'selection 必须记录 confirmed 状态、provider、时间、scope 和人的决定。',
+          location,
+        );
+      } else if (!providers[selection.provider]) {
+        add(
+          'error',
+          'selected-provider-missing',
+          `已确认的 provider 不存在：${selection.provider}。`,
+          `${location}.provider`,
+        );
+      } else if (selection.provider !== definition.defaultProvider) {
+        add(
+          'error',
+          'selected-provider-mismatch',
+          `selection.provider ${selection.provider} 与 defaultProvider ${definition.defaultProvider} 不一致。`,
+          location,
+        );
+      }
     }
     for (const [providerId, provider] of Object.entries(providers)) {
       const location = `capabilities.${capability}.providers.${providerId}`;
@@ -132,6 +166,57 @@ export const resolveProvider = (config, capability, providerId = 'auto') => {
   return {...provider, id: selectedId, capability};
 };
 
+export const summarizeProviderSelections = (config) =>
+  Object.fromEntries(
+    PROVIDER_CAPABILITIES.map((capability) => {
+      const definition = config.capabilities?.[capability];
+      const selection = definition?.selection ?? null;
+      const confirmed = Boolean(
+        selection?.status === 'confirmed' &&
+          selection.provider === definition?.defaultProvider &&
+          definition?.providers?.[selection.provider],
+      );
+      return [
+        capability,
+        {
+          confirmed,
+          needsConfirmation: !confirmed,
+          selection,
+        },
+      ];
+    }),
+  );
+
+export const resolveConfirmedProvider = (
+  config,
+  capability,
+  providerId = 'auto',
+) => {
+  const selection = summarizeProviderSelections(config)[capability];
+  if (!selection?.confirmed) {
+    throw new Error(`${capability} provider 尚未获得用户确认。`);
+  }
+  const provider = resolveProvider(config, capability, providerId);
+  if (provider.id !== selection.selection.provider) {
+    throw new Error(
+      `${capability} provider ${provider.id} 未获授权；用户确认的是 ${selection.selection.provider}。`,
+    );
+  }
+  return provider;
+};
+
+export const assertProviderSelections = (loaded) => {
+  assertProviderConfig(loaded);
+  const selections = summarizeProviderSelections(loaded.config);
+  const missing = Object.entries(selections)
+    .filter(([, status]) => !status.confirmed)
+    .map(([capability]) => capability);
+  if (missing.length) {
+    throw new Error(`以下能力尚未获得用户确认：${missing.join(', ')}`);
+  }
+  return {...loaded, selections};
+};
+
 const executableCandidates = (executable) => {
   if (executable.includes('/') || executable.includes('\\')) {
     return [path.isAbsolute(executable) ? executable : path.resolve(ROOT, executable)];
@@ -190,6 +275,132 @@ export const inspectProviderReadiness = async (provider) => {
     message: errors.join('；') || `命令适配器可用：${executable}`,
     missingEnv,
     executable,
+  };
+};
+
+export const assertSelectedProvidersReady = async (slug) => {
+  const loaded = assertProviderSelections(await loadProviderConfig(slug));
+  for (const capability of PROVIDER_CAPABILITIES) {
+    const provider = resolveProvider(loaded.config, capability);
+    const readiness = await inspectProviderReadiness(provider);
+    if (readiness.status === 'error') {
+      throw new Error(`${capability} provider ${provider.id} 不可用：${readiness.message}`);
+    }
+  }
+  return loaded;
+};
+
+const selectionTarget = (slug, scope) =>
+  scope === 'workspace'
+    ? path.join(ROOT, 'providers.local.json')
+    : path.join(ROOT, 'projects', slug, 'providers.json');
+
+export const writeProviderSelection = async ({
+  slug,
+  capability,
+  providerId,
+  scope = 'project',
+  label = null,
+  adapter = null,
+  tool = null,
+  model = null,
+  note,
+  at = new Date().toISOString(),
+}) => {
+  if (!SLUG_PATTERN.test(slug ?? '')) throw new Error('项目 slug 格式无效。');
+  if (!(await fileExists(path.join(ROOT, 'projects', slug, 'production.json')))) {
+    throw new Error(`项目不存在：${slug}；请先运行 project:new。`);
+  }
+  if (!PROVIDER_CAPABILITIES.includes(capability)) {
+    throw new Error(`capability 必须是：${PROVIDER_CAPABILITIES.join(', ')}。`);
+  }
+  if (!PROVIDER_ID_PATTERN.test(providerId ?? '')) {
+    throw new Error('provider id 只能包含小写字母、数字和单个连字符。');
+  }
+  if (!PROVIDER_SCOPES.includes(scope)) {
+    throw new Error(`scope 必须是：${PROVIDER_SCOPES.join(', ')}。`);
+  }
+  if (!(note ?? '').trim()) throw new Error('provider 选择必须记录人的明确决定。');
+
+  const loaded = assertProviderConfig(await loadProviderConfig(slug));
+  const existing = loaded.config.capabilities[capability].providers[providerId] ?? null;
+  const selectedAdapter = adapter ?? existing?.adapter;
+  if (!PROVIDER_ADAPTERS.includes(selectedAdapter)) {
+    throw new Error(`新 provider 必须指定 adapter：${PROVIDER_ADAPTERS.join(', ')}。`);
+  }
+  if (!existing && !label) throw new Error('新 provider 必须指定 --label。');
+  if (!existing && selectedAdapter === 'command') {
+    throw new Error('新的 command provider 请先在 providers.local.json 配置 command，再选择它。');
+  }
+  const provider = {
+    ...(existing ?? {}),
+    ...(label ? {label} : {}),
+    adapter: selectedAdapter,
+    ...(tool ? {tool} : {}),
+    ...(model ? {model} : {}),
+  };
+  if (provider.adapter === 'host' && capability !== 'text' && !provider.tool) {
+    throw new Error('host image/voice provider 必须用 --tool 记录已发现的可调用工具。');
+  }
+
+  if (scope === 'workspace') {
+    const projectOverlay = await readOptionalJson(
+      path.join(ROOT, 'projects', slug, 'providers.json'),
+    );
+    const projectCapability = projectOverlay?.capabilities?.[capability];
+    if (projectCapability?.defaultProvider || projectCapability?.selection) {
+      throw new Error(
+        `${capability} 已有项目级选择；项目配置优先于 workspace。请保留 --scope=project，或先显式迁移该项目覆盖。`,
+      );
+    }
+  }
+
+  const target = selectionTarget(slug, scope);
+  const overlay = (await fileExists(target))
+    ? await readJson(target)
+    : {
+        $schema:
+          scope === 'workspace'
+            ? './schemas/providers.schema.json'
+            : '../../schemas/providers.schema.json',
+        schemaVersion: 1,
+      };
+  overlay.schemaVersion = 1;
+  overlay.capabilities ??= {};
+  overlay.capabilities[capability] ??= {};
+  const targetCapability = overlay.capabilities[capability];
+  targetCapability.defaultProvider = providerId;
+  if (!existing || label || adapter || tool || model) {
+    targetCapability.providers ??= {};
+    targetCapability.providers[providerId] = provider;
+  }
+  const selection = {
+    status: 'confirmed',
+    provider: providerId,
+    confirmedAt: at,
+    scope,
+    note: note.trim(),
+  };
+  targetCapability.selection = selection;
+  const prospectiveConfig = deepMerge(loaded.config, {
+    capabilities: {
+      [capability]: {
+        defaultProvider: providerId,
+        providers: {[providerId]: provider},
+        selection,
+      },
+    },
+  });
+  assertProviderConfig({
+    config: prospectiveConfig,
+    issues: validateProviderConfig(prospectiveConfig),
+  });
+  await writeJson(target, overlay);
+  return {
+    target,
+    provider: {...provider, id: providerId, capability},
+    selection,
+    loaded: assertProviderConfig(await loadProviderConfig(slug)),
   };
 };
 
@@ -309,6 +520,7 @@ export const recordAssetProvenance = async ({
     file: path.relative(ROOT, output),
     provider: provider.id,
     adapter: provider.adapter,
+    tool: provider.tool ?? null,
     model: model || request.model || provider.model || null,
     externalId: externalId || null,
     sha256,

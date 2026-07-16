@@ -12,6 +12,7 @@ import {
   writeValidationReport,
 } from './project-lib.mjs';
 import {advanceProduction, formatProduction} from './production-state.mjs';
+import {assertSelectedProvidersReady} from './provider-lib.mjs';
 
 const args = process.argv.slice(2);
 const positional = args.filter((arg) => !arg.startsWith('--'));
@@ -39,6 +40,9 @@ try {
   assertSlug(slug);
 
   const artifacts = {};
+  if (action === 'capabilities-ready') {
+    await assertSelectedProvidersReady(slug);
+  }
   if (action === 'assets-ready') {
     const {project} = await loadProject(slug);
     const validation = await validateProject(project);

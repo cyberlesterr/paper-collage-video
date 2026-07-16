@@ -2,6 +2,8 @@
 
 Read this reference before any creative generation, speech generation, final delivery, or external action.
 
+Provider confirmation at `capability-review` is a separate operational selection. It authorizes which capability may be used, but it does not approve the story concept, a paid bulk generation run, the creative result, or publication.
+
 ## Human Decisions
 
 Require an explicit human decision for:

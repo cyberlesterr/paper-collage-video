@@ -24,7 +24,7 @@ Turn a human topic into an editable Remotion project while keeping the human in 
    npm run project:new -- <slug> --title="<title>"
    ```
 
-5. Read [references/project-contract.md](references/project-contract.md) before creating or changing project files. Read [references/providers.md](references/providers.md) before selecting text, image, or voice generation services. Read [references/approval-gates.md](references/approval-gates.md) before generating creative assets, speech, or an external delivery.
+5. Read [references/project-contract.md](references/project-contract.md) before creating or changing project files. Read [references/providers.md](references/providers.md) and [references/capability-negotiation.md](references/capability-negotiation.md) before selecting text, image, or voice generation services. Read [references/approval-gates.md](references/approval-gates.md) before generating creative assets, speech, or an external delivery.
 6. Read [references/execution-control.md](references/execution-control.md) before doing work. Obey its `auto-continue`/`wait-human` contract and tool-only image-generation isolation rules.
 
 ## Apply Defaults Deliberately
@@ -42,6 +42,18 @@ Ask only for missing information that materially changes the subject, factual po
 
 ## Follow the Production Stages
 
+### 0. Discover and Confirm Capabilities
+
+New projects begin at `capability-review`. Inspect the current host's real callable text, image, and fictional-voice capabilities, then ask the human to confirm all unresolved choices in one structured form when the host offers one. Always offer configured providers, manual import, and a way to describe a user-supplied service. Fall back to a concise chat question when no form surface exists.
+
+Persist each answer with `provider:select`. Do not put secrets in the selection. Once all three choices are confirmed, run:
+
+```bash
+npm run project:advance -- <slug> capabilities-ready --note="<human decision>"
+```
+
+Do not generate a sample merely to test availability. On resume, reuse confirmed selections only while their recorded host tools are still callable.
+
 ### 1. Prepare the Brief
 
 Fill `projects/<slug>/brief.md` from the conversation. Keep unknown but non-blocking fields explicit and use the defaults above. Then run:
@@ -50,7 +62,7 @@ Fill `projects/<slug>/brief.md` from the conversation. Keep unknown but non-bloc
 npm run project:advance -- <slug> brief-ready
 ```
 
-Run `provider:status -- <slug>` before drafting. Use the default host text model unless the merged project configuration explicitly selects a ready command or manual text provider. Record externally generated text through the provider request contract.
+Run `provider:status -- <slug>` before drafting. Use only the confirmed text provider. Record externally generated text through the provider request contract.
 
 ### 2. Propose the Concept and Stop
 

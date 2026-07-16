@@ -51,6 +51,7 @@ Store paths in `project.json` relative to `public/`, for example `projects/<slug
 
 | Current stage | Action | Next stage | Gate |
 |---|---|---|---|
+| `capability-review` | `capabilities-ready` | `brief` | Explicit human provider choices are recorded and ready |
 | `brief` | `brief-ready` | `concept-review` | Brief captures the request |
 | `concept-review` | `approve-concept` | `style-review` | Explicit human concept approval |
 | `concept-review` or `style-review` | `request-concept-revision` | `concept-review` | Human requests concept changes |
@@ -92,6 +93,7 @@ Render commands enforce prior approvals. Successful renders record their artifac
 ```bash
 npm run project:new -- <slug> --title="<title>"
 npm run provider:status -- <slug>
+npm run provider:select -- <slug> <capability> <provider-id> --note="<decision>"
 npm run project:sync -- <slug>
 npm run project:validate -- <slug>
 npm run project:assets-ready -- <slug>

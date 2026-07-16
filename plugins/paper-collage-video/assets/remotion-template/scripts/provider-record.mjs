@@ -5,7 +5,7 @@ import {
   loadAssetRequest,
   loadProviderConfig,
   recordAssetProvenance,
-  resolveProvider,
+  resolveConfirmedProvider,
 } from './provider-lib.mjs';
 import {ROOT} from './project-lib.mjs';
 
@@ -25,7 +25,7 @@ try {
   const loadedConfig = assertProviderConfig(
     await loadProviderConfig(loadedRequest.request.projectSlug),
   );
-  const provider = resolveProvider(
+  const provider = resolveConfirmedProvider(
     loadedConfig.config,
     loadedRequest.request.capability,
     providerId,

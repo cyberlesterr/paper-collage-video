@@ -19,6 +19,7 @@
           "file": {"type": "string"},
           "provider": {"type": "string"},
           "adapter": {"enum": ["host", "command", "manual"]},
+          "tool": {"type": ["string", "null"]},
           "model": {"type": ["string", "null"]},
           "externalId": {"type": ["string", "null"]},
           "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},

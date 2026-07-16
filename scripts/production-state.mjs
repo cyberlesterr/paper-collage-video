@@ -9,6 +9,7 @@ import {
 } from './project-lib.mjs';
 
 export const PRODUCTION_STAGES = [
+  'capability-review',
   'brief',
   'concept-review',
   'style-review',
@@ -27,11 +28,16 @@ export const APPROVAL_KEYS = [
   'publish',
 ];
 
-export const HUMAN_GATE_STAGES = new Set([
+export const HUMAN_APPROVAL_STAGES = new Set([
   'concept-review',
   'style-review',
   'human-review',
   'publish-approval',
+]);
+
+export const HUMAN_GATE_STAGES = new Set([
+  'capability-review',
+  ...HUMAN_APPROVAL_STAGES,
 ]);
 
 export const WORK_ITEM_STATUSES = [
@@ -56,6 +62,7 @@ const REQUIRED_ARTIFACT_KEYS = new Set(['brief', 'project', 'prompts', 'review']
 
 const APPROVAL_STATUSES = ['pending', 'approved', 'changes-requested'];
 const HUMAN_DECISION_ACTIONS = new Set([
+  'capabilities-ready',
   'approve-concept',
   'request-concept-revision',
   'approve-style-voice',
@@ -66,6 +73,8 @@ const HUMAN_DECISION_ACTIONS = new Set([
 ]);
 
 const nextActionByStage = {
+  'capability-review':
+    '检测当前宿主能力并请人确认 text/image/voice provider；然后记录 capabilities-ready',
   brief: '完善 brief.md，再记录 brief-ready',
   'concept-review': '向人展示文案、分镜和素材清单；确认后记录 approve-concept',
   'style-review': '展示一张风格样张和虚构音色；确认后记录 approve-style-voice',
@@ -78,6 +87,13 @@ const nextActionByStage = {
 };
 
 const stageControlByStage = {
+  'capability-review': {
+    mode: 'wait-human',
+    gate: 'providers',
+    requiredDecision:
+      '请确认是否使用检测到的文本、生图和虚构音色能力；也可以选择已配置服务、自定义服务或手工导入。',
+    expectedArtifacts: ['providers'],
+  },
   brief: {
     mode: 'auto-continue',
     expectedArtifacts: ['brief'],
@@ -524,6 +540,10 @@ export const transitionProduction = (current, action, options = {}) => {
   }
 
   switch (action) {
+    case 'capabilities-ready':
+      assertStage(state, ['capability-review'], action);
+      state.stage = 'brief';
+      break;
     case 'brief-ready':
       assertStage(state, ['brief'], action);
       state.stage = 'concept-review';

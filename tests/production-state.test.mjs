@@ -4,6 +4,7 @@ import {
   assessHandoff,
   formatProduction,
   getStageControl,
+  HUMAN_APPROVAL_STAGES,
   HUMAN_GATE_STAGES,
   mergeReviewDocument,
   PRODUCTION_STAGES,
@@ -47,23 +48,30 @@ const makeState = (stage) => ({
     {
       at: '2026-07-16T00:00:00.000Z',
       action: 'project-created',
-      stage: 'brief',
+      stage: 'capability-review',
       note: '',
     },
   ],
 });
 
-test('only the four declared human gates wait for a user decision', () => {
+test('capability setup and the four approvals are the only human wait stages', () => {
   const waitingStages = PRODUCTION_STAGES.filter(
     (stage) => getStageControl(makeState(stage)).mode === 'wait-human',
   );
   assert.deepEqual(waitingStages, [
+    'capability-review',
     'concept-review',
     'style-review',
     'human-review',
     'publish-approval',
   ]);
   assert.deepEqual(waitingStages, [...HUMAN_GATE_STAGES]);
+  assert.deepEqual([...HUMAN_APPROVAL_STAGES], [
+    'concept-review',
+    'style-review',
+    'human-review',
+    'publish-approval',
+  ]);
 });
 
 test('automatic stages explicitly prohibit normal turn termination', () => {
@@ -74,6 +82,20 @@ test('automatic stages explicitly prohibit normal turn termination', () => {
     assert.ok(control.nextCommand);
     assert.equal(control.requiredDecision, null);
   }
+});
+
+test('capability confirmation requires a recorded human decision', () => {
+  const current = makeState('capability-review');
+  assert.throws(
+    () => transitionProduction(current, 'capabilities-ready'),
+    /必须用 --note/,
+  );
+  const next = transitionProduction(current, 'capabilities-ready', {
+    note: '使用已检测到的宿主能力，并手工导入旁白',
+    at: '2026-07-16T00:01:00.000Z',
+  });
+  assert.equal(next.stage, 'brief');
+  assert.equal(next.history.at(-1).action, 'capabilities-ready');
 });
 
 test('handoff guard blocks automatic stages unless a real blocker is explicit', () => {

@@ -52,16 +52,17 @@ codex plugin add paper-collage-video@paper-collage-video
 用 $make-paper-collage-video 做一条约 30 秒的玄奘西行纸片分层视频。
 ```
 
-Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于插件包中。它会从工作区初始化和简报开始，自动维护项目文件和生产状态，只在概念、风格/虚构音色、预览和发布四个节点停下来让人决定。其他阶段标记为 `AUTO-CONTINUE`，单次工具调用结束不等于任务暂停。中断后再次调用同一个 Skill，它会先读取 `production.json` 和逐项工作清单，从当前阶段继续。
+Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于插件包中。它会先检测当前宿主真实可用的文本、生图和虚构语音能力，用一次表单（没有表单能力时改用聊天）让人确认或选择自定义服务；随后只在概念、风格/虚构音色、预览和发布四个创意/发布节点停下来让人决定。其他阶段标记为 `AUTO-CONTINUE`，单次工具调用结束不等于任务暂停。中断后再次调用同一个 Skill，它会先读取 `production.json` 和逐项工作清单，从当前阶段继续。
 
 ## 人在流程中的位置
 
-正常制作一条新视频时，人只需要参与四次：
+正常制作一条新视频时，人先做一次可复用的能力确认，再参与四个内容节点：
 
-1. 填写或口述 `brief.md`：主题、受众、平台、核心观点、风格和禁区。
-2. 确认文案、镜头、风格样张和虚构旁白音色。
-3. 查看 `preview.mp4`，用自然语言提出修改意见。
-4. 查看最终视频和验收报告，作出发布批准。
+1. 确认是否使用检测到的文本、生图和虚构语音能力，或选择自己的服务/手工导入。
+2. 填写或口述 `brief.md`：主题、受众、平台、核心观点、风格和禁区。
+3. 确认文案、镜头、风格样张和虚构旁白音色。
+4. 查看 `preview.mp4`，用自然语言提出修改意见。
+5. 查看最终视频和验收报告，作出发布批准。
 
 人不需要手写人物坐标、处理透明通道、计算旁白帧数、修改 React 或执行 FFmpeg。`project.json` 是 Codex 和工具维护的机器协议。
 
@@ -135,7 +136,7 @@ public/projects/silk-road/
   audio/sfx/
 ```
 
-接下来由人填写或口述 `brief.md`，Codex 根据简报维护 `project.json`、提示词和素材；`production.json` 记录阶段、审批和产物。可以用 `--dry-run` 预览将创建的路径而不写文件：
+新项目先处于 `capability-review`：Codex 检测当前宿主能力并让人确认三类 provider；全部选择落盘后才进入 `brief`。随后由人填写或口述 `brief.md`，Codex 根据简报维护 `project.json`、提示词和素材；`production.json` 记录阶段、审批和产物。可以用 `--dry-run` 预览将创建的路径而不写文件：
 
 ```bash
 npm run project:new -- silk-road --title="玄奘西行" --dry-run
@@ -149,6 +150,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | `npm run project:status -- <slug>` | 显示当前阶段、审批、产物和下一步 |
 | `npm run project:status -- <slug> --compact-json` | 输出不含冗长历史的机器可读控制信息 |
 | `npm run provider:status -- <slug>` | 合并并检查文本、生图、语音 provider 配置 |
+| `npm run provider:select -- <slug> <capability> <provider-id>` | 记录人确认的 provider、作用域和宿主工具 |
 | `npm run provider:run -- --request=<file>` | 运行用户配置的命令适配器并登记资产来源 |
 | `npm run provider:record -- --request=<file>` | 登记宿主工具或手工导入的本地输出 |
 | `npm run project:handoff-check -- <slug>` | 在回合结束前阻止 `AUTO-CONTINUE` 阶段被误当成人工停点 |
@@ -169,7 +171,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 
 `project:preview` 和 `project:render` 都遵循 fail-fast：素材或配置存在错误时不会开始昂贵渲染；警告会写入报告但不阻塞。
 
-新项目还会受到审批门控：概念和风格/虚构音色未确认时不能渲染预览，预览未获人工批准时不能渲染正式成片。完整动作表见 [docs/workflow.md](docs/workflow.md)。
+新项目还会受到门控：文本、生图、语音 provider 未确认时不能进入简报；概念和风格/虚构音色未确认时不能渲染预览，预览未获人工批准时不能渲染正式成片。完整动作表见 [docs/workflow.md](docs/workflow.md)。
 
 涉及人工决定的动作必须带 `--note="人的原话或明确结论"`；这样中断恢复时不会把技术通过误认为创意或发布批准。
 
@@ -180,6 +182,8 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 1. `providers.json`：可共享的工作区默认值；
 2. `providers.local.json`：本机覆盖，已加入 `.gitignore`；
 3. `projects/<slug>/providers.json`：单项目覆盖。
+
+Skill 不会只根据名称猜测能力存在：它先检查当前宿主的实际工具/Skill 元数据，再把检测到的候选、已有配置、手工导入和“我自己提供这个能力”放进一次确认表单。选择通过 `provider:select` 持久化；恢复任务时只要已选宿主工具仍存在，就不重复询问。
 
 复制 `providers.local.example.json` 为 `providers.local.json`，即可把任意 CLI、SDK 包装脚本或私有 API 接到 `command` adapter。配置只保存 `requiredEnv` 的变量名，API key 仍放在环境变量中。异步服务由用户的 adapter 自行提交和轮询；稳定接口是“读取请求 JSON、写入指定输出、退出码为 0”。
 
@@ -226,7 +230,7 @@ python3 scripts/remove_chroma_key.py --input KEY.png --out ALPHA.png --key-color
 
 后一个镜头从前一个镜头结束前 `transitionFrames` 帧开始，以形成交叠转场。
 
-生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、四个审批、逐项工作进度、已生成产物和追加式事件历史。审批应通过 `project:advance` 记录，工作进度应通过 `project:checkpoint` 记录，不直接改 JSON。
+生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、一次能力配置门禁、四个审批、逐项工作进度、已生成产物和追加式事件历史。审批与能力确认完成事件应通过 `project:advance` 记录，工作进度应通过 `project:checkpoint` 记录，不直接改 JSON。
 
 `project:status` 会把阶段标为 `AUTO-CONTINUE`、`WAIT-HUMAN` 或 `COMPLETE`。只有 `WAIT-HUMAN` 可以作为正常的人机暂停点；`AUTO-CONTINUE` 阶段若发生真实阻塞，必须报告确切错误和需要的人为动作，不能以空白响应结束。
 

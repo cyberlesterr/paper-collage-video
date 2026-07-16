@@ -8,6 +8,7 @@
         "host-text": {
           "label": "Host language model",
           "adapter": "host",
+          "tool": "codex-host-model",
           "toolHint": "Use the current Codex host model for briefs, scripts, prompts, and storyboard text."
         },
         "manual-text": {

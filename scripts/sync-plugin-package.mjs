@@ -65,6 +65,7 @@ for (const entry of [
   'templates',
   'scripts/process-character-sheet.mjs',
   'scripts/provider-lib.mjs',
+  'scripts/provider-select.mjs',
   'scripts/provider-record.mjs',
   'scripts/provider-run.mjs',
   'scripts/provider-status.mjs',
@@ -103,13 +104,14 @@ const rootPackage = JSON.parse(
 const workspacePackage = {
   ...rootPackage,
   name: 'paper-collage-video-workspace',
-  version: '0.2.0',
+  version: '0.3.0',
   private: true,
   engines: {node: '>=20'},
   scripts: {
     'assets:rasterize': rootPackage.scripts['assets:rasterize'],
     'assets:process-sheet': rootPackage.scripts['assets:process-sheet'],
     'provider:status': rootPackage.scripts['provider:status'],
+    'provider:select': rootPackage.scripts['provider:select'],
     'provider:run': rootPackage.scripts['provider:run'],
     'provider:record': rootPackage.scripts['provider:record'],
     'project:new': rootPackage.scripts['project:new'],
@@ -315,7 +317,7 @@ await fs.writeFile(narrationFile, makeSilentWav());
 await writeJson(path.join(RUNTIME_ROOT, '.paper-collage-template.json'), {
   schemaVersion: 1,
   plugin: 'paper-collage-video',
-  pluginVersion: '0.2.0',
+  pluginVersion: '0.3.0',
 });
 
 console.log(`✓ Plugin skill synced: ${path.relative(ROOT, SKILL_TARGET)}`);

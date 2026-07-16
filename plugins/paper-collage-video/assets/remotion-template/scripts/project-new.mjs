@@ -77,7 +77,7 @@ try {
   }
 
   console.log('✓ 项目骨架已创建');
-  console.log(`下一步：填写 projects/${slug}/brief.md，再运行 project:advance -- ${slug} brief-ready。`);
+  console.log(`下一步：运行 provider:status -- ${slug} --json，检测并确认 text/image/voice provider。`);
 } catch (error) {
   console.error(`project:new failed: ${error.message}`);
   process.exitCode = 1;

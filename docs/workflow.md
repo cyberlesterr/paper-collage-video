@@ -7,7 +7,8 @@
 ## 状态流转
 
 ```text
-brief
+capability-review
+→ brief
 → concept-review
 → style-review
 → asset-production
@@ -16,6 +17,12 @@ brief
 → final-render
 → publish-approval
 ```
+
+### 0. capability-review
+
+Codex 先读取 provider 配置，再检查当前宿主真正可调用的文本、生图和虚构语音工具。未确认的能力通过一次结构化表单交给人选择；没有表单能力时使用一条普通聊天消息。每类能力都可选择检测到的宿主工具、已配置服务、手工导入，或描述自己的服务。
+
+选择由 `provider:select` 写入项目或经明确要求写入本机配置。表单与配置中不收集 API key。三类能力都确认且配置可用后记录 `capabilities-ready`，进入 `brief`。这是服务配置，不代表概念、批量生成、创意结果或发布获批。
 
 ### 1. brief
 
@@ -28,7 +35,7 @@ brief
 
 系统产出：`projects/<slug>/brief.md`。完成后记录 `brief-ready`。
 
-文本、生图和语音能力由 `providers.json`、可选的本机 `providers.local.json` 与项目 `providers.json` 依次覆盖。开始前运行 `provider:status`；外部模型的输出通过请求文件和 `assets-manifest.json` 留下可复现记录。
+文本、生图和语音能力由 `providers.json`、可选的本机 `providers.local.json` 与项目 `providers.json` 依次覆盖。进入本阶段前再次运行 `provider:status`；外部模型的输出通过请求文件和 `assets-manifest.json` 留下可复现记录。
 
 ### 2. concept-review
 
@@ -144,7 +151,7 @@ npm run project:checkpoint -- <slug> <id> blocked --note="确切阻塞原因"
 npm run project:advance -- <slug> <action> --note="人的决定或验收说明"
 ```
 
-允许的动作包括 `brief-ready`、`approve-concept`、`request-concept-revision`、`approve-style-voice`、`request-style-voice-revision`、`assets-ready`、`approve-preview`、`request-preview-revision` 和 `approve-publish`。预览与正式渲染成功事件由渲染命令自动记录。
+允许的动作包括 `capabilities-ready`、`brief-ready`、`approve-concept`、`request-concept-revision`、`approve-style-voice`、`request-style-voice-revision`、`assets-ready`、`approve-preview`、`request-preview-revision` 和 `approve-publish`。预览与正式渲染成功事件由渲染命令自动记录。
 
 审批状态只以 `production.json` 为准，并自动同步到 `review.md`。`brief.md` 不保存会过期的审批状态。
 

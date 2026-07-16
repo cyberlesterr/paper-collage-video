@@ -84,4 +84,4 @@ Every `wait-human` response must contain:
 - technical results separately from creative judgment;
 - the exact approval phrase or a request for concrete revision notes.
 
-The four human gates are concept, style and fictional voice, rendered preview, and publication readiness. All other stages are autonomous.
+The four creative/publication approval gates are concept, style and fictional voice, rendered preview, and publication readiness. `capability-review` is one additional one-time operational configuration wait stage. All other stages are autonomous.

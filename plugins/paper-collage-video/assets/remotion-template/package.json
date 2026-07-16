@@ -1,12 +1,13 @@
 {
   "name": "paper-collage-video-workspace",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "assets:rasterize": "node scripts/rasterize-assets.mjs",
     "assets:process-sheet": "node scripts/process-character-sheet.mjs",
     "provider:status": "node scripts/provider-status.mjs",
+    "provider:select": "node scripts/provider-select.mjs",
     "provider:run": "node scripts/provider-run.mjs",
     "provider:record": "node scripts/provider-record.mjs",
     "project:new": "node scripts/project-new.mjs",

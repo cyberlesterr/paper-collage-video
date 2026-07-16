@@ -2,7 +2,7 @@
   "$schema": "../../schemas/production.schema.json",
   "schemaVersion": 1,
   "slug": "{{slug}}",
-  "stage": "brief",
+  "stage": "capability-review",
   "createdAt": "{{createdAt}}",
   "updatedAt": "{{createdAt}}",
   "approvals": {
@@ -27,7 +27,7 @@
     {
       "at": "{{createdAt}}",
       "action": "project-created",
-      "stage": "brief",
+      "stage": "capability-review",
       "note": ""
     }
   ]

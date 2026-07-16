@@ -26,7 +26,8 @@
         "providers": {
           "type": "object",
           "additionalProperties": {"$ref": "#/$defs/provider"}
-        }
+        },
+        "selection": {"$ref": "#/$defs/selection"}
       },
       "additionalProperties": false
     },
@@ -36,6 +37,7 @@
       "properties": {
         "label": {"type": "string", "minLength": 1},
         "adapter": {"enum": ["host", "command", "manual"]},
+        "tool": {"type": "string", "minLength": 1},
         "toolHint": {"type": "string"},
         "model": {"type": "string"},
         "requiredEnv": {
@@ -54,6 +56,18 @@
           },
           "additionalProperties": false
         }
+      },
+      "additionalProperties": false
+    },
+    "selection": {
+      "type": "object",
+      "required": ["status", "provider", "confirmedAt", "scope", "note"],
+      "properties": {
+        "status": {"const": "confirmed"},
+        "provider": {"type": "string", "minLength": 1},
+        "confirmedAt": {"type": "string", "format": "date-time"},
+        "scope": {"enum": ["project", "workspace"]},
+        "note": {"type": "string", "minLength": 1}
       },
       "additionalProperties": false
     }

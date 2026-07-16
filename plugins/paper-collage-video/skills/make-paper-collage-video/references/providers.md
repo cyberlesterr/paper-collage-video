@@ -16,9 +16,25 @@ Run this before production:
 npm run provider:status -- <slug>
 ```
 
-`agent-check-required` is expected for a `host` provider: inspect the tools installed in the current host before invoking one. `error` means the configured command, environment variable, or provider id is unavailable and must be fixed or explicitly overridden.
+`agent-check-required` is expected for a `host` provider: inspect the tools installed in the current host before invoking one. `error` means the configured command, environment variable, or provider id is unavailable and must be fixed or explicitly overridden. `allConfirmed` means the human has selected all three providers; it does not prove a host tool still exists, so verify the recorded tool id against the current host.
 
 Never put API keys, bearer tokens, cookies, or other secret values in provider JSON. List only their environment-variable names in `requiredEnv`; the adapter receives values from its process environment.
+
+## Human Selection
+
+Follow `capability-negotiation.md` to discover real host candidates and collect one explicit confirmation. Persist each choice instead of relying on a session-only assumption:
+
+```bash
+npm run provider:select -- <slug> image <provider-id> \
+  --note="<human decision>" \
+  --adapter=host \
+  --tool="<exact callable tool id>" \
+  --model="<known model id>"
+```
+
+Existing providers need only their id and `--note`. New host/manual providers also require `--label` and `--adapter`; new host image/voice providers require `--tool`. Configure a new command provider in ignored `providers.local.json` before selecting it.
+
+Selections default to project scope. `--scope=workspace` stores the choice in ignored `providers.local.json` for reuse, but never use workspace scope without the human's explicit request. Changing a provider requires a fresh confirmation and overwrites the relevant selection record.
 
 ## Adapter Types
 
@@ -77,5 +93,7 @@ Arguments are passed as an array with `shell: false`; shell substitutions such a
 ## Provenance and Resume Behavior
 
 Every `provider:run` or `provider:record` call updates `projects/<slug>/assets-manifest.json` by stable `assetId`. Each entry records the provider, adapter, actual model when known, optional external job id, SHA-256, size, time, output path, and request snapshot.
+
+Both commands refuse an unconfirmed provider or a `--provider` different from the human's recorded selection. Change the selection explicitly before switching services.
 
 Provider provenance does not replace `production.json`: keep material work items there with `project:checkpoint`. If a provider is unavailable, record the exact work-item blocker and preserve the current production stage. Do not manufacture an output or silently switch to a different paid service.

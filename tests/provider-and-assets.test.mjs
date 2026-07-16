@@ -11,6 +11,7 @@ import {
   deepMerge,
   expandCommandTemplate,
   recordAssetProvenance,
+  resolveConfirmedProvider,
   runProviderCommand,
   validateProviderConfig,
 } from '../scripts/provider-lib.mjs';
@@ -71,6 +72,28 @@ test('provider overlays add local adapters without replacing bundled providers',
   assert.equal(merged.capabilities.text.defaultProvider, 'host-text');
   assert.equal(merged.capabilities.voice.defaultProvider, 'host-voice');
   assert.deepEqual(validateProviderConfig(merged), []);
+  assert.throws(
+    () => resolveConfirmedProvider(merged, 'image'),
+    /尚未获得用户确认/,
+  );
+  const confirmed = deepMerge(merged, {
+    capabilities: {
+      image: {
+        selection: {
+          status: 'confirmed',
+          provider: 'custom-image',
+          confirmedAt: '2026-07-17T00:00:00.000Z',
+          scope: 'project',
+          note: 'Use custom image',
+        },
+      },
+    },
+  });
+  assert.equal(resolveConfirmedProvider(confirmed, 'image').id, 'custom-image');
+  assert.throws(
+    () => resolveConfirmedProvider(confirmed, 'image', 'host-image'),
+    /未获授权/,
+  );
   const unsafe = deepMerge(merged, {
     capabilities: {
       image: {providers: {'custom-image': {apiKey: 'do-not-store-this'}}},
@@ -137,12 +160,16 @@ test('bundled provider status is valid and defers host capability selection', ()
   assert.equal(result.status, 0, result.stderr);
   const status = JSON.parse(result.stdout);
   assert.equal(status.valid, true);
+  assert.equal(status.allConfirmed, false);
   assert.equal(status.capabilities.text.readiness.status, 'agent-check-required');
   assert.equal(status.capabilities.image.readiness.status, 'agent-check-required');
   assert.equal(status.capabilities.voice.readiness.status, 'agent-check-required');
+  assert.ok(
+    status.capabilities.image.candidates.some(({id}) => id === 'manual-image'),
+  );
 });
 
-test('project:new creates provider-neutral configuration and provenance files', async () => {
+test('new projects wait for confirmed providers before entering the brief', async () => {
   const slug = `v2-smoke-${process.pid}`;
   const projectDirectory = path.join(ROOT, 'projects', slug);
   const publicDirectory = path.join(ROOT, 'public', 'projects', slug);
@@ -168,6 +195,92 @@ test('project:new creates provider-neutral configuration and provenance files', 
     assert.deepEqual(manifest.assets, []);
     assert.ok(fs.existsSync(path.join(projectDirectory, 'providers.json')));
     assert.ok(fs.existsSync(path.join(projectDirectory, 'requests', '.gitkeep')));
+
+    const initialProduction = JSON.parse(
+      await fsp.readFile(path.join(projectDirectory, 'production.json'), 'utf8'),
+    );
+    assert.equal(initialProduction.stage, 'capability-review');
+
+    const blockedAdvance = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-advance.mjs'),
+        slug,
+        'capabilities-ready',
+        '--note=Try to continue without provider choices',
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.notEqual(blockedAdvance.status, 0);
+    assert.match(blockedAdvance.stderr, /尚未获得用户确认/);
+
+    const select = (...selectionArgs) =>
+      spawnSync(
+        process.execPath,
+        [path.join(ROOT, 'scripts', 'provider-select.mjs'), slug, ...selectionArgs],
+        {cwd: ROOT, encoding: 'utf8'},
+      );
+    const invalidSelection = select(
+      'text',
+      'host-text',
+      '--adapter=command',
+      '--note=Invalid adapter override',
+    );
+    assert.notEqual(invalidSelection.status, 0);
+    assert.match(invalidSelection.stderr, /command adapter 必须配置/);
+    const untouchedOverlay = JSON.parse(
+      await fsp.readFile(path.join(projectDirectory, 'providers.json'), 'utf8'),
+    );
+    assert.equal(untouchedOverlay.capabilities, undefined);
+
+    const textSelection = select(
+      'text',
+      'host-text',
+      '--note=Use the host language model',
+    );
+    assert.equal(textSelection.status, 0, textSelection.stderr);
+    const imageSelection = select(
+      'image',
+      'gpt-image',
+      '--label=GPT Image',
+      '--adapter=host',
+      '--tool=image_gen__imagegen',
+      '--model=gpt-image',
+      '--note=Use the detected GPT Image capability',
+    );
+    assert.equal(imageSelection.status, 0, imageSelection.stderr);
+    const voiceSelection = select(
+      'voice',
+      'manual-voice',
+      '--note=Import authorized fictional narration',
+    );
+    assert.equal(voiceSelection.status, 0, voiceSelection.stderr);
+
+    const statusResult = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'provider-status.mjs'), slug, '--json'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(statusResult.status, 0, statusResult.stderr);
+    const providerStatus = JSON.parse(statusResult.stdout);
+    assert.equal(providerStatus.allConfirmed, true);
+    assert.equal(providerStatus.capabilities.image.provider.tool, 'image_gen__imagegen');
+
+    const advance = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-advance.mjs'),
+        slug,
+        'capabilities-ready',
+        '--note=Confirmed host text and image plus manual fictional narration',
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(advance.status, 0, advance.stderr);
+    const production = JSON.parse(
+      await fsp.readFile(path.join(projectDirectory, 'production.json'), 'utf8'),
+    );
+    assert.equal(production.stage, 'brief');
   } finally {
     await fsp.rm(projectDirectory, {recursive: true, force: true});
     await fsp.rm(publicDirectory, {recursive: true, force: true});

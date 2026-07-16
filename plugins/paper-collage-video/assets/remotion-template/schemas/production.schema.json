@@ -20,6 +20,7 @@
     "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "stage": {
       "enum": [
+        "capability-review",
         "brief",
         "concept-review",
         "style-review",
