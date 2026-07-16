@@ -10,6 +10,11 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from 'remotion';
+import type {
+  NormalizedProjectScene,
+  ProjectSound,
+  ProjectTheme,
+} from './project';
 import {roleMotion, type Role} from './roleMotion';
 
 export type EnterFrom = 'left' | 'right' | 'bottom';
@@ -32,31 +37,10 @@ export type SubtitleCue = {
   text: string;
 };
 
-export type ReplicaScene = {
-  id: string;
-  label: string;
-  eyebrow: string;
-  from: number;
-  durationInFrames: number;
-  background: string;
-  narration: string;
-  narrationStart: number;
-  narrationDurationSeconds: number;
-  layers: CharacterLayer[];
-  subtitles: SubtitleCue[];
-};
-
 const clamp = {
   extrapolateLeft: 'clamp',
   extrapolateRight: 'clamp',
 } as const;
-
-const cutoutFilter = `
-  drop-shadow(4px 0 #f5eedc)
-  drop-shadow(-4px 0 #f5eedc)
-  drop-shadow(0 4px #f5eedc)
-  drop-shadow(0 18px 9px rgba(20,15,12,.32))
-`;
 
 const backgroundStyle: CSSProperties = {
   width: '100%',
@@ -64,7 +48,13 @@ const backgroundStyle: CSSProperties = {
   objectFit: 'cover',
 };
 
-const Character = ({layer}: {layer: CharacterLayer}) => {
+const Character = ({
+  layer,
+  paperEdge,
+}: {
+  layer: CharacterLayer;
+  paperEdge: string;
+}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
   const motion = roleMotion[layer.role];
@@ -88,6 +78,12 @@ const Character = ({layer}: {layer: CharacterLayer}) => {
     Math.sin((frame - layer.delay + layer.z * 11) / 42) *
       (layer.role === 'primary' ? 2.2 : 1.4);
   const scale = motion.startScale + (1 - motion.startScale) * entrance;
+  const cutoutFilter = `
+    drop-shadow(4px 0 ${paperEdge})
+    drop-shadow(-4px 0 ${paperEdge})
+    drop-shadow(0 4px ${paperEdge})
+    drop-shadow(0 18px 9px rgba(20,15,12,.32))
+  `;
 
   return (
     <div
@@ -108,7 +104,13 @@ const Character = ({layer}: {layer: CharacterLayer}) => {
   );
 };
 
-const Subtitle = ({cues}: {cues: SubtitleCue[]}) => {
+const Subtitle = ({
+  cues,
+  theme,
+}: {
+  cues: SubtitleCue[];
+  theme: ProjectTheme;
+}) => {
   const frame = useCurrentFrame();
   const cue = cues.find(({from, to}) => frame >= from && frame < to);
   if (!cue) return null;
@@ -130,7 +132,7 @@ const Subtitle = ({cues}: {cues: SubtitleCue[]}) => {
         bottom: 58,
         textAlign: 'center',
         opacity,
-        color: '#fff8ea',
+        color: theme.subtitle,
         fontFamily: 'STKaiti, KaiTi, "Noto Serif SC", serif',
         fontWeight: 700,
         fontSize: 42,
@@ -144,7 +146,7 @@ const Subtitle = ({cues}: {cues: SubtitleCue[]}) => {
         style={{
           display: 'inline-block',
           padding: '12px 32px 14px',
-          background: 'rgba(58, 25, 18, .72)',
+          background: theme.subtitleBackground,
           border: '1px solid rgba(244, 222, 174, .42)',
           boxShadow: '0 8px 24px rgba(40, 16, 10, .22)',
         }}
@@ -158,7 +160,10 @@ const Subtitle = ({cues}: {cues: SubtitleCue[]}) => {
 const ChapterLabel = ({
   eyebrow,
   label,
-}: Pick<ReplicaScene, 'eyebrow' | 'label'>) => {
+  theme,
+}: Pick<NormalizedProjectScene, 'eyebrow' | 'label'> & {
+  theme: ProjectTheme;
+}) => {
   const frame = useCurrentFrame();
   const enter = spring({
     frame,
@@ -176,11 +181,11 @@ const ChapterLabel = ({
         left: 92,
         opacity,
         transform: `translateX(${(1 - enter) * -42}px)`,
-        color: '#4a291f',
+        color: theme.ink,
         fontFamily: 'STKaiti, KaiTi, "Noto Serif SC", serif',
       }}
     >
-      <div style={{fontSize: 22, letterSpacing: 8, color: '#a33a2d'}}>
+      <div style={{fontSize: 22, letterSpacing: 8, color: theme.accent}}>
         {eyebrow}
       </div>
       <div
@@ -198,15 +203,14 @@ const ChapterLabel = ({
           width: 270 * enter,
           height: 4,
           marginTop: 13,
-          background:
-            'linear-gradient(90deg, #a33a2d, rgba(163,58,45,0))',
+          background: `linear-gradient(90deg, ${theme.accent}, transparent)`,
         }}
       />
     </div>
   );
 };
 
-const ForegroundPaper = () => {
+const ForegroundPaper = ({color}: {color: string}) => {
   const frame = useCurrentFrame();
   const drift = Math.sin(frame / 46) * 5;
   return (
@@ -219,8 +223,7 @@ const ForegroundPaper = () => {
           right: -70 - drift,
           bottom: -45,
           height: 150,
-          background:
-            'linear-gradient(90deg, #7d1d19, #b33b2c 44%, #6f1817)',
+          background: `linear-gradient(90deg, ${color}, color-mix(in srgb, ${color}, #d65a3d 36%) 44%, ${color})`,
           clipPath:
             'polygon(0 23%, 9% 10%, 18% 24%, 29% 7%, 42% 20%, 53% 4%, 64% 21%, 76% 8%, 89% 24%, 100% 10%, 100% 100%, 0 100%)',
           opacity: 0.88,
@@ -244,31 +247,35 @@ const ForegroundPaper = () => {
   );
 };
 
-const RoleSounds = ({layers}: {layers: CharacterLayer[]}) => (
+const RoleSounds = ({
+  layers,
+  roleSounds,
+}: {
+  layers: CharacterLayer[];
+  roleSounds: Partial<Record<Role, ProjectSound>>;
+}) => (
   <>
     {layers.map((layer) => {
-      const sound =
-        layer.role === 'primary'
-          ? 'audio/sfx/impact.wav'
-          : layer.role === 'secondary'
-            ? 'audio/sfx/whoosh.wav'
-            : 'audio/sfx/tick.wav';
-      const volume =
-        layer.role === 'primary'
-          ? 0.24
-          : layer.role === 'secondary'
-            ? 0.13
-            : 0.09;
+      const sound = roleSounds[layer.role];
+      if (!sound) return null;
       return (
         <Sequence key={`sound-${layer.id}`} from={layer.delay} layout="none">
-          <Audio src={staticFile(sound)} volume={volume} />
+          <Audio src={staticFile(sound.src)} volume={sound.volume} />
         </Sequence>
       );
     })}
   </>
 );
 
-export const ReplicaChapterScene = ({scene}: {scene: ReplicaScene}) => {
+export const ReplicaChapterScene = ({
+  scene,
+  roleSounds,
+  theme,
+}: {
+  scene: NormalizedProjectScene;
+  roleSounds: Partial<Record<Role, ProjectSound>>;
+  theme: ProjectTheme;
+}) => {
   const frame = useCurrentFrame();
   const cameraZoom = interpolate(
     frame,
@@ -295,7 +302,7 @@ export const ReplicaChapterScene = ({scene}: {scene: ReplicaScene}) => {
       style={{
         overflow: 'hidden',
         opacity: Math.min(fadeIn, fadeOut),
-        background: '#8a271f',
+        background: theme.sceneBackground,
       }}
     >
       <AbsoluteFill
@@ -310,22 +317,22 @@ export const ReplicaChapterScene = ({scene}: {scene: ReplicaScene}) => {
         style={{
           opacity: 0.14,
           mixBlendMode: 'multiply',
-          backgroundImage: `url(${staticFile('textures/paper-grain.png')})`,
+          backgroundImage: `url(${staticFile(theme.texture)})`,
           backgroundSize: 'cover',
           zIndex: 6,
           pointerEvents: 'none',
         }}
       />
       {scene.layers.map((layer) => (
-        <Character key={layer.id} layer={layer} />
+        <Character key={layer.id} layer={layer} paperEdge={theme.paperEdge} />
       ))}
-      <ForegroundPaper />
-      <ChapterLabel eyebrow={scene.eyebrow} label={scene.label} />
-      <Subtitle cues={scene.subtitles} />
-      <Sequence from={scene.narrationStart} layout="none">
-        <Audio src={staticFile(scene.narration)} volume={1} />
+      <ForegroundPaper color={theme.foreground} />
+      <ChapterLabel eyebrow={scene.eyebrow} label={scene.label} theme={theme} />
+      <Subtitle cues={scene.subtitles} theme={theme} />
+      <Sequence from={scene.narration.startFrame} layout="none">
+        <Audio src={staticFile(scene.narration.src)} volume={1} />
       </Sequence>
-      <RoleSounds layers={scene.layers} />
+      <RoleSounds layers={scene.layers} roleSounds={roleSounds} />
     </AbsoluteFill>
   );
 };

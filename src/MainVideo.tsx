@@ -1,28 +1,34 @@
+import {useMemo} from 'react';
 import {AbsoluteFill, Audio, Sequence, staticFile} from 'remotion';
+import {ReplicaChapterScene} from './ReplicaChapterScene';
 import {
-  ReplicaChapterScene,
-  type ReplicaScene,
-} from './ReplicaChapterScene';
-import script from './script.json';
+  normalizeProject,
+  type PaperCollageProject,
+} from './project';
 
-const scenes = script.scenes as ReplicaScene[];
-
-export const MainVideo = () => {
+export const MainVideo = (project: PaperCollageProject) => {
+  const normalized = useMemo(() => normalizeProject(project), [project]);
   return (
-    <AbsoluteFill style={{background: '#6e1e19'}}>
-      <Audio src={staticFile('audio/music/tang-ambient.wav')} volume={0.52} />
-      {scenes.map((scene) => (
+    <AbsoluteFill style={{background: normalized.theme.canvas}}>
+      {normalized.audio.music ? (
+        <Audio
+          src={staticFile(normalized.audio.music.src)}
+          volume={normalized.audio.music.volume}
+        />
+      ) : null}
+      {normalized.scenes.map((scene) => (
         <Sequence
           key={scene.id}
           from={scene.from}
           durationInFrames={scene.durationInFrames}
         >
-          <ReplicaChapterScene scene={scene} />
+          <ReplicaChapterScene
+            scene={scene}
+            roleSounds={normalized.audio.sfx}
+            theme={normalized.theme}
+          />
         </Sequence>
       ))}
     </AbsoluteFill>
   );
 };
-
-export const REPLICA_VIDEO_DURATION = script.durationInFrames;
-

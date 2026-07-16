@@ -1,16 +1,23 @@
 {
-  "name": "tang-paper-cutout",
+  "name": "paper-collage-video-pipeline",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
     "assets:rasterize": "node scripts/rasterize-assets.mjs",
-    "dev": "remotion studio src/index.ts",
+    "assets:process-sheet": "node scripts/process-character-sheet.mjs",
+    "project:new": "node scripts/project-new.mjs",
+    "project:sync": "node scripts/project-sync.mjs",
+    "project:validate": "node scripts/project-validate.mjs",
+    "project:preview": "node scripts/project-render.mjs preview",
+    "project:render": "node scripts/project-render.mjs render",
+    "project:report": "node scripts/project-report.mjs",
+    "dev": "remotion studio src/index.ts --props=projects/tang-demo/project.json",
     "check": "tsc --noEmit",
     "bundle": "remotion bundle src/index.ts",
-    "render": "remotion render src/index.ts Tang-Collage-Replica out/tang-collage-replica.mp4",
-    "render:preview": "remotion render src/index.ts Tang-Collage-Replica out/tang-collage-replica-preview.mp4 --scale=0.5 --concurrency=8",
-    "render:frame": "remotion still src/index.ts Tang-Collage-Replica out/replica-preview-frame.png --frame=470",
+    "render": "npm run project:render -- tang-demo",
+    "render:preview": "npm run project:preview -- tang-demo",
+    "render:frame": "remotion still src/index.ts Paper-Collage out/replica-preview-frame.png --props=projects/tang-demo/project.json --frame=470",
     "render:prototype": "remotion render src/index.ts Tang-Paper-Cutout-Prototype out/tang-paper-cutout-prototype.mp4 --scale=0.5 --concurrency=8"
   },
   "dependencies": {

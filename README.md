@@ -1,117 +1,161 @@
-# 唐朝纸片分层动画 · Remotion 复刻项目
+# Paper Collage Video Pipeline
 
-这是按教程原文重新搭建的本地视频流水线第一版：两张无人物背景底板、两张角色素材表、八个独立透明角色图层、两段虚构旁白、逐句字幕、背景氛围与分级入场音效，最后由 Remotion 渲染为约 29.8 秒视频。
+一个配置驱动的本地纸片分层视频生产系统。人负责内容意图、审美选择和最终批准；Codex 与本地工具负责文案拆镜、素材组织、抠图、动画、旁白同步、渲染和技术验收。
 
-Remotion Studio 中有两个 composition：
+仓库自带 `tang-demo` 黄金样例，它是回归基准，不是引擎里的硬编码题材。
 
-- `Tang-Collage-Replica`：按原文工作流重做的正式第一版。
-- `Tang-Paper-Cutout-Prototype`：此前用于验证视差机制的单镜头原型，保留作对照。
+## 人在流程中的位置
 
-## 运行与渲染
+正常制作一条新视频时，人只需要参与四次：
+
+1. 填写或口述 `brief.md`：主题、受众、平台、核心观点、风格和禁区。
+2. 确认文案、镜头、风格样张和虚构旁白音色。
+3. 查看 `preview.mp4`，用自然语言提出修改意见。
+4. 查看最终视频和验收报告，作出发布批准。
+
+人不需要手写人物坐标、处理透明通道、计算旁白帧数、修改 React 或执行 FFmpeg。`project.json` 是 Codex 和工具维护的机器协议。
+
+完整的人机边界和审批节点见 [docs/workflow.md](docs/workflow.md)。
+
+## 环境
+
+- Node.js 20+
+- FFmpeg / ffprobe
+- Python 3.11+（只在处理绿幕素材表时需要）
 
 ```bash
 npm install
-npm run dev
+python3 -m pip install -r requirements.txt
 ```
 
-渲染 1920×1080 正式版：
+## 跑通黄金样例
 
 ```bash
-npm run render
+npm run project:sync -- tang-demo
+npm run project:validate -- tang-demo
+npm run project:preview -- tang-demo
 ```
 
-渲染 960×540 的完整快速预览：
-
-```bash
-npm run render:preview
-```
-
-渲染代表帧：
-
-```bash
-npm run render:frame
-```
-
-类型检查：
-
-```bash
-npm run check
-```
-
-## 第一版流水线
+输出位于：
 
 ```text
-两镜头文案
-→ Imagegen 生成无人物背景底板
-→ Imagegen 生成 2×2 绿幕角色素材表
-→ Python + Pillow + NumPy 拆表
-→ 绿幕去除、软边与去绿溢色
-→ Remotion 静态排版、层级和错峰入场
-→ 虚构 TTS 旁白驱动镜头与字幕时长
-→ 背景氛围、impact / whoosh / tick 音效
-→ Remotion 渲染
-→ FFmpeg / ffprobe 抽帧与技术验收
+dist/tang-demo/
+  preview.mp4
+  validation-report.json
+  report.json
+  contact-sheet.jpg
+  frames/
 ```
 
-## 目录结构
+正式渲染：
+
+```bash
+npm run project:render -- tang-demo
+```
+
+输出 `dist/tang-demo/final.mp4`，并重新生成验收报告和关键帧联系表。
+
+## 创建新项目
+
+```bash
+npm run project:new -- silk-road --title="玄奘西行"
+```
+
+这会创建：
 
 ```text
-src/script.json                 文案、镜头、字幕、人物坐标和时长
-src/ReplicaChapterScene.tsx     角色入场、图层遮挡、推镜、字幕和音效
-src/MainVideo.tsx               两幕时间线、旁白和背景氛围
-src/roleMotion.ts               primary / secondary / tertiary 动画参数
-scripts/split_sheet.py          把规则角色素材表拆成独立图片
-public/assets/plates/            两张无人物背景底板
-public/assets/characters/source/ 绿幕素材表和拆分后的绿幕单体
-public/assets/characters/alpha/  八个独立透明 PNG
-public/audio/narration/          两段旁白
-public/audio/music/              背景氛围
-public/audio/sfx/                入场音效
+projects/silk-road/
+  brief.md
+  project.json
+  prompts.json
+  review.md
+
+public/projects/silk-road/
+  assets/plates/
+  assets/characters/source/
+  assets/characters/alpha/
+  audio/narration/
+  audio/music/
+  audio/sfx/
 ```
 
-## 镜头和角色层级
+接下来由人填写或口述 `brief.md`，Codex 根据简报维护 `project.json`、提示词和素材。可以用 `--dry-run` 预览将创建的路径而不写文件：
 
-全景镜头以皇帝为 `primary`，两名侍女为 `secondary`，右侧群臣为 `tertiary`。特写镜头以捧礼盒使者为 `primary`，两名前排跪拜人物为 `secondary`，后排侍从为 `tertiary`。
-
-三类角色沿用教程中的动画强度：
-
-```ts
-primary:   {distance: 78, rise: 55, startScale: 0.86}
-secondary: {distance: 58, rise: 38, startScale: 0.90}
-tertiary:  {distance: 38, rise: 22, startScale: 0.95}
+```bash
+npm run project:new -- silk-road --title="玄奘西行" --dry-run
 ```
 
-人物没有同时出现，而是按“主角 → 配角 → 群像”建立画面。入场结束后保留约 1–2 像素的呼吸漂浮，背景则只做约 1.6% 的慢推镜。
+## 项目命令
 
-## 旁白方案
+| 命令 | 作用 |
+|---|---|
+| `npm run project:new -- <slug>` | 创建人类简报、机器配置和素材目录 |
+| `npm run project:sync -- <slug>` | 用 ffprobe 把真实旁白时长写回项目配置 |
+| `npm run project:validate -- <slug>` | 检查配置、素材、透明通道、绿边、字幕和时长 |
+| `npm run project:preview -- <slug>` | 校验后渲染 50% 预览，并生成报告 |
+| `npm run project:render -- <slug>` | 校验后渲染正式成片，并生成报告 |
+| `npm run project:report -- <slug>` | 对已有成片生成技术报告和关键帧联系表 |
+| `npm run dev` | 在 Remotion Studio 中打开黄金样例 |
+| `npm run check` | TypeScript 类型检查 |
 
-第一版不需要参考录音，也不做声音克隆。旁白使用虚构音色：
+`project:preview` 和 `project:render` 都遵循 fail-fast：素材或配置存在错误时不会开始昂贵渲染；警告会写入报告但不阻塞。
 
-- 提供方：豆包 TTS
-- 音色：`儒雅逸辰（ruyayichen）`
-- 语速：`speedRatio 0.94`
-- 音高：`pitch -1`
-- 风格：温润儒雅、克制、有文化纪录片的历史纵深感
+## 角色素材表处理
 
-两段生成音频的实测长度分别是 12.360 秒和 16.176 秒。`src/script.json` 的镜头与字幕以这两个真实时长为依据。声音克隆被明确留作后续优化，不是第一版的运行依赖。
+一条命令完成四宫格拆分、软蒙版、去绿溢色和透明 PNG 输出：
 
-## 素材生成原则
+```bash
+PYTHON_BIN=python3 npm run assets:process-sheet -- \
+  public/projects/my-project/assets/characters/source/scene-sheet-green.png \
+  public/projects/my-project/assets/characters/source \
+  public/projects/my-project/assets/characters/alpha \
+  scene 4 \
+  --columns=2 \
+  --names=emperor,maid-left,maid-right,officials
+```
 
-背景提示词要求“无人物、无文字、留出角色站位区”；角色提示词要求“唐代服饰、完整人物、明确朝向、古籍线描与复古纸片拼贴、白色剪纸描边、纯绿背景、无场景和水印”。两张角色素材表都采用四宫格，拆分后再做软蒙版和去绿溢色。
+底层脚本仍可独立使用：
 
-如果替换角色素材，请保持以下约束：
+```bash
+python3 scripts/split_sheet.py INPUT OUTPUT_DIR PREFIX COUNT --columns 2
+python3 scripts/remove_chroma_key.py --input GREEN.png --out ALPHA.png --force
+```
 
-- 主角最大，配角次之，后排群像最小。
-- 每张 PNG 只承担一个叙事角色或一个紧密人物组。
-- 朝向必须服务于场景关系；左右人物应看向画面中心。
-- 头、手、脚、衣摆与关键道具不可裁切。
-- `z`、`delay`、`x`、`bottom`、`width` 全部集中在 `src/script.json`，先静态排版，再调整动画。
+## 项目协议
 
-## 验收重点
+项目配置遵循 [schemas/project.schema.json](schemas/project.schema.json)。核心结构包括：
 
-- 两幕是否都有背景、后排、主体和前景层。
-- 主角是否明显大于配角，且脸、手和礼盒不被遮挡。
-- 透明 PNG 是否存在绿边、破洞或半透明污染。
-- 角色是否错峰进入，音效是否落在入场帧。
-- 字幕是否与旁白段落一致，并避开人物脚部和礼盒。
-- 输出是否为 30 fps、包含视频流和混合后的音频流。
+- `video`：宽高、帧率和镜头重叠帧数。
+- `theme`：纸张、字幕、描边和前景颜色。
+- `voice`：虚构音色或后续可选的克隆音色元数据。
+- `audio`：背景音乐和三类角色音效。
+- `scenes`：背景、旁白、角色图层和字幕。
+
+镜头时长不是人工填写的常量，而是：
+
+```text
+旁白开始帧 + ceil(真实旁白秒数 × fps) + 尾部留白帧
+```
+
+后一个镜头从前一个镜头结束前 `transitionFrames` 帧开始，以形成交叠转场。
+
+## 验收
+
+`project:validate` 检查：
+
+- 项目协议、slug、视频规格和唯一 id。
+- 背景、人物、旁白、音乐、音效和纸张纹理是否存在。
+- 人物 PNG 是否真的有透明区域。
+- 半透明边缘是否疑似存在绿溢色。
+- 背景宽高比是否与视频接近。
+- 旁白配置时长是否等于 ffprobe 实测时长。
+- 字幕范围、重叠和越界。
+- 每幕是否有 primary 主体，人物是否完全跑出画布。
+
+`project:report` 继续检查成片编码、分辨率、帧率、音轨、音量峰值，并生成三帧联系表供人做最终视觉判断。
+
+## 黄金样例
+
+`projects/tang-demo` 保存简报、机器配置、提示词和验收记录；素材位于 `public/projects/tang-demo`。虚构旁白为“儒雅逸辰（ruyayichen）”，声音克隆不是 P0 的依赖。
+
+此前的单镜头视差实验仍保留为 Remotion composition `Tang-Paper-Cutout-Prototype`，通用引擎 composition 为 `Paper-Collage`。
