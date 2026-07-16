@@ -1,0 +1,51 @@
+{
+  "$schema": "./schemas/providers.schema.json",
+  "schemaVersion": 1,
+  "capabilities": {
+    "text": {
+      "defaultProvider": "host-text",
+      "providers": {
+        "host-text": {
+          "label": "Host language model",
+          "adapter": "host",
+          "toolHint": "Use the current Codex host model for briefs, scripts, prompts, and storyboard text."
+        },
+        "manual-text": {
+          "label": "Imported text",
+          "adapter": "manual",
+          "toolHint": "Place an authored or externally generated text file at the request output path, then register it with provider:record."
+        }
+      }
+    },
+    "image": {
+      "defaultProvider": "host-image",
+      "providers": {
+        "host-image": {
+          "label": "Host image generation",
+          "adapter": "host",
+          "toolHint": "Use an installed image-generation skill or tool, then register the resulting local file with provider:record."
+        },
+        "manual-image": {
+          "label": "Imported image",
+          "adapter": "manual",
+          "toolHint": "Place an authorized image at the request output path, then register it with provider:record."
+        }
+      }
+    },
+    "voice": {
+      "defaultProvider": "host-voice",
+      "providers": {
+        "host-voice": {
+          "label": "Host fictional voice",
+          "adapter": "host",
+          "toolHint": "Use an installed fictional catalog TTS skill or tool, then register the resulting local file with provider:record."
+        },
+        "manual-voice": {
+          "label": "Imported narration",
+          "adapter": "manual",
+          "toolHint": "Place an authorized narration file at the request output path, then register it with provider:record."
+        }
+      }
+    }
+  }
+}

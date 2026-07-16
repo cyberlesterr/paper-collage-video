@@ -64,6 +64,46 @@ export const deriveTimeline = (project) => {
   return {durationInFrames: cursor, durationSeconds: cursor / fps, scenes};
 };
 
+export const deriveContactSheetSamples = ({
+  timeline,
+  fps,
+  durationSeconds,
+  maxPanels = 8,
+}) => {
+  const scenes = timeline?.scenes ?? [];
+  const panelLimit = Math.max(1, Math.floor(maxPanels));
+  if (scenes.length === 0) {
+    return [0.18, 0.5, 0.84].map((ratio, index) => ({
+      time: Math.max(0, Math.min(durationSeconds - 0.04, durationSeconds * ratio)),
+      label: `全片 ${index + 1}`,
+      sceneId: null,
+    }));
+  }
+  const selectedScenes =
+    scenes.length <= panelLimit
+      ? scenes
+      : panelLimit === 1
+        ? [scenes[Math.floor(scenes.length / 2)]]
+        : Array.from({length: panelLimit}, (_, index) =>
+            scenes[
+              Math.round((index * (scenes.length - 1)) / (panelLimit - 1))
+            ],
+          );
+  const ratios = selectedScenes.length <= Math.floor(panelLimit / 2) ? [0.28, 0.72] : [0.5];
+  return selectedScenes.flatMap((scene) =>
+    ratios.map((ratio, ratioIndex) => {
+      const frame = scene.from + Math.max(0, scene.durationInFrames - 1) * ratio;
+      const time = Math.max(0, Math.min(durationSeconds - 0.04, frame / fps));
+      const position = ratios.length === 1 ? '中段' : ratioIndex === 0 ? '前段' : '后段';
+      return {
+        time,
+        label: `${scene.label || scene.id} · ${position}`,
+        sceneId: scene.id,
+      };
+    }),
+  );
+};
+
 export const resolvePublicFile = (assetPath) => {
   const publicRoot = path.join(ROOT, 'public');
   const resolved = path.resolve(publicRoot, assetPath);
@@ -99,7 +139,7 @@ const fileExists = async (file) => {
   }
 };
 
-const inspectCharacterPng = async (file) => {
+export const inspectCharacterPng = async (file) => {
   const metadata = await sharp(file).metadata();
   const {data, info} = await sharp(file)
     .ensureAlpha()
@@ -107,27 +147,85 @@ const inspectCharacterPng = async (file) => {
     .toBuffer({resolveWithObject: true});
   let transparentPixels = 0;
   let partialPixels = 0;
+  let partialAlphaWeight = 0;
   let visiblePixels = 0;
-  let greenEdgePixels = 0;
+  let transparentRed = 0;
+  let transparentGreen = 0;
+  let transparentBlue = 0;
+  let lowAlphaPixels = 0;
+  let lowAlphaRed = 0;
+  let lowAlphaGreen = 0;
+  let lowAlphaBlue = 0;
 
   for (let index = 0; index < data.length; index += info.channels) {
     const red = data[index];
     const green = data[index + 1];
     const blue = data[index + 2];
     const alpha = data[index + 3];
-    if (alpha === 0) transparentPixels += 1;
-    if (alpha > 0 && alpha < 250) partialPixels += 1;
+    if (alpha === 0) {
+      transparentPixels += 1;
+      transparentRed += red;
+      transparentGreen += green;
+      transparentBlue += blue;
+    }
+    if (alpha > 0 && alpha < 250) {
+      partialPixels += 1;
+      partialAlphaWeight += alpha / 255;
+    }
     if (alpha > 0) visiblePixels += 1;
-    if (
-      alpha > 0 &&
-      alpha < 250 &&
-      green > red + 52 &&
-      green > blue + 52 &&
-      green > 110
-    ) {
-      greenEdgePixels += 1;
+    if (alpha > 0 && alpha <= 64) {
+      lowAlphaPixels += 1;
+      lowAlphaRed += red;
+      lowAlphaGreen += green;
+      lowAlphaBlue += blue;
     }
   }
+
+  const keySampleCount = transparentPixels || lowAlphaPixels;
+  const keyColor = keySampleCount
+    ? [
+        (transparentPixels ? transparentRed : lowAlphaRed) / keySampleCount,
+        (transparentPixels ? transparentGreen : lowAlphaGreen) / keySampleCount,
+        (transparentPixels ? transparentBlue : lowAlphaBlue) / keySampleCount,
+      ]
+    : null;
+  const keyMean = keyColor
+    ? (keyColor[0] + keyColor[1] + keyColor[2]) / 3
+    : 0;
+  const keyChroma = keyColor?.map((channel) => channel - keyMean) ?? [0, 0, 0];
+  const keyChromaMagnitude = Math.hypot(...keyChroma);
+  let keyEdgePixels = 0;
+  let keyEdgeAlphaWeight = 0;
+  if (keyChromaMagnitude >= 18) {
+    for (let index = 0; index < data.length; index += info.channels) {
+      const alpha = data[index + 3];
+      if (alpha <= 0 || alpha >= 250) continue;
+      const red = data[index];
+      const green = data[index + 1];
+      const blue = data[index + 2];
+      const mean = (red + green + blue) / 3;
+      const chroma = [red - mean, green - mean, blue - mean];
+      const chromaMagnitude = Math.hypot(...chroma);
+      if (chromaMagnitude < 18) continue;
+      const similarity =
+        chroma.reduce(
+          (total, channel, channelIndex) =>
+            total + channel * keyChroma[channelIndex],
+          0,
+        ) /
+        (chromaMagnitude * keyChromaMagnitude);
+      if (similarity > 0.9) {
+        keyEdgePixels += 1;
+        keyEdgeAlphaWeight += alpha / 255;
+      }
+    }
+  }
+
+  const keyColorHex = keyColor
+    ? `#${keyColor
+        .map((channel) => Math.max(0, Math.min(255, Math.round(channel))).toString(16).padStart(2, '0'))
+        .join('')}`
+    : null;
 
   return {
     width: metadata.width,
@@ -137,9 +235,10 @@ const inspectCharacterPng = async (file) => {
     transparentPixels,
     partialPixels,
     visiblePixels,
-    greenEdgePixels,
-    greenEdgeRatio:
-      partialPixels === 0 ? 0 : greenEdgePixels / partialPixels,
+    keyColor: keyChromaMagnitude >= 18 ? keyColorHex : null,
+    keyEdgePixels,
+    keyEdgeRatio:
+      partialAlphaWeight === 0 ? 0 : keyEdgeAlphaWeight / partialAlphaWeight,
   };
 };
 
@@ -283,11 +382,11 @@ export const validateProject = async (project, options = {}) => {
           if (!inspection.hasAlpha || inspection.transparentPixels === 0) {
             add('error', 'layer-alpha', '人物 PNG 没有有效透明区域。', `${layerLocation}.src`);
           }
-          if (inspection.greenEdgeRatio > 0.12) {
+          if (inspection.keyEdgeRatio > 0.12) {
             add(
               'warning',
-              'layer-green-edge',
-              `半透明边缘中 ${(inspection.greenEdgeRatio * 100).toFixed(1)}% 疑似有绿溢色。`,
+              'layer-key-edge',
+              `可见半透明边缘中 ${(inspection.keyEdgeRatio * 100).toFixed(1)}% 疑似残留色键 ${inspection.keyColor ?? ''}。`,
               `${layerLocation}.src`,
             );
           }

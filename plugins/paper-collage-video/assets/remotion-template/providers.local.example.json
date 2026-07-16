@@ -1,0 +1,66 @@
+{
+  "$schema": "./schemas/providers.schema.json",
+  "schemaVersion": 1,
+  "capabilities": {
+    "text": {
+      "defaultProvider": "custom-text",
+      "providers": {
+        "custom-text": {
+          "label": "My language model",
+          "adapter": "command",
+          "requiredEnv": ["MY_LLM_API_KEY"],
+          "model": "my-language-model",
+          "command": {
+            "executable": "node",
+            "args": [
+              "scripts/local/text-adapter.mjs",
+              "--request={request}",
+              "--output={output}"
+            ],
+            "timeoutSeconds": 300
+          }
+        }
+      }
+    },
+    "image": {
+      "defaultProvider": "custom-image",
+      "providers": {
+        "custom-image": {
+          "label": "My image service",
+          "adapter": "command",
+          "requiredEnv": ["MY_IMAGE_API_KEY"],
+          "model": "my-image-model",
+          "command": {
+            "executable": "node",
+            "args": [
+              "scripts/local/image-adapter.mjs",
+              "--request={request}",
+              "--output={output}"
+            ],
+            "timeoutSeconds": 900
+          }
+        }
+      }
+    },
+    "voice": {
+      "defaultProvider": "custom-voice",
+      "providers": {
+        "custom-voice": {
+          "label": "My fictional voice service",
+          "adapter": "command",
+          "requiredEnv": ["MY_VOICE_API_KEY"],
+          "model": "my-voice-model",
+          "command": {
+            "executable": "node",
+            "args": [
+              "scripts/local/voice-adapter.mjs",
+              "--request={request}",
+              "--output={output}"
+            ],
+            "timeoutSeconds": 900
+          }
+        }
+      }
+    }
+  }
+}

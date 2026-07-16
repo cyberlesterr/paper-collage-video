@@ -89,7 +89,7 @@ try {
         {
           schemaVersion: 1,
           plugin: 'paper-collage-video',
-          pluginVersion: '0.1.0',
+          pluginVersion: '0.2.0',
           createdAt: new Date().toISOString(),
         },
         null,

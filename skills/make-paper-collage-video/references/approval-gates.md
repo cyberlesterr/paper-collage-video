@@ -25,7 +25,7 @@ After style and voice approval, “继续” is no longer a scheduler. Remain au
 
 ## Voice Boundary
 
-Default to a fictional catalog voice. Prefer `儒雅逸辰 (ruyayichen)` when the provider offers it.
+Default to the fictional catalog voice selected by the merged provider configuration. Prefer `儒雅逸辰 (ruyayichen)` when that provider offers it, but do not silently switch services merely to obtain that voice.
 
 Do not clone, imitate, or imply the identity of a real person unless the human explicitly opts into that separate enhancement and confirms authorization for both the reference recording and its transcript. A clean reference clip and corresponding text are inputs supplied or licensed by the human; they are not prerequisites for the fictional-voice P0 path.
 

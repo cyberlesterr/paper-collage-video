@@ -32,7 +32,7 @@ test('plugin manifest points at a complete packaged skill', () => {
     path.join(PLUGIN_ROOT, '.codex-plugin', 'plugin.json'),
   );
   assert.equal(manifest.name, 'paper-collage-video');
-  assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
+  assert.equal(manifest.version, '0.2.0');
   assert.equal(manifest.skills, './skills/');
   assert.ok(manifest.interface.defaultPrompt.length > 0);
 
@@ -44,6 +44,7 @@ test('plugin manifest points at a complete packaged skill', () => {
   );
   assert.ok(fs.existsSync(skillFile));
   assert.match(fs.readFileSync(skillFile, 'utf8'), /references\/setup\.md/);
+  assert.match(fs.readFileSync(skillFile, 'utf8'), /references\/providers\.md/);
   assert.ok(
     fs.existsSync(
       path.join(
@@ -60,7 +61,9 @@ test('plugin manifest points at a complete packaged skill', () => {
 test('packaged runtime is lightweight and independent from production projects', () => {
   const packageJson = readJson(path.join(RUNTIME_ROOT, 'package.json'));
   assert.equal(packageJson.name, 'paper-collage-video-workspace');
+  assert.equal(packageJson.version, '0.2.0');
   assert.equal(packageJson.scripts.doctor, 'node scripts/project-doctor.mjs');
+  assert.equal(packageJson.scripts['provider:status'], 'node scripts/provider-status.mjs');
   assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'projects', 'starter-demo')));
   assert.equal(fs.existsSync(path.join(RUNTIME_ROOT, 'projects', 'tang-demo')), false);
   assert.equal(
@@ -70,8 +73,11 @@ test('packaged runtime is lightweight and independent from production projects',
 
   for (const relative of [
     'scripts/production-state.mjs',
+    'scripts/provider-lib.mjs',
     'schemas/project.schema.json',
+    'schemas/providers.schema.json',
     'templates/project/production.json',
+    'providers.json',
   ]) {
     assert.equal(
       fs.readFileSync(path.join(RUNTIME_ROOT, relative), 'utf8'),
@@ -97,9 +103,15 @@ test('bootstrap creates an isolated resumable workspace and is idempotent', asyn
       fs.existsSync(path.join(target, '.paper-collage-video-workspace.json')),
     );
     assert.equal(
+      readJson(path.join(target, '.paper-collage-video-workspace.json')).pluginVersion,
+      '0.2.0',
+    );
+    assert.equal(
       readJson(path.join(target, 'package.json')).name,
       'paper-collage-video-workspace',
     );
+    assert.ok(fs.existsSync(path.join(target, 'providers.json')));
+    assert.ok(fs.existsSync(path.join(target, 'providers.local.example.json')));
 
     const second = spawnSync(
       process.execPath,

@@ -10,6 +10,8 @@ Read this reference when creating, resuming, validating, or rendering a paper-co
 | `projects/<slug>/production.json` | State CLI | Current stage, approvals, recoverable work items, artifacts, and audit history |
 | `projects/<slug>/project.json` | Codex and deterministic scripts | Remotion timeline, layers, subtitles, audio, and theme |
 | `projects/<slug>/prompts.json` | Codex | Reproducible image-generation prompts and outputs |
+| `projects/<slug>/providers.json` | Codex and human configuration | Optional project override for text, image, and voice providers |
+| `projects/<slug>/assets-manifest.json` | Provider CLI | Provider/model/job provenance, hashes, output paths, and request snapshots |
 | `projects/<slug>/review.md` | State CLI and Codex transcription | Auto-synced approval summary plus human feedback and revision history |
 
 Never ask the human to maintain `project.json` or `production.json` directly.
@@ -22,6 +24,9 @@ projects/<slug>/
   production.json
   project.json
   prompts.json
+  providers.json
+  assets-manifest.json
+  requests/
   review.md
 
 public/projects/<slug>/
@@ -62,7 +67,7 @@ Use:
 
 ```bash
 npm run project:status -- <slug>
-npm run project:status -- <slug> --control-json
+npm run project:status -- <slug> --compact-json
 npm run project:handoff-check -- <slug>
 npm run project:checkpoint -- <slug> <id> <status>
 npm run project:advance -- <slug> <action> --note="<decision>"
@@ -74,6 +79,8 @@ Render commands enforce prior approvals. Successful renders record their artifac
 
 - Follow `schemas/project.schema.json` for the animation contract.
 - Follow `schemas/production.schema.json` for the state record.
+- Follow `schemas/providers.schema.json` and `references/providers.md` for portable service selection. Keep secrets out of JSON.
+- Follow `schemas/asset-request.schema.json` for provider requests; let provider scripts own `assets-manifest.json`.
 - Give each scene one `primary` subject; use `secondary` and `tertiary` roles for decreasing motion strength.
 - Keep backgrounds character-free and main figures in independent alpha PNG files.
 - Use z-order and foreground occlusion for depth; do not fake all motion with a single flattened image.
@@ -84,8 +91,10 @@ Render commands enforce prior approvals. Successful renders record their artifac
 
 ```bash
 npm run project:new -- <slug> --title="<title>"
+npm run provider:status -- <slug>
 npm run project:sync -- <slug>
 npm run project:validate -- <slug>
+npm run project:assets-ready -- <slug>
 npm run project:preview -- <slug>
 npm run project:render -- <slug>
 npm run project:report -- <slug>

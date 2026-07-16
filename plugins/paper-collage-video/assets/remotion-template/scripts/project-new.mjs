@@ -30,10 +30,12 @@ try {
 
   const templateDirectory = path.join(ROOT, 'templates', 'project');
   const templateFiles = [
+    'assets-manifest.json',
     'brief.md',
     'project.json',
     'production.json',
     'prompts.json',
+    'providers.json',
     'review.md',
   ];
   const publicDirectories = [
@@ -66,6 +68,8 @@ try {
       'utf8',
     );
   }
+  await fs.mkdir(path.join(paths.projectDirectory, 'requests'), {recursive: true});
+  await fs.writeFile(path.join(paths.projectDirectory, 'requests', '.gitkeep'), '', 'utf8');
   for (const directory of publicDirectories) {
     const absolute = path.join(paths.publicDirectory, directory);
     await fs.mkdir(absolute, {recursive: true});

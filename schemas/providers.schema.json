@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/providers.schema.json",
+  "title": "Paper Collage Provider Configuration",
+  "type": "object",
+  "required": ["schemaVersion"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "capabilities": {
+      "type": "object",
+      "properties": {
+        "text": {"$ref": "#/$defs/capability"},
+        "image": {"$ref": "#/$defs/capability"},
+        "voice": {"$ref": "#/$defs/capability"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "capability": {
+      "type": "object",
+      "properties": {
+        "defaultProvider": {"type": "string", "minLength": 1},
+        "providers": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/provider"}
+        }
+      },
+      "additionalProperties": false
+    },
+    "provider": {
+      "type": "object",
+      "required": ["label", "adapter"],
+      "properties": {
+        "label": {"type": "string", "minLength": 1},
+        "adapter": {"enum": ["host", "command", "manual"]},
+        "toolHint": {"type": "string"},
+        "model": {"type": "string"},
+        "requiredEnv": {
+          "type": "array",
+          "items": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
+          "uniqueItems": true
+        },
+        "command": {
+          "type": "object",
+          "required": ["executable", "args"],
+          "properties": {
+            "executable": {"type": "string", "minLength": 1},
+            "args": {"type": "array", "items": {"type": "string"}},
+            "cwd": {"type": "string"},
+            "timeoutSeconds": {"type": "integer", "minimum": 1, "maximum": 86400}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

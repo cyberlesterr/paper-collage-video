@@ -1,7 +1,7 @@
 {
   "name": "paper-collage-video",
-  "version": "0.1.0",
-  "description": "Create editable layered paper-collage videos with resumable human approval gates and a self-contained Remotion workspace.",
+  "version": "0.2.0",
+  "description": "Create editable layered paper-collage videos with pluggable image and voice providers, resumable approval gates, and a self-contained Remotion workspace.",
   "author": {
     "name": "Paper Collage Video Contributors"
   },
@@ -10,7 +10,7 @@
   "interface": {
     "displayName": "纸片分层视频制作",
     "shortDescription": "从主题到可编辑 Remotion 成片，支持审批门禁与断点恢复",
-    "longDescription": "初始化独立的 Remotion 工作区，并完成纸片拼贴视频的脚本、分镜、分层素材、虚构旁白、预览、修改、正式渲染和技术验收。",
+    "longDescription": "初始化独立的 Remotion 工作区，通过可配置的文本、生图和虚构语音服务完成纸片拼贴视频的脚本、分镜、分层素材、预览、修改、正式渲染和技术验收。",
     "developerName": "Paper Collage Video Contributors",
     "category": "Creativity",
     "capabilities": ["Create", "Render"],

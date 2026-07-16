@@ -3,6 +3,12 @@ import {spawnSync} from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {
+  PROVIDER_CAPABILITIES,
+  inspectProviderReadiness,
+  loadProviderConfig,
+  resolveProvider,
+} from './provider-lib.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -10,6 +16,7 @@ const args = new Set(process.argv.slice(2));
 const json = args.has('--json');
 const ready = args.has('--ready');
 const checks = [];
+const commandTimeoutMs = 15000;
 
 const record = (id, status, message, details = null) => {
   checks.push({id, status, message, details});
@@ -20,6 +27,7 @@ const run = (command, commandArgs) =>
     cwd: ROOT,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: commandTimeoutMs,
   });
 
 const commandCheck = (id, command, commandArgs, required = true) => {
@@ -29,7 +37,9 @@ const commandCheck = (id, command, commandArgs, required = true) => {
       id,
       required ? 'error' : 'warning',
       `${command} 不可用`,
-      result.error?.message ?? result.stderr.trim() ?? null,
+      result.error?.code === 'ETIMEDOUT'
+        ? `${command} 检查超过 ${commandTimeoutMs / 1000} 秒，已终止`
+        : result.error?.message ?? result.stderr.trim() ?? null,
     );
     return false;
   }
@@ -92,6 +102,33 @@ if (pythonAvailable) {
       ? python
       : '运行 python3 -m pip install -r requirements.txt，推荐使用 .venv',
   );
+}
+
+try {
+  const loaded = await loadProviderConfig();
+  const providerErrors = loaded.issues.filter(({level}) => level === 'error');
+  record(
+    'provider-config',
+    providerErrors.length === 0 ? 'ok' : 'error',
+    providerErrors.length === 0 ? 'Provider 配置有效' : 'Provider 配置无效',
+    providerErrors.length
+      ? providerErrors.map(({location, message}) => `${location}: ${message}`).join('\n')
+      : loaded.sources.filter(({loaded: active}) => active).map(({file}) => path.relative(ROOT, file)).join(', '),
+  );
+  if (providerErrors.length === 0) {
+    for (const capability of PROVIDER_CAPABILITIES) {
+      const provider = resolveProvider(loaded.config, capability);
+      const readiness = await inspectProviderReadiness(provider);
+      record(
+        `provider-${capability}`,
+        readiness.status === 'error' ? (ready ? 'error' : 'warning') : readiness.status === 'ready' ? 'ok' : 'warning',
+        `${capability} provider: ${provider.id} (${provider.adapter})`,
+        readiness.message,
+      );
+    }
+  }
+} catch (error) {
+  record('provider-config', 'error', '无法读取 Provider 配置', error.message);
 }
 
 const summary = {

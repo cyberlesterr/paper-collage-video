@@ -22,9 +22,9 @@
   },
   "voice": {
     "mode": "fictional",
-    "provider": "doubao",
-    "voiceId": "ruyayichen",
-    "displayName": "儒雅逸辰",
+    "provider": "auto",
+    "profile": "warm-storyteller",
+    "displayName": "Configured fictional narrator",
     "settings": {
       "speedRatio": 0.94,
       "pitch": -1

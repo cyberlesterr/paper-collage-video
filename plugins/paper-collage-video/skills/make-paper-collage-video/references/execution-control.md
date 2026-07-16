@@ -7,7 +7,7 @@ Read this reference before starting or resuming work. It defines when a turn may
 Run this at every new turn, after every interruption, and before ending a turn:
 
 ```bash
-npm run project:status -- <slug> --control-json
+npm run project:status -- <slug> --compact-json
 ```
 
 Interpret `control.mode` strictly:
@@ -38,7 +38,7 @@ npm run project:handoff-check -- <slug> \
 
 Then follow this response contract:
 
-1. Read `control.mode` from `project:status --control-json` and honor the handoff check result.
+1. Read `control.mode` from `project:status --compact-json` and honor the handoff check result.
 2. If it is `auto-continue`, continue to `control.nextCommand` or the next incomplete work item.
 3. If it is `wait-human`, include all expected artifacts that already exist.
 4. State exactly one of:
@@ -72,6 +72,8 @@ npm run project:checkpoint -- <slug> <id> blocked --note="<exact blocker>"
 ```
 
 Use stable ids for background plates, character sheets, narration clips, alpha extraction, timeline configuration, validation, preview, and final render. On resume, continue the first pending, in-progress, or blocked item that can be recovered safely. Do not regenerate a completed artifact unless revision was requested.
+
+Provider request/job provenance belongs in `assets-manifest.json`; production scheduling and blockers stay in `production.json`. A host provider result, command adapter exit, or async job completion never creates an extra human gate.
 
 ## Gate Response Minimums
 

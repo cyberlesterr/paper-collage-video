@@ -4,6 +4,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import {
   ROOT,
+  deriveContactSheetSamples,
   fileExists,
   loadProject,
   probeMedia,
@@ -40,13 +41,11 @@ const parseFrameRate = (value) => {
   return denominator ? numerator / denominator : 0;
 };
 
-const createContactSheet = async ({video, output, durationSeconds, framesDirectory}) => {
+const createContactSheet = async ({video, output, samples, framesDirectory}) => {
   await fs.mkdir(framesDirectory, {recursive: true});
-  const sampleTimes = [0.18, 0.5, 0.84].map((ratio) =>
-    Math.max(0, Math.min(durationSeconds - 0.04, durationSeconds * ratio)),
-  );
   const panels = [];
-  for (const [index, time] of sampleTimes.entries()) {
+  for (const [index, sample] of samples.entries()) {
+    const {time} = sample;
     const frameFile = path.join(framesDirectory, `frame-${index + 1}.png`);
     await runCommand('ffmpeg', [
       '-v',
@@ -64,7 +63,7 @@ const createContactSheet = async ({video, output, durationSeconds, framesDirecto
       .resize(480, 270, {fit: 'cover'})
       .png()
       .toBuffer();
-    panels.push({image, time});
+    panels.push({...sample, image});
   }
 
   const padding = 24;
@@ -72,21 +71,26 @@ const createContactSheet = async ({video, output, durationSeconds, framesDirecto
   const panelWidth = 480;
   const panelHeight = 270;
   const labelHeight = 42;
-  const width = padding * 2 + panelWidth * panels.length + gap * (panels.length - 1);
-  const height = padding * 2 + panelHeight + labelHeight;
+  const columns = Math.min(3, panels.length);
+  const rows = Math.ceil(panels.length / columns);
+  const width = padding * 2 + panelWidth * columns + gap * (columns - 1);
+  const height = padding * 2 + (panelHeight + labelHeight) * rows + gap * (rows - 1);
   const composite = [];
   for (const [index, panel] of panels.entries()) {
-    const left = padding + index * (panelWidth + gap);
-    composite.push({input: panel.image, left, top: padding});
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    const left = padding + column * (panelWidth + gap);
+    const top = padding + row * (panelHeight + labelHeight + gap);
+    composite.push({input: panel.image, left, top});
     const label = Buffer.from(`
       <svg width="${panelWidth}" height="${labelHeight}">
         <rect width="100%" height="100%" fill="#2b1713"/>
-        <text x="16" y="28" fill="#f6ead2" font-size="18" font-family="Arial, sans-serif">
-          ${escapeXml(`${index + 1} · ${panel.time.toFixed(2)}s`)}
+        <text x="16" y="28" fill="#f6ead2" font-size="18" font-family="Arial, PingFang SC, sans-serif">
+          ${escapeXml(`${panel.label} · ${panel.time.toFixed(2)}s`)}
         </text>
       </svg>
     `);
-    composite.push({input: label, left, top: padding + panelHeight});
+    composite.push({input: label, left, top: top + panelHeight});
   }
   await sharp({
     create: {width, height, channels: 3, background: '#160f0d'},
@@ -180,10 +184,15 @@ try {
     },
   ];
   const contactSheet = path.join(paths.distDirectory, 'contact-sheet.jpg');
+  const contactSheetSamples = deriveContactSheetSamples({
+    timeline: validation.timeline,
+    fps: project.video.fps,
+    durationSeconds,
+  });
   await createContactSheet({
     video: artifact,
     output: contactSheet,
-    durationSeconds,
+    samples: contactSheetSamples,
     framesDirectory: path.join(paths.distDirectory, 'frames'),
   });
 
@@ -222,6 +231,7 @@ try {
     passed:
       validation.passed && technicalChecks.every((check) => check.passed),
     contactSheet: path.relative(ROOT, contactSheet),
+    contactSheetSamples,
   };
   const reportFile = path.join(paths.distDirectory, 'report.json');
   await writeJson(reportFile, report);

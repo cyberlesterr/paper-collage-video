@@ -71,12 +71,13 @@ Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于
 
 - Node.js 20+
 - FFmpeg / ffprobe
-- Python 3.11+（只在处理绿幕素材表时需要）
+- Python 3.11+（只在处理色键素材表时需要）
 
 ```bash
 npm install
 python3 -m pip install -r requirements.txt
 npm run doctor -- --ready
+npm run provider:status
 ```
 
 ## 跑通黄金样例
@@ -116,10 +117,13 @@ npm run project:new -- silk-road --title="玄奘西行"
 
 ```text
 projects/silk-road/
+  assets-manifest.json
   brief.md
   production.json
   project.json
   prompts.json
+  providers.json
+  requests/
   review.md
 
 public/projects/silk-road/
@@ -143,13 +147,17 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 |---|---|
 | `npm run project:new -- <slug>` | 创建人类简报、机器配置和素材目录 |
 | `npm run project:status -- <slug>` | 显示当前阶段、审批、产物和下一步 |
-| `npm run project:status -- <slug> --control-json` | 输出机器可读的 `auto-continue` / `wait-human` 控制信息 |
+| `npm run project:status -- <slug> --compact-json` | 输出不含冗长历史的机器可读控制信息 |
+| `npm run provider:status -- <slug>` | 合并并检查文本、生图、语音 provider 配置 |
+| `npm run provider:run -- --request=<file>` | 运行用户配置的命令适配器并登记资产来源 |
+| `npm run provider:record -- --request=<file>` | 登记宿主工具或手工导入的本地输出 |
 | `npm run project:handoff-check -- <slug>` | 在回合结束前阻止 `AUTO-CONTINUE` 阶段被误当成人工停点 |
 | `npm run project:checkpoint -- <slug> <id> <status>` | 记录素材、旁白、校验或渲染工作项的可恢复进度 |
 | `npm run project:review-sync -- <slug>` | 从生产状态重新生成 `review.md` 的审批摘要 |
 | `npm run project:advance -- <slug> <action>` | 记录明确的审批或确定性阶段完成事件 |
+| `npm run project:assets-ready -- <slug>` | 校验素材并将状态从素材生产推进到预览 |
 | `npm run project:sync -- <slug>` | 用 ffprobe 把真实旁白时长写回项目配置 |
-| `npm run project:validate -- <slug>` | 检查配置、素材、透明通道、绿边、字幕和时长 |
+| `npm run project:validate -- <slug>` | 检查配置、素材、透明通道、色键残边、字幕和时长 |
 | `npm run project:preview -- <slug>` | 校验后渲染 50% 预览，并生成报告 |
 | `npm run project:render -- <slug>` | 校验后渲染正式成片，并生成报告 |
 | `npm run project:report -- <slug>` | 对已有成片生成技术报告和关键帧联系表 |
@@ -165,9 +173,21 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 
 涉及人工决定的动作必须带 `--note="人的原话或明确结论"`；这样中断恢复时不会把技术通过误认为创意或发布批准。
 
+## 自定义文本、生图和语音服务
+
+工作区默认使用当前 Codex 宿主提供的文本、生图和虚构语音能力，不绑定厂商。配置按以下顺序深度合并：
+
+1. `providers.json`：可共享的工作区默认值；
+2. `providers.local.json`：本机覆盖，已加入 `.gitignore`；
+3. `projects/<slug>/providers.json`：单项目覆盖。
+
+复制 `providers.local.example.json` 为 `providers.local.json`，即可把任意 CLI、SDK 包装脚本或私有 API 接到 `command` adapter。配置只保存 `requiredEnv` 的变量名，API key 仍放在环境变量中。异步服务由用户的 adapter 自行提交和轮询；稳定接口是“读取请求 JSON、写入指定输出、退出码为 0”。
+
+每次输出都通过 `provider:run` 或 `provider:record` 写入 `assets-manifest.json`，记录 provider、模型/任务 id、SHA-256、大小、时间和请求快照。完整契约见 [Provider Configuration](skills/make-paper-collage-video/references/providers.md)。
+
 ## 角色素材表处理
 
-一条命令完成四宫格拆分、软蒙版、去绿溢色和透明 PNG 输出：
+一条命令完成四宫格拆分、软蒙版、通用去色键溢色和透明 PNG 输出。色键可自动从边框采样，也可以显式指定；选用服装中没有的高饱和颜色，不必固定为绿色：
 
 ```bash
 PYTHON_BIN=python3 npm run assets:process-sheet -- \
@@ -176,6 +196,8 @@ PYTHON_BIN=python3 npm run assets:process-sheet -- \
   public/projects/my-project/assets/characters/alpha \
   scene 4 \
   --columns=2 \
+  --key-color=auto \
+  --matte-erode=1 \
   --names=emperor,maid-left,maid-right,officials
 ```
 
@@ -183,7 +205,7 @@ PYTHON_BIN=python3 npm run assets:process-sheet -- \
 
 ```bash
 python3 scripts/split_sheet.py INPUT OUTPUT_DIR PREFIX COUNT --columns 2
-python3 scripts/remove_chroma_key.py --input GREEN.png --out ALPHA.png --force
+python3 scripts/remove_chroma_key.py --input KEY.png --out ALPHA.png --key-color=auto --matte-erode=1 --force
 ```
 
 ## 项目协议
@@ -215,13 +237,13 @@ python3 scripts/remove_chroma_key.py --input GREEN.png --out ALPHA.png --force
 - 项目协议、slug、视频规格和唯一 id。
 - 背景、人物、旁白、音乐、音效和纸张纹理是否存在。
 - 人物 PNG 是否真的有透明区域。
-- 半透明边缘是否疑似存在绿溢色。
+- 按透明像素推断真实色键，检查可见半透明边缘是否仍有对应溢色。
 - 背景宽高比是否与视频接近。
 - 旁白配置时长是否等于 ffprobe 实测时长。
 - 字幕范围、重叠和越界。
 - 每幕是否有 primary 主体，人物是否完全跑出画布。
 
-`project:report` 继续检查成片编码、分辨率、帧率、音轨、音量峰值，并生成三帧联系表供人做最终视觉判断。
+`project:report` 继续检查成片编码、分辨率、帧率、音轨、音量峰值，并按场景前/后段生成最多八帧联系表，避免固定比例抽帧漏掉短镜头或转场。
 
 ## 黄金样例
 

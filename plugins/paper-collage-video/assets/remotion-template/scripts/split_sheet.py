@@ -20,6 +20,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--columns", type=int, default=2)
     parser.add_argument("--padding", type=int, default=20)
     parser.add_argument("--key-threshold", type=float, default=48.0)
+    parser.add_argument("--suffix", default="key")
     return parser.parse_args()
 
 
@@ -74,7 +75,7 @@ def main() -> None:
             cell.height,
             args.padding,
         )
-        output = args.output_dir / f"{args.prefix}-{index + 1}-green.png"
+        output = args.output_dir / f"{args.prefix}-{index + 1}-{args.suffix}.png"
         cell.crop(crop).save(output)
         print(output)
 

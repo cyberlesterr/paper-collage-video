@@ -57,13 +57,20 @@ await fs.cp(SKILL_SOURCE, SKILL_TARGET, {recursive: true});
 for (const entry of [
   '.gitignore',
   'package-lock.json',
+  'providers.local.example.json',
+  'providers.json',
   'requirements.txt',
   'tsconfig.json',
   'schemas',
   'templates',
   'scripts/process-character-sheet.mjs',
+  'scripts/provider-lib.mjs',
+  'scripts/provider-record.mjs',
+  'scripts/provider-run.mjs',
+  'scripts/provider-status.mjs',
   'scripts/production-state.mjs',
   'scripts/project-advance.mjs',
+  'scripts/project-assets-ready.mjs',
   'scripts/project-checkpoint.mjs',
   'scripts/project-doctor.mjs',
   'scripts/project-handoff-check.mjs',
@@ -83,6 +90,7 @@ for (const entry of [
   'src/index.ts',
   'src/project.ts',
   'src/roleMotion.ts',
+  'tests/provider-and-assets.test.mjs',
   'tests/production-state.test.mjs',
   'public/textures/paper-grain.png',
 ]) {
@@ -95,18 +103,22 @@ const rootPackage = JSON.parse(
 const workspacePackage = {
   ...rootPackage,
   name: 'paper-collage-video-workspace',
-  version: '0.1.0',
+  version: '0.2.0',
   private: true,
   engines: {node: '>=20'},
   scripts: {
     'assets:rasterize': rootPackage.scripts['assets:rasterize'],
     'assets:process-sheet': rootPackage.scripts['assets:process-sheet'],
+    'provider:status': rootPackage.scripts['provider:status'],
+    'provider:run': rootPackage.scripts['provider:run'],
+    'provider:record': rootPackage.scripts['provider:record'],
     'project:new': rootPackage.scripts['project:new'],
     'project:status': rootPackage.scripts['project:status'],
     'project:handoff-check': rootPackage.scripts['project:handoff-check'],
     'project:checkpoint': rootPackage.scripts['project:checkpoint'],
     'project:review-sync': rootPackage.scripts['project:review-sync'],
     'project:advance': rootPackage.scripts['project:advance'],
+    'project:assets-ready': rootPackage.scripts['project:assets-ready'],
     'project:sync': rootPackage.scripts['project:sync'],
     'project:validate': rootPackage.scripts['project:validate'],
     'project:preview': rootPackage.scripts['project:preview'],
@@ -251,6 +263,19 @@ await writeJson(
   path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'prompts.json'),
   {imageModel: 'fixture', assets: []},
 );
+await writeJson(
+  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'providers.json'),
+  {$schema: '../../schemas/providers.schema.json', schemaVersion: 1},
+);
+await writeJson(
+  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'assets-manifest.json'),
+  {
+    $schema: '../../schemas/assets-manifest.schema.json',
+    schemaVersion: 1,
+    projectSlug: 'starter-demo',
+    assets: [],
+  },
+);
 await fs.writeFile(
   path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'brief.md'),
   '# 项目简报：Paper Collage Starter\n\n这是插件自带的轻量技术样例。\n',
@@ -261,6 +286,14 @@ await fs.writeFile(
   '# 验收记录：Paper Collage Starter\n\n- Bundled fixture\n',
   'utf8',
 );
+const starterRequests = path.join(
+  RUNTIME_ROOT,
+  'projects',
+  'starter-demo',
+  'requests',
+);
+await fs.mkdir(starterRequests, {recursive: true});
+await fs.writeFile(path.join(starterRequests, '.gitkeep'), '', 'utf8');
 
 await copy('public/layers/sky.png', 'public/projects/starter-demo/assets/plates/01-bg.png');
 await copy(
@@ -282,7 +315,7 @@ await fs.writeFile(narrationFile, makeSilentWav());
 await writeJson(path.join(RUNTIME_ROOT, '.paper-collage-template.json'), {
   schemaVersion: 1,
   plugin: 'paper-collage-video',
-  pluginVersion: '0.1.0',
+  pluginVersion: '0.2.0',
 });
 
 console.log(`✓ Plugin skill synced: ${path.relative(ROOT, SKILL_TARGET)}`);

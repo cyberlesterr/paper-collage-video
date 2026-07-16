@@ -18,6 +18,13 @@ const names = (
   .map((name) => name.trim())
   .filter(Boolean);
 const python = process.env.PYTHON_BIN || 'python3';
+const keyColor =
+  args.find((arg) => arg.startsWith('--key-color='))?.slice('--key-color='.length) ??
+  'auto';
+const matteErode = Number(
+  args.find((arg) => arg.startsWith('--matte-erode='))?.slice('--matte-erode='.length) ??
+    1,
+);
 
 const runInherited = (command, commandArgs) =>
   new Promise((resolve, reject) => {
@@ -32,11 +39,14 @@ const runInherited = (command, commandArgs) =>
 try {
   if (!input || !sourceDirectory || !alphaDirectory || !prefix || !Number.isInteger(count) || count < 1) {
     throw new Error(
-      '用法：process-character-sheet.mjs <input> <sourceDir> <alphaDir> <prefix> <count> [--columns=2] [--names=a,b,c,d]',
+      '用法：process-character-sheet.mjs <input> <sourceDir> <alphaDir> <prefix> <count> [--columns=2] [--names=a,b,c,d] [--key-color=auto|#rrggbb] [--matte-erode=1]',
     );
   }
   if (names.length > 0 && names.length !== count) {
     throw new Error(`--names 需要恰好 ${count} 个名称。`);
+  }
+  if (!Number.isInteger(matteErode) || matteErode < 0 || matteErode > 8) {
+    throw new Error('--matte-erode 必须是 0 到 8 的整数。');
   }
   await fs.mkdir(path.resolve(ROOT, sourceDirectory), {recursive: true});
   await fs.mkdir(path.resolve(ROOT, alphaDirectory), {recursive: true});
@@ -48,9 +58,11 @@ try {
     String(count),
     '--columns',
     String(columns),
+    '--suffix',
+    'key',
   ]);
   for (let index = 0; index < count; index += 1) {
-    const source = path.join(sourceDirectory, `${prefix}-${index + 1}-green.png`);
+    const source = path.join(sourceDirectory, `${prefix}-${index + 1}-key.png`);
     const outputName = names[index] || `${prefix}-${index + 1}`;
     const output = path.join(alphaDirectory, `${outputName}.png`);
     await runInherited(python, [
@@ -65,6 +77,12 @@ try {
       '95',
       '--edge-feather',
       '0.6',
+      '--key-color',
+      keyColor,
+      '--matte-erode',
+      String(matteErode),
+      '--metadata',
+      `${output}.key.json`,
       '--force',
     ]);
   }

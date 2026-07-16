@@ -24,6 +24,7 @@ If no valid workspace exists:
 
    ```bash
    npm run doctor -- --ready
+   npm run provider:status
    ```
 
 Do not write projects, dependencies, renders, or generated media into the installed plugin cache.
@@ -37,4 +38,4 @@ If bootstrap or doctor fails, preserve any created workspace and report:
 - the safe command that can resume setup;
 - the one permission, dependency, or provider action required from the human.
 
-Do not proceed to concept or asset generation until required local checks pass. Provider availability for image and narration generation may remain a later explicit capability check because those providers are host-specific.
+Do not proceed to concept or asset generation until required local checks pass. A host provider may report `agent-check-required`; resolve it by inspecting the current host's installed text, image, or fictional-voice capability before the stage that needs it. Read `providers.md` for machine-local and per-project overrides.

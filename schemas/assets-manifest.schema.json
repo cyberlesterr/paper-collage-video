@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/assets-manifest.schema.json",
+  "title": "Paper Collage Generated Asset Manifest",
+  "type": "object",
+  "required": ["schemaVersion", "projectSlug", "assets"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["assetId", "capability", "file", "provider", "adapter", "sha256", "sizeBytes", "recordedAt", "request"],
+        "properties": {
+          "assetId": {"type": "string"},
+          "capability": {"enum": ["text", "image", "voice"]},
+          "file": {"type": "string"},
+          "provider": {"type": "string"},
+          "adapter": {"enum": ["host", "command", "manual"]},
+          "model": {"type": ["string", "null"]},
+          "externalId": {"type": ["string", "null"]},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "sizeBytes": {"type": "integer", "minimum": 1},
+          "recordedAt": {"type": "string", "format": "date-time"},
+          "request": {"type": "object"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
