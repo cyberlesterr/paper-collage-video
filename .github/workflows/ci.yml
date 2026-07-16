@@ -1,0 +1,61 @@
+name: Verify plugin and Remotion workspace
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install workspace dependencies
+        run: |
+          npm ci
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.txt
+
+      - name: Verify generated plugin package is current
+        run: |
+          npm run plugin:sync
+          git diff --exit-code
+
+      - name: Verify source workspace
+        run: |
+          npm test
+          npm run check
+          npm run doctor -- --ready
+
+      - name: Bootstrap installed-plugin equivalent workspace
+        run: |
+          node plugins/paper-collage-video/scripts/bootstrap-workspace.mjs --target=/tmp/paper-collage-plugin-smoke
+          ln -s "$GITHUB_WORKSPACE/node_modules" /tmp/paper-collage-plugin-smoke/node_modules
+          ln -s "$GITHUB_WORKSPACE/.venv" /tmp/paper-collage-plugin-smoke/.venv
+
+      - name: Verify packaged workspace and render smoke preview
+        working-directory: /tmp/paper-collage-plugin-smoke
+        run: |
+          npm run doctor -- --ready
+          npm test
+          npm run check
+          npm run project:validate -- starter-demo
+          npm run project:preview -- starter-demo

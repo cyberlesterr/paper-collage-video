@@ -1,0 +1,38 @@
+{
+  "$schema": "../../schemas/project.schema.json",
+  "schemaVersion": 1,
+  "slug": "{{slug}}",
+  "title": "{{title}}",
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "transitionFrames": 12
+  },
+  "theme": {
+    "canvas": "#6e1e19",
+    "sceneBackground": "#8a271f",
+    "accent": "#a33a2d",
+    "ink": "#4a291f",
+    "subtitle": "#fff8ea",
+    "subtitleBackground": "rgba(58, 25, 18, .72)",
+    "paperEdge": "#f5eedc",
+    "foreground": "#8d251e",
+    "texture": "textures/paper-grain.png"
+  },
+  "voice": {
+    "mode": "fictional",
+    "provider": "doubao",
+    "voiceId": "ruyayichen",
+    "displayName": "儒雅逸辰",
+    "settings": {
+      "speedRatio": 0.94,
+      "pitch": -1
+    }
+  },
+  "audio": {
+    "music": null,
+    "sfx": {}
+  },
+  "scenes": []
+}

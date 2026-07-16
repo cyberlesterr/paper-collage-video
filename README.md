@@ -4,6 +4,46 @@
 
 仓库自带 `tang-demo` 黄金样例，它是回归基准，不是引擎里的硬编码题材。
 
+## 从 GitHub 安装 Plugin
+
+面向普通用户的推荐路径是安装 Codex Plugin，不需要手动 clone 本仓库。仓库包含机器可读的 marketplace、插件清单、Skill、工作区初始化器和轻量 Remotion 模板。
+
+用户可以直接把 GitHub 地址交给 Codex：
+
+```text
+请安装这个 Codex 插件并完成初始化验证：
+https://github.com/<github-owner>/<repository>
+```
+
+Codex 对应执行：
+
+```bash
+codex plugin marketplace add <github-owner>/<repository>
+codex plugin add paper-collage-video@paper-collage-video
+```
+
+安装后新建一个 Codex 任务，再说：
+
+```text
+用 $make-paper-collage-video 做一条约 30 秒的玄奘西行纸片分层视频。
+```
+
+首次调用会从插件自带模板创建独立、可写的 Remotion 工作区，安装依赖并运行环境诊断。项目、依赖和渲染结果不会写入 Codex 的插件缓存。用户可能仍需批准依赖下载、FFmpeg 安装或图片/语音提供方授权。
+
+当前仓库尚未配置真实 GitHub owner、公开许可证和正式 release；发布前必须补齐这些发行元数据。
+
+### 本地开发安装演练
+
+仓库维护者可以从本地 marketplace 安装同一个插件：
+
+```bash
+npm run plugin:sync
+codex plugin marketplace add /absolute/path/to/paper-collage-video
+codex plugin add paper-collage-video@paper-collage-video
+```
+
+修改插件后重新运行 `npm run plugin:sync` 和插件校验，再按本地插件更新流程刷新缓存。插件源位于 `plugins/paper-collage-video/`；`skills/make-paper-collage-video/` 是制作流程的维护源，`plugin:sync` 会把它和轻量运行时同步到发行包。
+
 ## 最简单的用法
 
 在 Codex 中直接说：
@@ -12,7 +52,7 @@
 用 $make-paper-collage-video 做一条约 30 秒的玄奘西行纸片分层视频。
 ```
 
-仓库 Skill 位于 `skills/make-paper-collage-video/`。它会从简报开始，自动维护项目文件和生产状态，只在概念、风格/虚构音色、预览和发布四个节点停下来让人决定。其他阶段标记为 `AUTO-CONTINUE`，单次工具调用结束不等于任务暂停。中断后再次调用同一个 Skill，它会先读取 `production.json` 和逐项工作清单，从当前阶段继续。
+Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于插件包中。它会从工作区初始化和简报开始，自动维护项目文件和生产状态，只在概念、风格/虚构音色、预览和发布四个节点停下来让人决定。其他阶段标记为 `AUTO-CONTINUE`，单次工具调用结束不等于任务暂停。中断后再次调用同一个 Skill，它会先读取 `production.json` 和逐项工作清单，从当前阶段继续。
 
 ## 人在流程中的位置
 
@@ -36,6 +76,7 @@
 ```bash
 npm install
 python3 -m pip install -r requirements.txt
+npm run doctor -- --ready
 ```
 
 ## 跑通黄金样例
@@ -112,6 +153,8 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | `npm run project:preview -- <slug>` | 校验后渲染 50% 预览，并生成报告 |
 | `npm run project:render -- <slug>` | 校验后渲染正式成片，并生成报告 |
 | `npm run project:report -- <slug>` | 对已有成片生成技术报告和关键帧联系表 |
+| `npm run doctor -- --ready` | 检查 Node、FFmpeg、ffprobe、npm 和 Python 图像依赖 |
+| `npm run plugin:sync` | 从维护源重新生成插件 Skill 和轻量 Remotion 工作区模板 |
 | `npm run dev` | 在 Remotion Studio 中打开黄金样例 |
 | `npm test` | 运行生产状态、静默工具恢复和记录同步回归测试 |
 | `npm run check` | TypeScript 类型检查 |

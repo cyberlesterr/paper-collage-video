@@ -1,0 +1,67 @@
+{
+  "$schema": "../../schemas/project.schema.json",
+  "schemaVersion": 1,
+  "slug": "starter-demo",
+  "title": "Paper Collage Starter",
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "transitionFrames": 12
+  },
+  "theme": {
+    "canvas": "#6e1e19",
+    "sceneBackground": "#8a271f",
+    "accent": "#a33a2d",
+    "ink": "#4a291f",
+    "subtitle": "#fff8ea",
+    "subtitleBackground": "rgba(58, 25, 18, .72)",
+    "paperEdge": "#f5eedc",
+    "foreground": "#8d251e",
+    "texture": "textures/paper-grain.png"
+  },
+  "voice": {
+    "mode": "fictional",
+    "provider": "fixture",
+    "displayName": "Silent fixture"
+  },
+  "audio": {
+    "music": null,
+    "sfx": {}
+  },
+  "scenes": [
+    {
+      "id": "starter",
+      "label": "纸片分层视频",
+      "eyebrow": "STARTER",
+      "tailFrames": 30,
+      "background": "projects/starter-demo/assets/plates/01-bg.png",
+      "narration": {
+        "src": "projects/starter-demo/audio/narration/01-silence.wav",
+        "startFrame": 0,
+        "durationSeconds": 1,
+        "text": ""
+      },
+      "layers": [
+        {
+          "id": "traveler",
+          "src": "projects/starter-demo/assets/characters/alpha/01-traveler.png",
+          "role": "primary",
+          "x": 0,
+          "bottom": 0,
+          "width": 1920,
+          "z": 4,
+          "delay": 0,
+          "enterFrom": "left"
+        }
+      ],
+      "subtitles": [
+        {
+          "from": 0,
+          "to": 54,
+          "text": "Paper Collage Video"
+        }
+      ]
+    }
+  ]
+}

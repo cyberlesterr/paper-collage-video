@@ -1,0 +1,20 @@
+{
+  "name": "paper-collage-video",
+  "interface": {
+    "displayName": "Paper Collage Video"
+  },
+  "plugins": [
+    {
+      "name": "paper-collage-video",
+      "source": {
+        "source": "local",
+        "path": "./plugins/paper-collage-video"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Creativity"
+    }
+  ]
+}

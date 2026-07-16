@@ -1,6 +1,6 @@
 {
-  "name": "paper-collage-video-pipeline",
-  "version": "1.0.0",
+  "name": "paper-collage-video-workspace",
+  "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -18,15 +18,12 @@
     "project:render": "node scripts/project-render.mjs render",
     "project:report": "node scripts/project-report.mjs",
     "doctor": "node scripts/project-doctor.mjs",
-    "plugin:sync": "node scripts/sync-plugin-package.mjs",
-    "dev": "remotion studio src/index.ts --props=projects/tang-demo/project.json",
+    "dev": "remotion studio src/index.ts --props=projects/starter-demo/project.json",
     "check": "tsc --noEmit",
     "bundle": "remotion bundle src/index.ts",
-    "render": "npm run project:render -- tang-demo",
-    "render:preview": "npm run project:preview -- tang-demo",
-    "render:frame": "remotion still src/index.ts Paper-Collage out/replica-preview-frame.png --props=projects/tang-demo/project.json --frame=470",
-    "render:prototype": "remotion render src/index.ts Tang-Paper-Cutout-Prototype out/tang-paper-cutout-prototype.mp4 --scale=0.5 --concurrency=8",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "render": "npm run project:render -- starter-demo",
+    "render:preview": "npm run project:preview -- starter-demo"
   },
   "dependencies": {
     "@remotion/cli": "4.0.489",
@@ -39,5 +36,8 @@
     "@types/react-dom": "19.2.3",
     "sharp": "0.35.3",
     "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
