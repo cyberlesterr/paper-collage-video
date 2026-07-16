@@ -11,6 +11,7 @@
     "preview": {"status": "pending", "decidedAt": null, "note": ""},
     "publish": {"status": "pending", "decidedAt": null, "note": ""}
   },
+  "workItems": [],
   "artifacts": {
     "brief": "projects/{{slug}}/brief.md",
     "project": "projects/{{slug}}/project.json",

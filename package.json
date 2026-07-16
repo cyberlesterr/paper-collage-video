@@ -8,6 +8,9 @@
     "assets:process-sheet": "node scripts/process-character-sheet.mjs",
     "project:new": "node scripts/project-new.mjs",
     "project:status": "node scripts/project-status.mjs",
+    "project:handoff-check": "node scripts/project-handoff-check.mjs",
+    "project:checkpoint": "node scripts/project-checkpoint.mjs",
+    "project:review-sync": "node scripts/project-review-sync.mjs",
     "project:advance": "node scripts/project-advance.mjs",
     "project:sync": "node scripts/project-sync.mjs",
     "project:validate": "node scripts/project-validate.mjs",
@@ -20,7 +23,8 @@
     "render": "npm run project:render -- tang-demo",
     "render:preview": "npm run project:preview -- tang-demo",
     "render:frame": "remotion still src/index.ts Paper-Collage out/replica-preview-frame.png --props=projects/tang-demo/project.json --frame=470",
-    "render:prototype": "remotion render src/index.ts Tang-Paper-Cutout-Prototype out/tang-paper-cutout-prototype.mp4 --scale=0.5 --concurrency=8"
+    "render:prototype": "remotion render src/index.ts Tang-Paper-Cutout-Prototype out/tang-paper-cutout-prototype.mp4 --scale=0.5 --concurrency=8",
+    "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.489",

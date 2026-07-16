@@ -25,6 +25,7 @@ Turn a human topic into an editable Remotion project while keeping the human in 
    ```
 
 5. Read [references/project-contract.md](references/project-contract.md) before creating or changing project files. Read [references/approval-gates.md](references/approval-gates.md) before generating creative assets, speech, or an external delivery.
+6. Read [references/execution-control.md](references/execution-control.md) before doing work. Obey its `auto-continue`/`wait-human` contract and tool-only image-generation isolation rules.
 
 ## Apply Defaults Deliberately
 
@@ -79,6 +80,8 @@ npm run project:advance -- <slug> approve-style-voice --note="<human decision>"
 
 After style and voice approval:
 
+Record each material step with `project:checkpoint`. Keep the root workflow active while built-in image generation runs in bounded asset workers as described in `execution-control.md`; an image result is not a human gate.
+
 1. Generate each background plate without main characters.
 2. Generate complete characters on a clean green background, with stable period/style constraints and no text or watermark.
 3. Split and key character sheets with `assets:process-sheet` when appropriate.
@@ -88,6 +91,8 @@ After style and voice approval:
 7. Run `assets-ready`. This action repeats the deterministic validation and refuses to advance on errors.
 
 ```bash
+npm run project:checkpoint -- <slug> <work-item> in-progress --label="<label>"
+npm run project:checkpoint -- <slug> <work-item> completed --artifact="<path>"
 npm run project:sync -- <slug>
 npm run project:validate -- <slug>
 npm run project:advance -- <slug> assets-ready
@@ -128,6 +133,8 @@ Never upload, publish, share, or record `approve-publish` based on technical che
 
 ## Maintain the Resume Record
 
-Run `project:status` after every interruption, tool failure, or new turn. Use only the documented actions; do not hand-edit approval statuses or history. Keep approval notes short and attributable to the current conversation.
+Run `project:status -- <slug> --control-json` after every interruption, tool failure, or new turn. Immediately before ending a turn, run `project:handoff-check -- <slug>`; if it blocks the handoff, continue to the next command or recoverable work item. Only a genuine blocker with explicit `--blocker` and `--needs-user` may override an `auto-continue` handoff. Do not ask the human to continue. Use only the documented actions; do not hand-edit approval statuses or history. Keep approval notes short and attributable to the current conversation.
+
+Use `review.md` for human feedback, not as a second hand-maintained status source. State transitions synchronize its generated approval section automatically. Keep live approval status out of `brief.md`.
 
 When implementation files change, run at least `npm run check` and the relevant project validation. Commit locally only when the human has asked for implementation and the worktree scope is understood.

@@ -44,6 +44,10 @@
       },
       "additionalProperties": false
     },
+    "workItems": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/workItem"}
+    },
     "artifacts": {
       "type": "object",
       "required": [
@@ -104,6 +108,24 @@
     },
     "nullablePath": {
       "oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]
+    },
+    "workItem": {
+      "type": "object",
+      "required": ["id", "label", "status", "updatedAt", "artifact", "note"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        },
+        "label": {"type": "string", "minLength": 1},
+        "status": {
+          "enum": ["pending", "in-progress", "completed", "blocked"]
+        },
+        "updatedAt": {"type": "string", "format": "date-time"},
+        "artifact": {"$ref": "#/$defs/nullablePath"},
+        "note": {"type": "string"}
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": false

@@ -55,6 +55,8 @@ Codex 和工具负责：
 
 人只在涉及真人声音、品牌、肖像或外部版权素材时提供授权判断。
 
+每个背景、人物素材表、旁白、透明图层、时间线和校验步骤都使用 `project:checkpoint` 记录。内置图像生成产生的仅工具结果不能结束主流程；主流程继续处理下一工作项，并定期报告进度。
+
 全部素材通过确定性校验后记录 `assets-ready`。校验失败时状态不会进入预览。
 
 ### 5. preview
@@ -107,7 +109,29 @@ npm run project:render -- <slug>
 `projects/<slug>/production.json` 是断点恢复的机器记录。Codex 每次恢复任务先运行：
 
 ```bash
-npm run project:status -- <slug>
+npm run project:status -- <slug> --control-json
+```
+
+`control.mode` 的含义：
+
+- `auto-continue`：无需人操作，继续下一命令或工作项，不得以“请继续”或空白响应结束。
+- `wait-human`：展示本门禁产物、暂停原因和明确回复方式后等待。
+- `complete`：报告完成；仍不得推断外部发布授权。
+
+任何准备结束的回合还必须通过：
+
+```bash
+npm run project:handoff-check -- <slug>
+```
+
+`auto-continue` 阶段会返回非零状态并阻止正常交接。真实阻塞必须同时提供 `--blocker` 和 `--needs-user`，以保证用户能看到原因和唯一必要动作。
+
+生产中的可恢复工作项通过以下命令记录：
+
+```bash
+npm run project:checkpoint -- <slug> <id> in-progress --label="工作项说明"
+npm run project:checkpoint -- <slug> <id> completed --artifact="产物路径"
+npm run project:checkpoint -- <slug> <id> blocked --note="确切阻塞原因"
 ```
 
 审批和阶段完成事件通过以下命令记录：
@@ -117,6 +141,8 @@ npm run project:advance -- <slug> <action> --note="人的决定或验收说明"
 ```
 
 允许的动作包括 `brief-ready`、`approve-concept`、`request-concept-revision`、`approve-style-voice`、`request-style-voice-revision`、`assets-ready`、`approve-preview`、`request-preview-revision` 和 `approve-publish`。预览与正式渲染成功事件由渲染命令自动记录。
+
+审批状态只以 `production.json` 为准，并自动同步到 `review.md`。`brief.md` 不保存会过期的审批状态。
 
 ## 默认自治边界
 

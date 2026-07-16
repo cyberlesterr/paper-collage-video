@@ -12,7 +12,7 @@
 用 $make-paper-collage-video 做一条约 30 秒的玄奘西行纸片分层视频。
 ```
 
-仓库 Skill 位于 `skills/make-paper-collage-video/`。它会从简报开始，自动维护项目文件和生产状态，只在概念、风格/虚构音色、预览和发布四个节点停下来让人决定。中断后再次调用同一个 Skill，它会先读取 `production.json`，从当前阶段继续。
+仓库 Skill 位于 `skills/make-paper-collage-video/`。它会从简报开始，自动维护项目文件和生产状态，只在概念、风格/虚构音色、预览和发布四个节点停下来让人决定。其他阶段标记为 `AUTO-CONTINUE`，单次工具调用结束不等于任务暂停。中断后再次调用同一个 Skill，它会先读取 `production.json` 和逐项工作清单，从当前阶段继续。
 
 ## 人在流程中的位置
 
@@ -102,6 +102,10 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 |---|---|
 | `npm run project:new -- <slug>` | 创建人类简报、机器配置和素材目录 |
 | `npm run project:status -- <slug>` | 显示当前阶段、审批、产物和下一步 |
+| `npm run project:status -- <slug> --control-json` | 输出机器可读的 `auto-continue` / `wait-human` 控制信息 |
+| `npm run project:handoff-check -- <slug>` | 在回合结束前阻止 `AUTO-CONTINUE` 阶段被误当成人工停点 |
+| `npm run project:checkpoint -- <slug> <id> <status>` | 记录素材、旁白、校验或渲染工作项的可恢复进度 |
+| `npm run project:review-sync -- <slug>` | 从生产状态重新生成 `review.md` 的审批摘要 |
 | `npm run project:advance -- <slug> <action>` | 记录明确的审批或确定性阶段完成事件 |
 | `npm run project:sync -- <slug>` | 用 ffprobe 把真实旁白时长写回项目配置 |
 | `npm run project:validate -- <slug>` | 检查配置、素材、透明通道、绿边、字幕和时长 |
@@ -109,6 +113,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | `npm run project:render -- <slug>` | 校验后渲染正式成片，并生成报告 |
 | `npm run project:report -- <slug>` | 对已有成片生成技术报告和关键帧联系表 |
 | `npm run dev` | 在 Remotion Studio 中打开黄金样例 |
+| `npm test` | 运行生产状态、静默工具恢复和记录同步回归测试 |
 | `npm run check` | TypeScript 类型检查 |
 
 `project:preview` 和 `project:render` 都遵循 fail-fast：素材或配置存在错误时不会开始昂贵渲染；警告会写入报告但不阻塞。
@@ -156,7 +161,9 @@ python3 scripts/remove_chroma_key.py --input GREEN.png --out ALPHA.png --force
 
 后一个镜头从前一个镜头结束前 `transitionFrames` 帧开始，以形成交叠转场。
 
-生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、四个审批、已生成产物和追加式事件历史。审批应通过 `project:advance` 记录，不直接改 JSON。
+生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、四个审批、逐项工作进度、已生成产物和追加式事件历史。审批应通过 `project:advance` 记录，工作进度应通过 `project:checkpoint` 记录，不直接改 JSON。
+
+`project:status` 会把阶段标为 `AUTO-CONTINUE`、`WAIT-HUMAN` 或 `COMPLETE`。只有 `WAIT-HUMAN` 可以作为正常的人机暂停点；`AUTO-CONTINUE` 阶段若发生真实阻塞，必须报告确切错误和需要的人为动作，不能以空白响应结束。
 
 ## 验收
 

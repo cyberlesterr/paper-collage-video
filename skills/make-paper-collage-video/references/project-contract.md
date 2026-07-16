@@ -6,11 +6,11 @@ Read this reference when creating, resuming, validating, or rendering a paper-co
 
 | File | Owner | Purpose |
 |---|---|---|
-| `projects/<slug>/brief.md` | Human intent, Codex transcription | Audience, message, format, style, facts, and prohibitions |
-| `projects/<slug>/production.json` | State CLI | Current stage, approvals, artifacts, and audit history |
+| `projects/<slug>/brief.md` | Human intent, Codex transcription | Audience, message, format, style, facts, and prohibitions; never live approval status |
+| `projects/<slug>/production.json` | State CLI | Current stage, approvals, recoverable work items, artifacts, and audit history |
 | `projects/<slug>/project.json` | Codex and deterministic scripts | Remotion timeline, layers, subtitles, audio, and theme |
 | `projects/<slug>/prompts.json` | Codex | Reproducible image-generation prompts and outputs |
-| `projects/<slug>/review.md` | Human feedback, Codex transcription | Preview decisions and revision history |
+| `projects/<slug>/review.md` | State CLI and Codex transcription | Auto-synced approval summary plus human feedback and revision history |
 
 Never ask the human to maintain `project.json` or `production.json` directly.
 
@@ -62,6 +62,9 @@ Use:
 
 ```bash
 npm run project:status -- <slug>
+npm run project:status -- <slug> --control-json
+npm run project:handoff-check -- <slug>
+npm run project:checkpoint -- <slug> <id> <status>
 npm run project:advance -- <slug> <action> --note="<decision>"
 ```
 
