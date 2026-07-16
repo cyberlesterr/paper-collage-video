@@ -15,6 +15,7 @@ export const projectPaths = (slug) => ({
   slug,
   projectDirectory: path.join(ROOT, 'projects', slug),
   projectFile: path.join(ROOT, 'projects', slug, 'project.json'),
+  productionFile: path.join(ROOT, 'projects', slug, 'production.json'),
   publicDirectory: path.join(ROOT, 'public', 'projects', slug),
   distDirectory: path.join(ROOT, 'dist', slug),
   validationReport: path.join(ROOT, 'dist', slug, 'validation-report.json'),

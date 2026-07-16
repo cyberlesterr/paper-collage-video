@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/production.schema.json",
+  "title": "Paper Collage Production State",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "slug",
+    "stage",
+    "createdAt",
+    "updatedAt",
+    "approvals",
+    "artifacts",
+    "history"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "stage": {
+      "enum": [
+        "brief",
+        "concept-review",
+        "style-review",
+        "asset-production",
+        "preview",
+        "human-review",
+        "final-render",
+        "publish-approval",
+        "complete"
+      ]
+    },
+    "createdAt": {"type": "string", "format": "date-time"},
+    "updatedAt": {"type": "string", "format": "date-time"},
+    "approvals": {
+      "type": "object",
+      "required": ["concept", "styleAndVoice", "preview", "publish"],
+      "properties": {
+        "concept": {"$ref": "#/$defs/approval"},
+        "styleAndVoice": {"$ref": "#/$defs/approval"},
+        "preview": {"$ref": "#/$defs/approval"},
+        "publish": {"$ref": "#/$defs/approval"}
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "required": [
+        "brief",
+        "project",
+        "prompts",
+        "review",
+        "validationReport",
+        "preview",
+        "final",
+        "report",
+        "contactSheet"
+      ],
+      "properties": {
+        "brief": {"type": "string", "minLength": 1},
+        "project": {"type": "string", "minLength": 1},
+        "prompts": {"type": "string", "minLength": 1},
+        "review": {"type": "string", "minLength": 1},
+        "validationReport": {"$ref": "#/$defs/nullablePath"},
+        "preview": {"$ref": "#/$defs/nullablePath"},
+        "final": {"$ref": "#/$defs/nullablePath"},
+        "report": {"$ref": "#/$defs/nullablePath"},
+        "contactSheet": {"$ref": "#/$defs/nullablePath"}
+      },
+      "additionalProperties": false
+    },
+    "history": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["at", "action", "stage", "note"],
+        "properties": {
+          "at": {"type": "string", "format": "date-time"},
+          "action": {"type": "string", "minLength": 1},
+          "stage": {"type": "string", "minLength": 1},
+          "note": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "$defs": {
+    "approval": {
+      "type": "object",
+      "required": ["status", "decidedAt", "note"],
+      "properties": {
+        "status": {"enum": ["pending", "approved", "changes-requested"]},
+        "decidedAt": {
+          "oneOf": [
+            {"type": "string", "format": "date-time"},
+            {"type": "null"}
+          ]
+        },
+        "note": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "nullablePath": {
+      "oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]
+    }
+  },
+  "additionalProperties": false
+}

@@ -4,6 +4,16 @@
 
 仓库自带 `tang-demo` 黄金样例，它是回归基准，不是引擎里的硬编码题材。
 
+## 最简单的用法
+
+在 Codex 中直接说：
+
+```text
+用 $make-paper-collage-video 做一条约 30 秒的玄奘西行纸片分层视频。
+```
+
+仓库 Skill 位于 `skills/make-paper-collage-video/`。它会从简报开始，自动维护项目文件和生产状态，只在概念、风格/虚构音色、预览和发布四个节点停下来让人决定。中断后再次调用同一个 Skill，它会先读取 `production.json`，从当前阶段继续。
+
 ## 人在流程中的位置
 
 正常制作一条新视频时，人只需要参与四次：
@@ -66,6 +76,7 @@ npm run project:new -- silk-road --title="玄奘西行"
 ```text
 projects/silk-road/
   brief.md
+  production.json
   project.json
   prompts.json
   review.md
@@ -79,7 +90,7 @@ public/projects/silk-road/
   audio/sfx/
 ```
 
-接下来由人填写或口述 `brief.md`，Codex 根据简报维护 `project.json`、提示词和素材。可以用 `--dry-run` 预览将创建的路径而不写文件：
+接下来由人填写或口述 `brief.md`，Codex 根据简报维护 `project.json`、提示词和素材；`production.json` 记录阶段、审批和产物。可以用 `--dry-run` 预览将创建的路径而不写文件：
 
 ```bash
 npm run project:new -- silk-road --title="玄奘西行" --dry-run
@@ -90,6 +101,8 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | 命令 | 作用 |
 |---|---|
 | `npm run project:new -- <slug>` | 创建人类简报、机器配置和素材目录 |
+| `npm run project:status -- <slug>` | 显示当前阶段、审批、产物和下一步 |
+| `npm run project:advance -- <slug> <action>` | 记录明确的审批或确定性阶段完成事件 |
 | `npm run project:sync -- <slug>` | 用 ffprobe 把真实旁白时长写回项目配置 |
 | `npm run project:validate -- <slug>` | 检查配置、素材、透明通道、绿边、字幕和时长 |
 | `npm run project:preview -- <slug>` | 校验后渲染 50% 预览，并生成报告 |
@@ -99,6 +112,10 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | `npm run check` | TypeScript 类型检查 |
 
 `project:preview` 和 `project:render` 都遵循 fail-fast：素材或配置存在错误时不会开始昂贵渲染；警告会写入报告但不阻塞。
+
+新项目还会受到审批门控：概念和风格/虚构音色未确认时不能渲染预览，预览未获人工批准时不能渲染正式成片。完整动作表见 [docs/workflow.md](docs/workflow.md)。
+
+涉及人工决定的动作必须带 `--note="人的原话或明确结论"`；这样中断恢复时不会把技术通过误认为创意或发布批准。
 
 ## 角色素材表处理
 
@@ -138,6 +155,8 @@ python3 scripts/remove_chroma_key.py --input GREEN.png --out ALPHA.png --force
 ```
 
 后一个镜头从前一个镜头结束前 `transitionFrames` 帧开始，以形成交叠转场。
+
+生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、四个审批、已生成产物和追加式事件历史。审批应通过 `project:advance` 记录，不直接改 JSON。
 
 ## 验收
 

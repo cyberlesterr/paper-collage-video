@@ -7,6 +7,8 @@
     "assets:rasterize": "node scripts/rasterize-assets.mjs",
     "assets:process-sheet": "node scripts/process-character-sheet.mjs",
     "project:new": "node scripts/project-new.mjs",
+    "project:status": "node scripts/project-status.mjs",
+    "project:advance": "node scripts/project-advance.mjs",
     "project:sync": "node scripts/project-sync.mjs",
     "project:validate": "node scripts/project-validate.mjs",
     "project:preview": "node scripts/project-render.mjs preview",

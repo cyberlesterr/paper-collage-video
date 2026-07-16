@@ -10,6 +10,7 @@ import {
   validateProject,
   writeValidationReport,
 } from './project-lib.mjs';
+import {assertRenderAllowed, recordRender} from './production-state.mjs';
 
 const [mode, slug] = process.argv.slice(2);
 
@@ -27,6 +28,7 @@ try {
   if (!['preview', 'render'].includes(mode)) {
     throw new Error('用法：project-render.mjs <preview|render> <slug>');
   }
+  await assertRenderAllowed(slug, mode);
   await runInherited(process.execPath, ['scripts/project-sync.mjs', slug]);
   const {project} = await loadProject(slug);
   const report = await validateProject(project);
@@ -58,6 +60,8 @@ try {
     slug,
     `--artifact=${output}`,
   ]);
+  const production = await recordRender(slug, mode);
+  console.log(`✓ 生产状态：${production.stage}`);
 } catch (error) {
   console.error(`project:${mode ?? 'render'} failed: ${error.message}`);
   process.exitCode = 1;

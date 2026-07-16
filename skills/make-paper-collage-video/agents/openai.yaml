@@ -1,0 +1,4 @@
+interface:
+  display_name: "纸片分层视频制作"
+  short_description: "从创意审批到技术验收，分阶段制作可复用的纸片分层视频"
+  default_prompt: "使用 $make-paper-collage-video 根据我的主题制作一条纸片分层视频，并在需要我确认的节点停下来。"

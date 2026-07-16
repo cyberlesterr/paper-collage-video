@@ -13,9 +13,13 @@ const slug = args.find((arg) => !arg.startsWith('--'));
 const titleArgument = args.find((arg) => arg.startsWith('--title='));
 const title = titleArgument?.slice('--title='.length) || slug;
 const dryRun = args.includes('--dry-run');
+const createdAt = new Date().toISOString();
 
 const renderTemplate = (value) =>
-  value.replaceAll('{{slug}}', slug).replaceAll('{{title}}', title);
+  value
+    .replaceAll('{{slug}}', slug)
+    .replaceAll('{{title}}', title)
+    .replaceAll('{{createdAt}}', createdAt);
 
 try {
   assertSlug(slug);
@@ -25,7 +29,13 @@ try {
   }
 
   const templateDirectory = path.join(ROOT, 'templates', 'project');
-  const templateFiles = ['brief.md', 'project.json', 'prompts.json', 'review.md'];
+  const templateFiles = [
+    'brief.md',
+    'project.json',
+    'production.json',
+    'prompts.json',
+    'review.md',
+  ];
   const publicDirectories = [
     'assets/plates',
     'assets/characters/source',
@@ -63,7 +73,7 @@ try {
   }
 
   console.log('✓ 项目骨架已创建');
-  console.log(`下一步：填写 projects/${slug}/brief.md，并让 Codex 生成 project.json。`);
+  console.log(`下一步：填写 projects/${slug}/brief.md，再运行 project:advance -- ${slug} brief-ready。`);
 } catch (error) {
   console.error(`project:new failed: ${error.message}`);
   process.exitCode = 1;
