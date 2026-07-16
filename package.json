@@ -11,6 +11,7 @@
     "provider:run": "node scripts/provider-run.mjs",
     "provider:record": "node scripts/provider-record.mjs",
     "project:new": "node scripts/project-new.mjs",
+    "project:plan": "node scripts/project-plan.mjs",
     "project:status": "node scripts/project-status.mjs",
     "project:handoff-check": "node scripts/project-handoff-check.mjs",
     "project:checkpoint": "node scripts/project-checkpoint.mjs",

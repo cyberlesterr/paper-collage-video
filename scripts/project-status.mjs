@@ -4,6 +4,7 @@ import {
   getStageControl,
   loadProduction,
 } from './production-state.mjs';
+import {loadProject} from './project-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
@@ -13,6 +14,8 @@ const compactJson = args.includes('--compact-json');
 
 try {
   const {state} = await loadProduction(slug);
+  const {project} = await loadProject(slug);
+  const plan = project.plan ?? null;
   const control = getStageControl(state);
   if (compactJson) {
     console.log(
@@ -23,6 +26,7 @@ try {
           updatedAt: state.updatedAt,
           approvals: state.approvals,
           artifacts: state.artifacts,
+          plan,
           control,
         },
         null,
@@ -30,7 +34,7 @@ try {
       ),
     );
   } else if (controlJson) {
-    console.log(JSON.stringify({state, control}, null, 2));
+    console.log(JSON.stringify({state, plan, control}, null, 2));
   } else {
     console.log(json ? JSON.stringify(state, null, 2) : formatProduction(state));
   }

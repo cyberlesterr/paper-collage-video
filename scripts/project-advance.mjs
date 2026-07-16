@@ -13,6 +13,7 @@ import {
 } from './project-lib.mjs';
 import {advanceProduction, formatProduction} from './production-state.mjs';
 import {assertSelectedProvidersReady} from './provider-lib.mjs';
+import {assertCreativePlanReady} from './creative-plan-lib.mjs';
 
 const args = process.argv.slice(2);
 const positional = args.filter((arg) => !arg.startsWith('--'));
@@ -42,6 +43,10 @@ try {
   const artifacts = {};
   if (action === 'capabilities-ready') {
     await assertSelectedProvidersReady(slug);
+  }
+  if (action === 'brief-ready') {
+    const {project} = await loadProject(slug);
+    assertCreativePlanReady(project.plan, {slug});
   }
   if (action === 'assets-ready') {
     const {project} = await loadProject(slug);

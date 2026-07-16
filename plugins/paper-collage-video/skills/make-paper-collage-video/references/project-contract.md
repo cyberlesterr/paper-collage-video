@@ -8,7 +8,7 @@ Read this reference when creating, resuming, validating, or rendering a paper-co
 |---|---|---|
 | `projects/<slug>/brief.md` | Human intent, Codex transcription | Audience, message, format, style, facts, and prohibitions; never live approval status |
 | `projects/<slug>/production.json` | State CLI | Current stage, approvals, recoverable work items, artifacts, and audit history |
-| `projects/<slug>/project.json` | Codex and deterministic scripts | Remotion timeline, layers, subtitles, audio, and theme |
+| `projects/<slug>/project.json` | Codex and deterministic scripts | Resolved creative plan plus Remotion timeline, layers, subtitles, audio, and theme |
 | `projects/<slug>/prompts.json` | Codex | Reproducible image-generation prompts and outputs |
 | `projects/<slug>/providers.json` | Codex and human configuration | Optional project override for text, image, and voice providers |
 | `projects/<slug>/assets-manifest.json` | Provider CLI | Provider/model/job provenance, hashes, output paths, and request snapshots |
@@ -79,6 +79,7 @@ Render commands enforce prior approvals. Successful renders record their artifac
 ## Configuration Rules
 
 - Follow `schemas/project.schema.json` for the animation contract.
+- Resolve the optional duration and scene constraints with `project:plan` before `brief-ready`; never overwrite an explicit user value.
 - Follow `schemas/production.schema.json` for the state record.
 - Follow `schemas/providers.schema.json` and `references/providers.md` for portable service selection. Keep secrets out of JSON.
 - Follow `schemas/asset-request.schema.json` for provider requests; let provider scripts own `assets-manifest.json`.
@@ -92,6 +93,7 @@ Render commands enforce prior approvals. Successful renders record their artifac
 
 ```bash
 npm run project:new -- <slug> --title="<title>"
+npm run project:plan -- <slug> --duration=<seconds> --scenes=<count> --rationale="<basis>"
 npm run provider:status -- <slug>
 npm run provider:select -- <slug> <capability> <provider-id> --note="<decision>"
 npm run project:sync -- <slug>

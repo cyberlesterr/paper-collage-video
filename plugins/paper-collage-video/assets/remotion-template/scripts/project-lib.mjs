@@ -4,6 +4,10 @@ import {fileURLToPath} from 'node:url';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
+import {
+  assessCreativePlanTimeline,
+  validateCreativePlan,
+} from './creative-plan-lib.mjs';
 
 const execFileAsync = promisify(execFile);
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -289,12 +293,26 @@ export const validateProject = async (project, options = {}) => {
   if (!Array.isArray(project.scenes) || project.scenes.length === 0) {
     add('error', 'scenes-empty', '项目至少需要一个镜头。', 'scenes');
   }
+  if (project.plan !== undefined) {
+    for (const issue of validateCreativePlan(project.plan, {slug: project.slug})) {
+      add('error', issue.code, issue.message, issue.location);
+    }
+    if (project.plan?.status !== 'resolved') {
+      add('error', 'plan-pending', '创作规格尚未补全；请先运行 project:plan。', 'plan');
+    }
+  }
 
   const structuralErrors = issues.some(({level}) => level === 'error');
   const timeline = structuralErrors
     ? {durationInFrames: 0, durationSeconds: 0, scenes: []}
     : deriveTimeline(project);
   const sceneIds = new Set();
+
+  if (project.plan?.status === 'resolved' && timeline.scenes.length > 0) {
+    for (const issue of assessCreativePlanTimeline(project.plan, timeline)) {
+      add(issue.level, issue.code, issue.message, issue.location);
+    }
+  }
 
   for (const [sceneIndex, scene] of (timeline.scenes ?? []).entries()) {
     const sceneLocation = `scenes[${sceneIndex}]`;
@@ -436,6 +454,7 @@ export const validateProject = async (project, options = {}) => {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
     project: {slug: project.slug, title: project.title},
+    plan: project.plan ?? null,
     passed: errors === 0,
     summary: {errors, warnings, assetCount: assets.length},
     timeline,

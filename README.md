@@ -136,7 +136,7 @@ public/projects/silk-road/
   audio/sfx/
 ```
 
-新项目先处于 `capability-review`：Codex 检测当前宿主能力并让人确认三类 provider；全部选择落盘后才进入 `brief`。随后由人填写或口述 `brief.md`，Codex 根据简报维护 `project.json`、提示词和素材；`production.json` 记录阶段、审批和产物。可以用 `--dry-run` 预览将创建的路径而不写文件：
+新项目先处于 `capability-review`：Codex 检测当前宿主能力并让人确认三类 provider；全部选择落盘后才进入 `brief`。随后由人填写或口述 `brief.md`。时长和幕数可以任选其一、同时指定或都不指定；Codex 保留明确值，只根据故事节拍和旁白估时补全缺失项，并通过 `project:plan` 写入 `project.json`。`production.json` 记录阶段、审批和产物。可以用 `--dry-run` 预览将创建的路径而不写文件：
 
 ```bash
 npm run project:new -- silk-road --title="玄奘西行" --dry-run
@@ -147,6 +147,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | 命令 | 作用 |
 |---|---|
 | `npm run project:new -- <slug>` | 创建人类简报、机器配置和素材目录 |
+| `npm run project:plan -- <slug> ...` | 保留用户指定的时长/幕数，并补全未指定项 |
 | `npm run project:status -- <slug>` | 显示当前阶段、审批、产物和下一步 |
 | `npm run project:status -- <slug> --compact-json` | 输出不含冗长历史的机器可读控制信息 |
 | `npm run provider:status -- <slug>` | 合并并检查文本、生图、语音 provider 配置 |

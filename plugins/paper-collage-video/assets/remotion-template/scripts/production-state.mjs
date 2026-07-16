@@ -75,7 +75,7 @@ const HUMAN_DECISION_ACTIONS = new Set([
 const nextActionByStage = {
   'capability-review':
     '检测当前宿主能力并请人确认 text/image/voice provider；然后记录 capabilities-ready',
-  brief: '完善 brief.md，再记录 brief-ready',
+  brief: '完善 brief.md，运行 project:plan 补全时长和幕数，再记录 brief-ready',
   'concept-review': '向人展示文案、分镜和素材清单；确认后记录 approve-concept',
   'style-review': '展示一张风格样张和虚构音色；确认后记录 approve-style-voice',
   'asset-production': '生产素材与旁白、同步时长并通过校验；然后记录 assets-ready',
@@ -96,8 +96,8 @@ const stageControlByStage = {
   },
   brief: {
     mode: 'auto-continue',
-    expectedArtifacts: ['brief'],
-    nextCommand: (slug) => `npm run project:advance -- ${slug} brief-ready`,
+    expectedArtifacts: ['brief', 'plan'],
+    nextCommand: (slug) => `npm run project:plan -- ${slug} <planning-options>`,
   },
   'concept-review': {
     mode: 'wait-human',

@@ -9,6 +9,7 @@
     "schemaVersion": {"const": 1},
     "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "title": {"type": "string", "minLength": 1},
+    "plan": {"$ref": "#/$defs/creativePlan"},
     "video": {
       "type": "object",
       "required": ["width", "height", "fps", "transitionFrames"],
@@ -83,5 +84,57 @@
       }
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "nullablePositiveNumber": {
+      "oneOf": [
+        {"type": "number", "exclusiveMinimum": 0},
+        {"type": "null"}
+      ]
+    },
+    "nullablePositiveInteger": {
+      "oneOf": [
+        {"type": "integer", "minimum": 1},
+        {"type": "null"}
+      ]
+    },
+    "creativePlan": {
+      "type": "object",
+      "required": ["schemaVersion", "slug", "status", "inputMode", "requested", "resolved", "updatedAt"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "status": {"enum": ["pending", "resolved"]},
+        "inputMode": {"enum": ["none", "duration-only", "scenes-only", "both"]},
+        "requested": {
+          "type": "object",
+          "required": ["durationSeconds", "sceneCount"],
+          "properties": {
+            "durationSeconds": {"$ref": "#/$defs/nullablePositiveNumber"},
+            "sceneCount": {"$ref": "#/$defs/nullablePositiveInteger"}
+          },
+          "additionalProperties": false
+        },
+        "resolved": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["durationSeconds", "sceneCount", "estimatedNarrationSeconds", "rationale", "resolvedAt"],
+              "properties": {
+                "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
+                "sceneCount": {"type": "integer", "minimum": 1},
+                "estimatedNarrationSeconds": {"$ref": "#/$defs/nullablePositiveNumber"},
+                "rationale": {"type": "string", "minLength": 1},
+                "resolvedAt": {"type": "string", "format": "date-time"}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "updatedAt": {"type": "string", "format": "date-time"}
+      },
+      "additionalProperties": false
+    }
+  }
 }

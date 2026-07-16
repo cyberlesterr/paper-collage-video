@@ -63,6 +63,7 @@ for (const entry of [
   'tsconfig.json',
   'schemas',
   'templates',
+  'scripts/creative-plan-lib.mjs',
   'scripts/process-character-sheet.mjs',
   'scripts/provider-lib.mjs',
   'scripts/provider-select.mjs',
@@ -77,6 +78,7 @@ for (const entry of [
   'scripts/project-handoff-check.mjs',
   'scripts/project-lib.mjs',
   'scripts/project-new.mjs',
+  'scripts/project-plan.mjs',
   'scripts/project-render.mjs',
   'scripts/project-report.mjs',
   'scripts/project-review-sync.mjs',
@@ -92,6 +94,7 @@ for (const entry of [
   'src/project.ts',
   'src/roleMotion.ts',
   'tests/provider-and-assets.test.mjs',
+  'tests/creative-plan.test.mjs',
   'tests/production-state.test.mjs',
   'public/textures/paper-grain.png',
 ]) {
@@ -104,7 +107,7 @@ const rootPackage = JSON.parse(
 const workspacePackage = {
   ...rootPackage,
   name: 'paper-collage-video-workspace',
-  version: '0.3.0',
+  version: '0.4.0',
   private: true,
   engines: {node: '>=20'},
   scripts: {
@@ -115,6 +118,7 @@ const workspacePackage = {
     'provider:run': rootPackage.scripts['provider:run'],
     'provider:record': rootPackage.scripts['provider:record'],
     'project:new': rootPackage.scripts['project:new'],
+    'project:plan': rootPackage.scripts['project:plan'],
     'project:status': rootPackage.scripts['project:status'],
     'project:handoff-check': rootPackage.scripts['project:handoff-check'],
     'project:checkpoint': rootPackage.scripts['project:checkpoint'],
@@ -317,7 +321,7 @@ await fs.writeFile(narrationFile, makeSilentWav());
 await writeJson(path.join(RUNTIME_ROOT, '.paper-collage-template.json'), {
   schemaVersion: 1,
   plugin: 'paper-collage-video',
-  pluginVersion: '0.3.0',
+  pluginVersion: '0.4.0',
 });
 
 console.log(`✓ Plugin skill synced: ${path.relative(ROOT, SKILL_TARGET)}`);

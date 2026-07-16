@@ -39,6 +39,24 @@ export type PaperCollageProject = {
   schemaVersion: 1;
   slug: string;
   title: string;
+  plan?: {
+    schemaVersion: 1;
+    slug: string;
+    status: 'pending' | 'resolved';
+    inputMode: 'none' | 'duration-only' | 'scenes-only' | 'both';
+    requested: {
+      durationSeconds: number | null;
+      sceneCount: number | null;
+    };
+    resolved: null | {
+      durationSeconds: number;
+      sceneCount: number;
+      estimatedNarrationSeconds: number | null;
+      rationale: string;
+      resolvedAt: string;
+    };
+    updatedAt: string;
+  };
   video: {
     width: number;
     height: number;

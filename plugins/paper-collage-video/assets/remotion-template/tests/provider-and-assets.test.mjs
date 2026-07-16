@@ -191,6 +191,7 @@ test('new projects wait for confirmed providers before entering the brief', asyn
     );
     assert.equal(project.voice.provider, 'auto');
     assert.equal(project.voice.profile, 'warm-storyteller');
+    assert.equal(project.plan.status, 'pending');
     assert.equal(manifest.projectSlug, slug);
     assert.deepEqual(manifest.assets, []);
     assert.ok(fs.existsSync(path.join(projectDirectory, 'providers.json')));
@@ -281,6 +282,80 @@ test('new projects wait for confirmed providers before entering the brief', asyn
       await fsp.readFile(path.join(projectDirectory, 'production.json'), 'utf8'),
     );
     assert.equal(production.stage, 'brief');
+
+    const blockedBrief = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'project-advance.mjs'), slug, 'brief-ready'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.notEqual(blockedBrief.status, 0);
+    assert.match(blockedBrief.stderr, /请先运行 project:plan/);
+
+    const planResult = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-plan.mjs'),
+        slug,
+        '--requested-duration=45',
+        '--duration=45',
+        '--scenes=4',
+        '--narration-seconds=38',
+        '--rationale=Four visual beats fit the requested duration',
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(planResult.status, 0, planResult.stderr);
+    const plannedProject = JSON.parse(
+      await fsp.readFile(path.join(projectDirectory, 'project.json'), 'utf8'),
+    );
+    assert.equal(plannedProject.plan.inputMode, 'duration-only');
+    assert.equal(plannedProject.plan.requested.durationSeconds, 45);
+    assert.equal(plannedProject.plan.requested.sceneCount, null);
+    assert.equal(plannedProject.plan.resolved.sceneCount, 4);
+
+    const compactStatus = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'project-status.mjs'), slug, '--compact-json'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(compactStatus.status, 0, compactStatus.stderr);
+    assert.equal(JSON.parse(compactStatus.stdout).plan.inputMode, 'duration-only');
+
+    const briefReady = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'project-advance.mjs'), slug, 'brief-ready'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(briefReady.status, 0, briefReady.stderr);
+    const conceptProduction = JSON.parse(
+      await fsp.readFile(path.join(projectDirectory, 'production.json'), 'utf8'),
+    );
+    assert.equal(conceptProduction.stage, 'concept-review');
+
+    const approveConcept = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-advance.mjs'),
+        slug,
+        'approve-concept',
+        '--note=Approve the planned duration and scenes',
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(approveConcept.status, 0, approveConcept.stderr);
+    const latePlan = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-plan.mjs'),
+        slug,
+        '--duration=30',
+        '--scenes=3',
+        '--rationale=Attempt to change an approved plan',
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.notEqual(latePlan.status, 0);
+    assert.match(latePlan.stderr, /只能在 brief 或 concept-review/);
   } finally {
     await fsp.rm(projectDirectory, {recursive: true, force: true});
     await fsp.rm(publicDirectory, {recursive: true, force: true});

@@ -8,7 +8,7 @@ Provider confirmation at `capability-review` is a separate operational selection
 
 Require an explicit human decision for:
 
-1. The narration position, storyboard, and factual assumptions.
+1. The resolved duration/scene plan, narration position, storyboard, and factual assumptions.
 2. The representative visual sample and fictional voice identity.
 3. The rendered preview and requested creative changes.
 4. Publication readiness, including facts, rights, branding, and platform suitability.

@@ -1,7 +1,7 @@
 {
   "name": "paper-collage-video",
-  "version": "0.3.0",
-  "description": "Create editable layered paper-collage videos with host capability discovery, user-confirmed providers, resumable approval gates, and a self-contained Remotion workspace.",
+  "version": "0.4.0",
+  "description": "Create editable layered paper-collage videos with adaptive duration/scene planning, host capability discovery, user-confirmed providers, resumable approval gates, and a self-contained Remotion workspace.",
   "author": {
     "name": "Paper Collage Video Contributors"
   },
@@ -16,6 +16,7 @@
     "capabilities": ["Create", "Render"],
     "defaultPrompt": [
       "用 $make-paper-collage-video 做一条约 30 秒的纸片分层视频。",
+      "用 $make-paper-collage-video 做一个四幕的儿童历史故事，时长由你安排。",
       "用 $make-paper-collage-video 继续我上次中断的视频项目。"
     ]
   }

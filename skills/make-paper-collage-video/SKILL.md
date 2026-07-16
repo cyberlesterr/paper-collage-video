@@ -1,6 +1,6 @@
 ---
 name: make-paper-collage-video
-description: Initialize, create, and resume configuration-driven layered paper-collage video workspaces, from a topic or brief through script, storyboard, image layers, fictional narration, preview review, final render, and technical acceptance. Use when Codex is asked to install, make, reproduce, continue, revise, or productize a paper-cutout, historical collage, layered illustration, or parallax explainer video with human approval gates.
+description: Initialize, create, and resume configuration-driven layered paper-collage video workspaces with adaptive duration and scene planning, from a topic or brief through script, storyboard, image layers, fictional narration, preview review, final render, and technical acceptance. Use when Codex is asked to install, make, reproduce, continue, revise, or productize a paper-cutout, historical collage, layered illustration, or parallax explainer video with human approval gates.
 ---
 
 # Make Paper Collage Video
@@ -24,16 +24,16 @@ Turn a human topic into an editable Remotion project while keeping the human in 
    npm run project:new -- <slug> --title="<title>"
    ```
 
-5. Read [references/project-contract.md](references/project-contract.md) before creating or changing project files. Read [references/providers.md](references/providers.md) and [references/capability-negotiation.md](references/capability-negotiation.md) before selecting text, image, or voice generation services. Read [references/approval-gates.md](references/approval-gates.md) before generating creative assets, speech, or an external delivery.
+5. Read [references/project-contract.md](references/project-contract.md) before creating or changing project files. Read [references/story-planning.md](references/story-planning.md) before resolving duration and scene count. Read [references/providers.md](references/providers.md) and [references/capability-negotiation.md](references/capability-negotiation.md) before selecting text, image, or voice generation services. Read [references/approval-gates.md](references/approval-gates.md) before generating creative assets, speech, or an external delivery.
 6. Read [references/execution-control.md](references/execution-control.md) before doing work. Obey its `auto-continue`/`wait-human` contract and tool-only image-generation isolation rules.
 
 ## Apply Defaults Deliberately
 
 When the human supplies only a topic, use these reversible defaults and state them in the concept proposal:
 
-- Produce about 30 seconds at 1920×1080 and 30 fps.
+- Use 1920×1080 and 30 fps unless the delivery format requires otherwise.
 - Target a general Chinese-language audience.
-- Use two or three scenes with one dominant subject in each scene.
+- Infer duration and scene count independently from story beats, narration density, audience, and platform. Preserve whichever value the human explicitly supplied; do not ask merely because the other is missing.
 - Use layered paper collage with background, rear, subject, and foreground depth.
 - Use the configured fictional narrator profile; prefer `儒雅逸辰 (ruyayichen)` only when the selected provider offers it.
 - Do not clone a real person, publish, upload, or send externally.
@@ -56,7 +56,16 @@ Do not generate a sample merely to test availability. On resume, reuse confirmed
 
 ### 1. Prepare the Brief
 
-Fill `projects/<slug>/brief.md` from the conversation. Keep unknown but non-blocking fields explicit and use the defaults above. Then run:
+Fill `projects/<slug>/brief.md` from the conversation. Record duration and scene count separately as user-specified or unspecified. Draft the minimum narrative beats and estimate spoken duration, then run `project:plan` to preserve explicit values and infer only the missing values. Do not mechanically use 30 seconds or three scenes.
+
+```bash
+npm run project:plan -- <slug> \
+  [--requested-duration=<seconds>] [--requested-scenes=<count>] \
+  --duration=<resolved-seconds> --scenes=<resolved-count> \
+  [--narration-seconds=<estimate>] --rationale="<calculation basis>"
+```
+
+Only after the plan is resolved, run:
 
 ```bash
 npm run project:advance -- <slug> brief-ready
@@ -66,7 +75,7 @@ Run `provider:status -- <slug>` before drafting. Use only the confirmed text pro
 
 ### 2. Propose the Concept and Stop
 
-Prepare the narration draft, scene outline, layer hierarchy, asset list, factual assumptions, and style direction. Present them compactly to the human.
+Prepare the narration draft, scene outline, layer hierarchy, asset list, factual assumptions, and style direction. Present the resolved duration and scene count compactly, labeling each as human-specified or Skill-inferred.
 
 Do not generate images, bulk speech, music, or final assets yet. Stop and wait for an explicit concept decision.
 

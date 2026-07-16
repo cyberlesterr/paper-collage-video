@@ -3,6 +3,18 @@
   "schemaVersion": 1,
   "slug": "{{slug}}",
   "title": "{{title}}",
+  "plan": {
+    "schemaVersion": 1,
+    "slug": "{{slug}}",
+    "status": "pending",
+    "inputMode": "none",
+    "requested": {
+      "durationSeconds": null,
+      "sceneCount": null
+    },
+    "resolved": null,
+    "updatedAt": "{{createdAt}}"
+  },
   "video": {
     "width": 1920,
     "height": 1080,
