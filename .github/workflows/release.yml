@@ -1,0 +1,65 @@
+name: Publish GitHub Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'cyberlesterr/paper-collage-video'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install workspace dependencies
+        run: npm ci
+
+      - name: Verify release source
+        run: |
+          npm test
+          npm run check
+          npm run project:validate -- tie-chu-mo-zhen
+
+      - name: Render the repository showcase
+        run: npm run project:preview -- tie-chu-mo-zhen
+
+      - name: Publish release and the single showcase asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          asset_path="$RUNNER_TEMP/tie-chu-mo-zhen-preview.mp4"
+          cp dist/tie-chu-mo-zhen/preview.mp4 "$asset_path"
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" \
+              --title "Paper Collage Video $GITHUB_REF_NAME" \
+              --notes-file RELEASE_NOTES.md
+            gh release upload "$GITHUB_REF_NAME" \
+              "$asset_path#Tie Chu Mo Zhen preview (MP4)" \
+              --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              "$asset_path#Tie Chu Mo Zhen preview (MP4)" \
+              --verify-tag \
+              --title "Paper Collage Video $GITHUB_REF_NAME" \
+              --notes-file RELEASE_NOTES.md
+          fi

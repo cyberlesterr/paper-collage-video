@@ -51,13 +51,9 @@ git status --short
 ```bash
 git tag -a v0.4.0 -m "Paper Collage Video v0.4.0"
 git push origin v0.4.0
-gh release create v0.4.0 \
-  --verify-tag \
-  --title "Paper Collage Video v0.4.0" \
-  --notes-file RELEASE_NOTES.md
 ```
 
-将示例视频、联系表或大体积素材作为 Release assets 上传，不要继续扩大主仓库。不要在 Release 中包含 provider 凭据、本机配置或权属未确认的媒体。
+标签会触发 `Publish GitHub Release` 工作流。工作流会从该标签重新验证源码、渲染 `tie-chu-mo-zhen`，并创建正式 Release；唯一上传的媒体资产是 `tie-chu-mo-zhen-preview.mp4`。不要手动追加联系表、其他示例媒体、provider 凭据、本机配置或权属未确认的素材。
 
 ## 6. Post-Release Verification
 
