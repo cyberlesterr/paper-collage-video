@@ -7,7 +7,13 @@
 
 仓库只保留一套完整展示项目 `tie-chu-mo-zhen`，用于回归和仓库功能演示；题材不是引擎硬编码。插件发行包另带一个 2 秒静音技术夹具 `starter-demo`，仅用于自动化烟雾测试。
 
-当前目标版本为 `0.4.0`。首个正式 GitHub Release 正在准备中；功能和协议仍可能在 `1.0.0` 前调整。
+当前公开预览版本为 `0.4.0`；功能和协议仍可能在 `1.0.0` 前调整。
+
+## 完整演示
+
+[观看或下载唯一完整演示：《铁杵磨针》52 秒纸片故事](https://github.com/cyberlesterr/paper-collage-video/releases/download/v0.4.0/tie-chu-mo-zhen-preview.mp4)
+
+发布页只提供这一份完整演示视频。它用于展示四幕时间线、人物分层、字幕、虚构旁白和技术验收能力，不是可自由复用的素材包；使用边界见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
 
 ## 从 GitHub 安装 Plugin
 
@@ -35,7 +41,7 @@ codex plugin add paper-collage-video@paper-collage-video
 
 首次调用会从插件自带模板创建独立、可写的 Remotion 工作区，安装依赖并运行环境诊断。项目、依赖和渲染结果不会写入 Codex 的插件缓存。用户可能仍需批准依赖下载、FFmpeg 安装或图片/语音提供方授权。
 
-源码采用 [MIT License](LICENSE)。完整样片、测试夹具、纸张纹理和其衍生媒体不采用 MIT，只能按 [ASSET_LICENSES.md](ASSET_LICENSES.md) 随仓库运行、测试和演示。首个正式 GitHub Release 尚未创建。
+源码采用 [MIT License](LICENSE)。完整样片、测试夹具、纸张纹理和其衍生媒体不采用 MIT，只能按 [ASSET_LICENSES.md](ASSET_LICENSES.md) 随仓库运行、测试和演示。Release 页只附带唯一完整样片，不把生产素材作为独立素材包发布。
 
 ### 本地开发安装演练
 
