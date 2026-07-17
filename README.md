@@ -12,13 +12,13 @@
 
 ```text
 请安装这个 Codex 插件并完成初始化验证：
-https://github.com/<github-owner>/<repository>
+https://github.com/cyberlesterr/paper-collage-video
 ```
 
 Codex 对应执行：
 
 ```bash
-codex plugin marketplace add <github-owner>/<repository>
+codex plugin marketplace add cyberlesterr/paper-collage-video
 codex plugin add paper-collage-video@paper-collage-video
 ```
 
@@ -30,7 +30,7 @@ codex plugin add paper-collage-video@paper-collage-video
 
 首次调用会从插件自带模板创建独立、可写的 Remotion 工作区，安装依赖并运行环境诊断。项目、依赖和渲染结果不会写入 Codex 的插件缓存。用户可能仍需批准依赖下载、FFmpeg 安装或图片/语音提供方授权。
 
-当前仓库尚未配置真实 GitHub owner、公开许可证和正式 release；发布前必须补齐这些发行元数据。
+当前仓库已配置公开 GitHub 地址；尚未选择公开许可证和创建正式 release。在允许第三方复制、修改或分发前，需要先明确许可证。
 
 ### 本地开发安装演练
 
