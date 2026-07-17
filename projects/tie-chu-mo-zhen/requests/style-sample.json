@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "style-sample",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png",
+  "prompt": "Use case: historical-scene. Asset type: representative 16:9 visual style sample for a children's Remotion paper-collage story, not a final scene plate. Primary request: illustrate the ancient Chinese folk legend Iron Pestle Ground into a Needle at a quiet mountain creek. Scene/backdrop: Tang-era countryside impression with layered distant blue-green mountains, bamboo, cream paper clouds, a narrow low-saturation blue creek and a broad flat grinding stone. Subject: a fictional young adult scholar representing Li Bai, with a friendly round paper-cut face and simple indigo-and-ivory Tang-inspired scholar clothing, has paused beside the creek and watches respectfully; an elderly woman in muted ochre and tea-green clothing sits steadily at the grinding stone, holding one thick iron pestle horizontally with both hands and grinding it against the stone. The iron pestle remains visibly thick and unfinished; do not show a finished needle. Style/medium: handcrafted layered collage made from torn xuan paper and cotton paper, visible fibers, matte texture, softly raised cut-paper edges, clearly separated background, rear, subject and foreground depth, rounded child-friendly shapes, subtle traditional Chinese ink-wash influence without becoming a flat ink painting. Composition/framing: wide landscape composition with both full figures clearly readable, the woman and grinding action as the main focal point, scholar slightly behind, bamboo and creek paper strips creating foreground parallax; leave a clean lower safe area for subtitles. Lighting/mood: gentle warm morning light, calm curiosity, patient and encouraging, never stern. Color palette: indigo, tea green, ochre, cinnabar accents, rice-paper ivory and muted blue water. Constraints: historically inspired rather than claimed reconstruction; no exact portrait of the real Li Bai; no text, no Chinese characters, no letters, no captions, no watermark, no logo, no modern objects, no magic, no talking animals, no finished needle, no sharp needle close-up, no punishment, no photorealism, no 3D render, no glossy surfaces, no frightening expression, no extra people.",
+  "model": "gpt-image",
+  "settings": {
+    "aspectRatio": "16:9",
+    "purpose": "style-review",
+    "audience": "children-5-9"
+  }
+}

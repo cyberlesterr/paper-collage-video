@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "old-woman-character-sheet",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/old-woman-poses-sheet-magenta.png",
+  "prompt": "Use case: illustration-story. Asset type: 2x2 full-body character-and-prop sprite sheet for chroma-key extraction. Image 1 is a style-only reference defining the exact child-friendly torn-paper collage design. Create four consistent isolated poses of the same warm elderly woman with gray hair in a simple bun, ochre outer jacket, tea-green robe and dark cloth shoes: top-left seated beside one broad grinding stone, both hands moving one visibly thick unfinished iron pestle horizontally across the stone; top-right paused beside the same stone, one hand resting on the thick iron pestle while she looks up to answer kindly; bottom-left a closer side-facing seated grinding pose with the same stone and still-thick pestle; bottom-right seated calmly beside the stone with a gentle encouraging smile and open hand. Include the full grinding stone and complete thick pestle within each relevant cell; never show a finished needle or sharp point. Each pose group must be fully visible, centered in its equal cell, separated with generous padding and no overlap. Background must be one perfectly flat uniform solid #ff00ff magenta with no shadows, gradients, texture, floor plane, reflections or lighting variation. Do not use magenta in the subject. No labels, no grid lines, no text, no letters, no watermark, no logo, no extra characters, no magic, no modern objects, no photorealism, no 3D.",
+  "model": "gpt-image",
+  "settings": {"layout": "2x2", "keyColor": "#ff00ff", "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"}
+}

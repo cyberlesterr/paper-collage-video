@@ -1,0 +1,244 @@
+{
+  "$schema": "../../schemas/project.schema.json",
+  "schemaVersion": 1,
+  "slug": "tie-chu-mo-zhen",
+  "title": "铁杵磨针｜儿童教育纸片故事",
+  "plan": {
+    "schemaVersion": 1,
+    "slug": "tie-chu-mo-zhen",
+    "status": "resolved",
+    "inputMode": "none",
+    "requested": {
+      "durationSeconds": null,
+      "sceneCount": null
+    },
+    "resolved": {
+      "durationSeconds": 50,
+      "sceneCount": 4,
+      "estimatedNarrationSeconds": 43,
+      "rationale": "四个必要视觉节拍；156个汉字按儿童绘本语速约3.6至4.0字每秒并预留对白停顿、字幕阅读与转场",
+      "resolvedAt": "2026-07-17T08:27:39.463Z"
+    },
+    "updatedAt": "2026-07-17T08:27:39.463Z"
+  },
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "transitionFrames": 12
+  },
+  "theme": {
+    "canvas": "#394842",
+    "sceneBackground": "#d8c9a7",
+    "accent": "#9b5d38",
+    "ink": "#3f3126",
+    "subtitle": "#fff8ea",
+    "subtitleBackground": "rgba(54, 43, 32, .76)",
+    "paperEdge": "#f5eedc",
+    "foreground": "#817254",
+    "texture": "textures/paper-grain.png"
+  },
+  "voice": {
+    "mode": "fictional",
+    "provider": "doubao",
+    "voiceId": "ruyayichen",
+    "displayName": "儒雅逸辰",
+    "settings": {
+      "speedRatio": 0.94,
+      "pitch": -1,
+      "emotion": "happy",
+      "emotionScale": 1,
+      "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；保持好奇感，不说教，不夸张表演"
+    }
+  },
+  "audio": {
+    "music": null,
+    "sfx": {}
+  },
+  "scenes": [
+    {
+      "id": "departure",
+      "label": "山中书屋 · 学业未成",
+      "eyebrow": "第一幕 · 准备离开",
+      "tailFrames": 12,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/01-study-departure-bg.png",
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/scene-1.mp3",
+        "startFrame": 9,
+        "durationSeconds": 8.352,
+        "text": "相传，李白曾在山中读书。一天，学业还没完成，他却准备离开。"
+      },
+      "layers": [
+        {
+          "id": "li-leaving",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-leaving.png",
+          "role": "primary",
+          "x": 1060,
+          "bottom": 116,
+          "width": 390,
+          "z": 5,
+          "delay": 12,
+          "enterFrom": "right"
+        }
+      ],
+      "subtitles": [
+        {
+          "from": 16,
+          "to": 112,
+          "text": "相传，李白曾在山中读书。"
+        },
+        {
+          "from": 114,
+          "to": 260,
+          "text": "一天，学业还没完成，他却准备离开。"
+        }
+      ]
+    },
+    {
+      "id": "encounter",
+      "label": "磨针溪边 · 老妇磨杵",
+      "eyebrow": "第二幕 · 溪边相遇",
+      "tailFrames": 12,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/02-creek-encounter-bg.png",
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/scene-2.mp3",
+        "startFrame": 9,
+        "durationSeconds": 9.384,
+        "text": "走到象耳山下的磨针溪边，他看见一位老婆婆，正把粗粗的铁杵，一下一下磨在石头上。"
+      },
+      "layers": [
+        {
+          "id": "woman-grinding",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/woman-grinding.png",
+          "role": "primary",
+          "x": 930,
+          "bottom": 104,
+          "width": 720,
+          "z": 5,
+          "delay": 8,
+          "enterFrom": "right"
+        },
+        {
+          "id": "li-observing",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-observing.png",
+          "role": "secondary",
+          "x": 350,
+          "bottom": 122,
+          "width": 390,
+          "z": 4,
+          "delay": 22,
+          "enterFrom": "left"
+        }
+      ],
+      "subtitles": [
+        {
+          "from": 16,
+          "to": 112,
+          "text": "走到象耳山下的磨针溪边，"
+        },
+        {
+          "from": 114,
+          "to": 291,
+          "text": "他看见一位老婆婆，正把粗粗的铁杵，一下一下磨在石头上。"
+        }
+      ]
+    },
+    {
+      "id": "dialogue",
+      "label": "一问一答 · 欲作针",
+      "eyebrow": "第三幕 · 明白坚持",
+      "tailFrames": 15,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/03-creek-dialogue-bg.png",
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/scene-3.mp3",
+        "startFrame": 9,
+        "durationSeconds": 17.496,
+        "text": "李白问：‘您磨铁杵做什么？’老婆婆回答：‘我要把它磨成针。’李白望着铁杵，又看看她始终不停的双手，明白了坚持的意义。"
+      },
+      "layers": [
+        {
+          "id": "woman-answering",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/woman-answering.png",
+          "role": "primary",
+          "x": 900,
+          "bottom": 92,
+          "width": 740,
+          "z": 5,
+          "delay": 8,
+          "enterFrom": "right"
+        },
+        {
+          "id": "li-observing",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-observing.png",
+          "role": "secondary",
+          "x": 300,
+          "bottom": 118,
+          "width": 420,
+          "z": 4,
+          "delay": 20,
+          "enterFrom": "left"
+        }
+      ],
+      "subtitles": [
+        {
+          "from": 16,
+          "to": 140,
+          "text": "李白问：“您磨铁杵做什么？”"
+        },
+        {
+          "from": 142,
+          "to": 270,
+          "text": "老婆婆回答：“我要把它磨成针。”"
+        },
+        {
+          "from": 272,
+          "to": 534,
+          "text": "李白望着铁杵，又看看她始终不停的双手，明白了坚持的意义。"
+        }
+      ]
+    },
+    {
+      "id": "return",
+      "label": "返回书屋 · 继续学业",
+      "eyebrow": "第四幕 · 一步一步",
+      "tailFrames": 18,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/04-study-return-bg.png",
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/scene-4.mp3",
+        "startFrame": 9,
+        "durationSeconds": 14.904,
+        "text": "于是，他回到山中，继续完成学业。《铁杵磨针》告诉我们：先确定正确的目标，再用合适的方法，一步一步坚持，困难也会慢慢变小。"
+      },
+      "layers": [
+        {
+          "id": "li-returning",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-returning.png",
+          "role": "primary",
+          "x": 1030,
+          "bottom": 108,
+          "width": 430,
+          "z": 5,
+          "delay": 8,
+          "enterFrom": "right"
+        }
+      ],
+      "subtitles": [
+        {
+          "from": 16,
+          "to": 155,
+          "text": "于是，他回到山中，继续完成学业。"
+        },
+        {
+          "from": 157,
+          "to": 315,
+          "text": "《铁杵磨针》告诉我们：先确定正确的目标，再用合适的方法，"
+        },
+        {
+          "from": 317,
+          "to": 457,
+          "text": "一步一步坚持，困难也会慢慢变小。"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,382 @@
+{
+  "$schema": "../../schemas/assets-manifest.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assets": [
+    {
+      "assetId": "concept-text",
+      "capability": "text",
+      "file": "projects/tie-chu-mo-zhen/brief.md",
+      "provider": "host-text",
+      "adapter": "host",
+      "tool": "codex-host-model",
+      "model": "codex-host-model",
+      "externalId": null,
+      "sha256": "f7e8942711093088012700bd861821e1ac1415f4f61c0cdc7dc4669a6c85ca45",
+      "sizeBytes": 6174,
+      "recordedAt": "2026-07-17T08:27:30.358Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "concept-text",
+        "capability": "text",
+        "output": "projects/tie-chu-mo-zhen/brief.md",
+        "prompt": "根据南宋《方舆胜览》所载《铁杵磨针》，为5至9岁中文儿童制定一份约50秒、四幕的纸片拼贴视频概念。必须用相传标示传说性质，不虚构李白确切年龄，不表现老妇已经磨出成品针，不把后世谚语冒充古籍原句。输出需包含忠实旁白、四幕分镜、分层方案、素材清单、视觉方向、声音方向与禁止内容。",
+        "model": "codex-host-model",
+        "settings": {
+          "language": "zh-CN",
+          "audience": "children-5-9",
+          "factBoundary": "方舆胜览·磨针溪"
+        }
+      }
+    },
+    {
+      "assetId": "style-sample",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png",
+      "provider": "host-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "gpt-image",
+      "externalId": "019f6f34-ef14-74d0-a3d5-3ce3f73823c7",
+      "sha256": "189fbb167a0e415f3b7053bd5e24e6edfd78f4604a17c83f28a1c67b77e18cdc",
+      "sizeBytes": 2808797,
+      "recordedAt": "2026-07-17T08:37:03.274Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "style-sample",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png",
+        "prompt": "Use case: historical-scene. Asset type: representative 16:9 visual style sample for a children's Remotion paper-collage story, not a final scene plate. Primary request: illustrate the ancient Chinese folk legend Iron Pestle Ground into a Needle at a quiet mountain creek. Scene/backdrop: Tang-era countryside impression with layered distant blue-green mountains, bamboo, cream paper clouds, a narrow low-saturation blue creek and a broad flat grinding stone. Subject: a fictional young adult scholar representing Li Bai, with a friendly round paper-cut face and simple indigo-and-ivory Tang-inspired scholar clothing, has paused beside the creek and watches respectfully; an elderly woman in muted ochre and tea-green clothing sits steadily at the grinding stone, holding one thick iron pestle horizontally with both hands and grinding it against the stone. The iron pestle remains visibly thick and unfinished; do not show a finished needle. Style/medium: handcrafted layered collage made from torn xuan paper and cotton paper, visible fibers, matte texture, softly raised cut-paper edges, clearly separated background, rear, subject and foreground depth, rounded child-friendly shapes, subtle traditional Chinese ink-wash influence without becoming a flat ink painting. Composition/framing: wide landscape composition with both full figures clearly readable, the woman and grinding action as the main focal point, scholar slightly behind, bamboo and creek paper strips creating foreground parallax; leave a clean lower safe area for subtitles. Lighting/mood: gentle warm morning light, calm curiosity, patient and encouraging, never stern. Color palette: indigo, tea green, ochre, cinnabar accents, rice-paper ivory and muted blue water. Constraints: historically inspired rather than claimed reconstruction; no exact portrait of the real Li Bai; no text, no Chinese characters, no letters, no captions, no watermark, no logo, no modern objects, no magic, no talking animals, no finished needle, no sharp needle close-up, no punishment, no photorealism, no 3D render, no glossy surfaces, no frightening expression, no extra people.",
+        "model": "gpt-image",
+        "settings": {
+          "aspectRatio": "16:9",
+          "purpose": "style-review",
+          "audience": "children-5-9"
+        }
+      }
+    },
+    {
+      "assetId": "voice-audition-ruyayichen",
+      "capability": "voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen.mp3",
+      "provider": "host-voice",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "cc3e7dd3f6",
+      "sha256": "be7e9c9c9b97157c34763ca5b7ef1fecd6f404c3c378e8210695bf7b74ea2f78",
+      "sizeBytes": 80493,
+      "recordedAt": "2026-07-17T08:48:20.848Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "voice-audition-ruyayichen",
+        "capability": "voice",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen.mp3",
+        "text": "相传，李白走到磨针溪边，看见一位老婆婆，正把粗粗的铁杵，一下一下磨在石头上。",
+        "voiceId": "ruyayichen",
+        "model": "doubao-seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "emotion": "happy",
+          "emotionScale": 1,
+          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；保持好奇感，不说教，不夸张表演"
+        }
+      }
+    },
+    {
+      "assetId": "narration-scene-1",
+      "capability": "voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/scene-1.mp3",
+      "provider": "host-voice",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "4284a7d265",
+      "sha256": "c8a7c4e14a7c13c7eb9521425d8954fd59e2a1b1b61e32237731ff87254df160",
+      "sizeBytes": 66861,
+      "recordedAt": "2026-07-17T08:58:22.821Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "narration-scene-1",
+        "capability": "voice",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-1.mp3",
+        "text": "相传，李白曾在山中读书。一天，学业还没完成，他却准备离开。",
+        "voiceId": "ruyayichen",
+        "model": "doubao-seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "emotion": "happy",
+          "emotionScale": 1,
+          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；保持好奇感，不说教，不夸张表演"
+        }
+      }
+    },
+    {
+      "assetId": "narration-scene-2",
+      "capability": "voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/scene-2.mp3",
+      "provider": "host-voice",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "74fece1b72",
+      "sha256": "251a2bab2be88160ee63e2c50e3614f3780de17b5c4e6c77c536cb4afa03e9ba",
+      "sizeBytes": 75117,
+      "recordedAt": "2026-07-17T08:58:23.260Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "narration-scene-2",
+        "capability": "voice",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-2.mp3",
+        "text": "走到象耳山下的磨针溪边，他看见一位老婆婆，正把粗粗的铁杵，一下一下磨在石头上。",
+        "voiceId": "ruyayichen",
+        "model": "doubao-seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "emotion": "happy",
+          "emotionScale": 1,
+          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；保持好奇感，不说教，不夸张表演"
+        }
+      }
+    },
+    {
+      "assetId": "narration-scene-3",
+      "capability": "voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/scene-3.mp3",
+      "provider": "host-voice",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "9c3123e0ed",
+      "sha256": "784a7cd3a242667ad392288e149685c5e6fbbfd2e61ae21dcb7fd467331faddc",
+      "sizeBytes": 140013,
+      "recordedAt": "2026-07-17T08:58:23.690Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "narration-scene-3",
+        "capability": "voice",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-3.mp3",
+        "text": "李白问：‘您磨铁杵做什么？’老婆婆回答：‘我要把它磨成针。’李白望着铁杵，又看看她始终不停的双手，明白了坚持的意义。",
+        "voiceId": "ruyayichen",
+        "model": "doubao-seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "emotion": "happy",
+          "emotionScale": 1,
+          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；对白停顿清楚但不夸张角色表演，不说教"
+        }
+      }
+    },
+    {
+      "assetId": "narration-scene-4",
+      "capability": "voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/scene-4.mp3",
+      "provider": "host-voice",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "787263930b",
+      "sha256": "ebf1d5bf798e231dfa160402ac775d6bdab47049ad94d643fcf78fb59b8f9381",
+      "sizeBytes": 119277,
+      "recordedAt": "2026-07-17T08:58:24.237Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "narration-scene-4",
+        "capability": "voice",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-4.mp3",
+        "text": "于是，他回到山中，继续完成学业。《铁杵磨针》告诉我们：先确定正确的目标，再用合适的方法，一步一步坚持，困难也会慢慢变小。",
+        "voiceId": "ruyayichen",
+        "model": "doubao-seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "emotion": "happy",
+          "emotionScale": 1,
+          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；结尾鼓励而不说教，不夸张表演"
+        }
+      }
+    },
+    {
+      "assetId": "scene-1-background",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-departure-bg.png",
+      "provider": "host-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "gpt-image",
+      "externalId": null,
+      "sha256": "a1784fcb921a67a4f33da12121e35808c94e260bbc206cd58a2e4f4ecad31093",
+      "sizeBytes": 2930763,
+      "recordedAt": "2026-07-17T09:01:13.786Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "scene-1-background",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-departure-bg.png",
+        "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Recreate the same warm hand-torn xuan-paper and cotton-paper collage language, but remove every person. A wide Tang-era-inspired mountain study courtyard: an open-sided humble study hut occupies the left third, with a low wooden reading desk, two rolled scrolls and one open blank scroll; a winding mountain footpath begins near the hut and leads through the center-right toward layered blue-green mountains and bamboo. Keep the center and right open for separate character cutouts, with clear rear, middle and foreground paper depth and a clean lower subtitle-safe area. Gentle late-morning light, indigo, tea green, ochre, cinnabar accents and rice-paper ivory. No characters, no human silhouettes, no readable writing on scrolls, no text, no letters, no watermark, no logo, no modern objects, no finished needle, no photorealism, no 3D.",
+        "model": "gpt-image",
+        "settings": {
+          "aspectRatio": "16:9",
+          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+        }
+      }
+    },
+    {
+      "assetId": "scene-2-background",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/02-creek-encounter-bg.png",
+      "provider": "host-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "gpt-image",
+      "externalId": null,
+      "sha256": "e1ca10b4ad6b3fdf56ce2e4f847dd4228423278afb97d78d4e6e80de3ba4f8ee",
+      "sizeBytes": 3081445,
+      "recordedAt": "2026-07-17T09:01:14.426Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "scene-2-background",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/02-creek-encounter-bg.png",
+        "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Create the same layered hand-torn paper collage style with no people. A wide quiet mountain creek at the foot of layered blue-green peaks, with a low-saturation blue paper-water ribbon crossing the midground, bamboo on the left, an old pine and a tiny distant thatched shelter on the right. Provide a broad flat dry creek bank in the center-right for a separate elderly-woman-and-grinding-stone cutout and open space on the left-center for a separate scholar cutout. Add foreground bamboo leaves and rounded stones for parallax, while keeping the lower subtitle-safe area visually simple. Gentle warm daylight, patient and curious mood, visible paper fibers and matte edges. No characters, no human silhouettes, no grinding stone or iron pestle in the background, no text, no letters, no watermark, no logo, no modern objects, no magic, no photorealism, no 3D.",
+        "model": "gpt-image",
+        "settings": {
+          "aspectRatio": "16:9",
+          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+        }
+      }
+    },
+    {
+      "assetId": "scene-3-background",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-dialogue-bg.png",
+      "provider": "host-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "gpt-image",
+      "externalId": null,
+      "sha256": "4f6cf51516f64f8bd3cfb0a8c5be7381a2adfc5450138eb356b7f4a66cf27c5d",
+      "sizeBytes": 2969870,
+      "recordedAt": "2026-07-17T09:01:14.870Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "scene-3-background",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-dialogue-bg.png",
+        "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Create the same warm layered hand-torn paper collage style with no people. A closer, calmer view of the same mountain creek bank: muted blue water and rounded paper rocks behind, soft blue-green mountains in atmospheric layers, bamboo framing the far left and pine branches framing the upper right. Leave a wide clear dry-ground stage across the center for two separate character cutouts and their grinding-stone prop group; keep the bottom subtitle-safe region uncluttered. The composition should support a gentle conversational close shot without changing locations. Visible paper fibers, matte texture, rice-paper clouds, indigo, tea green, ochre and ivory. No characters, no silhouettes, no grinding stone or iron pestle already present, no text, no letters, no watermark, no logo, no modern objects, no finished needle, no photorealism, no 3D.",
+        "model": "gpt-image",
+        "settings": {
+          "aspectRatio": "16:9",
+          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+        }
+      }
+    },
+    {
+      "assetId": "scene-4-background",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/04-study-return-bg.png",
+      "provider": "host-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "gpt-image",
+      "externalId": null,
+      "sha256": "2aee62b7307248078eccf592d6ac2c7b8ddd03dbf057f73e28498d255137146f",
+      "sizeBytes": 2945269,
+      "recordedAt": "2026-07-17T09:05:26.278Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "scene-4-background",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/04-study-return-bg.png",
+        "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Return to the same Tang-era-inspired mountain study courtyard as scene one, in the same hand-torn xuan-paper collage style, with no people. The winding path now leads from the lower right back toward the open study hut on the left; warm early-evening light falls across a low reading desk with an open blank scroll and a small unlit oil lamp, while layered mountains, bamboo and cream paper clouds create hopeful depth. Leave the center-right open for a returning scholar cutout and keep the lower subtitle-safe area simple. Calm, resolved and encouraging mood; indigo, tea green, ochre, cinnabar accents and rice-paper ivory. No characters, no human silhouettes, no readable writing, no text, no letters, no watermark, no logo, no modern objects, no finished needle, no photorealism, no 3D.",
+        "model": "gpt-image",
+        "settings": {
+          "aspectRatio": "16:9",
+          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+        }
+      }
+    },
+    {
+      "assetId": "old-woman-character-sheet",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/old-woman-poses-sheet-magenta.png",
+      "provider": "host-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "gpt-image",
+      "externalId": null,
+      "sha256": "4bd9bf80fe45e0ec51b4a1a3dce0b6c7931a47d4e55d6d24f30019cf61bcb4c4",
+      "sizeBytes": 2061240,
+      "recordedAt": "2026-07-17T09:05:26.709Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "old-woman-character-sheet",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/old-woman-poses-sheet-magenta.png",
+        "prompt": "Use case: illustration-story. Asset type: 2x2 full-body character-and-prop sprite sheet for chroma-key extraction. Image 1 is a style-only reference defining the exact child-friendly torn-paper collage design. Create four consistent isolated poses of the same warm elderly woman with gray hair in a simple bun, ochre outer jacket, tea-green robe and dark cloth shoes: top-left seated beside one broad grinding stone, both hands moving one visibly thick unfinished iron pestle horizontally across the stone; top-right paused beside the same stone, one hand resting on the thick iron pestle while she looks up to answer kindly; bottom-left a closer side-facing seated grinding pose with the same stone and still-thick pestle; bottom-right seated calmly beside the stone with a gentle encouraging smile and open hand. Include the full grinding stone and complete thick pestle within each relevant cell; never show a finished needle or sharp point. Each pose group must be fully visible, centered in its equal cell, separated with generous padding and no overlap. Background must be one perfectly flat uniform solid #ff00ff magenta with no shadows, gradients, texture, floor plane, reflections or lighting variation. Do not use magenta in the subject. No labels, no grid lines, no text, no letters, no watermark, no logo, no extra characters, no magic, no modern objects, no photorealism, no 3D.",
+        "model": "gpt-image",
+        "settings": {
+          "layout": "2x2",
+          "keyColor": "#ff00ff",
+          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+        }
+      }
+    },
+    {
+      "assetId": "li-bai-character-sheet",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-poses-sheet-magenta.png",
+      "provider": "host-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "gpt-image",
+      "externalId": null,
+      "sha256": "6848f821ac7f638f6ab458571ddeb287ea5bd76df87a24d0def14a1e2dc34011",
+      "sizeBytes": 1091212,
+      "recordedAt": "2026-07-17T09:11:34.802Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "li-bai-character-sheet",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-poses-sheet-magenta.png",
+        "prompt": "Use case: illustration-story. Asset type: 2x2 full-body character sprite sheet for chroma-key extraction. Image 1 is a style-only reference defining the exact child-friendly torn-paper collage medium and the fictional scholar design. Create four consistent full-body poses of the same fictional young adult scholar representing Li Bai, never an exact historical portrait: top-left seated at a small low desk reading a blank scroll, thoughtful but slightly tired; top-right walking away with a tied scroll bundle held at his side, hesitant expression; bottom-left standing respectfully and leaning forward slightly to observe, hands calmly behind his back; bottom-right walking back with the scroll bundle held close to his chest, newly focused and hopeful. Preserve the same friendly round face, navy cloth cap, indigo outer robe, ivory inner robe, dark sash and black cloth shoes in every cell. Every figure and any small attached desk prop must be fully visible, centered inside its own equal cell, separated with generous padding, no overlap across cells. Background must be one perfectly flat uniform solid #ff00ff magenta with no shadows, gradients, texture, floor plane, reflections or lighting variation. Do not use magenta in the character. No labels, no grid lines, no text, no writing on scrolls, no letters, no watermark, no logo, no extra characters, no needle, no modern objects, no photorealism, no 3D.",
+        "model": "gpt-image",
+        "settings": {
+          "layout": "2x2",
+          "keyColor": "#ff00ff",
+          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+        }
+      }
+    }
+  ]
+}

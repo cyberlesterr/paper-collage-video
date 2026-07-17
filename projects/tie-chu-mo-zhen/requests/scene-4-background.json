@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "scene-4-background",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/plates/04-study-return-bg.png",
+  "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Return to the same Tang-era-inspired mountain study courtyard as scene one, in the same hand-torn xuan-paper collage style, with no people. The winding path now leads from the lower right back toward the open study hut on the left; warm early-evening light falls across a low reading desk with an open blank scroll and a small unlit oil lamp, while layered mountains, bamboo and cream paper clouds create hopeful depth. Leave the center-right open for a returning scholar cutout and keep the lower subtitle-safe area simple. Calm, resolved and encouraging mood; indigo, tea green, ochre, cinnabar accents and rice-paper ivory. No characters, no human silhouettes, no readable writing, no text, no letters, no watermark, no logo, no modern objects, no finished needle, no photorealism, no 3D.",
+  "model": "gpt-image",
+  "settings": {"aspectRatio": "16:9", "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"}
+}

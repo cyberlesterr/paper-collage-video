@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "li-bai-character-sheet",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-poses-sheet-magenta.png",
+  "prompt": "Use case: illustration-story. Asset type: 2x2 full-body character sprite sheet for chroma-key extraction. Image 1 is a style-only reference defining the exact child-friendly torn-paper collage medium and the fictional scholar design. Create four consistent full-body poses of the same fictional young adult scholar representing Li Bai, never an exact historical portrait: top-left seated at a small low desk reading a blank scroll, thoughtful but slightly tired; top-right walking away with a tied scroll bundle held at his side, hesitant expression; bottom-left standing respectfully and leaning forward slightly to observe, hands calmly behind his back; bottom-right walking back with the scroll bundle held close to his chest, newly focused and hopeful. Preserve the same friendly round face, navy cloth cap, indigo outer robe, ivory inner robe, dark sash and black cloth shoes in every cell. Every figure and any small attached desk prop must be fully visible, centered inside its own equal cell, separated with generous padding, no overlap across cells. Background must be one perfectly flat uniform solid #ff00ff magenta with no shadows, gradients, texture, floor plane, reflections or lighting variation. Do not use magenta in the character. No labels, no grid lines, no text, no writing on scrolls, no letters, no watermark, no logo, no extra characters, no needle, no modern objects, no photorealism, no 3D.",
+  "model": "gpt-image",
+  "settings": {"layout": "2x2", "keyColor": "#ff00ff", "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"}
+}

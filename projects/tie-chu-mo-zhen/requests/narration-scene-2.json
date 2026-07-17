@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "narration-scene-2",
+  "capability": "voice",
+  "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-2.mp3",
+  "text": "走到象耳山下的磨针溪边，他看见一位老婆婆，正把粗粗的铁杵，一下一下磨在石头上。",
+  "voiceId": "ruyayichen",
+  "model": "doubao-seed-tts-2.0",
+  "settings": {"speedRatio": 0.94, "pitch": -1, "emotion": "happy", "emotionScale": 1, "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；保持好奇感，不说教，不夸张表演"}
+}
