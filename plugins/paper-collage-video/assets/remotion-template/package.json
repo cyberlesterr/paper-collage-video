@@ -53,10 +53,10 @@
     "render:preview": "npm run project:preview -- starter-demo"
   },
   "dependencies": {
-    "@remotion/cli": "4.0.489",
+    "@remotion/cli": "4.0.490",
     "react": "19.2.7",
     "react-dom": "19.2.7",
-    "remotion": "4.0.489"
+    "remotion": "4.0.490"
   },
   "devDependencies": {
     "@types/react": "19.2.17",
