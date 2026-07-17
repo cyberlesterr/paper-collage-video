@@ -1,8 +1,29 @@
 {
   "name": "paper-collage-video-workspace",
   "version": "0.4.0",
+  "description": "Configuration-driven paper-collage video pipeline and Codex plugin built with Remotion.",
   "private": true,
   "type": "module",
+  "author": "Paper Collage Video Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyberlesterr/paper-collage-video.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cyberlesterr/paper-collage-video/issues"
+  },
+  "homepage": "https://github.com/cyberlesterr/paper-collage-video#readme",
+  "keywords": [
+    "remotion",
+    "codex-plugin",
+    "video",
+    "paper-collage",
+    "animation"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "assets:rasterize": "node scripts/rasterize-assets.mjs",
     "assets:process-sheet": "node scripts/process-character-sheet.mjs",
@@ -42,8 +63,5 @@
     "@types/react-dom": "19.2.3",
     "sharp": "0.35.3",
     "typescript": "5.9.3"
-  },
-  "engines": {
-    "node": ">=20"
   }
 }

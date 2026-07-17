@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/cyberlesterr/paper-collage-video/security/advisories/new
+    about: 请私密报告安全问题，不要创建公开 Issue。
+  - name: Support guide
+    url: https://github.com/cyberlesterr/paper-collage-video/blob/main/SUPPORT.md
+    about: 创建 Issue 前先查看诊断步骤和支持边界。

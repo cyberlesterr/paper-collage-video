@@ -1,0 +1,36 @@
+name: Feature request
+description: 提议新的能力或工作流改进
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: 你希望解决什么具体问题？
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: 描述建议的交互、命令或输出。
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: licensing
+    attributes:
+      label: Provider or asset implications
+      description: 是否涉及新的外部服务、媒体素材、声音、品牌或授权要求？
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: 我已经搜索过现有 Issue。
+          required: true

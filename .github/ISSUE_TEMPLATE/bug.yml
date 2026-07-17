@@ -1,0 +1,53 @@
+name: Bug report
+description: 报告可以稳定复现的缺陷
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: 请先移除密钥、私人提示词、未授权素材和其他敏感信息。安全漏洞请使用 SECURITY.md 中的私密渠道。
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: 插件版本或 commit SHA
+      placeholder: 0.4.0 or abc1234
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: 操作系统、Node.js、Python、FFmpeg 和 Codex 版本
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: 最小、完整、可重复的步骤
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and logs
+      description: 粘贴已脱敏的完整错误或日志
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: 我已经搜索过现有 Issue。
+          required: true
+        - label: 我已经移除密钥、私人内容和未授权素材。
+          required: true

@@ -64,6 +64,9 @@ test('plugin manifest points at a complete packaged skill', () => {
       ),
     ),
   );
+  assert.ok(fs.existsSync(path.join(PLUGIN_ROOT, 'THIRD_PARTY_NOTICES.md')));
+  assert.ok(fs.existsSync(path.join(PLUGIN_ROOT, 'ASSET_LICENSES.md')));
+  assert.ok(fs.existsSync(path.join(PLUGIN_ROOT, 'LICENSE')));
 });
 
 test('packaged runtime is lightweight and independent from production projects', () => {
@@ -75,10 +78,12 @@ test('packaged runtime is lightweight and independent from production projects',
   assert.equal(packageJson.scripts['provider:select'], 'node scripts/provider-select.mjs');
   assert.equal(packageJson.scripts['project:plan'], 'node scripts/project-plan.mjs');
   assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'projects', 'starter-demo')));
-  assert.equal(fs.existsSync(path.join(RUNTIME_ROOT, 'projects', 'tang-demo')), false);
-  assert.equal(
-    fs.existsSync(path.join(RUNTIME_ROOT, 'projects', 'xuanzang-westward')),
-    false,
+  assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'THIRD_PARTY_NOTICES.md')));
+  assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'ASSET_LICENSES.md')));
+  assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'LICENSE')));
+  assert.deepEqual(
+    fs.readdirSync(path.join(RUNTIME_ROOT, 'projects')).sort(),
+    ['starter-demo'],
   );
 
   for (const relative of [

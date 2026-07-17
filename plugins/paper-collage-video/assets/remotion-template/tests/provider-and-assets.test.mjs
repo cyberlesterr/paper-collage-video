@@ -18,9 +18,18 @@ import {
 import {
   deriveContactSheetSamples,
   inspectCharacterPng,
+  resolveRenderConcurrency,
 } from '../scripts/project-lib.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+test('preview rendering caps concurrency at available CPU capacity', () => {
+  assert.equal(resolveRenderConcurrency(16), 8);
+  assert.equal(resolveRenderConcurrency(8), 8);
+  assert.equal(resolveRenderConcurrency(4), 4);
+  assert.equal(resolveRenderConcurrency(1), 1);
+  assert.equal(resolveRenderConcurrency(0), 1);
+});
 
 test('provider overlays add local adapters without replacing bundled providers', () => {
   const base = {

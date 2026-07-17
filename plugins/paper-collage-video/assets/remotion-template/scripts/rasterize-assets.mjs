@@ -3,7 +3,6 @@ import {extname, join} from 'node:path';
 import sharp from 'sharp';
 
 const assetDirectories = [
-  {directory: 'public/layers', width: 1920, height: 1080, palette: false},
   {directory: 'public/textures', width: 960, height: 540, palette: true},
 ];
 

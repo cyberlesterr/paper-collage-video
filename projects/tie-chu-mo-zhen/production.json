@@ -4,7 +4,7 @@
   "slug": "tie-chu-mo-zhen",
   "stage": "human-review",
   "createdAt": "2026-07-17T08:22:23.886Z",
-  "updatedAt": "2026-07-17T09:17:58.425Z",
+  "updatedAt": "2026-07-17T14:22:22.196Z",
   "approvals": {
     "concept": {
       "status": "approved",
@@ -422,6 +422,12 @@
       "action": "work-item-completed",
       "stage": "human-review",
       "note": "preview-render · 预览、验收报告与接触表均已生成"
+    },
+    {
+      "at": "2026-07-17T14:22:22.196Z",
+      "action": "preview-rendered",
+      "stage": "human-review",
+      "note": "dist/tie-chu-mo-zhen/preview.mp4"
     }
   ]
 }

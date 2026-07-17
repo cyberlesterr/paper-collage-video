@@ -1,8 +1,13 @@
 # Paper Collage Video Pipeline
 
+[![CI](https://github.com/cyberlesterr/paper-collage-video/actions/workflows/ci.yml/badge.svg)](https://github.com/cyberlesterr/paper-collage-video/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 一个配置驱动的本地纸片分层视频生产系统。人负责内容意图、审美选择和最终批准；Codex 与本地工具负责文案拆镜、素材组织、抠图、动画、旁白同步、渲染和技术验收。
 
-仓库自带 `tang-demo` 黄金样例，它是回归基准，不是引擎里的硬编码题材。
+仓库只保留一套完整展示项目 `tie-chu-mo-zhen`，用于回归和仓库功能演示；题材不是引擎硬编码。插件发行包另带一个 2 秒静音技术夹具 `starter-demo`，仅用于自动化烟雾测试。
+
+当前目标版本为 `0.4.0`。首个正式 GitHub Release 正在准备中；功能和协议仍可能在 `1.0.0` 前调整。
 
 ## 从 GitHub 安装 Plugin
 
@@ -30,7 +35,7 @@ codex plugin add paper-collage-video@paper-collage-video
 
 首次调用会从插件自带模板创建独立、可写的 Remotion 工作区，安装依赖并运行环境诊断。项目、依赖和渲染结果不会写入 Codex 的插件缓存。用户可能仍需批准依赖下载、FFmpeg 安装或图片/语音提供方授权。
 
-当前仓库已配置公开 GitHub 地址；尚未选择公开许可证和创建正式 release。在允许第三方复制、修改或分发前，需要先明确许可证。
+源码采用 [MIT License](LICENSE)。完整样片、测试夹具、纸张纹理和其衍生媒体不采用 MIT，只能按 [ASSET_LICENSES.md](ASSET_LICENSES.md) 随仓库运行、测试和演示。首个正式 GitHub Release 尚未创建。
 
 ### 本地开发安装演练
 
@@ -74,25 +79,30 @@ Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于
 - FFmpeg / ffprobe
 - Python 3.11+（只在处理色键素材表时需要）
 
+当前 CI 在 Ubuntu、Node.js 20 和 Python 3.12 上运行；维护者同时在 macOS 上验证。代码包含 Windows 命令与虚拟环境路径适配，但尚未加入 Windows CI，因此当前属于尽力支持。
+
 ```bash
-npm install
-python3 -m pip install -r requirements.txt
+npm ci
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
 npm run doctor -- --ready
 npm run provider:status
 ```
 
-## 跑通黄金样例
+Windows 使用 `.venv\\Scripts\\python.exe -m pip install -r requirements.txt`。
+
+## 跑通唯一完整样例
 
 ```bash
-npm run project:sync -- tang-demo
-npm run project:validate -- tang-demo
-npm run project:preview -- tang-demo
+npm run project:sync -- tie-chu-mo-zhen
+npm run project:validate -- tie-chu-mo-zhen
+npm run project:preview -- tie-chu-mo-zhen
 ```
 
 输出位于：
 
 ```text
-dist/tang-demo/
+dist/tie-chu-mo-zhen/
   preview.mp4
   validation-report.json
   report.json
@@ -100,13 +110,14 @@ dist/tang-demo/
   frames/
 ```
 
-正式渲染：
+该样例有四幕、约 52 秒，并故意停在 `human-review` 阶段，用来展示真实审批门禁。人实际看过预览并明确批准后，记录决定并正式渲染：
 
 ```bash
-npm run project:render -- tang-demo
+npm run project:advance -- tie-chu-mo-zhen approve-preview --note="已人工查看并批准预览"
+npm run project:render -- tie-chu-mo-zhen
 ```
 
-输出 `dist/tang-demo/final.mp4`，并重新生成验收报告和关键帧联系表。
+输出 `dist/tie-chu-mo-zhen/final.mp4`，并重新生成验收报告和关键帧联系表。技术检查不能代替人的内容、权利和发布批准。
 
 ## 创建新项目
 
@@ -250,8 +261,23 @@ python3 scripts/remove_chroma_key.py --input KEY.png --out ALPHA.png --key-color
 
 `project:report` 继续检查成片编码、分辨率、帧率、音轨、音量峰值，并按场景前/后段生成最多八帧联系表，避免固定比例抽帧漏掉短镜头或转场。
 
-## 黄金样例
+## 唯一完整样例
 
-`projects/tang-demo` 保存简报、机器配置、提示词和验收记录；素材位于 `public/projects/tang-demo`。虚构旁白为“儒雅逸辰（ruyayichen）”，声音克隆不是 P0 的依赖。
+`projects/tie-chu-mo-zhen` 保存《铁杵磨针》儿童教育故事的简报、机器配置、提示词、provider 请求记录、素材清单、旁白同步和验收状态；素材位于 `public/projects/tie-chu-mo-zhen`。它覆盖四幕时间线、两个人物姿态表、透明角色拆分、四段虚构旁白、字幕、技术报告和联系表，是仓库唯一的完整生产展示。通用 Remotion composition 为 `Paper-Collage`。
 
-此前的单镜头视差实验仍保留为 Remotion composition `Tang-Paper-Cutout-Prototype`，通用引擎 composition 为 `Paper-Collage`。
+这套展示媒体只用于说明和验证仓库，不是可自由复用的素材包。详细边界见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
+
+## 贡献、支持与安全
+
+- 参与开发前阅读 [CONTRIBUTING.md](CONTRIBUTING.md)。
+- 使用问题和支持边界见 [SUPPORT.md](SUPPORT.md)。
+- 漏洞请按 [SECURITY.md](SECURITY.md) 私密报告，不要创建公开 Issue。
+- 社区参与需要遵守 [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)。
+- 版本变化记录在 [CHANGELOG.md](CHANGELOG.md)。
+- 维护者发布新版本时遵循 [docs/releasing.md](docs/releasing.md)。
+
+## 许可与第三方条款
+
+源码、脚本、Schema、模板、测试和文档采用 [MIT License](LICENSE)。仓库完整样片、技术夹具、纸张纹理及其衍生媒体明确排除在 MIT 之外，只授予随本仓库或插件运行、测试、评审和演示所必需的有限权限；不得抽取为素材包、用于其他作品或商业产品、训练模型、再许可或出售。详见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
+
+本项目依赖 Remotion，其特殊许可证在部分公司使用场景下要求购买 Company License。项目自己的许可证不会修改或替代 Remotion、FFmpeg、React、Sharp、NumPy、Pillow、外部生成服务或其他第三方组件的条款。详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

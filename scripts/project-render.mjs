@@ -7,6 +7,7 @@ import {
   formatValidation,
   loadProject,
   projectPaths,
+  resolveRenderConcurrency,
   validateProject,
   writeValidationReport,
 } from './project-lib.mjs';
@@ -86,7 +87,10 @@ try {
     `--props=${path.relative(ROOT, paths.projectFile)}`,
   ];
   if (mode === 'preview') {
-    args.push('--scale=0.5', '--concurrency=8');
+    args.push(
+      '--scale=0.5',
+      `--concurrency=${resolveRenderConcurrency()}`,
+    );
   }
   const remotion = path.join(ROOT, 'node_modules', '.bin', 'remotion');
   await runInherited(remotion, ['browser', 'ensure'], {captureOutput: true}).catch(

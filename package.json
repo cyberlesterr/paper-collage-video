@@ -1,8 +1,29 @@
 {
   "name": "paper-collage-video-pipeline",
-  "version": "1.0.0",
+  "version": "0.4.0",
+  "description": "Configuration-driven paper-collage video pipeline and Codex plugin built with Remotion.",
   "private": true,
   "type": "module",
+  "author": "Paper Collage Video Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cyberlesterr/paper-collage-video.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cyberlesterr/paper-collage-video/issues"
+  },
+  "homepage": "https://github.com/cyberlesterr/paper-collage-video#readme",
+  "keywords": [
+    "remotion",
+    "codex-plugin",
+    "video",
+    "paper-collage",
+    "animation"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "assets:rasterize": "node scripts/rasterize-assets.mjs",
     "assets:process-sheet": "node scripts/process-character-sheet.mjs",
@@ -25,13 +46,12 @@
     "project:report": "node scripts/project-report.mjs",
     "doctor": "node scripts/project-doctor.mjs",
     "plugin:sync": "node scripts/sync-plugin-package.mjs",
-    "dev": "remotion studio src/index.ts --props=projects/tang-demo/project.json",
+    "dev": "remotion studio src/index.ts --props=projects/tie-chu-mo-zhen/project.json",
     "check": "tsc --noEmit",
     "bundle": "remotion bundle src/index.ts",
-    "render": "npm run project:render -- tang-demo",
-    "render:preview": "npm run project:preview -- tang-demo",
-    "render:frame": "remotion still src/index.ts Paper-Collage out/replica-preview-frame.png --props=projects/tang-demo/project.json --frame=470",
-    "render:prototype": "remotion render src/index.ts Tang-Paper-Cutout-Prototype out/tang-paper-cutout-prototype.mp4 --scale=0.5 --concurrency=8",
+    "render": "npm run project:render -- tie-chu-mo-zhen",
+    "render:preview": "npm run project:preview -- tie-chu-mo-zhen",
+    "render:frame": "remotion still src/index.ts Paper-Collage out/tie-chu-mo-zhen-frame.png --props=projects/tie-chu-mo-zhen/project.json --frame=300",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {

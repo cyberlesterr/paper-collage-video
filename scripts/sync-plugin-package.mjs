@@ -53,9 +53,15 @@ await fs.rm(SKILL_TARGET, {recursive: true, force: true});
 await fs.mkdir(RUNTIME_ROOT, {recursive: true});
 await fs.mkdir(path.dirname(SKILL_TARGET), {recursive: true});
 await fs.cp(SKILL_SOURCE, SKILL_TARGET, {recursive: true});
+for (const notice of ['LICENSE', 'ASSET_LICENSES.md', 'THIRD_PARTY_NOTICES.md']) {
+  await fs.copyFile(path.join(ROOT, notice), path.join(PLUGIN_ROOT, notice));
+}
 
 for (const entry of [
   '.gitignore',
+  'LICENSE',
+  'ASSET_LICENSES.md',
+  'THIRD_PARTY_NOTICES.md',
   'package-lock.json',
   'providers.local.example.json',
   'providers.json',
@@ -148,6 +154,7 @@ lock.name = workspacePackage.name;
 lock.version = workspacePackage.version;
 lock.packages[''].name = workspacePackage.name;
 lock.packages[''].version = workspacePackage.version;
+lock.packages[''].license = workspacePackage.license;
 await writeJson(path.join(RUNTIME_ROOT, 'package-lock.json'), lock);
 
 const rootSource = `import {Composition, type CalculateMetadataFunction} from 'remotion';
@@ -301,9 +308,12 @@ const starterRequests = path.join(
 await fs.mkdir(starterRequests, {recursive: true});
 await fs.writeFile(path.join(starterRequests, '.gitkeep'), '', 'utf8');
 
-await copy('public/layers/sky.png', 'public/projects/starter-demo/assets/plates/01-bg.png');
 await copy(
-  'public/layers/traveler.png',
+  'fixtures/starter-demo/01-bg.png',
+  'public/projects/starter-demo/assets/plates/01-bg.png',
+);
+await copy(
+  'fixtures/starter-demo/01-traveler.png',
   'public/projects/starter-demo/assets/characters/alpha/01-traveler.png',
 );
 const narrationFile = path.join(

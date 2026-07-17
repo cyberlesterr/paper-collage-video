@@ -1,4 +1,5 @@
 import {execFile} from 'node:child_process';
+import {availableParallelism} from 'node:os';
 import {promisify} from 'node:util';
 import {fileURLToPath} from 'node:url';
 import fs from 'node:fs/promises';
@@ -14,6 +15,11 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 export const ROOT = path.resolve(scriptDirectory, '..');
 export const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export const resolveRenderConcurrency = (
+  parallelism = availableParallelism(),
+  maximum = 8,
+) => Math.max(1, Math.min(maximum, Math.floor(parallelism)));
 
 export const projectPaths = (slug) => ({
   slug,
