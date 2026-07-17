@@ -1,13 +1,33 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /
+    directories:
+      - /
+      - /plugins/paper-collage-video/assets/remotion-template
     schedule:
       interval: weekly
       day: monday
       time: "09:00"
       timezone: Asia/Shanghai
     open-pull-requests-limit: 5
+    allow:
+      - dependency-type: all
+        update-types:
+          - version-update:semver-minor
+          - version-update:semver-patch
+    groups:
+      remotion:
+        patterns:
+          - "@remotion/*"
+          - remotion
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+      synchronized-dependencies:
+        group-by: dependency-name
     labels:
       - dependencies
 
