@@ -20,7 +20,19 @@ and Codex Plugin.
 - Project validation, narration synchronization, subtitle alignment, LUFS and
   true-peak reporting, CPU-aware rendering, and scene-aware contact sheets.
 - A lightweight two-second fixture used only for installation smoke tests;
-  production projects and media are not bundled into the release artifact.
+  production projects and media are not bundled into the Plugin package.
+
+## Complete Repository Demo
+
+The Release has one media attachment only:
+[Tie Chu Mo Zhen — 77.7-second 1080p final film](https://github.com/cyberlesterr/paper-collage-video/releases/download/v0.5.0/tie-chu-mo-zhen-final.mp4).
+It demonstrates the v2 quality gate, six-scene timeline, depth and narrative
+motion, subtitles, fictional narration, action sound effects, and delivery
+checks. Preview renders, motion proofs, contact sheets, and source assets are
+not attached.
+
+The demo is repository-demo-only material rather than an MIT-licensed media
+asset. See `ASSET_LICENSES.md` before redistributing or reusing it.
 
 ## Install
 

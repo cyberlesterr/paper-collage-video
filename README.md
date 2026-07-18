@@ -7,7 +7,13 @@
 
 仓库中的 `tie-chu-mo-zhen` 已按 v2 协议从空项目重新开始，不继承旧素材、旧 provider 选择或旧审批。插件发行包另带一个 2 秒低电平测试音技术夹具 `starter-demo`，仅用于自动化烟雾测试。
 
-当前公开预览版本为 `0.4.0`，仓库正在开发 `0.5.0` 的质量门与 Motion/Depth 协议；功能和协议仍可能在 `1.0.0` 前调整。
+当前公开预览版本为 `0.5.0`，包含 v2 项目协议、哈希绑定质量门、Motion/Depth、字幕对齐和响度验收；功能和协议仍可能在 `1.0.0` 前调整。
+
+## 完整演示
+
+[观看或下载唯一完整演示：《铁杵磨针》77.7 秒 1080p 纸片故事](https://github.com/cyberlesterr/paper-collage-video/releases/download/v0.5.0/tie-chu-mo-zhen-final.mp4)
+
+Release 页只保留这一份最终成片，不附带预览、动作证明、联系表或素材包。它仅用于展示 v2 质量门、六幕时间线、景深运动、字幕、虚构旁白、动作音效和技术验收能力；使用边界见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
 
 ## 从 GitHub 安装 Plugin
 

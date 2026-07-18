@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-07-18
+
 ### Added
 
 - Hash-bound asset quality reports with deterministic image checks and a recorded semantic visual rubric.
@@ -53,5 +55,6 @@
 - The repository now keeps one complete showcase, `tie-chu-mo-zhen`; older
   production demos and the legacy one-shot composition were removed.
 
-[Unreleased]: https://github.com/cyberlesterr/paper-collage-video/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/cyberlesterr/paper-collage-video/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/cyberlesterr/paper-collage-video/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cyberlesterr/paper-collage-video/releases/tag/v0.4.0

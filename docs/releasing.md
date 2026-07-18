@@ -49,11 +49,22 @@ git status --short
 ## 5. Create the Release
 
 ```bash
-git tag -a v0.4.0 -m "Paper Collage Video v0.4.0"
-git push origin v0.4.0
+git tag -a v0.5.0 -m "Paper Collage Video v0.5.0"
+git push origin v0.5.0
 ```
 
 标签会触发 `Publish GitHub Release` 工作流。工作流会从该标签重新验证源码、测试、类型和 Remotion bundle，然后创建正式 Release。生产项目及其预览不再作为发布构建依赖，也不会自动上传媒体、provider 凭据、本机配置或权属未确认的素材。
+
+工作流成功后，仅上传已通过发布审批和技术报告的最终演示成片：
+
+```bash
+cp dist/tie-chu-mo-zhen/final.mp4 \
+  dist/tie-chu-mo-zhen/tie-chu-mo-zhen-final.mp4
+gh release upload v0.5.0 \
+  'dist/tie-chu-mo-zhen/tie-chu-mo-zhen-final.mp4#Tie Chu Mo Zhen final demo (MP4)'
+```
+
+Release 只保留这一份仓库演示媒体；不要追加预览、动作证明、联系表、源素材或 provider 产物。演示媒体不采用 MIT，受 `ASSET_LICENSES.md` 的 repository-demo-only 条款约束。
 
 ## 6. Post-Release Verification
 
