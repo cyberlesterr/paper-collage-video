@@ -2,9 +2,9 @@
   "$schema": "../../schemas/production.schema.json",
   "schemaVersion": 1,
   "slug": "tie-chu-mo-zhen",
-  "stage": "human-review",
+  "stage": "publish-approval",
   "createdAt": "2026-07-18T08:36:15.079Z",
-  "updatedAt": "2026-07-18T15:02:45.276Z",
+  "updatedAt": "2026-07-18T15:22:45.761Z",
   "approvals": {
     "concept": {
       "status": "approved",
@@ -17,9 +17,9 @@
       "note": "批准风格和音色"
     },
     "preview": {
-      "status": "pending",
-      "decidedAt": null,
-      "note": ""
+      "status": "approved",
+      "decidedAt": "2026-07-18T15:09:10.402Z",
+      "note": "预览通过"
     },
     "publish": {
       "status": "pending",
@@ -116,7 +116,7 @@
     "review": "projects/tie-chu-mo-zhen/review.md",
     "validationReport": "dist/tie-chu-mo-zhen/validation-report.json",
     "preview": "dist/tie-chu-mo-zhen/preview.mp4",
-    "final": null,
+    "final": "dist/tie-chu-mo-zhen/final.mp4",
     "report": "dist/tie-chu-mo-zhen/report.json",
     "contactSheet": "dist/tie-chu-mo-zhen/contact-sheet.jpg"
   },
@@ -312,6 +312,18 @@
       "action": "preview-rendered",
       "stage": "human-review",
       "note": "dist/tie-chu-mo-zhen/preview.mp4"
+    },
+    {
+      "at": "2026-07-18T15:09:10.402Z",
+      "action": "approve-preview",
+      "stage": "final-render",
+      "note": "预览通过"
+    },
+    {
+      "at": "2026-07-18T15:22:45.761Z",
+      "action": "final-rendered",
+      "stage": "publish-approval",
+      "note": "dist/tie-chu-mo-zhen/final.mp4"
     }
   ]
 }
