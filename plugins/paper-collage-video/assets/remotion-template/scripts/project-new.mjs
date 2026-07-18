@@ -36,6 +36,7 @@ try {
     'production.json',
     'prompts.json',
     'providers.json',
+    'quality-report.json',
     'review.md',
   ];
   const publicDirectories = [

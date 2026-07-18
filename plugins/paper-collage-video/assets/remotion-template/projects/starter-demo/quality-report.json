@@ -1,0 +1,7 @@
+{
+  "$schema": "../../schemas/quality-report.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "starter-demo",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "assets": []
+}

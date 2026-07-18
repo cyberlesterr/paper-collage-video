@@ -29,6 +29,8 @@ If no valid workspace exists:
 
 Do not write projects, dependencies, renders, or generated media into the installed plugin cache.
 
+The bootstrap installs Python image dependencies into `.venv`. Runtime image commands resolve `PYTHON_BIN` first, then the workspace `.venv`, then the system Python. Do not require the human to activate the virtual environment manually.
+
 ## Failure Contract
 
 If bootstrap or doctor fails, preserve any created workspace and report:

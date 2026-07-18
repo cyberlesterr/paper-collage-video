@@ -15,6 +15,10 @@
     "resolved": null,
     "updatedAt": "{{createdAt}}"
   },
+  "quality": {
+    "mode": "required",
+    "minimumAssetScale": 1
+  },
   "video": {
     "width": 1920,
     "height": 1080,
@@ -44,7 +48,12 @@
   },
   "audio": {
     "music": null,
-    "sfx": {}
+    "sfx": {},
+    "mastering": {
+      "targetLufs": -16,
+      "toleranceLufs": 3,
+      "truePeakDbtp": -1
+    }
   },
   "scenes": []
 }

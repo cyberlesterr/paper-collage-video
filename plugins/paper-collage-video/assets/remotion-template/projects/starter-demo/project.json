@@ -3,6 +3,10 @@
   "schemaVersion": 1,
   "slug": "starter-demo",
   "title": "Paper Collage Starter",
+  "quality": {
+    "mode": "advisory",
+    "minimumAssetScale": 0.5
+  },
   "video": {
     "width": 1920,
     "height": 1080,
@@ -27,7 +31,12 @@
   },
   "audio": {
     "music": null,
-    "sfx": {}
+    "sfx": {},
+    "mastering": {
+      "targetLufs": -16,
+      "toleranceLufs": 3,
+      "truePeakDbtp": -1
+    }
   },
   "scenes": [
     {
@@ -36,6 +45,10 @@
       "eyebrow": "STARTER",
       "tailFrames": 30,
       "background": "projects/starter-demo/assets/plates/01-bg.png",
+      "camera": {
+        "preset": "push",
+        "intensity": 0.6
+      },
       "narration": {
         "src": "projects/starter-demo/audio/narration/01-silence.wav",
         "startFrame": 0,
@@ -52,7 +65,12 @@
           "width": 1920,
           "z": 4,
           "delay": 0,
-          "enterFrom": "left"
+          "enterFrom": "left",
+          "motion": {
+            "idle": "breathe",
+            "intensity": 0.5,
+            "cycleSeconds": 2.8
+          }
         }
       ],
       "subtitles": [

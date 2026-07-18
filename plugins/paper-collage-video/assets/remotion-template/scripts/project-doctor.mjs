@@ -9,6 +9,7 @@ import {
   loadProviderConfig,
   resolveProvider,
 } from './provider-lib.mjs';
+import {resolvePythonCommand} from './python-runtime.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -79,7 +80,7 @@ record(
   fs.existsSync(remotionBinary) ? null : '运行 npm ci',
 );
 
-const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
+const pythonCommand = resolvePythonCommand({root: ROOT});
 const pythonAvailable = commandCheck(
   'python',
   pythonCommand,
@@ -87,20 +88,14 @@ const pythonAvailable = commandCheck(
   ready,
 );
 if (pythonAvailable) {
-  const virtualPython = path.join(
-    ROOT,
-    '.venv',
-    process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python',
-  );
-  const python = fs.existsSync(virtualPython) ? virtualPython : pythonCommand;
-  const modules = run(python, ['-c', 'import numpy; import PIL']);
+  const modules = run(pythonCommand, ['-c', 'import numpy; import PIL']);
   record(
     'python-dependencies',
     modules.status === 0 ? 'ok' : ready ? 'error' : 'warning',
     modules.status === 0 ? 'Python 图像依赖已安装' : '缺少 numpy 或 Pillow',
     modules.status === 0
-      ? python
-      : '运行 python3 -m pip install -r requirements.txt，推荐使用 .venv',
+      ? pythonCommand
+      : '运行 python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt',
   );
 }
 

@@ -67,7 +67,11 @@ export const deriveTimeline = (project) => {
       Number(scene.narration?.startFrame ?? 0) +
       narrationFrames +
       Number(scene.tailFrames ?? 0);
-    const from = index === 0 ? 0 : Math.max(0, cursor - transitionFrames);
+    const sceneTransitionFrames =
+      scene.transition?.type === 'none'
+        ? 0
+        : scene.transition?.durationFrames ?? transitionFrames;
+    const from = index === 0 ? 0 : Math.max(0, cursor - sceneTransitionFrames);
     cursor = from + durationInFrames;
     return {...scene, from, durationInFrames, narrationFrames};
   });
@@ -275,6 +279,13 @@ const isPositiveNumber = (value) =>
 export const validateProject = async (project, options = {}) => {
   const issues = [];
   const assets = [];
+  const backgroundInspectionCache = new Map();
+  const characterInspectionCache = new Map();
+  const mediaProbeCache = new Map();
+  const memoize = (cache, key, inspect) => {
+    if (!cache.has(key)) cache.set(key, inspect());
+    return cache.get(key);
+  };
   const add = (level, code, message, location) =>
     issues.push(makeIssue(level, code, message, location));
 
@@ -295,6 +306,29 @@ export const validateProject = async (project, options = {}) => {
   }
   if (!isPositiveNumber(project.video?.fps)) {
     add('error', 'video-fps', 'fps 必须为正数。', 'video.fps');
+  }
+  if (
+    project.quality?.minimumAssetScale !== undefined &&
+    !isPositiveNumber(project.quality.minimumAssetScale)
+  ) {
+    add(
+      'error',
+      'quality-minimum-scale',
+      'quality.minimumAssetScale 必须是正数。',
+      'quality.minimumAssetScale',
+    );
+  }
+  if (project.audio?.mastering) {
+    const {targetLufs, toleranceLufs, truePeakDbtp} = project.audio.mastering;
+    if (!Number.isFinite(targetLufs)) {
+      add('error', 'audio-target-lufs', 'audio.mastering.targetLufs 必须是数字。', 'audio.mastering.targetLufs');
+    }
+    if (!isPositiveNumber(toleranceLufs)) {
+      add('error', 'audio-lufs-tolerance', 'audio.mastering.toleranceLufs 必须是正数。', 'audio.mastering.toleranceLufs');
+    }
+    if (!Number.isFinite(truePeakDbtp)) {
+      add('error', 'audio-true-peak', 'audio.mastering.truePeakDbtp 必须是数字。', 'audio.mastering.truePeakDbtp');
+    }
   }
   if (!Array.isArray(project.scenes) || project.scenes.length === 0) {
     add('error', 'scenes-empty', '项目至少需要一个镜头。', 'scenes');
@@ -329,6 +363,17 @@ export const validateProject = async (project, options = {}) => {
     if (scene.durationInFrames <= 0) {
       add('error', 'scene-duration', '镜头计算时长必须大于 0。', sceneLocation);
     }
+    if (
+      scene.transition?.durationFrames !== undefined &&
+      scene.transition.durationFrames * 2 >= scene.durationInFrames
+    ) {
+      add(
+        'warning',
+        'transition-too-long',
+        '转场时长占镜头时长的一半或更多。',
+        `${sceneLocation}.transition.durationFrames`,
+      );
+    }
 
     const backgroundLocation = `${sceneLocation}.background`;
     try {
@@ -336,7 +381,11 @@ export const validateProject = async (project, options = {}) => {
       if (!(await fileExists(backgroundFile))) {
         add('error', 'background-missing', `缺少背景：${scene.background}`, backgroundLocation);
       } else {
-        const inspection = await inspectBackground(backgroundFile);
+        const inspection = await memoize(
+          backgroundInspectionCache,
+          backgroundFile,
+          () => inspectBackground(backgroundFile),
+        );
         assets.push({kind: 'background', src: scene.background, ...inspection});
         const sourceRatio = inspection.width / inspection.height;
         const videoRatio = project.video.width / project.video.height;
@@ -345,6 +394,17 @@ export const validateProject = async (project, options = {}) => {
             'warning',
             'background-aspect',
             `背景宽高比 ${sourceRatio.toFixed(3)} 与视频 ${videoRatio.toFixed(3)} 差异较大。`,
+            backgroundLocation,
+          );
+        }
+        const minimumScale = project.quality?.minimumAssetScale ?? 1;
+        const minimumWidth = Math.round(project.video.width * minimumScale);
+        const minimumHeight = Math.round(project.video.height * minimumScale);
+        if (inspection.width < minimumWidth || inspection.height < minimumHeight) {
+          add(
+            project.quality?.mode === 'required' ? 'error' : 'warning',
+            'background-resolution',
+            `背景 ${inspection.width}x${inspection.height} 低于质量规格 ${minimumWidth}x${minimumHeight}。`,
             backgroundLocation,
           );
         }
@@ -359,7 +419,9 @@ export const validateProject = async (project, options = {}) => {
       if (!(await fileExists(narrationFile))) {
         add('error', 'narration-missing', `缺少旁白：${scene.narration?.src}`, narrationLocation);
       } else {
-        const probe = await probeMedia(narrationFile);
+        const probe = await memoize(mediaProbeCache, narrationFile, () =>
+          probeMedia(narrationFile),
+        );
         const durationSeconds = Number(probe.format?.duration ?? 0);
         assets.push({kind: 'narration', src: scene.narration.src, durationSeconds});
         if (Math.abs(durationSeconds - scene.narration.durationSeconds) > 0.08) {
@@ -373,6 +435,20 @@ export const validateProject = async (project, options = {}) => {
       }
     } catch (error) {
       add('error', 'narration-probe', error.message, narrationLocation);
+    }
+    if (scene.narration?.timingSrc) {
+      try {
+        if (!(await fileExists(resolvePublicFile(scene.narration.timingSrc)))) {
+          add(
+            'error',
+            'narration-timing-missing',
+            `缺少旁白时间戳：${scene.narration.timingSrc}`,
+            `${narrationLocation}.timingSrc`,
+          );
+        }
+      } catch (error) {
+        add('error', 'narration-timing-path', error.message, `${narrationLocation}.timingSrc`);
+      }
     }
 
     const layerIds = new Set();
@@ -390,6 +466,12 @@ export const validateProject = async (project, options = {}) => {
       if (!['left', 'right', 'bottom'].includes(layer.enterFrom)) {
         add('error', 'layer-enter', `未知入场方向：${layer.enterFrom}`, `${layerLocation}.enterFrom`);
       }
+      if (
+        layer.motion?.idle !== undefined &&
+        !['float', 'breathe', 'grind', 'drift', 'still'].includes(layer.motion.idle)
+      ) {
+        add('error', 'layer-motion', `未知 idle 动画：${layer.motion.idle}`, `${layerLocation}.motion.idle`);
+      }
       if (!isPositiveNumber(layer.width)) {
         add('error', 'layer-width', '人物宽度必须大于 0。', `${layerLocation}.width`);
       }
@@ -401,7 +483,11 @@ export const validateProject = async (project, options = {}) => {
         if (!(await fileExists(layerFile))) {
           add('error', 'layer-missing', `缺少人物素材：${layer.src}`, `${layerLocation}.src`);
         } else {
-          const inspection = await inspectCharacterPng(layerFile);
+          const inspection = await memoize(
+            characterInspectionCache,
+            layerFile,
+            () => inspectCharacterPng(layerFile),
+          );
           assets.push({kind: 'character', src: layer.src, ...inspection});
           if (!inspection.hasAlpha || inspection.transparentPixels === 0) {
             add('error', 'layer-alpha', '人物 PNG 没有有效透明区域。', `${layerLocation}.src`);
@@ -423,6 +509,87 @@ export const validateProject = async (project, options = {}) => {
       add('warning', 'primary-missing', '镜头没有 primary 主体。', `${sceneLocation}.layers`);
     }
 
+    const environmentIds = new Set();
+    for (const [environmentIndex, environment] of (
+      scene.environmentLayers ?? []
+    ).entries()) {
+      const environmentLocation = `${sceneLocation}.environmentLayers[${environmentIndex}]`;
+      if (!environment.id || environmentIds.has(environment.id)) {
+        add(
+          'error',
+          'environment-id',
+          '环境图层 id 缺失或重复。',
+          `${environmentLocation}.id`,
+        );
+      }
+      environmentIds.add(environment.id);
+      if (environment.depth < -1 || environment.depth > 1) {
+        add(
+          'error',
+          'environment-depth',
+          '环境图层 depth 必须位于 -1 到 1。',
+          `${environmentLocation}.depth`,
+        );
+      }
+      try {
+        const environmentFile = resolvePublicFile(environment.src);
+        if (!(await fileExists(environmentFile))) {
+          add(
+            'error',
+            'environment-missing',
+            `缺少环境图层：${environment.src}`,
+            `${environmentLocation}.src`,
+          );
+        } else {
+          const inspection = await memoize(
+            backgroundInspectionCache,
+            environmentFile,
+            () => inspectBackground(environmentFile),
+          );
+          assets.push({kind: 'environment', src: environment.src, ...inspection});
+        }
+      } catch (error) {
+        add('error', 'environment-inspect', error.message, `${environmentLocation}.src`);
+      }
+    }
+
+    const cameraKeyframes = scene.camera?.keyframes ?? [];
+    for (let index = 0; index < cameraKeyframes.length; index += 1) {
+      const keyframe = cameraKeyframes[index];
+      if (keyframe.at < 0 || keyframe.at > 1) {
+        add('error', 'camera-keyframe-at', 'camera keyframe.at 必须位于 0 到 1。', `${sceneLocation}.camera.keyframes[${index}].at`);
+      }
+      if (index > 0 && keyframe.at <= cameraKeyframes[index - 1].at) {
+        add('error', 'camera-keyframe-order', 'camera keyframes 必须按 at 严格递增。', `${sceneLocation}.camera.keyframes[${index}].at`);
+      }
+    }
+
+    for (const [eventIndex, event] of (scene.audioEvents ?? []).entries()) {
+      const eventLocation = `${sceneLocation}.audioEvents[${eventIndex}]`;
+      if (event.atSeconds !== undefined && event.fromFrame !== undefined) {
+        add(
+          'error',
+          'audio-event-time',
+          '动作音效只能使用 atSeconds 或 fromFrame 之一。',
+          eventLocation,
+        );
+      }
+      const fromFrame =
+        event.atSeconds === undefined
+          ? event.fromFrame ?? 0
+          : Math.round(event.atSeconds * project.video.fps);
+      if (fromFrame >= scene.durationInFrames) {
+        add('warning', 'audio-event-overflow', '动作音效开始时间超过镜头结束。', eventLocation);
+      }
+      try {
+        if (!(await fileExists(resolvePublicFile(event.src)))) {
+          add('error', 'audio-event-missing', `缺少动作音效：${event.src}`, `${eventLocation}.src`);
+        }
+      } catch (error) {
+        add('error', 'audio-event-path', error.message, `${eventLocation}.src`);
+      }
+    }
+
     let previousSubtitleEnd = -1;
     for (const [subtitleIndex, subtitle] of (scene.subtitles ?? []).entries()) {
       const subtitleLocation = `${sceneLocation}.subtitles[${subtitleIndex}]`;
@@ -434,6 +601,27 @@ export const validateProject = async (project, options = {}) => {
       }
       if (subtitle.from < previousSubtitleEnd) {
         add('warning', 'subtitle-overlap', '字幕时间发生重叠。', subtitleLocation);
+      }
+      const characterCount = [...String(subtitle.text ?? '').replace(/\s/g, '')].length;
+      const visibleSeconds = (subtitle.to - subtitle.from) / project.video.fps;
+      const readingRate = visibleSeconds > 0 ? characterCount / visibleSeconds : Infinity;
+      const maximumCharacters =
+        project.video.width / project.video.height >= 1 ? 32 : 18;
+      if (characterCount > maximumCharacters) {
+        add(
+          'warning',
+          'subtitle-length',
+          `字幕含 ${characterCount} 个字符，超过当前画幅建议的 ${maximumCharacters} 个字符。`,
+          `${subtitleLocation}.text`,
+        );
+      }
+      if (readingRate > 12) {
+        add(
+          'warning',
+          'subtitle-reading-rate',
+          `字幕阅读速度约 ${readingRate.toFixed(1)} 字/秒，建议拆分或延长显示。`,
+          subtitleLocation,
+        );
       }
       previousSubtitleEnd = Math.max(previousSubtitleEnd, subtitle.to);
     }

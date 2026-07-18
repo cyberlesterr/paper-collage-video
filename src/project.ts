@@ -1,5 +1,70 @@
-import type {CharacterLayer, SubtitleCue} from './ReplicaChapterScene';
 import type {Role} from './roleMotion';
+
+export type EnterFrom = 'left' | 'right' | 'bottom';
+export type IdleMotionPreset = 'float' | 'breathe' | 'grind' | 'drift' | 'still';
+
+export type LayerMotion = {
+  idle?: IdleMotionPreset;
+  intensity?: number;
+  cycleSeconds?: number;
+  phase?: number;
+  enterDurationSeconds?: number;
+};
+
+export type CharacterLayer = {
+  id: string;
+  src: string;
+  role: Role;
+  x: number;
+  bottom: number;
+  width: number;
+  z: number;
+  delay: number;
+  delaySeconds?: number;
+  enterFrom: EnterFrom;
+  motion?: LayerMotion;
+};
+
+export type EnvironmentLayer = {
+  id: string;
+  src: string;
+  depth: number;
+  z: number;
+  x?: number;
+  y?: number;
+  width?: number;
+  opacity?: number;
+};
+
+export type SubtitleCue = {
+  from: number;
+  to: number;
+  text: string;
+};
+
+export type CameraKeyframe = {
+  at: number;
+  x?: number;
+  y?: number;
+  zoom?: number;
+};
+
+export type SceneCamera = {
+  preset?: 'push' | 'pull' | 'pan-left' | 'pan-right' | 'static';
+  intensity?: number;
+  keyframes?: CameraKeyframe[];
+};
+
+export type SceneTransition = {
+  type?: 'fade' | 'none';
+  durationFrames?: number;
+};
+
+export type ProjectAudioEvent = ProjectSound & {
+  id: string;
+  fromFrame?: number;
+  atSeconds?: number;
+};
 
 export type ProjectTheme = {
   canvas: string;
@@ -11,11 +76,19 @@ export type ProjectTheme = {
   paperEdge: string;
   foreground: string;
   texture: string;
+  fontFamily?: string;
+  fontFile?: string;
 };
 
 export type ProjectSound = {
   src: string;
   volume: number;
+};
+
+export type ProjectAudioMastering = {
+  targetLufs: number;
+  toleranceLufs: number;
+  truePeakDbtp: number;
 };
 
 export type ProjectScene = {
@@ -24,14 +97,19 @@ export type ProjectScene = {
   eyebrow: string;
   tailFrames: number;
   background: string;
+  environmentLayers?: EnvironmentLayer[];
+  camera?: SceneCamera;
+  transition?: SceneTransition;
   narration: {
     src: string;
+    timingSrc?: string;
     startFrame: number;
     durationSeconds: number;
     text: string;
   };
   layers: CharacterLayer[];
   subtitles: SubtitleCue[];
+  audioEvents?: ProjectAudioEvent[];
 };
 
 export type PaperCollageProject = {
@@ -63,6 +141,10 @@ export type PaperCollageProject = {
     fps: number;
     transitionFrames: number;
   };
+  quality?: {
+    mode: 'required' | 'advisory' | 'off';
+    minimumAssetScale?: number;
+  };
   theme: ProjectTheme;
   voice?: {
     mode: 'fictional' | 'clone';
@@ -74,6 +156,7 @@ export type PaperCollageProject = {
   audio: {
     music: ProjectSound | null;
     sfx: Partial<Record<Role, ProjectSound>>;
+    mastering?: ProjectAudioMastering;
   };
   scenes: ProjectScene[];
 };
@@ -97,7 +180,11 @@ export const normalizeProject = (
     const narrationFrames = Math.ceil(scene.narration.durationSeconds * fps);
     const durationInFrames =
       scene.narration.startFrame + narrationFrames + scene.tailFrames;
-    const from = index === 0 ? 0 : Math.max(0, cursor - transitionFrames);
+    const sceneTransitionFrames =
+      scene.transition?.type === 'none'
+        ? 0
+        : scene.transition?.durationFrames ?? transitionFrames;
+    const from = index === 0 ? 0 : Math.max(0, cursor - sceneTransitionFrames);
     cursor = from + durationInFrames;
     return {...scene, from, durationInFrames};
   });

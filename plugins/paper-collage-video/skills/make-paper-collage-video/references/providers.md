@@ -94,6 +94,8 @@ Arguments are passed as an array with `shell: false`; shell substitutions such a
 
 Every `provider:run` or `provider:record` call updates `projects/<slug>/assets-manifest.json` by stable `assetId`. Each entry records the provider, adapter, actual model when known, optional external job id, SHA-256, size, time, output path, and request snapshot.
 
+The record also contains a request fingerprint that excludes project-specific ids and output paths. Before invoking a paid or slow provider, run `provider:reuse` with the request. It reuses only an exact provider/model/input/settings match whose file still matches its recorded hash. A cache miss is normal; continue with the selected provider. Reused images still require the current project's quality review.
+
 Both commands refuse an unconfirmed provider or a `--provider` different from the human's recorded selection. Change the selection explicitly before switching services.
 
 Provider provenance does not replace `production.json`: keep material work items there with `project:checkpoint`. If a provider is unavailable, record the exact work-item blocker and preserve the current production stage. Do not manufacture an output or silently switch to a different paid service.

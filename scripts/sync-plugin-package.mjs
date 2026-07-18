@@ -71,7 +71,9 @@ for (const entry of [
   'templates',
   'scripts/creative-plan-lib.mjs',
   'scripts/process-character-sheet.mjs',
+  'scripts/python-runtime.mjs',
   'scripts/provider-lib.mjs',
+  'scripts/provider-reuse.mjs',
   'scripts/provider-select.mjs',
   'scripts/provider-record.mjs',
   'scripts/provider-run.mjs',
@@ -85,15 +87,19 @@ for (const entry of [
   'scripts/project-lib.mjs',
   'scripts/project-new.mjs',
   'scripts/project-plan.mjs',
+  'scripts/project-quality.mjs',
   'scripts/project-render.mjs',
   'scripts/project-report.mjs',
   'scripts/project-review-sync.mjs',
   'scripts/project-status.mjs',
   'scripts/project-sync.mjs',
+  'scripts/project-subtitles.mjs',
   'scripts/project-validate.mjs',
+  'scripts/quality-lib.mjs',
   'scripts/rasterize-assets.mjs',
   'scripts/remove_chroma_key.py',
   'scripts/split_sheet.py',
+  'scripts/subtitle-lib.mjs',
   'src/MainVideo.tsx',
   'src/ReplicaChapterScene.tsx',
   'src/index.ts',
@@ -102,6 +108,7 @@ for (const entry of [
   'tests/provider-and-assets.test.mjs',
   'tests/creative-plan.test.mjs',
   'tests/production-state.test.mjs',
+  'tests/quality-motion-runtime.test.mjs',
   'public/textures/paper-grain.png',
 ]) {
   await copy(entry);
@@ -113,7 +120,7 @@ const rootPackage = JSON.parse(
 const workspacePackage = {
   ...rootPackage,
   name: 'paper-collage-video-workspace',
-  version: '0.4.0',
+  version: '0.5.0',
   private: true,
   engines: {node: '>=20'},
   scripts: {
@@ -123,8 +130,10 @@ const workspacePackage = {
     'provider:select': rootPackage.scripts['provider:select'],
     'provider:run': rootPackage.scripts['provider:run'],
     'provider:record': rootPackage.scripts['provider:record'],
+    'provider:reuse': rootPackage.scripts['provider:reuse'],
     'project:new': rootPackage.scripts['project:new'],
     'project:plan': rootPackage.scripts['project:plan'],
+    'project:quality': rootPackage.scripts['project:quality'],
     'project:status': rootPackage.scripts['project:status'],
     'project:handoff-check': rootPackage.scripts['project:handoff-check'],
     'project:checkpoint': rootPackage.scripts['project:checkpoint'],
@@ -132,6 +141,7 @@ const workspacePackage = {
     'project:advance': rootPackage.scripts['project:advance'],
     'project:assets-ready': rootPackage.scripts['project:assets-ready'],
     'project:sync': rootPackage.scripts['project:sync'],
+    'project:subtitles': rootPackage.scripts['project:subtitles'],
     'project:validate': rootPackage.scripts['project:validate'],
     'project:preview': rootPackage.scripts['project:preview'],
     'project:render': rootPackage.scripts['project:render'],
@@ -191,6 +201,7 @@ const project = {
   schemaVersion: 1,
   slug: 'starter-demo',
   title: 'Paper Collage Starter',
+  quality: {mode: 'advisory', minimumAssetScale: 0.5},
   video: {width: 1920, height: 1080, fps: 30, transitionFrames: 12},
   theme: {
     canvas: '#6e1e19',
@@ -204,7 +215,11 @@ const project = {
     texture: 'textures/paper-grain.png',
   },
   voice: {mode: 'fictional', provider: 'fixture', displayName: 'Silent fixture'},
-  audio: {music: null, sfx: {}},
+  audio: {
+    music: null,
+    sfx: {},
+    mastering: {targetLufs: -16, toleranceLufs: 3, truePeakDbtp: -1},
+  },
   scenes: [
     {
       id: 'starter',
@@ -212,6 +227,7 @@ const project = {
       eyebrow: 'STARTER',
       tailFrames: 30,
       background: 'projects/starter-demo/assets/plates/01-bg.png',
+      camera: {preset: 'push', intensity: 0.6},
       narration: {
         src: 'projects/starter-demo/audio/narration/01-silence.wav',
         startFrame: 0,
@@ -229,6 +245,7 @@ const project = {
           z: 4,
           delay: 0,
           enterFrom: 'left',
+          motion: {idle: 'breathe', intensity: 0.5, cycleSeconds: 2.8},
         },
       ],
       subtitles: [{from: 0, to: 54, text: 'Paper Collage Video'}],
@@ -289,6 +306,16 @@ await writeJson(
     assets: [],
   },
 );
+await writeJson(
+  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'quality-report.json'),
+  {
+    $schema: '../../schemas/quality-report.schema.json',
+    schemaVersion: 1,
+    projectSlug: 'starter-demo',
+    updatedAt: at,
+    assets: [],
+  },
+);
 await fs.writeFile(
   path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'brief.md'),
   '# 项目简报：Paper Collage Starter\n\n这是插件自带的轻量技术样例。\n',
@@ -331,7 +358,7 @@ await fs.writeFile(narrationFile, makeSilentWav());
 await writeJson(path.join(RUNTIME_ROOT, '.paper-collage-template.json'), {
   schemaVersion: 1,
   plugin: 'paper-collage-video',
-  pluginVersion: '0.4.0',
+  pluginVersion: '0.5.0',
 });
 
 console.log(`✓ Plugin skill synced: ${path.relative(ROOT, SKILL_TARGET)}`);

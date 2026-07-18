@@ -10,6 +10,15 @@
     "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "title": {"type": "string", "minLength": 1},
     "plan": {"$ref": "#/$defs/creativePlan"},
+    "quality": {
+      "type": "object",
+      "required": ["mode"],
+      "properties": {
+        "mode": {"enum": ["required", "advisory", "off"]},
+        "minimumAssetScale": {"type": "number", "exclusiveMinimum": 0, "maximum": 2}
+      },
+      "additionalProperties": false
+    },
     "video": {
       "type": "object",
       "required": ["width", "height", "fps", "transitionFrames"],
@@ -21,9 +30,29 @@
       },
       "additionalProperties": false
     },
-    "theme": {"type": "object"},
+    "theme": {
+      "type": "object",
+      "properties": {
+        "fontFamily": {"type": "string", "minLength": 1},
+        "fontFile": {"type": "string", "minLength": 1}
+      }
+    },
     "voice": {"type": "object"},
-    "audio": {"type": "object"},
+    "audio": {
+      "type": "object",
+      "properties": {
+        "mastering": {
+          "type": "object",
+          "required": ["targetLufs", "toleranceLufs", "truePeakDbtp"],
+          "properties": {
+            "targetLufs": {"type": "number"},
+            "toleranceLufs": {"type": "number", "exclusiveMinimum": 0},
+            "truePeakDbtp": {"type": "number"}
+          },
+          "additionalProperties": false
+        }
+      }
+    },
     "scenes": {
       "type": "array",
       "minItems": 1,
@@ -36,11 +65,61 @@
           "eyebrow": {"type": "string"},
           "tailFrames": {"type": "integer", "minimum": 0},
           "background": {"type": "string", "minLength": 1},
+          "environmentLayers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "src", "depth", "z"],
+              "properties": {
+                "id": {"type": "string", "minLength": 1},
+                "src": {"type": "string", "minLength": 1},
+                "depth": {"type": "number", "minimum": -1, "maximum": 1},
+                "z": {"type": "integer"},
+                "x": {"type": "number"},
+                "y": {"type": "number"},
+                "width": {"type": "number", "exclusiveMinimum": 0},
+                "opacity": {"type": "number", "minimum": 0, "maximum": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "camera": {
+            "type": "object",
+            "properties": {
+              "preset": {"enum": ["push", "pull", "pan-left", "pan-right", "static"]},
+              "intensity": {"type": "number", "minimum": 0, "maximum": 3},
+              "keyframes": {
+                "type": "array",
+                "minItems": 2,
+                "items": {
+                  "type": "object",
+                  "required": ["at"],
+                  "properties": {
+                    "at": {"type": "number", "minimum": 0, "maximum": 1},
+                    "x": {"type": "number"},
+                    "y": {"type": "number"},
+                    "zoom": {"type": "number", "exclusiveMinimum": 0}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "transition": {
+            "type": "object",
+            "properties": {
+              "type": {"enum": ["fade", "none"]},
+              "durationFrames": {"type": "integer", "minimum": 0}
+            },
+            "additionalProperties": false
+          },
           "narration": {
             "type": "object",
             "required": ["src", "startFrame", "durationSeconds", "text"],
             "properties": {
               "src": {"type": "string", "minLength": 1},
+              "timingSrc": {"type": "string", "minLength": 1},
               "startFrame": {"type": "integer", "minimum": 0},
               "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
               "text": {"type": "string"}
@@ -61,7 +140,19 @@
                 "width": {"type": "number", "exclusiveMinimum": 0},
                 "z": {"type": "integer"},
                 "delay": {"type": "integer", "minimum": 0},
-                "enterFrom": {"enum": ["left", "right", "bottom"]}
+                "delaySeconds": {"type": "number", "minimum": 0},
+                "enterFrom": {"enum": ["left", "right", "bottom"]},
+                "motion": {
+                  "type": "object",
+                  "properties": {
+                    "idle": {"enum": ["float", "breathe", "grind", "drift", "still"]},
+                    "intensity": {"type": "number", "minimum": 0, "maximum": 3},
+                    "cycleSeconds": {"type": "number", "exclusiveMinimum": 0},
+                    "phase": {"type": "number"},
+                    "enterDurationSeconds": {"type": "number", "exclusiveMinimum": 0}
+                  },
+                  "additionalProperties": false
+                }
               },
               "additionalProperties": false
             }
@@ -75,6 +166,21 @@
                 "from": {"type": "integer", "minimum": 0},
                 "to": {"type": "integer", "minimum": 1},
                 "text": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          },
+          "audioEvents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "src", "volume"],
+              "properties": {
+                "id": {"type": "string", "minLength": 1},
+                "src": {"type": "string", "minLength": 1},
+                "volume": {"type": "number", "minimum": 0},
+                "fromFrame": {"type": "integer", "minimum": 0},
+                "atSeconds": {"type": "number", "minimum": 0}
               },
               "additionalProperties": false
             }

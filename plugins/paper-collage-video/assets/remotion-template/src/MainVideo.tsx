@@ -8,8 +8,12 @@ import {
 
 export const MainVideo = (project: PaperCollageProject) => {
   const normalized = useMemo(() => normalizeProject(project), [project]);
+  const fontFace = normalized.theme.fontFile
+    ? `@font-face { font-family: "PaperCollageProjectFont"; src: url("${staticFile(normalized.theme.fontFile)}"); font-display: block; }`
+    : null;
   return (
     <AbsoluteFill style={{background: normalized.theme.canvas}}>
+      {fontFace ? <style>{fontFace}</style> : null}
       {normalized.audio.music ? (
         <Audio
           src={staticFile(normalized.audio.music.src)}

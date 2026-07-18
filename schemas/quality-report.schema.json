@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/quality-report.schema.json",
+  "title": "Paper Collage Asset Quality Report",
+  "type": "object",
+  "required": ["schemaVersion", "projectSlug", "updatedAt", "assets"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "updatedAt": {"type": "string", "format": "date-time"},
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["assetId", "file", "kind", "sources", "sha256", "requiredChecks", "technical", "semanticChecks", "status", "reviewer", "reviewedAt", "note"],
+        "properties": {
+          "assetId": {"type": "string", "minLength": 1},
+          "file": {"type": "string", "minLength": 1},
+          "kind": {"enum": ["background", "environment", "character", "character-sheet", "style-sample", "image"]},
+          "sources": {"type": "array", "items": {"type": "string"}},
+          "sha256": {"type": ["string", "null"]},
+          "requiredChecks": {"type": "array", "items": {"type": "string"}},
+          "technical": {"type": "object"},
+          "semanticChecks": {"type": "object"},
+          "status": {"enum": ["pending", "passed", "needs-revision"]},
+          "reviewer": {"type": ["string", "null"]},
+          "reviewedAt": {"type": ["string", "null"]},
+          "note": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

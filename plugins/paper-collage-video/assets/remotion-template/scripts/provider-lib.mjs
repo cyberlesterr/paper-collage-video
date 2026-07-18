@@ -7,10 +7,55 @@ import {ROOT, SLUG_PATTERN, fileExists, readJson, writeJson} from './project-lib
 export const PROVIDER_CAPABILITIES = ['text', 'image', 'voice'];
 export const PROVIDER_ADAPTERS = ['host', 'command', 'manual'];
 export const PROVIDER_SCOPES = ['project', 'workspace'];
+const IMAGE_QUALITY_KINDS = [
+  'background',
+  'environment',
+  'character-sheet',
+  'style-sample',
+  'image',
+];
+const IMAGE_QUALITY_CHECKS = [
+  'no-text',
+  'no-watermark',
+  'no-people',
+  'safe-area-clear',
+  'style-consistent',
+  'subject-complete',
+  'identity-consistent',
+  'cell-separation',
+  'background-uniform',
+  'edge-clean',
+];
 const PROVIDER_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const isPlainObject = (value) =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
+
+const stableValue = (value) => {
+  if (Array.isArray(value)) return value.map(stableValue);
+  if (!isPlainObject(value)) return value;
+  return Object.fromEntries(
+    Object.keys(value)
+      .sort()
+      .map((key) => [key, stableValue(value[key])]),
+  );
+};
+
+export const createRequestFingerprint = ({request, providerId, model}) => {
+  const reusableRequest = {
+    capability: request.capability,
+    prompt: request.prompt ?? null,
+    text: request.text ?? null,
+    voiceId: request.voiceId ?? null,
+    model: model ?? request.model ?? null,
+    settings: request.settings ?? {},
+    quality: request.quality ?? null,
+    providerId,
+  };
+  return createHash('sha256')
+    .update(JSON.stringify(stableValue(reusableRequest)))
+    .digest('hex');
+};
 
 export const deepMerge = (base, overlay) => {
   if (!isPlainObject(base) || !isPlainObject(overlay)) return overlay;
@@ -431,6 +476,27 @@ export const validateAssetRequest = (request) => {
   if (request?.capability === 'text' && !request.prompt) errors.push('text request 缺少 prompt');
   if (request?.capability === 'image' && !request.prompt) errors.push('image request 缺少 prompt');
   if (request?.capability === 'voice' && !request.text) errors.push('voice request 缺少 text');
+  if (request?.quality !== undefined) {
+    if (request.capability !== 'image') {
+      errors.push('只有 image request 可以声明 quality');
+    }
+    if (
+      request.quality.kind !== undefined &&
+      !IMAGE_QUALITY_KINDS.includes(request.quality.kind)
+    ) {
+      errors.push('quality.kind 无效');
+    }
+    if (
+      request.quality.requiredChecks !== undefined &&
+      (!Array.isArray(request.quality.requiredChecks) ||
+        request.quality.requiredChecks.length === 0 ||
+        request.quality.requiredChecks.some(
+          (check) => !IMAGE_QUALITY_CHECKS.includes(check),
+        ))
+    ) {
+      errors.push('quality.requiredChecks 含未知检查或为空');
+    }
+  }
   if (errors.length) throw new Error(`资产请求无效：${errors.join('；')}`);
   return request;
 };
@@ -499,6 +565,7 @@ export const recordAssetProvenance = async ({
   provider,
   model = null,
   externalId = null,
+  reusedFrom = null,
 }) => {
   const stat = await verifyOutputFile(output);
   const sha256 = createHash('sha256').update(await fs.readFile(output)).digest('hex');
@@ -514,6 +581,7 @@ export const recordAssetProvenance = async ({
   if (manifest.projectSlug !== request.projectSlug || !Array.isArray(manifest.assets)) {
     throw new Error(`资产清单无效：${path.relative(ROOT, manifestFile)}`);
   }
+  const actualModel = model || request.model || provider.model || null;
   const record = {
     assetId: request.assetId,
     capability: request.capability,
@@ -521,8 +589,14 @@ export const recordAssetProvenance = async ({
     provider: provider.id,
     adapter: provider.adapter,
     tool: provider.tool ?? null,
-    model: model || request.model || provider.model || null,
+    model: actualModel,
     externalId: externalId || null,
+    requestFingerprint: createRequestFingerprint({
+      request,
+      providerId: provider.id,
+      model: actualModel,
+    }),
+    reusedFrom,
     sha256,
     sizeBytes: stat.size,
     recordedAt: new Date().toISOString(),

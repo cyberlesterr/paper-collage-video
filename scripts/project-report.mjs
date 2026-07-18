@@ -13,6 +13,7 @@ import {
   validateProject,
   writeJson,
 } from './project-lib.mjs';
+import {prepareQualityReport} from './quality-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
@@ -34,6 +35,21 @@ const parseVolume = (stderr) => {
   };
 };
 
+const parseLoudness = (stderr) => {
+  const match = stderr.match(/\{\s*"input_i"[\s\S]*?"target_offset"\s*:\s*"[^"]+"\s*\}/g)?.at(-1);
+  if (!match) return {integratedLufs: null, truePeakDbtp: null, loudnessRangeLu: null};
+  const parsed = JSON.parse(match);
+  const numberOrNull = (value) => {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : null;
+  };
+  return {
+    integratedLufs: numberOrNull(parsed.input_i),
+    truePeakDbtp: numberOrNull(parsed.input_tp),
+    loudnessRangeLu: numberOrNull(parsed.input_lra),
+  };
+};
+
 const parseFrameRate = (value) => {
   const [numerator, denominator] = String(value ?? '0/1')
     .split('/')
@@ -41,30 +57,46 @@ const parseFrameRate = (value) => {
   return denominator ? numerator / denominator : 0;
 };
 
+const mapWithConcurrency = async (items, limit, mapper) => {
+  const results = new Array(items.length);
+  const concurrency = Math.max(1, Math.min(limit, items.length));
+  await Promise.all(
+    Array.from({length: concurrency}, async (_, workerIndex) => {
+      for (let index = workerIndex; index < items.length; index += concurrency) {
+        results[index] = await mapper(items[index], index);
+      }
+    }),
+  );
+  return results;
+};
+
 const createContactSheet = async ({video, output, samples, framesDirectory}) => {
   await fs.mkdir(framesDirectory, {recursive: true});
-  const panels = [];
-  for (const [index, sample] of samples.entries()) {
-    const {time} = sample;
-    const frameFile = path.join(framesDirectory, `frame-${index + 1}.png`);
-    await runCommand('ffmpeg', [
-      '-v',
-      'error',
-      '-ss',
-      time.toFixed(3),
-      '-i',
-      video,
-      '-frames:v',
-      '1',
-      '-y',
-      frameFile,
-    ]);
-    const image = await sharp(frameFile)
-      .resize(480, 270, {fit: 'cover'})
-      .png()
-      .toBuffer();
-    panels.push({...sample, image});
-  }
+  const panels = await mapWithConcurrency(
+    samples,
+    4,
+    async (sample, index) => {
+      const {time} = sample;
+      const frameFile = path.join(framesDirectory, `frame-${index + 1}.png`);
+      await runCommand('ffmpeg', [
+        '-v',
+        'error',
+        '-ss',
+        time.toFixed(3),
+        '-i',
+        video,
+        '-frames:v',
+        '1',
+        '-y',
+        frameFile,
+      ]);
+      const image = await sharp(frameFile)
+        .resize(480, 270, {fit: 'cover'})
+        .png()
+        .toBuffer();
+      return {...sample, image};
+    },
+  );
 
   const padding = 24;
   const gap = 18;
@@ -137,6 +169,23 @@ try {
         ).stderr,
       )
     : {meanDb: null, maxDb: null};
+  const loudness = audioStream
+    ? parseLoudness(
+        (
+          await runCommand('ffmpeg', [
+            '-i',
+            artifact,
+            '-map',
+            '0:a:0',
+            '-af',
+            'loudnorm=I=-16:TP=-1:LRA=11:print_format=json',
+            '-f',
+            'null',
+            '-',
+          ])
+        ).stderr,
+      )
+    : {integratedLufs: null, truePeakDbtp: null, loudnessRangeLu: null};
   const isPreview = path.basename(artifact) === 'preview.mp4';
   const expectedScale = isPreview ? 0.5 : 1;
   const expectedWidth = Math.round(project.video.width * expectedScale);
@@ -183,6 +232,28 @@ try {
       actual: volume.maxDb,
     },
   ];
+  const mastering = project.audio?.mastering;
+  if (mastering) {
+    technicalChecks.push(
+      {
+        id: 'audio-loudness',
+        passed:
+          loudness.integratedLufs !== null &&
+          Math.abs(loudness.integratedLufs - mastering.targetLufs) <=
+            mastering.toleranceLufs,
+        expected: `${mastering.targetLufs} ± ${mastering.toleranceLufs} LUFS`,
+        actual: loudness.integratedLufs,
+      },
+      {
+        id: 'audio-true-peak',
+        passed:
+          loudness.truePeakDbtp !== null &&
+          loudness.truePeakDbtp <= mastering.truePeakDbtp,
+        expected: `<= ${mastering.truePeakDbtp} dBTP`,
+        actual: loudness.truePeakDbtp,
+      },
+    );
+  }
   const contactSheet = path.join(paths.distDirectory, 'contact-sheet.jpg');
   const contactSheetSamples = deriveContactSheetSamples({
     timeline: validation.timeline,
@@ -196,6 +267,7 @@ try {
     framesDirectory: path.join(paths.distDirectory, 'frames'),
   });
 
+  const quality = await prepareQualityReport(slug);
   const report = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),
@@ -219,6 +291,7 @@ try {
             sampleRate: Number(audioStream.sample_rate),
             channels: audioStream.channels,
             ...volume,
+            ...loudness,
           }
         : null,
     },
@@ -227,9 +300,21 @@ try {
       summary: validation.summary,
       issues: validation.issues,
     },
+    quality: {
+      mode: quality.mode,
+      ready: quality.ready,
+      actualPassed: quality.actualPassed,
+      total: quality.total,
+      passed: quality.passed,
+      pending: quality.pending,
+      failed: quality.failed,
+      file: path.relative(ROOT, quality.file),
+    },
     technicalChecks,
     passed:
-      validation.passed && technicalChecks.every((check) => check.passed),
+      validation.passed &&
+      quality.ready &&
+      technicalChecks.every((check) => check.passed),
     contactSheet: path.relative(ROOT, contactSheet),
     contactSheetSamples,
   };

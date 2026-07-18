@@ -14,6 +14,7 @@ import {
 import {advanceProduction, formatProduction} from './production-state.mjs';
 import {assertSelectedProvidersReady} from './provider-lib.mjs';
 import {assertCreativePlanReady} from './creative-plan-lib.mjs';
+import {assertQualityReady, formatQualityStatus} from './quality-lib.mjs';
 
 const args = process.argv.slice(2);
 const positional = args.filter((arg) => !arg.startsWith('--'));
@@ -56,6 +57,8 @@ try {
     if (!validation.passed) {
       throw new Error('素材与项目校验未通过，不能进入 preview。');
     }
+    const quality = await assertQualityReady(slug);
+    console.log(formatQualityStatus(quality));
     artifacts.validationReport = path.relative(ROOT, reportFile);
   }
   if (action === 'approve-preview') {
