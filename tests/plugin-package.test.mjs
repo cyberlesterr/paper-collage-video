@@ -88,6 +88,20 @@ test('packaged runtime is lightweight and independent from production projects',
     fs.readdirSync(path.join(RUNTIME_ROOT, 'projects')).sort(),
     ['starter-demo'],
   );
+  const starterProject = readJson(
+    path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'project.json'),
+  );
+  const starterManifest = readJson(
+    path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'assets-manifest.json'),
+  );
+  const starterQuality = readJson(
+    path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'quality-report.json'),
+  );
+  assert.equal(starterProject.schemaVersion, 2);
+  assert.deepEqual(starterProject.quality, {minimumAssetScale: 0.5});
+  assert.equal(starterManifest.schemaVersion, 2);
+  assert.equal(starterQuality.assets.length, 2);
+  assert.ok(starterQuality.assets.every(({status}) => status === 'passed'));
 
   for (const relative of [
     'scripts/production-state.mjs',

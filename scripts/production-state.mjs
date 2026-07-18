@@ -342,7 +342,7 @@ export const loadProduction = async (slug) => {
   } catch (error) {
     if (error.code === 'ENOENT') {
       throw new Error(
-        `缺少 projects/${slug}/production.json；请迁移旧项目或重新运行 project:new。`,
+        `缺少 projects/${slug}/production.json；请重新运行 project:new。`,
       );
     }
     throw error;
@@ -480,32 +480,20 @@ export const renderReviewSection = (state) => {
   return lines.join('\n');
 };
 
-const LEGACY_EMPTY_REVIEW = /\n## 文案和镜头\n\n- 状态：待确认\n- 意见：\n\n## 风格和旁白\n\n- 状态：待确认\n- 意见：\n\n## 样片\n\n- 状态：待生成\n- 意见：\n\n## 最终批准\n\n- 内容准确性：待确认\n- 授权和合规：待确认\n- 发布批准：待确认\n?$/;
-
-const migrateLegacyEmptyReview = (value) =>
-  value.replace(
-    LEGACY_EMPTY_REVIEW,
-    '\n\n## 人工反馈与修改记录\n\n- 暂无\n',
-  ).replace(`${REVIEW_END}\n\n\n`, `${REVIEW_END}\n\n`);
-
 export const mergeReviewDocument = (existing, state) => {
   const section = renderReviewSection(state);
   const start = existing.indexOf(REVIEW_START);
   const end = existing.indexOf(REVIEW_END);
   if (start >= 0 && end >= start) {
-    return migrateLegacyEmptyReview(
-      `${existing.slice(0, start)}${section}${existing.slice(
-        end + REVIEW_END.length,
-      )}`,
-    );
+    return `${existing.slice(0, start)}${section}${existing.slice(
+      end + REVIEW_END.length,
+    )}`;
   }
   const newline = existing.indexOf('\n');
   if (newline < 0) return `${existing}\n\n${section}\n`;
-  return migrateLegacyEmptyReview(
-    `${existing.slice(0, newline + 1)}\n${section}\n${existing.slice(
-      newline + 1,
-    )}`,
-  );
+  return `${existing.slice(0, newline + 1)}\n${section}\n${existing.slice(
+    newline + 1,
+  )}`;
 };
 
 export const syncReviewFromProduction = async (slug, state) => {

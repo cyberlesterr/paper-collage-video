@@ -1,12 +1,12 @@
 import {Composition, type CalculateMetadataFunction} from 'remotion';
-import tieChuMoZhen from '../projects/tie-chu-mo-zhen/project.json';
+import starterDemo from '../fixtures/starter-demo/project.json';
 import {MainVideo} from './MainVideo';
 import {
   normalizeProject,
   type PaperCollageProject,
 } from './project';
 
-const defaultProject = tieChuMoZhen as PaperCollageProject;
+const defaultProject = starterDemo as PaperCollageProject;
 
 const calculateProjectMetadata: CalculateMetadataFunction<PaperCollageProject> = ({
   props,

@@ -34,7 +34,7 @@ try {
           failedChecks: listFor('--fail'),
           note: valueFor('--note') ?? '',
         })
-      : await prepareQualityReport(slug);
+      : await prepareQualityReport(slug, {write: action === 'prepare'});
   console.log(formatQualityStatus(status));
   console.log(`  report: ${path.relative(ROOT, status.file)}`);
   for (const asset of status.report.assets) {

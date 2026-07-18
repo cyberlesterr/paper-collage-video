@@ -222,13 +222,12 @@ const inspectTechnicalQuality = async ({asset, project}) => {
   return {passed: checks.every(({passed}) => passed), checks};
 };
 
-const summarizeReport = (report, mode) => {
+const summarizeReport = (report) => {
   const failed = report.assets.filter(({status}) => status === 'needs-revision');
   const pending = report.assets.filter(({status}) => status === 'pending');
   const actualPassed = failed.length === 0 && pending.length === 0;
   return {
-    mode,
-    ready: mode !== 'required' || actualPassed,
+    ready: actualPassed,
     actualPassed,
     total: report.assets.length,
     passed: report.assets.length - failed.length - pending.length,
@@ -300,7 +299,7 @@ export const prepareQualityReport = async (slug, {write = true} = {}) => {
     assets: inspected,
   };
   if (write) await writeJson(file, report);
-  return {file, ...summarizeReport(report, project.quality?.mode ?? 'advisory')};
+  return {file, ...summarizeReport(report)};
 };
 
 export const recordQualityReview = async ({
@@ -338,8 +337,7 @@ export const recordQualityReview = async ({
   asset.note = note.trim();
   prepared.report.updatedAt = new Date().toISOString();
   await writeJson(prepared.file, prepared.report);
-  const {project} = await loadProject(slug);
-  return {file: prepared.file, ...summarizeReport(prepared.report, project.quality?.mode ?? 'advisory')};
+  return {file: prepared.file, ...summarizeReport(prepared.report)};
 };
 
 export const assertQualityReady = async (slug) => {
@@ -355,4 +353,4 @@ export const assertQualityReady = async (slug) => {
 };
 
 export const formatQualityStatus = (status) =>
-  `${status.ready ? '✓' : '✗'} quality (${status.mode}): ${status.passed}/${status.total} passed, ${status.pending} pending, ${status.failed} failed`;
+  `${status.ready ? '✓' : '✗'} quality: ${status.passed}/${status.total} passed, ${status.pending} pending, ${status.failed} failed`;

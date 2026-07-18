@@ -3,5 +3,66 @@
   "schemaVersion": 1,
   "projectSlug": "starter-demo",
   "updatedAt": "2026-01-01T00:00:00.000Z",
-  "assets": []
+  "assets": [
+    {
+      "assetId": "runtime-35227d004842",
+      "file": "public/projects/starter-demo/assets/plates/01-bg.png",
+      "kind": "background",
+      "sources": [
+        "scene:starter:background"
+      ],
+      "sha256": "8b281acc2007312e394832a74ece76229b8c049d48a46c82f4377409a44a0d57",
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": []
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "bundled-fixture",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "note": "Repository-owned technical fixture"
+    },
+    {
+      "assetId": "runtime-904ce3e224ac",
+      "file": "public/projects/starter-demo/assets/characters/alpha/01-traveler.png",
+      "kind": "character",
+      "sources": [
+        "scene:starter:layer:traveler"
+      ],
+      "sha256": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": []
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "bundled-fixture",
+      "reviewedAt": "2026-01-01T00:00:00.000Z",
+      "note": "Repository-owned technical fixture"
+    }
+  ]
 }

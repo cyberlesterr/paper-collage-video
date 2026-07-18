@@ -47,7 +47,7 @@ jobs:
           npm test
           npm run check
           npm run doctor -- --ready
-          npm run project:validate -- tie-chu-mo-zhen
+          npm run bundle
 
       - name: Bootstrap installed-plugin equivalent workspace
         run: |

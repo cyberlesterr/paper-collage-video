@@ -32,7 +32,11 @@ projects/<slug>/
   review.md
 
 public/projects/<slug>/
+  assets/style/
   assets/plates/
+  assets/environment/rear/
+  assets/environment/mid/
+  assets/environment/foreground/
   assets/characters/source/
   assets/characters/alpha/
   audio/narration/
@@ -88,7 +92,9 @@ Render commands enforce prior approvals. Successful renders record their artifac
 - Give each scene one `primary` subject; use `secondary` and `tertiary` roles for decreasing motion strength.
 - Keep backgrounds character-free and main figures in independent alpha PNG files.
 - Use z-order and foreground occlusion for depth; do not fake all motion with a single flattened image.
-- Use `environmentLayers`, scene camera, layer motion, transitions, and action audio when they support the story beat; preserve legacy defaults when omitted.
+- Use only `project.schemaVersion: 2`. Do not migrate or infer removed v1 fields.
+- Every scene explicitly declares `environmentLayers`, `camera`, `transition`, `audioEvents`, and every character layer declares `motion`.
+- Author `tailSeconds`, `startSeconds`, `delaySeconds`, `durationSeconds`, `atSeconds`, `fromSeconds`, and `toSeconds`; frame counts exist only in normalized renderer state.
 - Run `project:quality` after image generation. Required quality mode must pass before `assets-ready`; changing an asset invalidates its prior review.
 - Let `project:sync` derive narration duration from media. Never guess final timeline duration after audio exists.
 - Run `project:subtitles` after sync. Prefer provider/forced-alignment timings and review the deterministic fallback.

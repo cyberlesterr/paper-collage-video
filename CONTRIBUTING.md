@@ -43,8 +43,8 @@ npm run plugin:sync
 ```bash
 npm test
 npm run check
+npm run bundle
 npm run doctor -- --ready
-npm run project:validate -- tie-chu-mo-zhen
 npm run plugin:sync
 git diff --exit-code
 ```
@@ -55,7 +55,7 @@ git diff --exit-code
 
 - 说明问题、解决方式和用户可见影响。
 - 列出实际运行的验证命令。
-- 对状态机、JSON Schema 或插件协议变更补充测试和迁移说明。
+- 对状态机、JSON Schema 或插件协议变更补充测试、版本说明并重新生成夹具；不要增加旧协议迁移分支。
 - 对新增素材说明来源、生成工具、授权状态和可再分发范围。
 - 保持一次 PR 聚焦一个主题。
 

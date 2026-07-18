@@ -1,11 +1,11 @@
 {
   "$schema": "../../schemas/project.schema.json",
   "schemaVersion": 2,
-  "slug": "{{slug}}",
-  "title": "{{title}}",
+  "slug": "starter-demo",
+  "title": "Paper Collage Workspace",
   "plan": {
     "schemaVersion": 1,
-    "slug": "{{slug}}",
+    "slug": "starter-demo",
     "status": "pending",
     "inputMode": "none",
     "requested": {
@@ -13,7 +13,7 @@
       "sceneCount": null
     },
     "resolved": null,
-    "updatedAt": "{{createdAt}}"
+    "updatedAt": "2026-01-01T00:00:00.000Z"
   },
   "quality": {
     "minimumAssetScale": 1
@@ -37,12 +37,7 @@
   "voice": {
     "mode": "fictional",
     "provider": "auto",
-    "profile": "warm-storyteller",
-    "displayName": "Configured fictional narrator",
-    "settings": {
-      "speedRatio": 0.94,
-      "pitch": -1
-    }
+    "displayName": "Configured fictional narrator"
   },
   "audio": {
     "music": null,

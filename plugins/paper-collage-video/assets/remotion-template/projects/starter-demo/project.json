@@ -1,17 +1,33 @@
 {
   "$schema": "../../schemas/project.schema.json",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "starter-demo",
   "title": "Paper Collage Starter",
+  "plan": {
+    "schemaVersion": 1,
+    "slug": "starter-demo",
+    "status": "resolved",
+    "inputMode": "both",
+    "requested": {
+      "durationSeconds": 2,
+      "sceneCount": 1
+    },
+    "resolved": {
+      "durationSeconds": 2,
+      "sceneCount": 1,
+      "estimatedNarrationSeconds": 1,
+      "rationale": "Bundled technical fixture",
+      "resolvedAt": "2026-01-01T00:00:00.000Z"
+    },
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
   "quality": {
-    "mode": "advisory",
     "minimumAssetScale": 0.5
   },
   "video": {
     "width": 1920,
     "height": 1080,
-    "fps": 30,
-    "transitionFrames": 12
+    "fps": 30
   },
   "theme": {
     "canvas": "#6e1e19",
@@ -27,15 +43,15 @@
   "voice": {
     "mode": "fictional",
     "provider": "fixture",
-    "displayName": "Silent fixture"
+    "displayName": "Test tone fixture"
   },
   "audio": {
     "music": null,
     "sfx": {},
     "mastering": {
-      "targetLufs": -16,
+      "targetLufs": -24,
       "toleranceLufs": 3,
-      "truePeakDbtp": -1
+      "truePeakDbtp": -18
     }
   },
   "scenes": [
@@ -43,15 +59,20 @@
       "id": "starter",
       "label": "纸片分层视频",
       "eyebrow": "STARTER",
-      "tailFrames": 30,
+      "tailSeconds": 1,
       "background": "projects/starter-demo/assets/plates/01-bg.png",
+      "environmentLayers": [],
       "camera": {
         "preset": "push",
         "intensity": 0.6
       },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.4
+      },
       "narration": {
-        "src": "projects/starter-demo/audio/narration/01-silence.wav",
-        "startFrame": 0,
+        "src": "projects/starter-demo/audio/narration/01-test-tone.wav",
+        "startSeconds": 0,
         "durationSeconds": 1,
         "text": ""
       },
@@ -64,22 +85,24 @@
           "bottom": 0,
           "width": 1920,
           "z": 4,
-          "delay": 0,
+          "delaySeconds": 0,
           "enterFrom": "left",
           "motion": {
             "idle": "breathe",
             "intensity": 0.5,
-            "cycleSeconds": 2.8
+            "cycleSeconds": 2.8,
+            "enterDurationSeconds": 1
           }
         }
       ],
       "subtitles": [
         {
-          "from": 0,
-          "to": 54,
+          "fromSeconds": 0,
+          "toSeconds": 1.8,
           "text": "Paper Collage Video"
         }
-      ]
+      ],
+      "audioEvents": []
     }
   ]
 }

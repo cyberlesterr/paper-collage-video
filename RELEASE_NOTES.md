@@ -1,21 +1,26 @@
-# Paper Collage Video v0.4.0
+# Paper Collage Video v0.5.0
 
-First public preview release of the configuration-driven paper-collage video
-pipeline and Codex Plugin.
+Second public preview of the configuration-driven paper-collage video pipeline
+and Codex Plugin.
 
 ## Highlights
 
 - Installable Codex Plugin that bootstraps an independent Remotion workspace.
+- A clean v2 project protocol with seconds-only timeline authoring and no v1
+  migration or compatibility branches.
+- Mandatory hash-bound technical and semantic image quality review.
+- Environment depth layers, camera keyframes, per-character narrative motion,
+  scene transitions, action audio, and project-local fonts.
 - Adaptive story planning when duration, scene count, both, or neither is given.
 - Configurable text, image, and fictional-voice providers with provenance
   manifests and resumable work items.
 - Capability selection plus four explicit human approvals for concept,
   style/voice, preview, and final publication; automatic stages remain
   resumable.
-- Project validation, narration synchronization, CPU-aware preview rendering,
-  technical reports, and scene-aware contact sheets.
-- One complete four-scene showcase, `tie-chu-mo-zhen`, plus a lightweight
-  two-second fixture used only for installation smoke tests.
+- Project validation, narration synchronization, subtitle alignment, LUFS and
+  true-peak reporting, CPU-aware rendering, and scene-aware contact sheets.
+- A lightweight two-second fixture used only for installation smoke tests;
+  production projects and media are not bundled into the release artifact.
 
 ## Install
 

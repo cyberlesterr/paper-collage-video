@@ -395,7 +395,7 @@ export const writeProviderSelection = async ({
     const projectCapability = projectOverlay?.capabilities?.[capability];
     if (projectCapability?.defaultProvider || projectCapability?.selection) {
       throw new Error(
-        `${capability} 已有项目级选择；项目配置优先于 workspace。请保留 --scope=project，或先显式迁移该项目覆盖。`,
+        `${capability} 已有项目级选择；项目配置优先于 workspace。请保留 --scope=project，或先显式移除该项目覆盖。`,
       );
     }
   }
@@ -574,12 +574,15 @@ export const recordAssetProvenance = async ({
     ? await readJson(manifestFile)
     : {
         $schema: '../../schemas/assets-manifest.schema.json',
-        schemaVersion: 1,
+        schemaVersion: 2,
         projectSlug: request.projectSlug,
         assets: [],
       };
   if (manifest.projectSlug !== request.projectSlug || !Array.isArray(manifest.assets)) {
     throw new Error(`资产清单无效：${path.relative(ROOT, manifestFile)}`);
+  }
+  if (manifest.schemaVersion !== 2) {
+    throw new Error('assets-manifest.json 必须使用 schemaVersion 2；请重新创建项目。');
   }
   const actualModel = model || request.model || provider.model || null;
   const record = {

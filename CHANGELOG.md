@@ -15,7 +15,9 @@
 
 ### Changed
 
-- New projects require asset quality approval before `assets-ready`; legacy projects remain advisory until migrated.
+- Project schema v2 uses one mandatory quality path and seconds-only authoring fields; removed v1 compatibility branches are intentionally unsupported.
+- The previous `tie-chu-mo-zhen` requests, approvals and media were removed; its workspace now starts fresh at the v2 capability gate.
+- CI and releases validate the reusable engine and technical fixture without depending on production showcase media.
 - Narration probing, character matte extraction and contact-sheet frame extraction use bounded parallel work.
 - Preview renders use a lighter review encoding profile and all renders use CPU-aware concurrency.
 - Validation now checks background pixel density, subtitle length and reading speed, motion/depth fields and action audio timing.

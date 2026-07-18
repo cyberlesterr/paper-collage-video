@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -26,7 +27,7 @@ const writeJson = async (file, value) => {
   await fs.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 };
 
-const makeSilentWav = ({sampleRate = 48000, seconds = 1} = {}) => {
+const makeTestToneWav = ({sampleRate = 48000, seconds = 1} = {}) => {
   const channels = 1;
   const bitsPerSample = 16;
   const sampleCount = sampleRate * seconds;
@@ -45,8 +46,21 @@ const makeSilentWav = ({sampleRate = 48000, seconds = 1} = {}) => {
   buffer.writeUInt16LE(bitsPerSample, 34);
   buffer.write('data', 36);
   buffer.writeUInt32LE(dataSize, 40);
+  const amplitude = Math.round(32767 * 0.1);
+  for (let sample = 0; sample < sampleCount; sample += 1) {
+    const value = Math.round(
+      Math.sin((sample / sampleRate) * Math.PI * 2 * 440) * amplitude,
+    );
+    buffer.writeInt16LE(value, 44 + sample * 2);
+  }
   return buffer;
 };
+
+const hashFile = async (file) =>
+  createHash('sha256').update(await fs.readFile(file)).digest('hex');
+
+const runtimeAssetId = (file) =>
+  `runtime-${createHash('sha256').update(file).digest('hex').slice(0, 12)}`;
 
 await fs.rm(RUNTIME_ROOT, {recursive: true, force: true});
 await fs.rm(SKILL_TARGET, {recursive: true, force: true});
@@ -198,11 +212,26 @@ await fs.writeFile(path.join(RUNTIME_ROOT, 'src', 'Root.tsx'), rootSource, 'utf8
 
 const project = {
   $schema: '../../schemas/project.schema.json',
-  schemaVersion: 1,
+  schemaVersion: 2,
   slug: 'starter-demo',
   title: 'Paper Collage Starter',
-  quality: {mode: 'advisory', minimumAssetScale: 0.5},
-  video: {width: 1920, height: 1080, fps: 30, transitionFrames: 12},
+  plan: {
+    schemaVersion: 1,
+    slug: 'starter-demo',
+    status: 'resolved',
+    inputMode: 'both',
+    requested: {durationSeconds: 2, sceneCount: 1},
+    resolved: {
+      durationSeconds: 2,
+      sceneCount: 1,
+      estimatedNarrationSeconds: 1,
+      rationale: 'Bundled technical fixture',
+      resolvedAt: '2026-01-01T00:00:00.000Z',
+    },
+    updatedAt: '2026-01-01T00:00:00.000Z',
+  },
+  quality: {minimumAssetScale: 0.5},
+  video: {width: 1920, height: 1080, fps: 30},
   theme: {
     canvas: '#6e1e19',
     sceneBackground: '#8a271f',
@@ -214,23 +243,25 @@ const project = {
     foreground: '#8d251e',
     texture: 'textures/paper-grain.png',
   },
-  voice: {mode: 'fictional', provider: 'fixture', displayName: 'Silent fixture'},
+  voice: {mode: 'fictional', provider: 'fixture', displayName: 'Test tone fixture'},
   audio: {
     music: null,
     sfx: {},
-    mastering: {targetLufs: -16, toleranceLufs: 3, truePeakDbtp: -1},
+    mastering: {targetLufs: -24, toleranceLufs: 3, truePeakDbtp: -18},
   },
   scenes: [
     {
       id: 'starter',
       label: '纸片分层视频',
       eyebrow: 'STARTER',
-      tailFrames: 30,
+      tailSeconds: 1,
       background: 'projects/starter-demo/assets/plates/01-bg.png',
+      environmentLayers: [],
       camera: {preset: 'push', intensity: 0.6},
+      transition: {type: 'fade', durationSeconds: 0.4},
       narration: {
-        src: 'projects/starter-demo/audio/narration/01-silence.wav',
-        startFrame: 0,
+        src: 'projects/starter-demo/audio/narration/01-test-tone.wav',
+        startSeconds: 0,
         durationSeconds: 1,
         text: '',
       },
@@ -243,12 +274,18 @@ const project = {
           bottom: 0,
           width: 1920,
           z: 4,
-          delay: 0,
+          delaySeconds: 0,
           enterFrom: 'left',
-          motion: {idle: 'breathe', intensity: 0.5, cycleSeconds: 2.8},
+          motion: {
+            idle: 'breathe',
+            intensity: 0.5,
+            cycleSeconds: 2.8,
+            enterDurationSeconds: 1,
+          },
         },
       ],
-      subtitles: [{from: 0, to: 54, text: 'Paper Collage Video'}],
+      subtitles: [{fromSeconds: 0, toSeconds: 1.8, text: 'Paper Collage Video'}],
+      audioEvents: [],
     },
   ],
 };
@@ -301,18 +338,8 @@ await writeJson(
   path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'assets-manifest.json'),
   {
     $schema: '../../schemas/assets-manifest.schema.json',
-    schemaVersion: 1,
+    schemaVersion: 2,
     projectSlug: 'starter-demo',
-    assets: [],
-  },
-);
-await writeJson(
-  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'quality-report.json'),
-  {
-    $schema: '../../schemas/quality-report.schema.json',
-    schemaVersion: 1,
-    projectSlug: 'starter-demo',
-    updatedAt: at,
     assets: [],
   },
 );
@@ -350,10 +377,50 @@ const narrationFile = path.join(
   'starter-demo',
   'audio',
   'narration',
-  '01-silence.wav',
+  '01-test-tone.wav',
 );
 await fs.mkdir(path.dirname(narrationFile), {recursive: true});
-await fs.writeFile(narrationFile, makeSilentWav());
+await fs.writeFile(narrationFile, makeTestToneWav());
+
+const fixtureQualityAssets = [
+  {
+    file: 'public/projects/starter-demo/assets/plates/01-bg.png',
+    kind: 'background',
+    source: 'scene:starter:background',
+    checks: ['no-text', 'no-watermark', 'no-people', 'safe-area-clear', 'style-consistent'],
+  },
+  {
+    file: 'public/projects/starter-demo/assets/characters/alpha/01-traveler.png',
+    kind: 'character',
+    source: 'scene:starter:layer:traveler',
+    checks: ['subject-complete', 'identity-consistent', 'edge-clean', 'style-consistent'],
+  },
+];
+await writeJson(
+  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'quality-report.json'),
+  {
+    $schema: '../../schemas/quality-report.schema.json',
+    schemaVersion: 1,
+    projectSlug: 'starter-demo',
+    updatedAt: at,
+    assets: await Promise.all(
+      fixtureQualityAssets.map(async ({file, kind, source, checks}) => ({
+        assetId: runtimeAssetId(file),
+        file,
+        kind,
+        sources: [source],
+        sha256: await hashFile(path.join(RUNTIME_ROOT, file)),
+        requiredChecks: checks,
+        technical: {passed: true, checks: []},
+        semanticChecks: Object.fromEntries(checks.map((check) => [check, 'passed'])),
+        status: 'passed',
+        reviewer: 'bundled-fixture',
+        reviewedAt: at,
+        note: 'Repository-owned technical fixture',
+      })),
+    ),
+  },
+);
 
 await writeJson(path.join(RUNTIME_ROOT, '.paper-collage-template.json'), {
   schemaVersion: 1,

@@ -49,14 +49,7 @@ try {
     if (!(await fileExists(manifestFile))) continue;
     const manifest = await readJson(manifestFile);
     for (const record of manifest.assets ?? []) {
-      const fingerprint =
-        record.requestFingerprint ??
-        createRequestFingerprint({
-          request: record.request,
-          providerId: record.provider,
-          model: record.model,
-        });
-      if (fingerprint !== targetFingerprint) continue;
+      if (record.requestFingerprint !== targetFingerprint) continue;
       let source;
       try {
         source = resolveWorkspacePath(record.file, '缓存资产路径');

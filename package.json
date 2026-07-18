@@ -49,12 +49,9 @@
     "project:report": "node scripts/project-report.mjs",
     "doctor": "node scripts/project-doctor.mjs",
     "plugin:sync": "node scripts/sync-plugin-package.mjs",
-    "dev": "remotion studio src/index.ts --props=projects/tie-chu-mo-zhen/project.json",
+    "dev": "remotion studio src/index.ts",
     "check": "tsc --noEmit",
     "bundle": "remotion bundle src/index.ts",
-    "render": "npm run project:render -- tie-chu-mo-zhen",
-    "render:preview": "npm run project:preview -- tie-chu-mo-zhen",
-    "render:frame": "remotion still src/index.ts Paper-Collage out/tie-chu-mo-zhen-frame.png --props=projects/tie-chu-mo-zhen/project.json --frame=300",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {

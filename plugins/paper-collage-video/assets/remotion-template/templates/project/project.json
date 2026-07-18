@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/project.schema.json",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "{{slug}}",
   "title": "{{title}}",
   "plan": {
@@ -16,14 +16,12 @@
     "updatedAt": "{{createdAt}}"
   },
   "quality": {
-    "mode": "required",
     "minimumAssetScale": 1
   },
   "video": {
     "width": 1920,
     "height": 1080,
-    "fps": 30,
-    "transitionFrames": 12
+    "fps": 30
   },
   "theme": {
     "canvas": "#6e1e19",

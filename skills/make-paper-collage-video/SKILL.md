@@ -35,7 +35,7 @@ When the human supplies only a topic, use these reversible defaults and state th
 - Target a general Chinese-language audience.
 - Infer duration and scene count independently from story beats, narration density, audience, and platform. Preserve whichever value the human explicitly supplied; do not ask merely because the other is missing.
 - Use layered paper collage with background, rear, subject, and foreground depth.
-- Require hash-bound asset quality review for new projects and use an advisory migration for legacy projects.
+- Require hash-bound asset quality review for every project. Reject non-v2 project files instead of migrating or interpreting old fields.
 - Use the configured fictional narrator profile; prefer `儒雅逸辰 (ruyayichen)` only when the selected provider offers it.
 - Do not clone a real person, publish, upload, or send externally.
 
@@ -114,7 +114,7 @@ Record each material step with `project:checkpoint`. Keep the root workflow acti
 6. Run `provider:record` after host/manual output, or use `provider:run` for command adapters, so `assets-manifest.json` records the provider, request fingerprint, model/job id, hash, and request.
 7. Run `project:quality prepare`, visually inspect every pending image, and record the required semantic checks. A generated result is incomplete until its hash-bound quality entry passes.
 8. Generate or import per-scene narration with the approved fictional voice. Run `project:sync`, then `project:subtitles`; provider/forced-alignment timings win over the deterministic fallback.
-9. Populate `project.json` with environment depth, scene camera, character motion, transition, action audio, z-order, and subtitles. Prefer seconds for new timing fields.
+9. Populate the v2 `project.json` with environment depth, scene camera, character motion, transition, action audio, z-order, and subtitles. Author all timeline offsets and durations in seconds; renderer frames are derived values only.
 10. Run `project:validate`; fix errors and deliberately review warnings before continuing.
 11. Run `project:assets-ready`. This action repeats deterministic validation and enforces required asset quality before advancing.
 

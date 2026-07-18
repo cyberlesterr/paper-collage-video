@@ -4,11 +4,11 @@ export type EnterFrom = 'left' | 'right' | 'bottom';
 export type IdleMotionPreset = 'float' | 'breathe' | 'grind' | 'drift' | 'still';
 
 export type LayerMotion = {
-  idle?: IdleMotionPreset;
-  intensity?: number;
-  cycleSeconds?: number;
+  idle: IdleMotionPreset;
+  intensity: number;
+  cycleSeconds: number;
   phase?: number;
-  enterDurationSeconds?: number;
+  enterDurationSeconds: number;
 };
 
 export type CharacterLayer = {
@@ -19,10 +19,9 @@ export type CharacterLayer = {
   bottom: number;
   width: number;
   z: number;
-  delay: number;
-  delaySeconds?: number;
+  delaySeconds: number;
   enterFrom: EnterFrom;
-  motion?: LayerMotion;
+  motion: LayerMotion;
 };
 
 export type EnvironmentLayer = {
@@ -37,6 +36,12 @@ export type EnvironmentLayer = {
 };
 
 export type SubtitleCue = {
+  fromSeconds: number;
+  toSeconds: number;
+  text: string;
+};
+
+export type NormalizedSubtitleCue = {
   from: number;
   to: number;
   text: string;
@@ -50,20 +55,19 @@ export type CameraKeyframe = {
 };
 
 export type SceneCamera = {
-  preset?: 'push' | 'pull' | 'pan-left' | 'pan-right' | 'static';
-  intensity?: number;
+  preset: 'push' | 'pull' | 'pan-left' | 'pan-right' | 'static';
+  intensity: number;
   keyframes?: CameraKeyframe[];
 };
 
 export type SceneTransition = {
-  type?: 'fade' | 'none';
-  durationFrames?: number;
+  type: 'fade' | 'none';
+  durationSeconds: number;
 };
 
 export type ProjectAudioEvent = ProjectSound & {
   id: string;
-  fromFrame?: number;
-  atSeconds?: number;
+  atSeconds: number;
 };
 
 export type ProjectTheme = {
@@ -95,29 +99,29 @@ export type ProjectScene = {
   id: string;
   label: string;
   eyebrow: string;
-  tailFrames: number;
+  tailSeconds: number;
   background: string;
-  environmentLayers?: EnvironmentLayer[];
-  camera?: SceneCamera;
-  transition?: SceneTransition;
+  environmentLayers: EnvironmentLayer[];
+  camera: SceneCamera;
+  transition: SceneTransition;
   narration: {
     src: string;
     timingSrc?: string;
-    startFrame: number;
+    startSeconds: number;
     durationSeconds: number;
     text: string;
   };
   layers: CharacterLayer[];
   subtitles: SubtitleCue[];
-  audioEvents?: ProjectAudioEvent[];
+  audioEvents: ProjectAudioEvent[];
 };
 
 export type PaperCollageProject = {
   $schema?: string;
-  schemaVersion: 1;
+  schemaVersion: 2;
   slug: string;
   title: string;
-  plan?: {
+  plan: {
     schemaVersion: 1;
     slug: string;
     status: 'pending' | 'resolved';
@@ -139,31 +143,33 @@ export type PaperCollageProject = {
     width: number;
     height: number;
     fps: number;
-    transitionFrames: number;
   };
-  quality?: {
-    mode: 'required' | 'advisory' | 'off';
-    minimumAssetScale?: number;
+  quality: {
+    minimumAssetScale: number;
   };
   theme: ProjectTheme;
-  voice?: {
+  voice: {
     mode: 'fictional' | 'clone';
     provider?: string;
     voiceId?: string;
+    profile?: string;
     displayName?: string;
     settings?: Record<string, string | number | boolean>;
   };
   audio: {
     music: ProjectSound | null;
     sfx: Partial<Record<Role, ProjectSound>>;
-    mastering?: ProjectAudioMastering;
+    mastering: ProjectAudioMastering;
   };
   scenes: ProjectScene[];
 };
 
-export type NormalizedProjectScene = ProjectScene & {
+export type NormalizedProjectScene = Omit<ProjectScene, 'subtitles'> & {
   from: number;
   durationInFrames: number;
+  narrationStartFrame: number;
+  transitionFrames: number;
+  subtitles: NormalizedSubtitleCue[];
 };
 
 export type NormalizedProject = Omit<PaperCollageProject, 'scenes'> & {
@@ -175,19 +181,36 @@ export const normalizeProject = (
   project: PaperCollageProject,
 ): NormalizedProject => {
   let cursor = 0;
-  const {fps, transitionFrames} = project.video;
+  const {fps} = project.video;
   const scenes = project.scenes.map((scene, index) => {
     const narrationFrames = Math.ceil(scene.narration.durationSeconds * fps);
+    const narrationStartFrame = Math.round(scene.narration.startSeconds * fps);
+    const tailFrames = Math.ceil(scene.tailSeconds * fps);
     const durationInFrames =
-      scene.narration.startFrame + narrationFrames + scene.tailFrames;
+      narrationStartFrame + narrationFrames + tailFrames;
     const sceneTransitionFrames =
-      scene.transition?.type === 'none'
+      scene.transition.type === 'none'
         ? 0
-        : scene.transition?.durationFrames ?? transitionFrames;
+        : Math.round(scene.transition.durationSeconds * fps);
     const from = index === 0 ? 0 : Math.max(0, cursor - sceneTransitionFrames);
     cursor = from + durationInFrames;
-    return {...scene, from, durationInFrames};
+    return {
+      ...scene,
+      from,
+      durationInFrames,
+      narrationStartFrame,
+      transitionFrames: sceneTransitionFrames,
+      subtitles: scene.subtitles.map((cue) => ({
+        from: Math.round(cue.fromSeconds * fps),
+        to: Math.round(cue.toSeconds * fps),
+        text: cue.text,
+      })),
+    };
   });
 
-  return {...project, durationInFrames: cursor, scenes};
+  return {
+    ...project,
+    durationInFrames: scenes.length === 0 ? fps : cursor,
+    scenes,
+  };
 };

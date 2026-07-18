@@ -5,15 +5,9 @@
 
 一个配置驱动的本地纸片分层视频生产系统。人负责内容意图、审美选择和最终批准；Codex 与本地工具负责文案拆镜、素材组织、抠图、动画、旁白同步、渲染和技术验收。
 
-仓库只保留一套完整展示项目 `tie-chu-mo-zhen`，用于回归和仓库功能演示；题材不是引擎硬编码。插件发行包另带一个 2 秒静音技术夹具 `starter-demo`，仅用于自动化烟雾测试。
+仓库中的 `tie-chu-mo-zhen` 已按 v2 协议从空项目重新开始，不继承旧素材、旧 provider 选择或旧审批。插件发行包另带一个 2 秒低电平测试音技术夹具 `starter-demo`，仅用于自动化烟雾测试。
 
 当前公开预览版本为 `0.4.0`，仓库正在开发 `0.5.0` 的质量门与 Motion/Depth 协议；功能和协议仍可能在 `1.0.0` 前调整。
-
-## 完整演示
-
-[观看或下载唯一完整演示：《铁杵磨针》52 秒纸片故事](https://github.com/cyberlesterr/paper-collage-video/releases/download/v0.4.0/tie-chu-mo-zhen-preview.mp4)
-
-发布页只提供这一份完整演示视频。它用于展示四幕时间线、人物分层、字幕、虚构旁白和技术验收能力，不是可自由复用的素材包；使用边界见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
 
 ## 从 GitHub 安装 Plugin
 
@@ -41,7 +35,7 @@ codex plugin add paper-collage-video@paper-collage-video
 
 首次调用会从插件自带模板创建独立、可写的 Remotion 工作区，安装依赖并运行环境诊断。项目、依赖和渲染结果不会写入 Codex 的插件缓存。用户可能仍需批准依赖下载、FFmpeg 安装或图片/语音提供方授权。
 
-源码采用 [MIT License](LICENSE)。完整样片、测试夹具、纸张纹理和其衍生媒体不采用 MIT，只能按 [ASSET_LICENSES.md](ASSET_LICENSES.md) 随仓库运行、测试和演示。Release 页只附带唯一完整样片，不把生产素材作为独立素材包发布。
+源码采用 [MIT License](LICENSE)。测试夹具、纸张纹理和其衍生媒体不采用 MIT，只能按 [ASSET_LICENSES.md](ASSET_LICENSES.md) 随仓库运行、测试和演示。
 
 ### 本地开发安装演练
 
@@ -97,33 +91,16 @@ npm run provider:status
 
 Windows 使用 `.venv\\Scripts\\python.exe -m pip install -r requirements.txt`。
 
-## 跑通唯一完整样例
+## 开发验证
 
 ```bash
-npm run project:sync -- tie-chu-mo-zhen
-npm run project:validate -- tie-chu-mo-zhen
-npm run project:preview -- tie-chu-mo-zhen
+npm test
+npm run check
+npm run bundle
+npm run doctor -- --ready
 ```
 
-输出位于：
-
-```text
-dist/tie-chu-mo-zhen/
-  preview.mp4
-  validation-report.json
-  report.json
-  contact-sheet.jpg
-  frames/
-```
-
-该样例有四幕、约 52 秒，并故意停在 `human-review` 阶段，用来展示真实审批门禁。人实际看过预览并明确批准后，记录决定并正式渲染：
-
-```bash
-npm run project:advance -- tie-chu-mo-zhen approve-preview --note="已人工查看并批准预览"
-npm run project:render -- tie-chu-mo-zhen
-```
-
-输出 `dist/tie-chu-mo-zhen/final.mp4`，并重新生成验收报告和关键帧联系表。技术检查不能代替人的内容、权利和发布批准。
+`npm run dev` 打开不依赖任何生产项目的通用 Remotion 占位 composition。实际项目必须按 Skill 的状态机完成 provider、概念、风格/虚构音色和素材质量门后才能预览或正式渲染。
 
 ## 创建新项目
 
@@ -146,7 +123,11 @@ projects/silk-road/
   review.md
 
 public/projects/silk-road/
+  assets/style/
   assets/plates/
+  assets/environment/rear/
+  assets/environment/mid/
+  assets/environment/foreground/
   assets/characters/source/
   assets/characters/alpha/
   audio/narration/
@@ -187,7 +168,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | `npm run project:report -- <slug>` | 对已有成片生成技术报告和关键帧联系表 |
 | `npm run doctor -- --ready` | 检查 Node、FFmpeg、ffprobe、npm 和 Python 图像依赖 |
 | `npm run plugin:sync` | 从维护源重新生成插件 Skill 和轻量 Remotion 工作区模板 |
-| `npm run dev` | 在 Remotion Studio 中打开黄金样例 |
+| `npm run dev` | 在 Remotion Studio 中打开通用开发 composition |
 | `npm test` | 运行生产状态、静默工具恢复和记录同步回归测试 |
 | `npm run check` | TypeScript 类型检查 |
 
@@ -238,20 +219,20 @@ python3 scripts/remove_chroma_key.py --input KEY.png --out ALPHA.png --key-color
 
 项目配置遵循 [schemas/project.schema.json](schemas/project.schema.json)。核心结构包括：
 
-- `video`：宽高、帧率和镜头重叠帧数。
-- `quality`：图像质量门模式和最低素材分辨率比例。
+- `video`：宽高和帧率。
+- `quality`：强制质量门使用的最低素材分辨率比例。
 - `theme`：纸张、字幕、描边和前景颜色。
 - `voice`：虚构音色或后续可选的克隆音色元数据。
-- `audio`：背景音乐、角色音效和可选 LUFS/true-peak 交付规格。
+- `audio`：背景音乐、角色音效和必填 LUFS/true-peak 交付规格。
 - `scenes`：背景、环境景深层、镜头 keyframe、旁白、角色 motion、动作音效、转场和字幕。
 
 镜头时长不是人工填写的常量，而是：
 
 ```text
-旁白开始帧 + ceil(真实旁白秒数 × fps) + 尾部留白帧
+round(旁白开始秒数 × fps) + ceil(真实旁白秒数 × fps) + ceil(尾部留白秒数 × fps)
 ```
 
-后一个镜头从前一个镜头结束前 `transitionFrames` 帧开始，以形成交叠转场。
+后一个镜头按该镜头显式声明的 `transition.durationSeconds` 与前一个镜头交叠。项目作者只写秒数；帧数由渲染器根据 fps 推导。v1 字段不会被迁移或猜测。
 
 生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、一次能力配置门禁、四个审批、逐项工作进度、已生成产物和追加式事件历史。审批与能力确认完成事件应通过 `project:advance` 记录，工作进度应通过 `project:checkpoint` 记录，不直接改 JSON。
 
@@ -273,11 +254,9 @@ python3 scripts/remove_chroma_key.py --input KEY.png --out ALPHA.png --key-color
 
 `project:quality` 对实际使用的背景、环境层、角色、人物表和样张建立技术检查与语义检查；文件哈希变化会自动使旧审查失效。`project:report` 继续检查成片编码、分辨率、帧率、音轨、音量峰值、集成 LUFS 和 true peak，并以受控并发按场景前/后段生成最多八帧联系表。
 
-## 唯一完整样例
+## 当前重建项目
 
-`projects/tie-chu-mo-zhen` 保存《铁杵磨针》儿童教育故事的简报、机器配置、提示词、provider 请求记录、素材清单、旁白同步和验收状态；素材位于 `public/projects/tie-chu-mo-zhen`。它覆盖四幕时间线、两个人物姿态表、透明角色拆分、四段虚构旁白、字幕、技术报告和联系表，是仓库唯一的完整生产展示。通用 Remotion composition 为 `Paper-Collage`。
-
-这套展示媒体只用于说明和验证仓库，不是可自由复用的素材包。详细边界见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
+`projects/tie-chu-mo-zhen` 是用当前 v2 模板新建的空项目，目前停在 `capability-review`。它只保存新的项目骨架，不包含旧版故事稿、生成请求、人物图、背景、旁白、预览或历史批准。确认本次使用的文本、生图和虚构语音能力后，再由 Skill 从概念阶段重新制作。
 
 ## 贡献、支持与安全
 
@@ -290,6 +269,6 @@ python3 scripts/remove_chroma_key.py --input KEY.png --out ALPHA.png --key-color
 
 ## 许可与第三方条款
 
-源码、脚本、Schema、模板、测试和文档采用 [MIT License](LICENSE)。仓库完整样片、技术夹具、纸张纹理及其衍生媒体明确排除在 MIT 之外，只授予随本仓库或插件运行、测试、评审和演示所必需的有限权限；不得抽取为素材包、用于其他作品或商业产品、训练模型、再许可或出售。详见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
+源码、脚本、Schema、模板、测试和文档采用 [MIT License](LICENSE)。仓库技术夹具、纸张纹理及其衍生媒体明确排除在 MIT 之外，只授予随本仓库或插件运行、测试、评审和演示所必需的有限权限；不得抽取为素材包、用于其他作品或商业产品、训练模型、再许可或出售。详见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
 
 本项目依赖 Remotion，其特殊许可证在部分公司使用场景下要求购买 Company License。项目自己的许可证不会修改或替代 Remotion、FFmpeg、React、Sharp、NumPy、Pillow、外部生成服务或其他第三方组件的条款。详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

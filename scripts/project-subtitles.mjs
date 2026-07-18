@@ -17,17 +17,17 @@ const valueFor = (name) =>
 
 try {
   if (!slug) {
-    throw new Error('用法：project:subtitles -- <slug> [--max-chars=<count>] [--gap-frames=<count>]');
+    throw new Error('用法：project:subtitles -- <slug> [--max-chars=<count>] [--gap-seconds=<seconds>]');
   }
   const {paths, project} = await loadProject(slug);
   const portrait = project.video.width / project.video.height < 1;
   const maximumCharacters = Number(valueFor('--max-chars') ?? (portrait ? 18 : 28));
-  const gapFrames = Number(valueFor('--gap-frames') ?? 2);
+  const gapSeconds = Number(valueFor('--gap-seconds') ?? 2 / project.video.fps);
   if (!Number.isInteger(maximumCharacters) || maximumCharacters < 4) {
     throw new Error('--max-chars 必须是至少 4 的整数。');
   }
-  if (!Number.isInteger(gapFrames) || gapFrames < 0) {
-    throw new Error('--gap-frames 必须是非负整数。');
+  if (!Number.isFinite(gapSeconds) || gapSeconds < 0) {
+    throw new Error('--gap-seconds 必须是非负秒数。');
   }
 
   for (const scene of project.scenes ?? []) {
@@ -38,17 +38,16 @@ try {
       }
       scene.subtitles = cuesFromTiming({
         timing: timing.cues,
-        startFrame: scene.narration.startFrame,
-        fps: project.video.fps,
+        startSeconds: scene.narration.startSeconds,
       });
     } else {
       scene.subtitles = deriveSubtitleCues({
         text: scene.narration.text,
-        startFrame: scene.narration.startFrame,
+        startSeconds: scene.narration.startSeconds,
         durationSeconds: scene.narration.durationSeconds,
         fps: project.video.fps,
         maximumCharacters,
-        gapFrames,
+        gapSeconds,
       });
     }
   }

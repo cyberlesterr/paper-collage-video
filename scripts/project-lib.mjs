@@ -52,28 +52,38 @@ export const loadProject = async (slug) => {
   assertSlug(slug);
   const paths = projectPaths(slug);
   const project = await readJson(paths.projectFile);
+  if (project.schemaVersion !== 2) {
+    throw new Error('project.json 必须使用 schemaVersion 2；请重新创建项目。');
+  }
   return {paths, project};
 };
 
 export const deriveTimeline = (project) => {
   let cursor = 0;
-  const fps = project.video?.fps ?? 30;
-  const transitionFrames = project.video?.transitionFrames ?? 0;
+  const fps = Number(project.video?.fps ?? 30);
   const scenes = (project.scenes ?? []).map((scene, index) => {
     const narrationFrames = Math.ceil(
       Number(scene.narration?.durationSeconds ?? 0) * fps,
     );
-    const durationInFrames =
-      Number(scene.narration?.startFrame ?? 0) +
-      narrationFrames +
-      Number(scene.tailFrames ?? 0);
+    const narrationStartFrame = Math.round(
+      Number(scene.narration?.startSeconds ?? 0) * fps,
+    );
+    const tailFrames = Math.ceil(Number(scene.tailSeconds ?? 0) * fps);
+    const durationInFrames = narrationStartFrame + narrationFrames + tailFrames;
     const sceneTransitionFrames =
       scene.transition?.type === 'none'
         ? 0
-        : scene.transition?.durationFrames ?? transitionFrames;
+        : Math.round(Number(scene.transition?.durationSeconds ?? 0) * fps);
     const from = index === 0 ? 0 : Math.max(0, cursor - sceneTransitionFrames);
     cursor = from + durationInFrames;
-    return {...scene, from, durationInFrames, narrationFrames};
+    return {
+      ...scene,
+      from,
+      durationInFrames,
+      narrationFrames,
+      narrationStartFrame,
+      transitionFrames: sceneTransitionFrames,
+    };
   });
   return {durationInFrames: cursor, durationSeconds: cursor / fps, scenes};
 };
@@ -289,8 +299,8 @@ export const validateProject = async (project, options = {}) => {
   const add = (level, code, message, location) =>
     issues.push(makeIssue(level, code, message, location));
 
-  if (project.schemaVersion !== 1) {
-    add('error', 'schema-version', 'schemaVersion 必须为 1。', 'schemaVersion');
+  if (project.schemaVersion !== 2) {
+    add('error', 'schema-version', 'schemaVersion 必须为 2。', 'schemaVersion');
   }
   if (!SLUG_PATTERN.test(project.slug ?? '')) {
     add('error', 'slug', 'slug 格式无效。', 'slug');
@@ -307,10 +317,13 @@ export const validateProject = async (project, options = {}) => {
   if (!isPositiveNumber(project.video?.fps)) {
     add('error', 'video-fps', 'fps 必须为正数。', 'video.fps');
   }
-  if (
-    project.quality?.minimumAssetScale !== undefined &&
-    !isPositiveNumber(project.quality.minimumAssetScale)
-  ) {
+  if (project.plan === undefined) {
+    add('error', 'plan-required', 'v2 项目必须包含 plan。', 'plan');
+  }
+  if (!project.voice || typeof project.voice !== 'object') {
+    add('error', 'voice-required', 'v2 项目必须包含 voice。', 'voice');
+  }
+  if (!isPositiveNumber(project.quality?.minimumAssetScale)) {
     add(
       'error',
       'quality-minimum-scale',
@@ -329,6 +342,13 @@ export const validateProject = async (project, options = {}) => {
     if (!Number.isFinite(truePeakDbtp)) {
       add('error', 'audio-true-peak', 'audio.mastering.truePeakDbtp 必须是数字。', 'audio.mastering.truePeakDbtp');
     }
+  } else {
+    add(
+      'error',
+      'audio-mastering-required',
+      'audio.mastering 是 v2 项目的必填交付规格。',
+      'audio.mastering',
+    );
   }
   if (!Array.isArray(project.scenes) || project.scenes.length === 0) {
     add('error', 'scenes-empty', '项目至少需要一个镜头。', 'scenes');
@@ -363,16 +383,24 @@ export const validateProject = async (project, options = {}) => {
     if (scene.durationInFrames <= 0) {
       add('error', 'scene-duration', '镜头计算时长必须大于 0。', sceneLocation);
     }
-    if (
-      scene.transition?.durationFrames !== undefined &&
-      scene.transition.durationFrames * 2 >= scene.durationInFrames
+    if (!scene.transition) {
+      add('error', 'transition-required', '每个镜头必须显式配置 transition。', `${sceneLocation}.transition`);
+    } else if (
+      !['fade', 'none'].includes(scene.transition.type) ||
+      !Number.isFinite(scene.transition.durationSeconds) ||
+      scene.transition.durationSeconds < 0
     ) {
+      add('error', 'transition-invalid', 'transition 必须包含有效 type 和非负 durationSeconds。', `${sceneLocation}.transition`);
+    } else if (scene.transitionFrames * 2 >= scene.durationInFrames) {
       add(
         'warning',
         'transition-too-long',
         '转场时长占镜头时长的一半或更多。',
-        `${sceneLocation}.transition.durationFrames`,
+        `${sceneLocation}.transition.durationSeconds`,
       );
+    }
+    if (!Number.isFinite(scene.tailSeconds) || scene.tailSeconds < 0) {
+      add('error', 'scene-tail', 'tailSeconds 必须是非负秒数。', `${sceneLocation}.tailSeconds`);
     }
 
     const backgroundLocation = `${sceneLocation}.background`;
@@ -397,12 +425,12 @@ export const validateProject = async (project, options = {}) => {
             backgroundLocation,
           );
         }
-        const minimumScale = project.quality?.minimumAssetScale ?? 1;
+        const minimumScale = project.quality.minimumAssetScale;
         const minimumWidth = Math.round(project.video.width * minimumScale);
         const minimumHeight = Math.round(project.video.height * minimumScale);
         if (inspection.width < minimumWidth || inspection.height < minimumHeight) {
           add(
-            project.quality?.mode === 'required' ? 'error' : 'warning',
+            'error',
             'background-resolution',
             `背景 ${inspection.width}x${inspection.height} 低于质量规格 ${minimumWidth}x${minimumHeight}。`,
             backgroundLocation,
@@ -414,6 +442,9 @@ export const validateProject = async (project, options = {}) => {
     }
 
     const narrationLocation = `${sceneLocation}.narration`;
+    if (!Number.isFinite(scene.narration?.startSeconds) || scene.narration.startSeconds < 0) {
+      add('error', 'narration-start', 'narration.startSeconds 必须是非负秒数。', `${narrationLocation}.startSeconds`);
+    }
     try {
       const narrationFile = resolvePublicFile(scene.narration?.src ?? '');
       if (!(await fileExists(narrationFile))) {
@@ -466,11 +497,26 @@ export const validateProject = async (project, options = {}) => {
       if (!['left', 'right', 'bottom'].includes(layer.enterFrom)) {
         add('error', 'layer-enter', `未知入场方向：${layer.enterFrom}`, `${layerLocation}.enterFrom`);
       }
+      if (!Number.isFinite(layer.delaySeconds) || layer.delaySeconds < 0) {
+        add('error', 'layer-delay', '人物 delaySeconds 必须是非负秒数。', `${layerLocation}.delaySeconds`);
+      }
+      if (!layer.motion) {
+        add('error', 'layer-motion-required', '每个人物图层必须显式配置 motion。', `${layerLocation}.motion`);
+      }
       if (
         layer.motion?.idle !== undefined &&
         !['float', 'breathe', 'grind', 'drift', 'still'].includes(layer.motion.idle)
       ) {
         add('error', 'layer-motion', `未知 idle 动画：${layer.motion.idle}`, `${layerLocation}.motion.idle`);
+      }
+      if (
+        layer.motion &&
+        (!Number.isFinite(layer.motion.intensity) ||
+          layer.motion.intensity < 0 ||
+          !isPositiveNumber(layer.motion.cycleSeconds) ||
+          !isPositiveNumber(layer.motion.enterDurationSeconds))
+      ) {
+        add('error', 'layer-motion-values', 'motion 必须包含有效的 intensity、cycleSeconds 和 enterDurationSeconds。', `${layerLocation}.motion`);
       }
       if (!isPositiveNumber(layer.width)) {
         add('error', 'layer-width', '人物宽度必须大于 0。', `${layerLocation}.width`);
@@ -509,6 +555,9 @@ export const validateProject = async (project, options = {}) => {
       add('warning', 'primary-missing', '镜头没有 primary 主体。', `${sceneLocation}.layers`);
     }
 
+    if (!Array.isArray(scene.environmentLayers)) {
+      add('error', 'environment-layers-required', '每个镜头必须包含 environmentLayers 数组。', `${sceneLocation}.environmentLayers`);
+    }
     const environmentIds = new Set();
     for (const [environmentIndex, environment] of (
       scene.environmentLayers ?? []
@@ -553,6 +602,9 @@ export const validateProject = async (project, options = {}) => {
       }
     }
 
+    if (!scene.camera) {
+      add('error', 'camera-required', '每个镜头必须显式配置 camera。', `${sceneLocation}.camera`);
+    }
     const cameraKeyframes = scene.camera?.keyframes ?? [];
     for (let index = 0; index < cameraKeyframes.length; index += 1) {
       const keyframe = cameraKeyframes[index];
@@ -564,20 +616,15 @@ export const validateProject = async (project, options = {}) => {
       }
     }
 
+    if (!Array.isArray(scene.audioEvents)) {
+      add('error', 'audio-events-required', '每个镜头必须包含 audioEvents 数组。', `${sceneLocation}.audioEvents`);
+    }
     for (const [eventIndex, event] of (scene.audioEvents ?? []).entries()) {
       const eventLocation = `${sceneLocation}.audioEvents[${eventIndex}]`;
-      if (event.atSeconds !== undefined && event.fromFrame !== undefined) {
-        add(
-          'error',
-          'audio-event-time',
-          '动作音效只能使用 atSeconds 或 fromFrame 之一。',
-          eventLocation,
-        );
+      if (!Number.isFinite(event.atSeconds) || event.atSeconds < 0) {
+        add('error', 'audio-event-time', '动作音效 atSeconds 必须是非负秒数。', `${eventLocation}.atSeconds`);
       }
-      const fromFrame =
-        event.atSeconds === undefined
-          ? event.fromFrame ?? 0
-          : Math.round(event.atSeconds * project.video.fps);
+      const fromFrame = Math.round(event.atSeconds * project.video.fps);
       if (fromFrame >= scene.durationInFrames) {
         add('warning', 'audio-event-overflow', '动作音效开始时间超过镜头结束。', eventLocation);
       }
@@ -593,17 +640,20 @@ export const validateProject = async (project, options = {}) => {
     let previousSubtitleEnd = -1;
     for (const [subtitleIndex, subtitle] of (scene.subtitles ?? []).entries()) {
       const subtitleLocation = `${sceneLocation}.subtitles[${subtitleIndex}]`;
-      if (subtitle.from < 0 || subtitle.to <= subtitle.from) {
-        add('error', 'subtitle-range', '字幕帧范围无效。', subtitleLocation);
+      if (
+        subtitle.fromSeconds < 0 ||
+        subtitle.toSeconds <= subtitle.fromSeconds
+      ) {
+        add('error', 'subtitle-range', '字幕秒数范围无效。', subtitleLocation);
       }
-      if (subtitle.to > scene.durationInFrames) {
-        add('warning', 'subtitle-overflow', '字幕超过镜头结束帧。', subtitleLocation);
+      if (subtitle.toSeconds > scene.durationInFrames / project.video.fps) {
+        add('warning', 'subtitle-overflow', '字幕超过镜头结束时间。', subtitleLocation);
       }
-      if (subtitle.from < previousSubtitleEnd) {
+      if (subtitle.fromSeconds < previousSubtitleEnd) {
         add('warning', 'subtitle-overlap', '字幕时间发生重叠。', subtitleLocation);
       }
       const characterCount = [...String(subtitle.text ?? '').replace(/\s/g, '')].length;
-      const visibleSeconds = (subtitle.to - subtitle.from) / project.video.fps;
+      const visibleSeconds = subtitle.toSeconds - subtitle.fromSeconds;
       const readingRate = visibleSeconds > 0 ? characterCount / visibleSeconds : Infinity;
       const maximumCharacters =
         project.video.width / project.video.height >= 1 ? 32 : 18;
@@ -623,12 +673,13 @@ export const validateProject = async (project, options = {}) => {
           subtitleLocation,
         );
       }
-      previousSubtitleEnd = Math.max(previousSubtitleEnd, subtitle.to);
+      previousSubtitleEnd = Math.max(previousSubtitleEnd, subtitle.toSeconds);
     }
   }
 
   const sharedAssets = [
     project.theme?.texture,
+    project.theme?.fontFile,
     project.audio?.music?.src,
     ...Object.values(project.audio?.sfx ?? {}).map((sound) => sound?.src),
   ].filter(Boolean);

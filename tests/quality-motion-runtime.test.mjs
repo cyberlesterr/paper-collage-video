@@ -10,7 +10,7 @@ import {
   prepareQualityReport,
   recordQualityReview,
 } from '../scripts/quality-lib.mjs';
-import {deriveTimeline} from '../scripts/project-lib.mjs';
+import {deriveTimeline, validateProject} from '../scripts/project-lib.mjs';
 import {resolvePythonCommand} from '../scripts/python-runtime.mjs';
 import {deriveSubtitleCues, segmentSubtitleText} from '../scripts/subtitle-lib.mjs';
 
@@ -72,26 +72,27 @@ test('request fingerprints ignore project-specific destinations but preserve gen
   assert.notEqual(first, changed);
 });
 
-test('scene-specific transitions override the legacy global overlap', () => {
+test('v2 scene transitions use one seconds-based timing protocol', () => {
   const timeline = deriveTimeline({
-    video: {fps: 30, transitionFrames: 12},
+    video: {fps: 30},
     scenes: [
       {
         id: 'one',
-        narration: {durationSeconds: 2, startFrame: 0},
-        tailFrames: 0,
+        narration: {durationSeconds: 2, startSeconds: 0},
+        tailSeconds: 0,
+        transition: {type: 'fade', durationSeconds: 0.4},
       },
       {
         id: 'two',
-        narration: {durationSeconds: 2, startFrame: 0},
-        tailFrames: 0,
-        transition: {type: 'none', durationFrames: 30},
+        narration: {durationSeconds: 2, startSeconds: 0},
+        tailSeconds: 0,
+        transition: {type: 'none', durationSeconds: 1},
       },
       {
         id: 'three',
-        narration: {durationSeconds: 2, startFrame: 0},
-        tailFrames: 0,
-        transition: {type: 'fade', durationFrames: 20},
+        narration: {durationSeconds: 2, startSeconds: 0},
+        tailSeconds: 0,
+        transition: {type: 'fade', durationSeconds: 2 / 3},
       },
     ],
   });
@@ -99,6 +100,25 @@ test('scene-specific transitions override the legacy global overlap', () => {
   assert.equal(timeline.scenes[1].from, 60);
   assert.equal(timeline.scenes[2].from, 100);
   assert.equal(timeline.durationInFrames, 160);
+});
+
+test('v1 projects are rejected instead of migrated', async () => {
+  const report = await validateProject({
+    schemaVersion: 1,
+    slug: 'old-project',
+    title: 'Old project',
+    video: {width: 1920, height: 1080, fps: 30, transitionFrames: 12},
+    theme: {},
+    audio: {music: null, sfx: {}},
+    scenes: [],
+  });
+  assert.equal(report.passed, false);
+  assert.ok(
+    report.issues.some(
+      ({code, message}) =>
+        code === 'schema-version' && message.includes('必须为 2'),
+    ),
+  );
 });
 
 test('subtitle fallback splits long narration and fills the measured narration window', () => {
@@ -110,25 +130,28 @@ test('subtitle fallback splits long narration and fills the measured narration w
   assert.ok(segments.every((segment) => [...segment].length <= 12));
   const cues = deriveSubtitleCues({
     text: segments.join(''),
-    startFrame: 9,
+    startSeconds: 0.3,
     durationSeconds: 6,
     fps: 30,
     maximumCharacters: 12,
   });
-  assert.equal(cues[0].from, 9);
-  assert.equal(cues.at(-1).to, 189);
-  assert.ok(cues.every(({from, to}) => to > from));
+  assert.equal(cues[0].fromSeconds, 0.3);
+  assert.equal(cues.at(-1).toSeconds, 6.3);
+  assert.ok(cues.every(({fromSeconds, toSeconds}) => toSeconds > fromSeconds));
 
   const compressed = deriveSubtitleCues({
     text: '甲。乙。丙。丁。',
-    startFrame: 0,
+    startSeconds: 0,
     durationSeconds: 2 / 30,
     fps: 30,
     maximumCharacters: 1,
-    gapFrames: 2,
+    gapSeconds: 2 / 30,
   });
   assert.equal(compressed.length, 2);
-  assert.deepEqual(compressed.map(({from, to}) => [from, to]), [[0, 1], [1, 2]]);
+  assert.deepEqual(
+    compressed.map(({fromSeconds, toSeconds}) => [fromSeconds, toSeconds]),
+    [[0, 1 / 30], [1 / 30, 2 / 30]],
+  );
 });
 
 test('required asset quality resets on file hashes and blocks until every rubric passes', async () => {
@@ -172,11 +195,11 @@ test('required asset quality resets on file hashes and blocks until every rubric
       path.join(projectDirectory, 'project.json'),
       `${JSON.stringify(
         {
-          schemaVersion: 1,
+          schemaVersion: 2,
           slug,
           title: 'Quality Gate',
-          quality: {mode: 'required', minimumAssetScale: 1},
-          video: {width: 640, height: 360, fps: 30, transitionFrames: 0},
+          quality: {minimumAssetScale: 1},
+          video: {width: 640, height: 360, fps: 30},
           theme: {},
           audio: {music: null, sfx: {}},
           scenes: [
@@ -200,7 +223,7 @@ test('required asset quality resets on file hashes and blocks until every rubric
     await fs.writeFile(
       path.join(projectDirectory, 'assets-manifest.json'),
       `${JSON.stringify({
-        schemaVersion: 1,
+        schemaVersion: 2,
         projectSlug: slug,
         assets: [
           {

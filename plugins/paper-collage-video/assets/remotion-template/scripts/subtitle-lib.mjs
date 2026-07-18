@@ -30,15 +30,17 @@ export const segmentSubtitleText = (text, maximumCharacters) =>
 
 export const deriveSubtitleCues = ({
   text,
-  startFrame,
+  startSeconds,
   durationSeconds,
   fps,
   maximumCharacters,
-  gapFrames = 2,
+  gapSeconds = 2 / 30,
 }) => {
   const rawSegments = segmentSubtitleText(text, maximumCharacters);
   if (rawSegments.length === 0) return [];
   const narrationFrames = Math.max(1, Math.ceil(durationSeconds * fps));
+  const startFrame = Math.round(startSeconds * fps);
+  const requestedGapFrames = Math.max(0, Math.round(gapSeconds * fps));
   const segmentCount = Math.min(rawSegments.length, narrationFrames);
   const segments = Array.from({length: segmentCount}, (_, index) => {
     const from = Math.floor((index * rawSegments.length) / segmentCount);
@@ -49,7 +51,7 @@ export const deriveSubtitleCues = ({
     segments.length <= 1
       ? 0
       : Math.min(
-          gapFrames,
+          requestedGapFrames,
           Math.max(
             0,
             Math.floor(
@@ -80,13 +82,17 @@ export const deriveSubtitleCues = ({
       : Math.min(startFrame + narrationFrames, from + frames);
     allocated += to - from;
     cursor = to + (isLast ? 0 : effectiveGapFrames);
-    return {from, to, text: segment};
+    return {
+      fromSeconds: from / fps,
+      toSeconds: to / fps,
+      text: segment,
+    };
   });
 };
 
-export const cuesFromTiming = ({timing, startFrame, fps}) =>
+export const cuesFromTiming = ({timing, startSeconds}) =>
   timing.map((cue) => ({
-    from: startFrame + Math.max(0, Math.round(cue.startSeconds * fps)),
-    to: startFrame + Math.max(1, Math.round(cue.endSeconds * fps)),
+    fromSeconds: startSeconds + Math.max(0, cue.startSeconds),
+    toSeconds: startSeconds + Math.max(0, cue.endSeconds),
     text: cue.text,
   }));

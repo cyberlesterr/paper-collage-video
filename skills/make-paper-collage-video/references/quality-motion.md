@@ -1,6 +1,6 @@
 # Asset Quality, Motion, and Delivery
 
-Read this reference before bulk image production, timeline authoring, or technical acceptance. New projects default to a required asset-quality gate. Legacy projects without a `quality` block remain advisory until intentionally migrated.
+Read this reference before bulk image production, timeline authoring, or technical acceptance. The v2 protocol has one mandatory asset-quality path; there is no advisory, off, or migration mode.
 
 ## Quality Is a Recorded Production Step
 
@@ -25,7 +25,7 @@ npm run project:quality -- <slug> record \
   --note="<brief visual evidence>"
 ```
 
-Use `--fail=<checks>` when a violation is visible, revise or regenerate only that asset, then prepare and review again. Never mark a check passed merely to unblock `assets-ready`. `project:assets-ready` and rendering enforce the quality report only when `project.json.quality.mode` is `required`.
+Use `--fail=<checks>` when a violation is visible, revise or regenerate only that asset, then prepare and review again. Never mark a check passed merely to unblock `assets-ready`. `project:assets-ready` and every render always enforce the quality report.
 
 ## Reuse Before Regeneration
 
@@ -51,10 +51,10 @@ Use scene-specific motion only when it supports the beat:
 - `camera.keyframes`: normalized `at` values from `0` to `1` with optional `x`, `y`, and `zoom`;
 - `layer.motion.idle`: `float`, `breathe`, `grind`, `drift`, or `still`;
 - `layer.motion`: tune `intensity`, `cycleSeconds`, `phase`, and `enterDurationSeconds`;
-- `scene.transition`: `fade` or `none`, with an optional duration;
-- `scene.audioEvents`: action-timed SFX using `atSeconds` or `fromFrame`.
+- `scene.transition`: `fade` or `none`, with an explicit `durationSeconds`;
+- `scene.audioEvents`: action-timed SFX using `atSeconds`.
 
-Prefer seconds for new delay and audio-event authoring so behavior remains stable across fps values. Keep legacy frame fields for compatibility. At the style-and-voice gate, include a short motion proof when the project introduces a new or material motion language; this is part of the existing gate, not an additional approval.
+Use seconds for scene tails, narration starts, transitions, layer delays, action audio, and subtitle ranges so behavior remains stable across fps values. At the style-and-voice gate, include a short motion proof when the project introduces a new or material motion language; this is part of the existing gate, not an additional approval.
 
 ## Delivery Profiles
 

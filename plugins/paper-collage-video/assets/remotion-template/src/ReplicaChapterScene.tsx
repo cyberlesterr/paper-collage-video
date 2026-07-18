@@ -17,7 +17,7 @@ import type {
   ProjectSound,
   ProjectAudioEvent,
   ProjectTheme,
-  SubtitleCue,
+  NormalizedSubtitleCue,
 } from './project';
 import {roleMotion, type Role} from './roleMotion';
 
@@ -47,11 +47,8 @@ const Character = ({
     height / (landscape ? 1080 : 1920),
   );
   const motion = roleMotion[layer.role];
-  const layerMotion = layer.motion ?? {};
-  const delay =
-    layer.delaySeconds === undefined
-      ? layer.delay
-      : Math.round(layer.delaySeconds * fps);
+  const layerMotion = layer.motion;
+  const delay = Math.round(layer.delaySeconds * fps);
   const entrance = spring({
     fps,
     frame: frame - delay,
@@ -62,7 +59,7 @@ const Character = ({
     },
     durationInFrames: Math.max(
       1,
-      Math.round((layerMotion.enterDurationSeconds ?? 34 / 30) * fps),
+      Math.round(layerMotion.enterDurationSeconds * fps),
     ),
   });
   const direction = layer.enterFrom === 'left' ? -1 : 1;
@@ -71,12 +68,12 @@ const Character = ({
       ? 0
       : (1 - entrance) * motion.distance * direction;
   const elapsed = Math.max(0, frame - delay);
-  const cycleFrames = Math.max(1, (layerMotion.cycleSeconds ?? 2.8) * fps);
+  const cycleFrames = Math.max(1, layerMotion.cycleSeconds * fps);
   const wave = Math.sin(
     (elapsed / cycleFrames) * Math.PI * 2 + (layerMotion.phase ?? layer.z * 0.7),
   );
-  const intensity = layerMotion.intensity ?? 1;
-  const idle = layerMotion.idle ?? 'float';
+  const intensity = layerMotion.intensity;
+  const idle = layerMotion.idle;
   const idleX =
     idle === 'grind'
       ? wave * 11 * intensity * layoutScale
@@ -124,7 +121,7 @@ const Subtitle = ({
   cues,
   theme,
 }: {
-  cues: SubtitleCue[];
+  cues: NormalizedSubtitleCue[];
   theme: ProjectTheme;
 }) => {
   const frame = useCurrentFrame();
@@ -353,10 +350,7 @@ const RoleSounds = ({
       {layers.map((layer) => {
         const sound = roleSounds[layer.role];
         if (!sound) return null;
-        const from =
-          layer.delaySeconds === undefined
-            ? layer.delay
-            : Math.round(layer.delaySeconds * fps);
+        const from = Math.round(layer.delaySeconds * fps);
         return (
           <Sequence key={`sound-${layer.id}`} from={from} layout="none">
             <Audio src={staticFile(sound.src)} volume={sound.volume} />
@@ -372,10 +366,7 @@ const AudioEvents = ({events}: {events: ProjectAudioEvent[]}) => {
   return (
     <>
       {events.map((event) => {
-        const from =
-          event.atSeconds === undefined
-            ? event.fromFrame ?? 0
-            : Math.round(event.atSeconds * fps);
+        const from = Math.round(event.atSeconds * fps);
         return (
           <Sequence key={event.id} from={from} layout="none">
             <Audio src={staticFile(event.src)} volume={event.volume} />
@@ -387,8 +378,8 @@ const AudioEvents = ({events}: {events: ProjectAudioEvent[]}) => {
 };
 
 const cameraDefaults = (
-  preset: NonNullable<NormalizedProjectScene['camera']>['preset'] = 'push',
-  intensity = 1,
+  preset: NormalizedProjectScene['camera']['preset'],
+  intensity: number,
 ) => {
   switch (preset) {
     case 'pull':
@@ -457,9 +448,9 @@ export const ReplicaChapterScene = ({
     height / (landscape ? 1080 : 1920),
   );
   const rawKeyframes =
-    scene.camera?.keyframes && scene.camera.keyframes.length >= 2
+    scene.camera.keyframes && scene.camera.keyframes.length >= 2
       ? [...scene.camera.keyframes].sort((left, right) => left.at - right.at)
-      : cameraDefaults(scene.camera?.preset, scene.camera?.intensity);
+      : cameraDefaults(scene.camera.preset, scene.camera.intensity);
   const keyframes = rawKeyframes.map((keyframe) => ({
     ...keyframe,
     x: (keyframe.x ?? 0) * layoutScale,
@@ -486,10 +477,7 @@ export const ReplicaChapterScene = ({
     property: 'y',
     fallback: 0,
   });
-  const fadeFrames =
-    scene.transition?.type === 'none'
-      ? 0
-      : scene.transition?.durationFrames ?? Math.round(0.6 * fps);
+  const fadeFrames = scene.transitionFrames;
   const fadeIn =
     fadeFrames === 0 ? 1 : interpolate(frame, [0, fadeFrames], [0, 1], clamp);
   const fadeOut =
@@ -528,7 +516,7 @@ export const ReplicaChapterScene = ({
           pointerEvents: 'none',
         }}
       />
-      {(scene.environmentLayers ?? [])
+      {scene.environmentLayers
         .filter(({z}) => z < 4)
         .map((layer) => (
           <EnvironmentCutout
@@ -542,7 +530,7 @@ export const ReplicaChapterScene = ({
       {scene.layers.map((layer) => (
         <Character key={layer.id} layer={layer} paperEdge={theme.paperEdge} />
       ))}
-      {(scene.environmentLayers ?? [])
+      {scene.environmentLayers
         .filter(({z}) => z >= 4)
         .map((layer) => (
           <EnvironmentCutout
@@ -556,11 +544,11 @@ export const ReplicaChapterScene = ({
       <ForegroundPaper color={theme.foreground} />
       <ChapterLabel eyebrow={scene.eyebrow} label={scene.label} theme={theme} />
       <Subtitle cues={scene.subtitles} theme={theme} />
-      <Sequence from={scene.narration.startFrame} layout="none">
+      <Sequence from={scene.narrationStartFrame} layout="none">
         <Audio src={staticFile(scene.narration.src)} volume={1} />
       </Sequence>
       <RoleSounds layers={scene.layers} roleSounds={roleSounds} />
-      <AudioEvents events={scene.audioEvents ?? []} />
+      <AudioEvents events={scene.audioEvents} />
     </AbsoluteFill>
   );
 };

@@ -301,7 +301,6 @@ try {
       issues: validation.issues,
     },
     quality: {
-      mode: quality.mode,
       ready: quality.ready,
       actualPassed: quality.actualPassed,
       total: quality.total,

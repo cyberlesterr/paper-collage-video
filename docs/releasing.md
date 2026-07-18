@@ -18,7 +18,7 @@ npm run plugin:sync
 npm test
 npm run check
 npm run doctor -- --ready
-npm run project:validate -- tie-chu-mo-zhen
+npm run bundle
 npm audit --audit-level=moderate
 git diff --check
 ```
@@ -53,7 +53,7 @@ git tag -a v0.4.0 -m "Paper Collage Video v0.4.0"
 git push origin v0.4.0
 ```
 
-标签会触发 `Publish GitHub Release` 工作流。工作流会从该标签重新验证源码、渲染 `tie-chu-mo-zhen`，并创建正式 Release；唯一上传的媒体资产是 `tie-chu-mo-zhen-preview.mp4`。不要手动追加联系表、其他示例媒体、provider 凭据、本机配置或权属未确认的素材。
+标签会触发 `Publish GitHub Release` 工作流。工作流会从该标签重新验证源码、测试、类型和 Remotion bundle，然后创建正式 Release。生产项目及其预览不再作为发布构建依赖，也不会自动上传媒体、provider 凭据、本机配置或权属未确认的素材。
 
 ## 6. Post-Release Verification
 
