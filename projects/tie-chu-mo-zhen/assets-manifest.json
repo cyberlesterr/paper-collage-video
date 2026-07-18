@@ -1082,53 +1082,6 @@
       }
     },
     {
-      "assetId": "char-granny-sheet-v2",
-      "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
-      "provider": "gpt-image",
-      "adapter": "host",
-      "tool": "image_gen__imagegen",
-      "model": "auto",
-      "externalId": null,
-      "requestFingerprint": "0d2bb92b6b17bae39ec568accd03ce502e563aa7121a8e6825a69deaca8ceac5",
-      "reusedFrom": null,
-      "sha256": "fa73c60bac38c82ad29b4ac8c61cb6ca7f4f343e0ee7094ab35e04ca9ef0dfde",
-      "sizeBytes": 1009241,
-      "recordedAt": "2026-07-18T11:46:38.985Z",
-      "request": {
-        "$schema": "../../../schemas/asset-request.schema.json",
-        "schemaVersion": 1,
-        "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "char-granny-sheet-v2",
-        "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
-        "prompt": "Use case: historical-scene\nAsset type: 3×1 character pose sheet for a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve the elderly woman on its right as the exact identity, lined calm face, gray wrapped hair, muted ochre-brown layered robe and paper-collage construction\nPrimary request: three complete poses of the same elderly woman, one per equal horizontal cell: 1 seated low and steadily grinding a thick iron pestle across an implied stone, both hands and full pestle visible; 2 seated upright, looking up calmly while answering, one hand resting near the iron pestle; 3 seated low in a stronger side-view grinding pose for rhythmic repetition\nStyle/medium: premium handcrafted Chinese paper collage matching Image 1, torn fibrous edges, restrained ink, matte mineral pigments and subtle paper shadows\nComposition/framing: exact 3 columns × 1 row, consistent identity and scale, generous padding, no overlap, all heads, hands, feet and iron pestles complete\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in every cell; no grindstone, floor, cast shadow, gradient, texture or divider\nConstraints: thick iron pestle remains a pestle, not a finished needle; no text, labels, watermark, logo, extra people, modern items or #ff00ff in subject; stable anatomy\nAvoid: witch caricature, comedy, anime, chibi, photorealism, glossy 3D, cropped hands, warped pestle, identity drift",
-        "model": "auto",
-        "settings": {
-          "stage": "asset-production",
-          "layout": "3x1",
-          "columns": 3,
-          "count": 3,
-          "keyColor": "#ff00ff",
-          "referenceImages": [
-            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
-          ]
-        },
-        "quality": {
-          "kind": "character-sheet",
-          "requiredChecks": [
-            "no-text",
-            "no-watermark",
-            "subject-complete",
-            "identity-consistent",
-            "cell-separation",
-            "background-uniform",
-            "style-consistent"
-          ]
-        }
-      }
-    },
-    {
       "assetId": "char-li-bai-sheet-b-v2",
       "capability": "image",
       "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-b.png",
@@ -1150,53 +1103,6 @@
         "capability": "image",
         "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-b.png",
         "prompt": "Use case: historical-scene\nAsset type: 2×1 character pose sheet for a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve the exact young scholar identity, face, topknot, blue-gray robe, tea-brown sash, blank book bundle and handmade paper construction\nPrimary request: two complete full-body poses of the same young Li Bai, one per equal horizontal cell: 1 walking uphill with renewed purpose and the same book bundle on his back; 2 seated at a low writing desk, calm and focused, brush lowered toward a blank page\nStyle/medium: premium handcrafted Chinese paper collage matching Image 1, fibrous torn edges, restrained ink, matte mineral pigments\nComposition/framing: exact 2 columns × 1 row, consistent scale and identity, generous padding, no overlap, complete head, hands and feet\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in both cells, no floor, shadows, gradient, texture or divider\nConstraints: no written marks on page, text, label, watermark, logo, extra people, modern items or #ff00ff in figure; stable anatomy and costume\nAvoid: anime, chibi, photorealism, glossy 3D, cropped or duplicated limbs, identity drift",
-        "model": "auto",
-        "settings": {
-          "stage": "asset-production",
-          "layout": "2x1",
-          "columns": 2,
-          "count": 2,
-          "keyColor": "#ff00ff",
-          "referenceImages": [
-            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
-          ]
-        },
-        "quality": {
-          "kind": "character-sheet",
-          "requiredChecks": [
-            "no-text",
-            "no-watermark",
-            "subject-complete",
-            "identity-consistent",
-            "cell-separation",
-            "background-uniform",
-            "style-consistent"
-          ]
-        }
-      }
-    },
-    {
-      "assetId": "char-grind-close-sheet-v2",
-      "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
-      "provider": "gpt-image",
-      "adapter": "host",
-      "tool": "image_gen__imagegen",
-      "model": "auto",
-      "externalId": null,
-      "requestFingerprint": "d76d48c69a5c0e8a1a21366a0d4bdfe7fd783f3198bab6e4eaf9210ff890ece3",
-      "reusedFrom": null,
-      "sha256": "6660d6d88984d412a82d95d94956cbc73de09a838d51a3eb23cdcff8611b1bec",
-      "sizeBytes": 519836,
-      "recordedAt": "2026-07-18T11:49:37.567Z",
-      "request": {
-        "$schema": "../../../schemas/asset-request.schema.json",
-        "schemaVersion": 1,
-        "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "char-grind-close-sheet-v2",
-        "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
-        "prompt": "Use case: historical-scene\nAsset type: 2×1 close-up action-parts sheet for scene 4 of a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; match the elderly woman's sleeves, hands, thick iron pestle, grinding stone contact and exact handmade paper language\nPrimary request: two complete isolated close-up cutouts, one per horizontal cell: 1 both elderly hands in muted ochre sleeves firmly holding the thick iron pestle diagonally, with the full visible pestle and no stone; 2 a second phase of the same hands and pestle shifted slightly along the grinding direction for rhythmic motion\nStyle/medium: premium handcrafted Chinese paper collage, fibrous torn edges, restrained ink, matte iron gray and ochre mineral pigments\nComposition/framing: exact 2 columns × 1 row, consistent hand anatomy and pestle thickness, generous padding, no overlap, complete wrists, fingers and pestle endpoints\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in both cells, no floor, shadow, gradient, texture, stone or divider\nConstraints: no finished needle, sparks, text, label, watermark, logo, extra limbs or #ff00ff in subject\nAvoid: distorted fingers, warped pestle, photorealism, glossy 3D, cropped endpoints, motion blur",
         "model": "auto",
         "settings": {
           "stage": "asset-production",
@@ -1311,6 +1217,100 @@
             "subject-complete",
             "style-consistent",
             "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "char-grind-close-sheet-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "fe2f3bd7eadc0c00ff4dbfafe0d886c896d77a14dad930864013bc10293dad1f",
+      "reusedFrom": null,
+      "sha256": "46f7e3d233ee5c824b777d3ed9a5eb76804763325c83d1aa19990d1def419985",
+      "sizeBytes": 788246,
+      "recordedAt": "2026-07-18T14:42:40.523Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "char-grind-close-sheet-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
+        "prompt": "Use case: historical-scene\nAsset type: 2×1 close-up action-parts sheet for scene 4 of a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; match the elderly woman's muted ochre sleeves, aged hands, thick iron pestle and exact handmade paper language\nPrimary request: two complete isolated close-up action phases, one per horizontal cell. In each cell, both elderly hands grip the upper and middle part of ONE thick iron pestle. The shaft slopes downward at a shallow 20–30 degree diagonal. ONLY THE LOWER END touches a small flat grindstone patch at the bottom of the cutout; every other part of the shaft is visibly raised. Cell 2 advances the hands and pestle a short distance ALONG THE SHAFT AXIS, showing the next phase of a lengthwise push-pull stroke while the same tip remains the sole abrasion point. Show a subtle flattened-to-tapered wear shape at that contacted tip, still much thicker than a needle.\nAction mechanics: axial back-and-forth rubbing of one end against stone to make that end gradually pointed. The hands do not roll the pestle around its circumference.\nStyle/medium: premium handcrafted Chinese paper collage, fibrous torn edges, restrained ink, matte iron gray and ochre mineral pigments\nComposition/framing: exact 2 columns × 1 row, consistent hand anatomy and pestle thickness, generous padding, no overlap, complete wrists and fingers; keep the tip-to-stone contact readable\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in both cells, no floor, cast shadow, gradient, texture or divider outside the small stone contact patch\nConstraints: the rod must not lie flat; only one end touches stone; no finished needle, sparks, text, label, watermark, logo, extra limbs or #ff00ff in subject\nAvoid: horizontal rod resting across the stone, one hand at each rod end, sideways rolling, polishing the full cylindrical surface, sawing motion, distorted fingers, warped pestle, photorealism, glossy 3D, cropped hands, motion blur",
+        "model": "auto",
+        "settings": {
+          "stage": "asset-production",
+          "layout": "2x1",
+          "columns": 2,
+          "count": 2,
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "character-sheet",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "identity-consistent",
+            "cell-separation",
+            "background-uniform",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "char-granny-sheet-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "fa9055530884628b27f570f0c350642b80f76fc26482de32d1bbd0562575cb16",
+      "reusedFrom": null,
+      "sha256": "70d3d705523999d52bec88aa8477c69fdc547e8a1824e8278fff6e11a620292d",
+      "sizeBytes": 951713,
+      "recordedAt": "2026-07-18T14:58:53.893Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "char-granny-sheet-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
+        "prompt": "Use case: historical-scene\nAsset type: 3×1 character pose sheet for a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve the elderly woman on its right as the exact identity, lined calm face, gray wrapped hair, muted ochre-brown layered robe and paper-collage construction\nPrimary request: three complete poses of the same elderly woman, one per equal horizontal cell. Cell 1: seated low, both hands spaced along the upper half of one thick iron pestle, holding its shaft at a shallow downward diagonal so ONLY ONE END presses against a small flat grindstone patch below; the rest of the pestle is visibly lifted off the surface. Cell 2: seated upright and answering calmly, one hand still steadying the correctly angled pestle whose same lower tip rests on a small flat stone patch. Cell 3: a second grinding phase of Cell 1, hands and shaft shifted slightly forward ALONG THE PESTLE'S LONG AXIS while the SAME SINGLE END remains the contact point on the same kind of small flat grindstone. The contacted end may be mildly worn and tapered but is still far from a needle.\nAction mechanics: she repeatedly pushes and pulls the pestle lengthwise to abrade one end into a point. This is axial back-and-forth rubbing of one tip, never rolling the whole cylinder sideways.\nStyle/medium: premium handcrafted Chinese paper collage matching Image 1, torn fibrous edges, restrained ink, matte mineral pigments and subtle paper shadows\nComposition/framing: exact 3 columns × 1 row, consistent identity and scale, generous padding, no overlap, all heads, hands, feet and iron pestles complete; make the single tip-to-stone contact unmistakable in Cells 1 and 3\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in every cell; no floor, cast shadow, gradient, texture or divider outside each small stone contact patch\nConstraints: the pestle must be oblique with only its lower tip touching the stone patch; no text, labels, watermark, logo, extra people, modern items or #ff00ff in subject; stable anatomy\nAvoid: iron rod lying flat across a stone, hands gripping opposite ends, sideways rolling, polishing the full cylindrical surface, sawing motion, finished needle, sparks, witch caricature, comedy, anime, chibi, photorealism, glossy 3D, cropped hands, warped pestle, identity drift",
+        "model": "auto",
+        "settings": {
+          "stage": "asset-production",
+          "layout": "3x1",
+          "columns": 3,
+          "count": 3,
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "character-sheet",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "identity-consistent",
+            "cell-separation",
+            "background-uniform",
+            "style-consistent"
           ]
         }
       }

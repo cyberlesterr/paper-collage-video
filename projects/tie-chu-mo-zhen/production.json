@@ -4,7 +4,7 @@
   "slug": "tie-chu-mo-zhen",
   "stage": "human-review",
   "createdAt": "2026-07-18T08:36:15.079Z",
-  "updatedAt": "2026-07-18T12:15:56.925Z",
+  "updatedAt": "2026-07-18T15:02:45.276Z",
   "approvals": {
     "concept": {
       "status": "approved",
@@ -82,6 +82,30 @@
       "status": "completed",
       "updatedAt": "2026-07-18T11:17:08.218Z",
       "artifact": "projects/tie-chu-mo-zhen/assets-manifest.json",
+      "note": ""
+    },
+    {
+      "id": "revision-granny-grinding",
+      "label": "修正老妇磨杵全身动作",
+      "status": "completed",
+      "updatedAt": "2026-07-18T14:45:08.913Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/granny-grinding-a.png",
+      "note": ""
+    },
+    {
+      "id": "revision-grind-close",
+      "label": "修正铁杵端部研磨特写",
+      "status": "completed",
+      "updatedAt": "2026-07-18T14:45:09.075Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/grind-hands-a.png",
+      "note": ""
+    },
+    {
+      "id": "revision-granny-contact",
+      "label": "强化第三幕铁杵单端接触磨石",
+      "status": "completed",
+      "updatedAt": "2026-07-18T14:59:40.267Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/granny-grinding-a.png",
       "note": ""
     }
   ],
@@ -213,6 +237,78 @@
     },
     {
       "at": "2026-07-18T12:15:56.925Z",
+      "action": "preview-rendered",
+      "stage": "human-review",
+      "note": "dist/tie-chu-mo-zhen/preview.mp4"
+    },
+    {
+      "at": "2026-07-18T14:31:00.977Z",
+      "action": "request-preview-revision",
+      "stage": "asset-production",
+      "note": "用户指出磨杵动作不准确：应握住铁杵，只让一端在磨石上沿轴向来回摩擦并逐渐磨尖，不应横放滚动整根铁棒"
+    },
+    {
+      "at": "2026-07-18T14:31:01.131Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "revision-granny-grinding"
+    },
+    {
+      "at": "2026-07-18T14:31:01.281Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "revision-grind-close"
+    },
+    {
+      "at": "2026-07-18T14:45:08.913Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "revision-granny-grinding"
+    },
+    {
+      "at": "2026-07-18T14:45:09.075Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "revision-grind-close"
+    },
+    {
+      "at": "2026-07-18T14:45:10.201Z",
+      "action": "assets-ready",
+      "stage": "preview",
+      "note": ""
+    },
+    {
+      "at": "2026-07-18T14:48:07.370Z",
+      "action": "preview-rendered",
+      "stage": "human-review",
+      "note": "dist/tie-chu-mo-zhen/preview.mp4"
+    },
+    {
+      "at": "2026-07-18T14:51:43.253Z",
+      "action": "request-preview-revision",
+      "stage": "asset-production",
+      "note": "落实同一条用户反馈时，连续帧复核发现第三幕接触石面不够明确；补强单端落在磨石上的可读性"
+    },
+    {
+      "at": "2026-07-18T14:51:43.631Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "revision-granny-contact"
+    },
+    {
+      "at": "2026-07-18T14:59:40.267Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "revision-granny-contact"
+    },
+    {
+      "at": "2026-07-18T14:59:41.451Z",
+      "action": "assets-ready",
+      "stage": "preview",
+      "note": ""
+    },
+    {
+      "at": "2026-07-18T15:02:45.276Z",
       "action": "preview-rendered",
       "stage": "human-review",
       "note": "dist/tie-chu-mo-zhen/preview.mp4"

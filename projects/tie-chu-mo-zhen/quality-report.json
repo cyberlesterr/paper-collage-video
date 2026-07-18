@@ -2,7 +2,7 @@
   "$schema": "../../schemas/quality-report.schema.json",
   "schemaVersion": 1,
   "projectSlug": "tie-chu-mo-zhen",
-  "updatedAt": "2026-07-18T12:15:56.913Z",
+  "updatedAt": "2026-07-18T15:02:45.262Z",
   "assets": [
     {
       "assetId": "bg-study-dusk-v2",
@@ -653,7 +653,7 @@
       "sources": [
         "scene:scene-03-creek-encounter:layer:granny-grinding-a"
       ],
-      "sha256": "ccc146acb3ddc0710a017743f372010cbf0b647d5cab269d9baac14448309268",
+      "sha256": "02ea6d5f60ce17f4ddcf83d2ca2c40ebabc48bcf9b42e9ac143b4c1d2a3aeb3c",
       "requiredChecks": [
         "subject-complete",
         "identity-consistent",
@@ -666,12 +666,12 @@
           {
             "id": "file-exists",
             "passed": true,
-            "actual": 345027
+            "actual": 359901
           },
           {
             "id": "dimensions-readable",
             "passed": true,
-            "actual": "584x567"
+            "actual": "512x609"
           },
           {
             "id": "alpha-present",
@@ -682,7 +682,7 @@
             "id": "key-edge-clean",
             "passed": true,
             "expected": "<= 0.12",
-            "actual": 0.012259319631597031
+            "actual": 0
           }
         ]
       },
@@ -694,8 +694,8 @@
       },
       "status": "passed",
       "reviewer": "codex",
-      "reviewedAt": "2026-07-18T12:02:56.958Z",
-      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+      "reviewedAt": "2026-07-18T14:59:40.100Z",
+      "note": "黑白底抠像检查通过：老妇、斜持铁杵及端部磨石接触点完整，边缘干净。"
     },
     {
       "assetId": "runtime-6afcd5b38e2e",
@@ -847,7 +847,7 @@
       "sources": [
         "scene:scene-04-inch-by-inch:layer:grind-hands-a"
       ],
-      "sha256": "c857dabe34fa649857b06dd306de8cb5192965fc8f0e5e3df93f93ffe3ffac84",
+      "sha256": "10e0d43c21e3e01f4a6ee8f77c2beafdeb443bef0a8c1d3122ebb6b3322da1c8",
       "requiredChecks": [
         "subject-complete",
         "identity-consistent",
@@ -860,12 +860,12 @@
           {
             "id": "file-exists",
             "passed": true,
-            "actual": 306669
+            "actual": 455341
           },
           {
             "id": "dimensions-readable",
             "passed": true,
-            "actual": "785x438"
+            "actual": "802x568"
           },
           {
             "id": "alpha-present",
@@ -888,8 +888,8 @@
       },
       "status": "passed",
       "reviewer": "codex",
-      "reviewedAt": "2026-07-18T12:02:58.463Z",
-      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+      "reviewedAt": "2026-07-18T14:44:54.832Z",
+      "note": "黑白底抠像检查通过：手部、单端接触点与小磨石完整，边缘干净。"
     },
     {
       "assetId": "bg-creek-reflection-v2",
@@ -1218,52 +1218,6 @@
       "note": "原尺寸复核：无文字水印与多余人物；两人、手部、铁杵和磨石清晰完整；纸纤维、矿物色、撕纸边与墨线语言一致。水带仅左中部连续，作为门禁样片可接受，生产阶段仍需独立水层。"
     },
     {
-      "assetId": "char-granny-sheet-v2",
-      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
-      "kind": "character-sheet",
-      "sources": [
-        "manifest:char-granny-sheet-v2"
-      ],
-      "requiredChecks": [
-        "no-text",
-        "no-watermark",
-        "subject-complete",
-        "identity-consistent",
-        "cell-separation",
-        "background-uniform",
-        "style-consistent"
-      ],
-      "sha256": "fa73c60bac38c82ad29b4ac8c61cb6ca7f4f343e0ee7094ab35e04ca9ef0dfde",
-      "technical": {
-        "passed": true,
-        "checks": [
-          {
-            "id": "file-exists",
-            "passed": true,
-            "actual": 1009241
-          },
-          {
-            "id": "dimensions-readable",
-            "passed": true,
-            "actual": "2172x724"
-          }
-        ]
-      },
-      "semanticChecks": {
-        "no-text": "passed",
-        "no-watermark": "passed",
-        "subject-complete": "passed",
-        "identity-consistent": "passed",
-        "cell-separation": "passed",
-        "background-uniform": "passed",
-        "style-consistent": "passed"
-      },
-      "status": "passed",
-      "reviewer": "codex",
-      "reviewedAt": "2026-07-18T12:03:00.848Z",
-      "note": "原尺寸图板检查通过：主体完整，身份一致，格线安全带与键色均匀，无文字水印。"
-    },
-    {
       "assetId": "char-li-bai-sheet-b-v2",
       "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-b.png",
       "kind": "character-sheet",
@@ -1307,52 +1261,6 @@
       "status": "passed",
       "reviewer": "codex",
       "reviewedAt": "2026-07-18T12:03:01.245Z",
-      "note": "原尺寸图板检查通过：主体完整，身份一致，格线安全带与键色均匀，无文字水印。"
-    },
-    {
-      "assetId": "char-grind-close-sheet-v2",
-      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
-      "kind": "character-sheet",
-      "sources": [
-        "manifest:char-grind-close-sheet-v2"
-      ],
-      "requiredChecks": [
-        "no-text",
-        "no-watermark",
-        "subject-complete",
-        "identity-consistent",
-        "cell-separation",
-        "background-uniform",
-        "style-consistent"
-      ],
-      "sha256": "6660d6d88984d412a82d95d94956cbc73de09a838d51a3eb23cdcff8611b1bec",
-      "technical": {
-        "passed": true,
-        "checks": [
-          {
-            "id": "file-exists",
-            "passed": true,
-            "actual": 519836
-          },
-          {
-            "id": "dimensions-readable",
-            "passed": true,
-            "actual": "1774x887"
-          }
-        ]
-      },
-      "semanticChecks": {
-        "no-text": "passed",
-        "no-watermark": "passed",
-        "subject-complete": "passed",
-        "identity-consistent": "passed",
-        "cell-separation": "passed",
-        "background-uniform": "passed",
-        "style-consistent": "passed"
-      },
-      "status": "passed",
-      "reviewer": "codex",
-      "reviewedAt": "2026-07-18T12:03:01.657Z",
       "note": "原尺寸图板检查通过：主体完整，身份一致，格线安全带与键色均匀，无文字水印。"
     },
     {
@@ -1400,6 +1308,98 @@
       "reviewer": "codex",
       "reviewedAt": "2026-07-18T12:03:02.143Z",
       "note": "原尺寸图板检查通过：主体完整，身份一致，格线安全带与键色均匀，无文字水印。"
+    },
+    {
+      "assetId": "char-grind-close-sheet-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
+      "kind": "character-sheet",
+      "sources": [
+        "manifest:char-grind-close-sheet-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "identity-consistent",
+        "cell-separation",
+        "background-uniform",
+        "style-consistent"
+      ],
+      "sha256": "46f7e3d233ee5c824b777d3ed9a5eb76804763325c83d1aa19990d1def419985",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 788246
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1774x887"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "cell-separation": "passed",
+        "background-uniform": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T14:44:54.297Z",
+      "note": "原尺寸检查通过：两格均只让同一端接触磨石，杆体悬空，双手未分握两端或滚动。"
+    },
+    {
+      "assetId": "char-granny-sheet-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
+      "kind": "character-sheet",
+      "sources": [
+        "manifest:char-granny-sheet-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "identity-consistent",
+        "cell-separation",
+        "background-uniform",
+        "style-consistent"
+      ],
+      "sha256": "70d3d705523999d52bec88aa8477c69fdc547e8a1824e8278fff6e11a620292d",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 951713
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "2172x724"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "cell-separation": "passed",
+        "background-uniform": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T14:59:39.854Z",
+      "note": "定点修订检查通过：三格均只让同一斜持铁杵端部落在小磨石上，人物与布局保持一致。"
     }
   ]
 }
