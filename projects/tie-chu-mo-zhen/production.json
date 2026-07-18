@@ -4,7 +4,7 @@
   "slug": "tie-chu-mo-zhen",
   "stage": "style-review",
   "createdAt": "2026-07-18T08:36:15.079Z",
-  "updatedAt": "2026-07-18T10:49:08.230Z",
+  "updatedAt": "2026-07-18T11:04:29.804Z",
   "approvals": {
     "concept": {
       "status": "approved",
@@ -42,6 +42,14 @@
       "status": "completed",
       "updatedAt": "2026-07-18T10:49:08.230Z",
       "artifact": "dist/tie-chu-mo-zhen/style-motion-proof.mp4",
+      "note": ""
+    },
+    {
+      "id": "voice-audition-ruyayichen-v2",
+      "label": "儒雅逸辰短旁白试听",
+      "status": "completed",
+      "updatedAt": "2026-07-18T11:04:29.804Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen-v2.mp3",
       "note": ""
     }
   ],
@@ -98,6 +106,18 @@
       "action": "work-item-completed",
       "stage": "style-review",
       "note": "motion-proof-v2"
+    },
+    {
+      "at": "2026-07-18T11:00:50.738Z",
+      "action": "work-item-in-progress",
+      "stage": "style-review",
+      "note": "voice-audition-ruyayichen-v2"
+    },
+    {
+      "at": "2026-07-18T11:04:29.804Z",
+      "action": "work-item-completed",
+      "stage": "style-review",
+      "note": "voice-audition-ruyayichen-v2"
     }
   ]
 }
