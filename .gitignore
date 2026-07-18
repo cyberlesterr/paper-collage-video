@@ -1,6 +1,7 @@
 node_modules/
 .venv/
 out/
+build/
 dist/
 .DS_Store
 *.log
