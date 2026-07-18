@@ -1,4 +1,12 @@
 {
   "imageModel": "auto",
-  "assets": []
+  "assets": [
+    {
+      "assetId": "style-sample-creek-v2",
+      "stage": "style-review",
+      "request": "projects/tie-chu-mo-zhen/requests/style-sample-v2.json",
+      "output": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
+      "purpose": "第三幕溪边相逢的代表性风格样片，以及 3–5 秒运动语言证明的唯一视觉源图"
+    }
+  ]
 }

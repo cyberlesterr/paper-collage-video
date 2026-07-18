@@ -2,6 +2,47 @@
   "$schema": "../../schemas/quality-report.schema.json",
   "schemaVersion": 1,
   "projectSlug": "tie-chu-mo-zhen",
-  "updatedAt": "2026-07-18T08:36:15.079Z",
-  "assets": []
+  "updatedAt": "2026-07-18T10:49:19.646Z",
+  "assets": [
+    {
+      "assetId": "style-sample-creek-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
+      "kind": "style-sample",
+      "sources": [
+        "manifest:style-sample-creek-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "style-consistent",
+        "subject-complete"
+      ],
+      "sha256": "a42e305c61a4eabbf2a2f5538ac37fe7ee68cf0fad74adaf894636edcb8a1f03",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 5299275
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "style-consistent": "passed",
+        "subject-complete": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex-view-image-original",
+      "reviewedAt": "2026-07-18T10:49:19.646Z",
+      "note": "原尺寸复核：无文字水印与多余人物；两人、手部、铁杵和磨石清晰完整；纸纤维、矿物色、撕纸边与墨线语言一致。水带仅左中部连续，作为门禁样片可接受，生产阶段仍需独立水层。"
+    }
+  ]
 }

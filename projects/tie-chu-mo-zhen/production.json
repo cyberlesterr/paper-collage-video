@@ -2,14 +2,14 @@
   "$schema": "../../schemas/production.schema.json",
   "schemaVersion": 1,
   "slug": "tie-chu-mo-zhen",
-  "stage": "concept-review",
+  "stage": "style-review",
   "createdAt": "2026-07-18T08:36:15.079Z",
-  "updatedAt": "2026-07-18T10:34:30.875Z",
+  "updatedAt": "2026-07-18T10:49:08.230Z",
   "approvals": {
     "concept": {
-      "status": "pending",
-      "decidedAt": null,
-      "note": ""
+      "status": "approved",
+      "decidedAt": "2026-07-18T10:42:00.684Z",
+      "note": "批准概念"
     },
     "styleAndVoice": {
       "status": "pending",
@@ -27,7 +27,24 @@
       "note": ""
     }
   },
-  "workItems": [],
+  "workItems": [
+    {
+      "id": "style-sample-v2",
+      "label": "生成第三幕溪边风格样片",
+      "status": "completed",
+      "updatedAt": "2026-07-18T10:49:07.914Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
+      "note": ""
+    },
+    {
+      "id": "motion-proof-v2",
+      "label": "生成 5 秒蒙版视差与磨杵局部动作证明",
+      "status": "completed",
+      "updatedAt": "2026-07-18T10:49:08.230Z",
+      "artifact": "dist/tie-chu-mo-zhen/style-motion-proof.mp4",
+      "note": ""
+    }
+  ],
   "artifacts": {
     "brief": "projects/tie-chu-mo-zhen/brief.md",
     "project": "projects/tie-chu-mo-zhen/project.json",
@@ -57,6 +74,30 @@
       "action": "brief-ready",
       "stage": "concept-review",
       "note": "用户未指定时长和幕数；Skill 根据六个故事转折推导为 78 秒、6 幕"
+    },
+    {
+      "at": "2026-07-18T10:42:00.684Z",
+      "action": "approve-concept",
+      "stage": "style-review",
+      "note": "批准概念"
+    },
+    {
+      "at": "2026-07-18T10:43:00.438Z",
+      "action": "work-item-in-progress",
+      "stage": "style-review",
+      "note": "style-sample-v2"
+    },
+    {
+      "at": "2026-07-18T10:49:07.914Z",
+      "action": "work-item-completed",
+      "stage": "style-review",
+      "note": "style-sample-v2"
+    },
+    {
+      "at": "2026-07-18T10:49:08.230Z",
+      "action": "work-item-completed",
+      "stage": "style-review",
+      "note": "motion-proof-v2"
     }
   ]
 }

@@ -116,6 +116,7 @@ npm run project:assets-ready -- <slug>
 npm run project:preview -- <slug>
 npm run project:render -- <slug>
 npm run project:report -- <slug>
+npm run style:proof -- <slug> --input=public/projects/<slug>/assets/style/<sample>.png
 npm run check
 ```
 

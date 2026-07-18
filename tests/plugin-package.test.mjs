@@ -80,6 +80,7 @@ test('packaged runtime is lightweight and independent from production projects',
   assert.equal(packageJson.scripts['project:plan'], 'node scripts/project-plan.mjs');
   assert.equal(packageJson.scripts['project:quality'], 'node scripts/project-quality.mjs');
   assert.equal(packageJson.scripts['project:subtitles'], 'node scripts/project-subtitles.mjs');
+  assert.equal(packageJson.scripts['style:proof'], 'node scripts/style-motion-proof.mjs');
   assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'projects', 'starter-demo')));
   assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'THIRD_PARTY_NOTICES.md')));
   assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'ASSET_LICENSES.md')));
@@ -115,6 +116,7 @@ test('packaged runtime is lightweight and independent from production projects',
     'scripts/project-subtitles.mjs',
     'scripts/creative-plan-lib.mjs',
     'scripts/project-plan.mjs',
+    'scripts/style-motion-proof.mjs',
     'src/MainVideo.tsx',
     'src/ReplicaChapterScene.tsx',
     'src/project.ts',

@@ -47,6 +47,7 @@
     "project:preview": "node scripts/project-render.mjs preview",
     "project:render": "node scripts/project-render.mjs render",
     "project:report": "node scripts/project-report.mjs",
+    "style:proof": "node scripts/style-motion-proof.mjs",
     "doctor": "node scripts/project-doctor.mjs",
     "dev": "remotion studio src/index.ts --props=projects/starter-demo/project.json",
     "check": "tsc --noEmit",
