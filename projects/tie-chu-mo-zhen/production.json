@@ -2,9 +2,9 @@
   "$schema": "../../schemas/production.schema.json",
   "schemaVersion": 1,
   "slug": "tie-chu-mo-zhen",
-  "stage": "publish-approval",
+  "stage": "complete",
   "createdAt": "2026-07-18T08:36:15.079Z",
-  "updatedAt": "2026-07-18T15:22:45.761Z",
+  "updatedAt": "2026-07-18T15:25:05.539Z",
   "approvals": {
     "concept": {
       "status": "approved",
@@ -22,9 +22,9 @@
       "note": "预览通过"
     },
     "publish": {
-      "status": "pending",
-      "decidedAt": null,
-      "note": ""
+      "status": "approved",
+      "decidedAt": "2026-07-18T15:25:05.539Z",
+      "note": "批准发布"
     }
   },
   "workItems": [
@@ -324,6 +324,12 @@
       "action": "final-rendered",
       "stage": "publish-approval",
       "note": "dist/tie-chu-mo-zhen/final.mp4"
+    },
+    {
+      "at": "2026-07-18T15:25:05.539Z",
+      "action": "approve-publish",
+      "stage": "complete",
+      "note": "批准发布"
     }
   ]
 }
