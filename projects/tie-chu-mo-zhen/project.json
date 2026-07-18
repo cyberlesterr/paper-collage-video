@@ -6,14 +6,20 @@
   "plan": {
     "schemaVersion": 1,
     "slug": "tie-chu-mo-zhen",
-    "status": "pending",
+    "status": "resolved",
     "inputMode": "none",
     "requested": {
       "durationSeconds": null,
       "sceneCount": null
     },
-    "resolved": null,
-    "updatedAt": "2026-07-18T08:36:15.079Z"
+    "resolved": {
+      "durationSeconds": 78,
+      "sceneCount": 6,
+      "estimatedNarrationSeconds": 60,
+      "rationale": "六个可见故事转折；245 字中文旁白按约 4.2 字每秒并加入对话停顿估为 60 秒，另留 18 秒用于开场、磨杵节奏、转场和结尾余韵",
+      "resolvedAt": "2026-07-18T10:34:26.993Z"
+    },
+    "updatedAt": "2026-07-18T10:34:26.993Z"
   },
   "quality": {
     "minimumAssetScale": 1

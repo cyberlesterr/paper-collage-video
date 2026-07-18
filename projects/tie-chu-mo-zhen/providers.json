@@ -1,4 +1,50 @@
 {
   "$schema": "../../schemas/providers.schema.json",
-  "schemaVersion": 1
+  "schemaVersion": 1,
+  "capabilities": {
+    "text": {
+      "defaultProvider": "host-text",
+      "selection": {
+        "status": "confirmed",
+        "provider": "host-text",
+        "confirmedAt": "2026-07-18T10:31:24.750Z",
+        "scope": "project",
+        "note": "用户确认：当前 Codex 模型用于文案、分镜与提示词"
+      }
+    },
+    "image": {
+      "defaultProvider": "gpt-image",
+      "providers": {
+        "gpt-image": {
+          "label": "GPT Image",
+          "adapter": "host",
+          "tool": "image_gen__imagegen"
+        }
+      },
+      "selection": {
+        "status": "confirmed",
+        "provider": "gpt-image",
+        "confirmedAt": "2026-07-18T10:31:24.973Z",
+        "scope": "project",
+        "note": "用户确认：GPT Image 用于风格样片、人物和分层场景图"
+      }
+    },
+    "voice": {
+      "defaultProvider": "chatcut-voice",
+      "providers": {
+        "chatcut-voice": {
+          "label": "ChatCut fictional voice",
+          "adapter": "host",
+          "tool": "mcp__chatcut__submit_voice"
+        }
+      },
+      "selection": {
+        "status": "confirmed",
+        "provider": "chatcut-voice",
+        "confirmedAt": "2026-07-18T10:31:25.181Z",
+        "scope": "project",
+        "note": "用户确认：ChatCut 虚构语音用于旁白"
+      }
+    }
+  }
 }

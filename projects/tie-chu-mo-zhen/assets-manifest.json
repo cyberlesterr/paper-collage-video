@@ -2,5 +2,36 @@
   "$schema": "../../schemas/assets-manifest.schema.json",
   "schemaVersion": 2,
   "projectSlug": "tie-chu-mo-zhen",
-  "assets": []
+  "assets": [
+    {
+      "assetId": "concept-text-v2",
+      "capability": "text",
+      "file": "projects/tie-chu-mo-zhen/concept.md",
+      "provider": "host-text",
+      "adapter": "host",
+      "tool": "codex-host-model",
+      "model": "gpt-5",
+      "externalId": null,
+      "requestFingerprint": "81ce63e2612e07a0cb869a6df80d3a1e7e69e25bfb7b5a5db8f491840089cb5a",
+      "reusedFrom": null,
+      "sha256": "0759dcc2b166e64d5483fb7c0f2a443b409bd70dd8cdb8e7669234125bdeae27",
+      "sizeBytes": 5116,
+      "recordedAt": "2026-07-18T10:34:23.144Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "concept-text-v2",
+        "capability": "text",
+        "output": "projects/tie-chu-mo-zhen/concept.md",
+        "prompt": "为传统寓言《铁杵磨针》设计一版从零开始的中文分层纸片动画概念。不要复用旧项目。时长和幕数均由故事节拍推导。必须把李白遇见老妇磨铁杵写成后世传说而非确定史实，并包含旁白草案、六幕分镜、分层与镜头运动、资产清单、风格方向、声音方向和事实边界。",
+        "model": "gpt-5",
+        "settings": {
+          "language": "zh-CN",
+          "format": "markdown",
+          "aspectRatio": "16:9"
+        }
+      }
+    }
+  ]
 }

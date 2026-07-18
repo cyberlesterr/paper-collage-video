@@ -2,14 +2,30 @@
   "$schema": "../../schemas/production.schema.json",
   "schemaVersion": 1,
   "slug": "tie-chu-mo-zhen",
-  "stage": "capability-review",
+  "stage": "concept-review",
   "createdAt": "2026-07-18T08:36:15.079Z",
-  "updatedAt": "2026-07-18T08:36:15.079Z",
+  "updatedAt": "2026-07-18T10:34:30.875Z",
   "approvals": {
-    "concept": {"status": "pending", "decidedAt": null, "note": ""},
-    "styleAndVoice": {"status": "pending", "decidedAt": null, "note": ""},
-    "preview": {"status": "pending", "decidedAt": null, "note": ""},
-    "publish": {"status": "pending", "decidedAt": null, "note": ""}
+    "concept": {
+      "status": "pending",
+      "decidedAt": null,
+      "note": ""
+    },
+    "styleAndVoice": {
+      "status": "pending",
+      "decidedAt": null,
+      "note": ""
+    },
+    "preview": {
+      "status": "pending",
+      "decidedAt": null,
+      "note": ""
+    },
+    "publish": {
+      "status": "pending",
+      "decidedAt": null,
+      "note": ""
+    }
   },
   "workItems": [],
   "artifacts": {
@@ -29,6 +45,18 @@
       "action": "project-created",
       "stage": "capability-review",
       "note": ""
+    },
+    {
+      "at": "2026-07-18T10:31:32.662Z",
+      "action": "capabilities-ready",
+      "stage": "brief",
+      "note": "用户确认 host-text、gpt-image、chatcut-voice"
+    },
+    {
+      "at": "2026-07-18T10:34:30.875Z",
+      "action": "brief-ready",
+      "stage": "concept-review",
+      "note": "用户未指定时长和幕数；Skill 根据六个故事转折推导为 78 秒、6 幕"
     }
   ]
 }

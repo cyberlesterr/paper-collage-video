@@ -1,0 +1,15 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "concept-text-v2",
+  "capability": "text",
+  "output": "projects/tie-chu-mo-zhen/concept.md",
+  "prompt": "为传统寓言《铁杵磨针》设计一版从零开始的中文分层纸片动画概念。不要复用旧项目。时长和幕数均由故事节拍推导。必须把李白遇见老妇磨铁杵写成后世传说而非确定史实，并包含旁白草案、六幕分镜、分层与镜头运动、资产清单、风格方向、声音方向和事实边界。",
+  "model": "gpt-5",
+  "settings": {
+    "language": "zh-CN",
+    "format": "markdown",
+    "aspectRatio": "16:9"
+  }
+}
