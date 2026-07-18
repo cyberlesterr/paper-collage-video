@@ -1,12 +1,29 @@
 {
   "imageModel": "auto",
+  "styleReference": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
   "assets": [
-    {
-      "assetId": "style-sample-creek-v2",
-      "stage": "style-review",
-      "request": "projects/tie-chu-mo-zhen/requests/style-sample-v2.json",
-      "output": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
-      "purpose": "第三幕溪边相逢的代表性风格样片，以及 3–5 秒运动语言证明的唯一视觉源图"
-    }
+    {"assetId": "style-sample-creek-v2", "stage": "style-review", "request": "projects/tie-chu-mo-zhen/requests/style-sample-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png", "purpose": "已批准的视觉语言锚点"},
+    {"assetId": "bg-study-dusk-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/bg-study-dusk-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-dusk.png", "purpose": "第一幕无人物书舍背景"},
+    {"assetId": "bg-mountain-road-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/bg-mountain-road-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/plates/02-mountain-road.png", "purpose": "第二幕无人物山路背景"},
+    {"assetId": "bg-creek-encounter-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/bg-creek-encounter-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-encounter.png", "purpose": "第三幕无人物溪边背景"},
+    {"assetId": "bg-grindstone-close-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/bg-grindstone-close-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/plates/04-grindstone-close.png", "purpose": "第四幕磨石特写背景"},
+    {"assetId": "bg-creek-reflection-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/bg-creek-reflection-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/plates/05-creek-reflection.png", "purpose": "第五幕顿悟背景"},
+    {"assetId": "bg-study-morning-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/bg-study-morning-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/plates/06-study-morning.png", "purpose": "第六幕晨光书舍背景"},
+    {"assetId": "env-study-window-rear-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-study-window-rear-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/rear/study-window-mountains.png", "purpose": "书舍窗外远山后景"},
+    {"assetId": "env-study-bookshelf-mid-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-study-bookshelf-mid-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/study-bookshelf.png", "purpose": "书舍书架中景"},
+    {"assetId": "env-study-bamboo-fg-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-study-bamboo-fg-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-bamboo.png", "purpose": "第一幕竹叶前景"},
+    {"assetId": "env-road-mountains-rear-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-road-mountains-rear-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/rear/road-mountains.png", "purpose": "山路远山后景"},
+    {"assetId": "env-road-bamboo-mid-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-road-bamboo-mid-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/road-bamboo.png", "purpose": "山路竹林中景"},
+    {"assetId": "env-road-branches-fg-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-road-branches-fg-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/road-branches.png", "purpose": "山路枝叶前景"},
+    {"assetId": "env-creek-bank-mid-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-creek-bank-mid-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/creek-bank.png", "purpose": "溪岸与磨石中景"},
+    {"assetId": "env-creek-water-mid-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-creek-water-mid-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/creek-water.png", "purpose": "可视差溪水中景"},
+    {"assetId": "env-creek-reeds-fg-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-creek-reeds-fg-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/creek-reeds.png", "purpose": "溪边芦草前景"},
+    {"assetId": "env-grind-water-fg-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-grind-water-fg-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/grind-water.png", "purpose": "磨杵水滴与纸屑前景"},
+    {"assetId": "env-memory-pages-mid-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-memory-pages-mid-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/memory-pages.png", "purpose": "顿悟书页意象"},
+    {"assetId": "env-study-ink-fg-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/env-study-ink-fg-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-ink.png", "purpose": "第六幕竹叶与墨迹前景"},
+    {"assetId": "char-li-bai-sheet-a-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/char-li-bai-sheet-a-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-a.png", "purpose": "李白前四个姿态图板"},
+    {"assetId": "char-li-bai-sheet-b-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/char-li-bai-sheet-b-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-b.png", "purpose": "李白回山与落笔姿态图板"},
+    {"assetId": "char-granny-sheet-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/char-granny-sheet-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png", "purpose": "老妇三个姿态图板"},
+    {"assetId": "char-grind-close-sheet-v2", "stage": "asset-production", "request": "projects/tie-chu-mo-zhen/requests/char-grind-close-sheet-v2.json", "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png", "purpose": "磨杵手部特写双相位图板"}
   ]
 }

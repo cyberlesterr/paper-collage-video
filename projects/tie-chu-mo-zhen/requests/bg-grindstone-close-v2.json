@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "bg-grindstone-close-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/plates/04-grindstone-close.png",
+  "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 close-up background plate for scene 4 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample and defines the exact fibrous paper, muted mineral colors, restrained ink and handmade shadow language\nPrimary request: close view of the creek-bank work area with a broad flat grinding stone occupying the lower middle and flowing creek beyond it; the stone is empty so separate hands and iron-pestle layers can animate over it\nScene/backdrop: weathered rock, blurred paper-collage creek water, hints of bamboo reflection; no person, hands, iron object or sparks\nStyle/medium: premium handcrafted Chinese paper collage, layered paper relief, visible fibers, matte celadon, gray-brown and restrained ochre\nComposition/framing: wide 16:9 macro-like framing; grinding stone surface clear and unobstructed; generous center area for the animated close-up layer; subtitle-safe lower edge\nLighting/mood: focused rhythmic calm, subtle warm contact area without actual sparks\nConstraints: no people, hands, iron pestle, needle, text, watermark, logo, modern items or frame\nAvoid: photoreal stone, glossy 3D, anime, cinematic lens flare, embedded motion blur, text-like marks",
+  "model": "auto",
+  "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

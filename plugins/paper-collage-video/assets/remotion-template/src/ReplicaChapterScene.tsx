@@ -433,10 +433,12 @@ const cameraValue = ({
 
 export const ReplicaChapterScene = ({
   scene,
+  narrationVolume,
   roleSounds,
   theme,
 }: {
   scene: NormalizedProjectScene;
+  narrationVolume: number;
   roleSounds: Partial<Record<Role, ProjectSound>>;
   theme: ProjectTheme;
 }) => {
@@ -545,7 +547,10 @@ export const ReplicaChapterScene = ({
       <ChapterLabel eyebrow={scene.eyebrow} label={scene.label} theme={theme} />
       <Subtitle cues={scene.subtitles} theme={theme} />
       <Sequence from={scene.narrationStartFrame} layout="none">
-        <Audio src={staticFile(scene.narration.src)} volume={1} />
+        <Audio
+          src={staticFile(scene.narration.src)}
+          volume={narrationVolume}
+        />
       </Sequence>
       <RoleSounds layers={scene.layers} roleSounds={roleSounds} />
       <AudioEvents events={scene.audioEvents} />

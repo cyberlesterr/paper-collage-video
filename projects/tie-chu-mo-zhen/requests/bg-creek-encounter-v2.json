@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "bg-creek-encounter-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-encounter.png",
+  "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 3 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve its exact paper fibers, mineral palette, ink restraint, creek geography and late-afternoon atmosphere, but remove both people, iron pestle, grindstone and foreground reeds\nPrimary request: the same mountain creek location as the approved sample, empty and ready for separately composited Li Bai and elderly woman cutouts\nScene/backdrop: distant teal mountains, bamboo and weathered rocks, visible horizontal creek-water band across the lower middle, open creek bank on the right\nStyle/medium: premium handcrafted Chinese paper collage with dimensional paper shadows and subtle print misregistration\nComposition/framing: wide 16:9; clear standing area left and seated area right; clean upper breathing room and subtitle-safe lower band; no baked-in people or foreground occluders\nLighting/mood: patient late-afternoon calm, cool celadon distance warming gently near the bank\nConstraints: no people, human silhouettes, iron pestle, grindstone, written characters, captions, signs, watermark, logos, modern items or border\nAvoid: glossy 3D, anime, chibi, photorealism, crowded scenery, text-like marks",
+  "model": "auto",
+  "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

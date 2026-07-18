@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "env-study-bamboo-fg-v2", "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-bamboo.png",
+  "prompt": "Use case: background-extraction\nAsset type: near-foreground occlusion cutout for scene 1 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines bamboo shape, paper texture and muted palette\nPrimary request: two sparse drooping bamboo-paper branches entering from the upper-right and lower-left corners, framing the image without covering the center or subtitle area\nStyle/medium: handcrafted cut-paper bamboo leaves, visible fibers, restrained ink, deep muted teal\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background with no shadow, gradient or texture; no #ff00ff in leaves; complete crisp silhouettes; no people, text, watermark, logo\nAvoid: dense border, photoreal foliage, glossy 3D",
+  "model": "auto", "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "layout": "environment-foreground", "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent", "edge-clean"]}
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "char-li-bai-sheet-b-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-b.png",
+  "prompt": "Use case: historical-scene\nAsset type: 2×1 character pose sheet for a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve the exact young scholar identity, face, topknot, blue-gray robe, tea-brown sash, blank book bundle and handmade paper construction\nPrimary request: two complete full-body poses of the same young Li Bai, one per equal horizontal cell: 1 walking uphill with renewed purpose and the same book bundle on his back; 2 seated at a low writing desk, calm and focused, brush lowered toward a blank page\nStyle/medium: premium handcrafted Chinese paper collage matching Image 1, fibrous torn edges, restrained ink, matte mineral pigments\nComposition/framing: exact 2 columns × 1 row, consistent scale and identity, generous padding, no overlap, complete head, hands and feet\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in both cells, no floor, shadows, gradient, texture or divider\nConstraints: no written marks on page, text, label, watermark, logo, extra people, modern items or #ff00ff in figure; stable anatomy and costume\nAvoid: anime, chibi, photorealism, glossy 3D, cropped or duplicated limbs, identity drift",
+  "model": "auto",
+  "settings": {"stage": "asset-production", "layout": "2x1", "columns": 2, "count": 2, "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "character-sheet", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "identity-consistent", "cell-separation", "background-uniform", "style-consistent"]}
+}

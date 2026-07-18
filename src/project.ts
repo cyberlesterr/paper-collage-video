@@ -157,6 +157,9 @@ export type PaperCollageProject = {
     settings?: Record<string, string | number | boolean>;
   };
   audio: {
+    narration: {
+      volume: number;
+    };
     music: ProjectSound | null;
     sfx: Partial<Record<Role, ProjectSound>>;
     mastering: ProjectAudioMastering;

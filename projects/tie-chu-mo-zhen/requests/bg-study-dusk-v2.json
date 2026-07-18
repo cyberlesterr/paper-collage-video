@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "bg-study-dusk-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-dusk.png",
+  "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 1 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample; use only its paper fibers, mineral-pigment palette, restrained ink outlines, cut-paper edge language and dimensional paper shadows as the visual reference\nPrimary request: a modest generalized Tang-era mountain study room at late afternoon, seen wide from inside; low writing desk with blank paper, rolled blank book bundles, an open lattice window toward misty mountains, simple shelving and a doorway suggesting departure\nScene/backdrop: warm dim interior against cool celadon mountains outside; no people, no human silhouettes\nStyle/medium: premium handcrafted Chinese paper collage, hand-torn mulberry-paper edges, matte mineral pigments, subtle misregistration print texture, Song-album-page compositional calm\nComposition/framing: wide 16:9, center and lower center kept readable for a seated character layer; clean subtitle-safe lower band; window at upper left, desk slightly right of center; clear depth planes without baked-in foreground branches\nLighting/mood: late-afternoon light fading, contemplative and slightly discouraged\nConstraints: blank pages only; no written characters, captions, signs, watermark, logo, people, animals, modern items or frame border\nAvoid: glossy 3D, plastic cartoon, photorealism, anime, crowded props, text-like marks",
+  "model": "auto",
+  "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

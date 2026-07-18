@@ -2,9 +2,9 @@
   "$schema": "../../schemas/production.schema.json",
   "schemaVersion": 1,
   "slug": "tie-chu-mo-zhen",
-  "stage": "style-review",
+  "stage": "human-review",
   "createdAt": "2026-07-18T08:36:15.079Z",
-  "updatedAt": "2026-07-18T11:04:29.804Z",
+  "updatedAt": "2026-07-18T12:15:56.925Z",
   "approvals": {
     "concept": {
       "status": "approved",
@@ -12,9 +12,9 @@
       "note": "批准概念"
     },
     "styleAndVoice": {
-      "status": "pending",
-      "decidedAt": null,
-      "note": ""
+      "status": "approved",
+      "decidedAt": "2026-07-18T11:08:40.793Z",
+      "note": "批准风格和音色"
     },
     "preview": {
       "status": "pending",
@@ -51,6 +51,38 @@
       "updatedAt": "2026-07-18T11:04:29.804Z",
       "artifact": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen-v2.mp3",
       "note": ""
+    },
+    {
+      "id": "background-plates-v2",
+      "label": "六幕无人物基础背景",
+      "status": "completed",
+      "updatedAt": "2026-07-18T11:56:43.302Z",
+      "artifact": null,
+      "note": ""
+    },
+    {
+      "id": "environment-layers-v2",
+      "label": "十二张分层环境透明素材",
+      "status": "completed",
+      "updatedAt": "2026-07-18T11:56:43.534Z",
+      "artifact": null,
+      "note": ""
+    },
+    {
+      "id": "character-sheets-v2",
+      "label": "李白、老妇与磨杵特写角色图板",
+      "status": "completed",
+      "updatedAt": "2026-07-18T11:56:43.737Z",
+      "artifact": null,
+      "note": ""
+    },
+    {
+      "id": "narration-scenes-v2",
+      "label": "六段儒雅逸辰正式旁白",
+      "status": "completed",
+      "updatedAt": "2026-07-18T11:17:08.218Z",
+      "artifact": "projects/tie-chu-mo-zhen/assets-manifest.json",
+      "note": ""
     }
   ],
   "artifacts": {
@@ -58,11 +90,11 @@
     "project": "projects/tie-chu-mo-zhen/project.json",
     "prompts": "projects/tie-chu-mo-zhen/prompts.json",
     "review": "projects/tie-chu-mo-zhen/review.md",
-    "validationReport": null,
-    "preview": null,
+    "validationReport": "dist/tie-chu-mo-zhen/validation-report.json",
+    "preview": "dist/tie-chu-mo-zhen/preview.mp4",
     "final": null,
-    "report": null,
-    "contactSheet": null
+    "report": "dist/tie-chu-mo-zhen/report.json",
+    "contactSheet": "dist/tie-chu-mo-zhen/contact-sheet.jpg"
   },
   "history": [
     {
@@ -118,6 +150,72 @@
       "action": "work-item-completed",
       "stage": "style-review",
       "note": "voice-audition-ruyayichen-v2"
+    },
+    {
+      "at": "2026-07-18T11:08:40.793Z",
+      "action": "approve-style-voice",
+      "stage": "asset-production",
+      "note": "批准风格和音色"
+    },
+    {
+      "at": "2026-07-18T11:14:52.352Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "background-plates-v2"
+    },
+    {
+      "at": "2026-07-18T11:14:52.561Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "environment-layers-v2"
+    },
+    {
+      "at": "2026-07-18T11:14:52.763Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "character-sheets-v2"
+    },
+    {
+      "at": "2026-07-18T11:14:52.977Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "narration-scenes-v2"
+    },
+    {
+      "at": "2026-07-18T11:17:08.218Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "narration-scenes-v2"
+    },
+    {
+      "at": "2026-07-18T11:56:43.302Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "background-plates-v2"
+    },
+    {
+      "at": "2026-07-18T11:56:43.534Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "environment-layers-v2"
+    },
+    {
+      "at": "2026-07-18T11:56:43.737Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "character-sheets-v2"
+    },
+    {
+      "at": "2026-07-18T12:03:41.357Z",
+      "action": "assets-ready",
+      "stage": "preview",
+      "note": ""
+    },
+    {
+      "at": "2026-07-18T12:15:56.925Z",
+      "action": "preview-rendered",
+      "stage": "human-review",
+      "note": "dist/tie-chu-mo-zhen/preview.mp4"
     }
   ]
 }

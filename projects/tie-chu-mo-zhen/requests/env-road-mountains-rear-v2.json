@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "env-road-mountains-rear-v2", "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/environment/rear/road-mountains.png",
+  "prompt": "Use case: background-extraction\nAsset type: rear-depth mountain cutout for scene 2 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines the mineral celadon mountains and paper relief\nPrimary request: three overlapping distant mountain-ridge silhouettes and a few pale cloud-paper strips, spanning the upper half while leaving open sky gaps\nStyle/medium: premium handcrafted Chinese paper collage, mulberry fibers, restrained ink, muted celadon and gray-blue\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key color only; no background shadow or gradient; no #ff00ff in artwork; no people, buildings, text, watermark or logo; complete cutout\nAvoid: photoreal mountains, dense city, glossy 3D",
+  "model": "auto", "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "layout": "environment-rear", "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent", "edge-clean"]}
+}

@@ -2,8 +2,1181 @@
   "$schema": "../../schemas/quality-report.schema.json",
   "schemaVersion": 1,
   "projectSlug": "tie-chu-mo-zhen",
-  "updatedAt": "2026-07-18T10:49:19.646Z",
+  "updatedAt": "2026-07-18T12:15:56.913Z",
   "assets": [
+    {
+      "assetId": "bg-study-dusk-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-dusk.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-01-study-doubt:background",
+        "manifest:bg-study-dusk-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "bc3a6c6c751b980bc1096d4bc9e2ccf68844dba753f7fe3f7b3f113610e538bd",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3664887
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:52.243Z",
+      "note": "原尺寸人工检查通过：无人物、文字和水印，叙事及字幕安全区可用，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-study-window-rear-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/rear/study-window-mountains.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-01-study-doubt:environment:study-window-mountains",
+        "scene:scene-06-return-to-study:environment:morning-window-mountains",
+        "manifest:env-study-window-rear-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "4871c0f0297e65bfc2c3aa58135cbc80ff0995b89edd9a2ae063ea67601c985c",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 548494
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:52.519Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-study-bookshelf-mid-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/study-bookshelf.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-01-study-doubt:environment:study-bookshelf",
+        "scene:scene-06-return-to-study:environment:morning-bookshelf",
+        "manifest:env-study-bookshelf-mid-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "a8bc1f8b653bbb4dfa7c26e6b9fb7396a7c3f97ce3d6cec91bcd2f29e9c2442e",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1310380
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:52.883Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-study-bamboo-fg-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-bamboo.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-01-study-doubt:environment:study-bamboo",
+        "manifest:env-study-bamboo-fg-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "399f98cdeecf9832ab8a949a87ccb3908901b54e4376788f3b22f336bdf8ff3d",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 161154
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:53.262Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "runtime-7c831250cdf4",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-seated-doubt.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-01-study-doubt:layer:li-bai-seated-doubt"
+      ],
+      "sha256": "b243cade22415cf705a85b590a76ffef1cf00b816c1f4ba6c10bcfdfb00e6b0b",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 186692
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "382x368"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:53.608Z",
+      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+    },
+    {
+      "assetId": "bg-mountain-road-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/02-mountain-road.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-02-mountain-road:background",
+        "manifest:bg-mountain-road-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "4fd5a2f5e17d163ddd19a4331574c72b0cadb4fce1a3ff3dbcce96f2246c7200",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3965566
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:53.939Z",
+      "note": "原尺寸人工检查通过：无人物、文字和水印，叙事及字幕安全区可用，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-road-mountains-rear-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/rear/road-mountains.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-02-mountain-road:environment:road-mountains",
+        "manifest:env-road-mountains-rear-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "1c7b2aaed13f776ab73cfed8b3a20029b454b59635b157cefcdb05b521a679d3",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1953011
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:54.215Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-road-bamboo-mid-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/road-bamboo.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-02-mountain-road:environment:road-bamboo",
+        "manifest:env-road-bamboo-mid-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "fa734e6bcc36ad047fa97d277c136f4bda07e7195f4fd48410b9ac8d371cafd2",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 2009915
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:54.619Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-road-branches-fg-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/road-branches.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-02-mountain-road:environment:road-branches",
+        "manifest:env-road-branches-fg-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "0cce822db368613ef89c313a828caa1767ea05a60de7e1fe80ef13d8ed6e12df",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 459653
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:54.949Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "runtime-2e65e4d7a8a8",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-walking-down.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-02-mountain-road:layer:li-bai-walking-down"
+      ],
+      "sha256": "13f97a43fb54d7af119e199d1613f4c3e4a16526f97a89a8fc7ed80c33a32de5",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 165899
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "238x478"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.003284985814833986
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:55.254Z",
+      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+    },
+    {
+      "assetId": "bg-creek-encounter-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-encounter.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-03-creek-encounter:background",
+        "manifest:bg-creek-encounter-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "eadeed6af9f6fb619255692ecac8d416948e6e8b7a485209e16f6441cc2d14e0",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 4125928
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:55.522Z",
+      "note": "原尺寸人工检查通过：无人物、文字和水印，叙事及字幕安全区可用，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-creek-water-mid-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/creek-water.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-03-creek-encounter:environment:creek-water",
+        "scene:scene-04-inch-by-inch:environment:grind-creek-water",
+        "scene:scene-05-reflection:environment:reflection-creek-water",
+        "manifest:env-creek-water-mid-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "0a5137d6eae1aecbff946832990cb6decafa15199e63f6d6ebd0fb54e3df2f3e",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1086807
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:55.941Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-creek-bank-mid-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/creek-bank.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-03-creek-encounter:environment:creek-bank",
+        "scene:scene-04-inch-by-inch:environment:grind-creek-bank",
+        "manifest:env-creek-bank-mid-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "28c6f0cc14fbf7fed525dec438049a5165ff8ebd0bfcfde900d8ecfa4ab52f76",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1939449
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:56.291Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-creek-reeds-fg-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/creek-reeds.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-03-creek-encounter:environment:creek-reeds",
+        "scene:scene-05-reflection:environment:reflection-creek-reeds",
+        "manifest:env-creek-reeds-fg-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "fc99b697dcfd80b5fc2b0c0efbed6f3ea691810f3b8b4c6d18901a2a9ea6e6c3",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 658347
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:56.662Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "runtime-8f5eb5d7f6c5",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/granny-grinding-a.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-03-creek-encounter:layer:granny-grinding-a"
+      ],
+      "sha256": "ccc146acb3ddc0710a017743f372010cbf0b647d5cab269d9baac14448309268",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 345027
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "584x567"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.012259319631597031
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:56.958Z",
+      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+    },
+    {
+      "assetId": "runtime-6afcd5b38e2e",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-asking.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-03-creek-encounter:layer:li-bai-asking"
+      ],
+      "sha256": "182008f852abda65d5ea4cb78dc3482e0268dfe439d0914c30f0a367c5f5c586",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 181787
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "260x500"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:57.330Z",
+      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+    },
+    {
+      "assetId": "bg-grindstone-close-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/04-grindstone-close.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-04-inch-by-inch:background",
+        "manifest:bg-grindstone-close-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "fed0884a9250dd7a7314741f8d69663e5d70119dcb299869db6934c031cd416a",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3639871
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:57.670Z",
+      "note": "原尺寸人工检查通过：无人物、文字和水印，叙事及字幕安全区可用，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-grind-water-fg-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/grind-water.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-04-inch-by-inch:environment:grind-water",
+        "manifest:env-grind-water-fg-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "8a118fdf1c98979b3a3a6021888b6ca7bcc163e5aa76df95926b4282269aa1e8",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 90056
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:57.972Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "runtime-55aa37d533f3",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/grind-hands-a.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-04-inch-by-inch:layer:grind-hands-a"
+      ],
+      "sha256": "c857dabe34fa649857b06dd306de8cb5192965fc8f0e5e3df93f93ffe3ffac84",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 306669
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "785x438"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:58.463Z",
+      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+    },
+    {
+      "assetId": "bg-creek-reflection-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/05-creek-reflection.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-05-reflection:background",
+        "manifest:bg-creek-reflection-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "67de4eb859fde4e067ed802b497dd6837bfa34a34c83b483d6298b1228eef5f1",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3647729
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:58.821Z",
+      "note": "原尺寸人工检查通过：无人物、文字和水印，叙事及字幕安全区可用，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-memory-pages-mid-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/memory-pages.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-05-reflection:environment:memory-pages",
+        "manifest:env-memory-pages-mid-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "843e2775bbdac9fce25827da9d97181f97be4971544b83afff49808e932d0561",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1321980
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:59.109Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "runtime-78e48d5cc493",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-reflecting.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-05-reflection:layer:li-bai-reflecting"
+      ],
+      "sha256": "3384c6384d5b3cf21f82ff869a298a8c97295f1f3ef9005695ee7ae8dbe55b51",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 166156
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "222x510"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.008648729539042523
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:59.413Z",
+      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+    },
+    {
+      "assetId": "bg-study-morning-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/06-study-morning.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-06-return-to-study:background",
+        "manifest:bg-study-morning-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "b3faf9d70712d53b4133cdc5b63937960d0b7729f7c788744f530b41bb5ae1cd",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3983057
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:02:59.767Z",
+      "note": "原尺寸人工检查通过：无人物、文字和水印，叙事及字幕安全区可用，风格与批准样张一致。"
+    },
+    {
+      "assetId": "env-study-ink-fg-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-ink.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-06-return-to-study:environment:study-ink",
+        "manifest:env-study-ink-fg-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "edge-clean"
+      ],
+      "sha256": "51bc82606064deda2d465391fb6ca1218530fe2fb72f01b87da32607c306df4b",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 606775
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed",
+        "edge-clean": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:03:00.214Z",
+      "note": "原尺寸及透明合成检查通过：主体完整，边缘干净，无文字水印，风格与批准样张一致。"
+    },
+    {
+      "assetId": "runtime-d4af29950c78",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-writing.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-06-return-to-study:layer:li-bai-writing"
+      ],
+      "sha256": "dcdb7be61186723339c581df3f15db11f0cc814b0761ff89e4f1f1f81a395766",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 562541
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "796x726"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.00755028659691996
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:03:00.532Z",
+      "note": "原图与黑底合成检查通过：主体完整，身份一致，无可见色键边，风格统一。"
+    },
     {
       "assetId": "style-sample-creek-v2",
       "file": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
@@ -43,6 +1216,190 @@
       "reviewer": "codex-view-image-original",
       "reviewedAt": "2026-07-18T10:49:19.646Z",
       "note": "原尺寸复核：无文字水印与多余人物；两人、手部、铁杵和磨石清晰完整；纸纤维、矿物色、撕纸边与墨线语言一致。水带仅左中部连续，作为门禁样片可接受，生产阶段仍需独立水层。"
+    },
+    {
+      "assetId": "char-granny-sheet-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
+      "kind": "character-sheet",
+      "sources": [
+        "manifest:char-granny-sheet-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "identity-consistent",
+        "cell-separation",
+        "background-uniform",
+        "style-consistent"
+      ],
+      "sha256": "fa73c60bac38c82ad29b4ac8c61cb6ca7f4f343e0ee7094ab35e04ca9ef0dfde",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1009241
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "2172x724"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "cell-separation": "passed",
+        "background-uniform": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:03:00.848Z",
+      "note": "原尺寸图板检查通过：主体完整，身份一致，格线安全带与键色均匀，无文字水印。"
+    },
+    {
+      "assetId": "char-li-bai-sheet-b-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-b.png",
+      "kind": "character-sheet",
+      "sources": [
+        "manifest:char-li-bai-sheet-b-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "identity-consistent",
+        "cell-separation",
+        "background-uniform",
+        "style-consistent"
+      ],
+      "sha256": "35172e74718aedb44639094f86386422ce05474f700d6f6272d334245af03c61",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 873933
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1774x887"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "cell-separation": "passed",
+        "background-uniform": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:03:01.245Z",
+      "note": "原尺寸图板检查通过：主体完整，身份一致，格线安全带与键色均匀，无文字水印。"
+    },
+    {
+      "assetId": "char-grind-close-sheet-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
+      "kind": "character-sheet",
+      "sources": [
+        "manifest:char-grind-close-sheet-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "identity-consistent",
+        "cell-separation",
+        "background-uniform",
+        "style-consistent"
+      ],
+      "sha256": "6660d6d88984d412a82d95d94956cbc73de09a838d51a3eb23cdcff8611b1bec",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 519836
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1774x887"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "cell-separation": "passed",
+        "background-uniform": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:03:01.657Z",
+      "note": "原尺寸图板检查通过：主体完整，身份一致，格线安全带与键色均匀，无文字水印。"
+    },
+    {
+      "assetId": "char-li-bai-sheet-a-v2",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-a.png",
+      "kind": "character-sheet",
+      "sources": [
+        "manifest:char-li-bai-sheet-a-v2"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "identity-consistent",
+        "cell-separation",
+        "background-uniform",
+        "style-consistent"
+      ],
+      "sha256": "d14c9ffdaf02e768f5eb8357200ca6e8a19ee92c402b96540fe6c8922959bca0",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1159413
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1254x1254"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "cell-separation": "passed",
+        "background-uniform": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "codex",
+      "reviewedAt": "2026-07-18T12:03:02.143Z",
+      "note": "原尺寸图板检查通过：主体完整，身份一致，格线安全带与键色均匀，无文字水印。"
     }
   ]
 }

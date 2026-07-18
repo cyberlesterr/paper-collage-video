@@ -331,6 +331,17 @@ export const validateProject = async (project, options = {}) => {
       'quality.minimumAssetScale',
     );
   }
+  if (
+    !isPositiveNumber(project.audio?.narration?.volume) ||
+    project.audio.narration.volume > 4
+  ) {
+    add(
+      'error',
+      'audio-narration-volume',
+      'audio.narration.volume 必须是大于 0 且不超过 4 的数字。',
+      'audio.narration.volume',
+    );
+  }
   if (project.audio?.mastering) {
     const {targetLufs, toleranceLufs, truePeakDbtp} = project.audio.mastering;
     if (!Number.isFinite(targetLufs)) {

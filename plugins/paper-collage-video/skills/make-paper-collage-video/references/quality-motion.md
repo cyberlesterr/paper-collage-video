@@ -68,4 +68,4 @@ npm run project:subtitles -- <slug>
 
 When `narration.timingSrc` points at provider or forced-alignment timing JSON, those timings win. Otherwise the command creates a punctuation- and length-aware fallback. Review reading-rate and line-length warnings.
 
-Set `audio.mastering` when delivery loudness matters. Reports measure integrated LUFS and true peak and enforce the configured target/tolerance for new projects.
+Set the required `audio.narration.volume` from measured preview loudness rather than changing source files or renderer constants. Keep it above `0` and at or below `4`; use `1` for unity gain. Reports measure integrated LUFS and true peak and enforce the required `audio.mastering` target/tolerance. If loudness misses the window, adjust narration gain, rerender, and verify true-peak headroom before human review.

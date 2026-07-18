@@ -44,6 +44,7 @@ export const MainVideo = (project: PaperCollageProject) => {
         >
           <ReplicaChapterScene
             scene={scene}
+            narrationVolume={normalized.audio.narration.volume}
             roleSounds={normalized.audio.sfx}
             theme={normalized.theme}
           />

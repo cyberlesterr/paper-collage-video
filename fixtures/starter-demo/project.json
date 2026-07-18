@@ -40,6 +40,9 @@
     "displayName": "Configured fictional narrator"
   },
   "audio": {
+    "narration": {
+      "volume": 1
+    },
     "music": null,
     "sfx": {},
     "mastering": {

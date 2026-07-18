@@ -121,6 +121,43 @@ test('v1 projects are rejected instead of migrated', async () => {
   );
 });
 
+test('v2 projects require an explicit bounded narration gain', async () => {
+  const base = {
+    schemaVersion: 2,
+    slug: 'narration-gain-test',
+    title: 'Narration gain test',
+    quality: {minimumAssetScale: 1},
+    video: {width: 1920, height: 1080, fps: 30},
+    theme: {},
+    voice: {mode: 'fictional'},
+    audio: {
+      music: null,
+      sfx: {},
+      mastering: {targetLufs: -16, toleranceLufs: 3, truePeakDbtp: -1},
+    },
+    scenes: [],
+  };
+  const missing = await validateProject(base);
+  assert.ok(
+    missing.issues.some(({code}) => code === 'audio-narration-volume'),
+  );
+  const excessive = await validateProject({
+    ...base,
+    audio: {...base.audio, narration: {volume: 4.01}},
+  });
+  assert.ok(
+    excessive.issues.some(({code}) => code === 'audio-narration-volume'),
+  );
+  const valid = await validateProject({
+    ...base,
+    audio: {...base.audio, narration: {volume: 1.42}},
+  });
+  assert.equal(
+    valid.issues.some(({code}) => code === 'audio-narration-volume'),
+    false,
+  );
+});
+
 test('subtitle fallback splits long narration and fills the measured narration window', () => {
   const segments = segmentSubtitleText(
     '第一句话很短。第二句话比较长，需要按照逗号拆开，确保竖屏也能阅读。',

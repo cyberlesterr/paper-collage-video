@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "env-road-branches-fg-v2", "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/road-branches.png",
+  "prompt": "Use case: background-extraction\nAsset type: near-foreground moving branch cutout for scene 2 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines paper texture and muted plant colors\nPrimary request: one wind-bent bamboo branch sweeping in from the upper-left and one small rock-grass cluster at bottom-right; center and subtitle band remain clear\nStyle/medium: handcrafted torn-paper silhouettes with fibrous edges and restrained ink\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform background, no shadow, gradient or texture; no #ff00ff in subject; no people, text, watermark, logo; complete crisp cutout\nAvoid: decorative frame, dense foliage, photorealism",
+  "model": "auto", "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "layout": "environment-foreground", "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent", "edge-clean"]}
+}

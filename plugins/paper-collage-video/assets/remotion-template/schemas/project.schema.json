@@ -61,8 +61,16 @@
     },
     "audio": {
       "type": "object",
-      "required": ["music", "sfx", "mastering"],
+      "required": ["narration", "music", "sfx", "mastering"],
       "properties": {
+        "narration": {
+          "type": "object",
+          "required": ["volume"],
+          "properties": {
+            "volume": {"type": "number", "exclusiveMinimum": 0, "maximum": 4}
+          },
+          "additionalProperties": false
+        },
         "music": {
           "oneOf": [
             {"type": "null"},

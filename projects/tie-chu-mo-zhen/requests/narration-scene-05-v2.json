@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "narration-scene-05-v2", "capability": "voice",
+  "output": "public/projects/tie-chu-mo-zhen/audio/narration/05-reflection.mp3",
+  "text": "李白望着铁杵，想起没读完的书。他明白，本领也在日复一日的练习里，一点一点磨出来。",
+  "voiceId": "ruyayichen", "model": "doubao-tts",
+  "settings": {"provider": "doubao", "displayName": "儒雅逸辰", "speedRatio": 0.94, "pitch": -1, "performancePrompt": "温暖、沉静、不说教；像一个想法慢慢清晰，明白处略暖但不突然拔高，一点一点自然放慢", "stage": "asset-production"}
+}

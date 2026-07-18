@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "bg-creek-reflection-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/plates/05-creek-reflection.png",
+  "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 5 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample; keep the same location and handcrafted paper language\nPrimary request: the creek at a quieter reflective moment, with an empty bank and a polished iron-pestle silhouette lying near the grinding stone, while the water catches a warmer patch of light\nScene/backdrop: cool teal creek and bamboo reflection transitioning toward muted ochre; no people; leave room for Li Bai and translucent memory-page layers\nStyle/medium: premium handcrafted Chinese paper collage, mulberry fibers, matte mineral pigment, restrained ink, subtle paper relief\nComposition/framing: wide 16:9; visual focus moves from lower-right pestle area toward open center-left standing space; calm negative space, subtitle-safe lower band, no foreground reeds\nLighting/mood: inward-looking, quiet realization; gradual warmth without glow explosion\nConstraints: no finished needle, no people, no hands, no written characters, captions, signs, watermark, logo, modern items or border\nAvoid: magical aura, glossy 3D, plastic cartoon, photorealism, anime, text-like marks",
+  "model": "auto",
+  "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

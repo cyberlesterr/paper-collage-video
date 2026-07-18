@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "char-granny-sheet-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
+  "prompt": "Use case: historical-scene\nAsset type: 3×1 character pose sheet for a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve the elderly woman on its right as the exact identity, lined calm face, gray wrapped hair, muted ochre-brown layered robe and paper-collage construction\nPrimary request: three complete poses of the same elderly woman, one per equal horizontal cell: 1 seated low and steadily grinding a thick iron pestle across an implied stone, both hands and full pestle visible; 2 seated upright, looking up calmly while answering, one hand resting near the iron pestle; 3 seated low in a stronger side-view grinding pose for rhythmic repetition\nStyle/medium: premium handcrafted Chinese paper collage matching Image 1, torn fibrous edges, restrained ink, matte mineral pigments and subtle paper shadows\nComposition/framing: exact 3 columns × 1 row, consistent identity and scale, generous padding, no overlap, all heads, hands, feet and iron pestles complete\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in every cell; no grindstone, floor, cast shadow, gradient, texture or divider\nConstraints: thick iron pestle remains a pestle, not a finished needle; no text, labels, watermark, logo, extra people, modern items or #ff00ff in subject; stable anatomy\nAvoid: witch caricature, comedy, anime, chibi, photorealism, glossy 3D, cropped hands, warped pestle, identity drift",
+  "model": "auto",
+  "settings": {"stage": "asset-production", "layout": "3x1", "columns": 3, "count": 3, "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "character-sheet", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "identity-consistent", "cell-separation", "background-uniform", "style-consistent"]}
+}

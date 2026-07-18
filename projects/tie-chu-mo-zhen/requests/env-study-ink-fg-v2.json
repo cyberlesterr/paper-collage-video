@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "env-study-ink-fg-v2", "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-ink.png",
+  "prompt": "Use case: background-extraction\nAsset type: near-foreground finishing cutout for scene 6 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines the handcrafted paper language\nPrimary request: one sparse warm bamboo-paper branch entering from upper-right, a small torn-paper desk edge along bottom-left, and a single abstract dark-ink brush trail near the lower-right edge; keep center and subtitles clear\nStyle/medium: premium torn-paper collage, visible fibers, restrained charcoal ink, warm ochre and muted teal\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: abstract ink only, no legible character or text; uniform key background; no people, watermark or logo; no #ff00ff in artwork; complete crisp silhouettes\nAvoid: decorative border, calligraphy, photorealism, glossy 3D",
+  "model": "auto", "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "layout": "environment-foreground", "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent", "edge-clean"]}
+}

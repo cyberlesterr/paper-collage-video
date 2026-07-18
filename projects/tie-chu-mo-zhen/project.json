@@ -53,6 +53,9 @@
     }
   },
   "audio": {
+    "narration": {
+      "volume": 1.42
+    },
     "music": null,
     "sfx": {},
     "mastering": {
@@ -61,5 +64,527 @@
       "truePeakDbtp": -1
     }
   },
-  "scenes": []
+  "scenes": [
+    {
+      "id": "scene-01-study-doubt",
+      "label": "书山未尽",
+      "eyebrow": "第一幕",
+      "tailSeconds": 1.8,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/01-study-dusk.png",
+      "environmentLayers": [
+        {
+          "id": "study-window-mountains",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/rear/study-window-mountains.png",
+          "depth": -0.8,
+          "z": 1
+        },
+        {
+          "id": "study-bookshelf",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/study-bookshelf.png",
+          "depth": 0,
+          "z": 3
+        },
+        {
+          "id": "study-bamboo",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/foreground/study-bamboo.png",
+          "depth": 0.85,
+          "z": 6
+        }
+      ],
+      "camera": {
+        "preset": "push",
+        "intensity": 0.45
+      },
+      "transition": {
+        "type": "none",
+        "durationSeconds": 0
+      },
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/01-study-doubt.mp3",
+        "startSeconds": 0.6,
+        "durationSeconds": 13.872,
+        "text": "相传，少年李白在象耳山中读书。艰深的文字像高山压在眼前。他一时气馁，收起书卷，转身下山。"
+      },
+      "layers": [
+        {
+          "id": "li-bai-seated-doubt",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-seated-doubt.png",
+          "role": "primary",
+          "x": 980,
+          "bottom": 80,
+          "width": 520,
+          "z": 4,
+          "delaySeconds": 0.15,
+          "enterFrom": "bottom",
+          "motion": {
+            "idle": "breathe",
+            "intensity": 0.55,
+            "cycleSeconds": 3.4,
+            "phase": 0.15,
+            "enterDurationSeconds": 1.1
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.6,
+          "toSeconds": 5.266666666666667,
+          "text": "相传，少年李白在象耳山中读书。"
+        },
+        {
+          "fromSeconds": 5.333333333333333,
+          "toSeconds": 9.466666666666667,
+          "text": "艰深的文字像高山压在眼前。"
+        },
+        {
+          "fromSeconds": 9.533333333333333,
+          "toSeconds": 14.5,
+          "text": "他一时气馁，收起书卷，转身下山。"
+        }
+      ],
+      "audioEvents": [
+        {
+          "id": "page-turn",
+          "src": "projects/tie-chu-mo-zhen/audio/sfx/page-turn.mp3",
+          "volume": 1,
+          "atSeconds": 8.8
+        }
+      ]
+    },
+    {
+      "id": "scene-02-mountain-road",
+      "label": "山路离去",
+      "eyebrow": "第二幕",
+      "tailSeconds": 1.2,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/02-mountain-road.png",
+      "environmentLayers": [
+        {
+          "id": "road-mountains",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/rear/road-mountains.png",
+          "depth": -0.8,
+          "z": 1
+        },
+        {
+          "id": "road-bamboo",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/road-bamboo.png",
+          "depth": 0.1,
+          "z": 2
+        },
+        {
+          "id": "road-branches",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/foreground/road-branches.png",
+          "depth": 0.85,
+          "z": 6
+        }
+      ],
+      "camera": {
+        "preset": "pan-right",
+        "intensity": 0.65
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.6
+      },
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/02-mountain-road.mp3",
+        "startSeconds": 0.4,
+        "durationSeconds": 8.952,
+        "text": "山风吹乱竹叶，也吹乱了他的心。走到溪边，一阵沙沙的声音让他停下脚步。"
+      },
+      "layers": [
+        {
+          "id": "li-bai-walking-down",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-walking-down.png",
+          "role": "primary",
+          "x": 700,
+          "bottom": 40,
+          "width": 430,
+          "z": 4,
+          "delaySeconds": 0.1,
+          "enterFrom": "left",
+          "motion": {
+            "idle": "drift",
+            "intensity": 0.85,
+            "cycleSeconds": 2.6,
+            "phase": 0.3,
+            "enterDurationSeconds": 1
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.4,
+          "toSeconds": 4.366666666666666,
+          "text": "山风吹乱竹叶，也吹乱了他的心。"
+        },
+        {
+          "fromSeconds": 4.433333333333334,
+          "toSeconds": 9.366666666666667,
+          "text": "走到溪边，一阵沙沙的声音让他停下脚步。"
+        }
+      ],
+      "audioEvents": [
+        {
+          "id": "approaching-creek",
+          "src": "projects/tie-chu-mo-zhen/audio/sfx/creek.mp3",
+          "volume": 5.5,
+          "atSeconds": 4.1
+        }
+      ]
+    },
+    {
+      "id": "scene-03-creek-encounter",
+      "label": "溪边相逢",
+      "eyebrow": "第三幕",
+      "tailSeconds": 1.7,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/03-creek-encounter.png",
+      "environmentLayers": [
+        {
+          "id": "creek-water",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/creek-water.png",
+          "depth": -0.1,
+          "z": 2
+        },
+        {
+          "id": "creek-bank",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/creek-bank.png",
+          "depth": 0.2,
+          "z": 3
+        },
+        {
+          "id": "creek-reeds",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/foreground/creek-reeds.png",
+          "depth": 0.9,
+          "z": 6
+        }
+      ],
+      "camera": {
+        "preset": "pull",
+        "intensity": 0.55
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.6
+      },
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/03-creek-encounter.mp3",
+        "startSeconds": 0.4,
+        "durationSeconds": 12.648,
+        "text": "老婆婆坐在磨石旁，磨着粗重的铁杵。李白问：这么粗的铁杵，要磨成什么？她说：磨成一根针。"
+      },
+      "layers": [
+        {
+          "id": "granny-grinding-a",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/granny-grinding-a.png",
+          "role": "primary",
+          "x": 1150,
+          "bottom": 45,
+          "width": 470,
+          "z": 4,
+          "delaySeconds": 0.05,
+          "enterFrom": "right",
+          "motion": {
+            "idle": "grind",
+            "intensity": 0.72,
+            "cycleSeconds": 1.55,
+            "phase": 0.1,
+            "enterDurationSeconds": 1
+          }
+        },
+        {
+          "id": "li-bai-asking",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-asking.png",
+          "role": "secondary",
+          "x": 300,
+          "bottom": 45,
+          "width": 420,
+          "z": 4,
+          "delaySeconds": 0.7,
+          "enterFrom": "left",
+          "motion": {
+            "idle": "breathe",
+            "intensity": 0.5,
+            "cycleSeconds": 3.2,
+            "phase": 0.45,
+            "enterDurationSeconds": 1.15
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.4,
+          "toSeconds": 5.266666666666667,
+          "text": "老婆婆坐在磨石旁，磨着粗重的铁杵。"
+        },
+        {
+          "fromSeconds": 5.333333333333333,
+          "toSeconds": 10.2,
+          "text": "李白问：这么粗的铁杵，要磨成什么？"
+        },
+        {
+          "fromSeconds": 10.266666666666667,
+          "toSeconds": 13.066666666666666,
+          "text": "她说：磨成一根针。"
+        }
+      ],
+      "audioEvents": [
+        {
+          "id": "creek-bed",
+          "src": "projects/tie-chu-mo-zhen/audio/sfx/creek.mp3",
+          "volume": 4.8,
+          "atSeconds": 0.15
+        }
+      ]
+    },
+    {
+      "id": "scene-04-inch-by-inch",
+      "label": "一寸一寸",
+      "eyebrow": "第四幕",
+      "tailSeconds": 1.5,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/04-grindstone-close.png",
+      "environmentLayers": [
+        {
+          "id": "grind-creek-water",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/creek-water.png",
+          "depth": -0.1,
+          "z": 2,
+          "opacity": 0.55
+        },
+        {
+          "id": "grind-creek-bank",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/creek-bank.png",
+          "depth": 0.2,
+          "z": 3
+        },
+        {
+          "id": "grind-water",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/foreground/grind-water.png",
+          "depth": 0.95,
+          "z": 6
+        }
+      ],
+      "camera": {
+        "preset": "push",
+        "intensity": 0.35
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.6
+      },
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/04-inch-by-inch.mp3",
+        "startSeconds": 0.4,
+        "durationSeconds": 11.352,
+        "text": "铁杵划过石面，一次，又一次。它没有立刻变细，可每一次摩擦，都让目标靠近一点。"
+      },
+      "layers": [
+        {
+          "id": "grind-hands-a",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/grind-hands-a.png",
+          "role": "primary",
+          "x": 520,
+          "bottom": 170,
+          "width": 900,
+          "z": 4,
+          "delaySeconds": 0.05,
+          "enterFrom": "bottom",
+          "motion": {
+            "idle": "grind",
+            "intensity": 0.92,
+            "cycleSeconds": 1.45,
+            "phase": 0,
+            "enterDurationSeconds": 0.8
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.4,
+          "toSeconds": 4.7,
+          "text": "铁杵划过石面，一次，又一次。"
+        },
+        {
+          "fromSeconds": 4.766666666666667,
+          "toSeconds": 11.766666666666667,
+          "text": "它没有立刻变细，可每一次摩擦，都让目标靠近一点。"
+        }
+      ],
+      "audioEvents": [
+        {
+          "id": "three-grind-strokes",
+          "src": "projects/tie-chu-mo-zhen/audio/sfx/grindstone.mp3",
+          "volume": 0.35,
+          "atSeconds": 1.25
+        }
+      ]
+    },
+    {
+      "id": "scene-05-reflection",
+      "label": "看见自己的路",
+      "eyebrow": "第五幕",
+      "tailSeconds": 1.6,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/05-creek-reflection.png",
+      "environmentLayers": [
+        {
+          "id": "reflection-creek-water",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/creek-water.png",
+          "depth": -0.1,
+          "z": 2
+        },
+        {
+          "id": "memory-pages",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/memory-pages.png",
+          "depth": 0.35,
+          "z": 3,
+          "opacity": 0.72
+        },
+        {
+          "id": "reflection-creek-reeds",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/foreground/creek-reeds.png",
+          "depth": 0.9,
+          "z": 6
+        }
+      ],
+      "camera": {
+        "preset": "pan-left",
+        "intensity": 0.45
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.6
+      },
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/05-reflection.mp3",
+        "startSeconds": 0.4,
+        "durationSeconds": 10.248,
+        "text": "李白望着铁杵，想起没读完的书。他明白，本领也在日复一日的练习里，一点一点磨出来。"
+      },
+      "layers": [
+        {
+          "id": "li-bai-reflecting",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-reflecting.png",
+          "role": "primary",
+          "x": 520,
+          "bottom": 20,
+          "width": 480,
+          "z": 4,
+          "delaySeconds": 0.15,
+          "enterFrom": "left",
+          "motion": {
+            "idle": "breathe",
+            "intensity": 0.42,
+            "cycleSeconds": 3.8,
+            "phase": 0.55,
+            "enterDurationSeconds": 1.2
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.4,
+          "toSeconds": 4.333333333333333,
+          "text": "李白望着铁杵，想起没读完的书。"
+        },
+        {
+          "fromSeconds": 4.4,
+          "toSeconds": 10.666666666666666,
+          "text": "他明白，本领也在日复一日的练习里，一点一点磨出来。"
+        }
+      ],
+      "audioEvents": [
+        {
+          "id": "reflection-creek",
+          "src": "projects/tie-chu-mo-zhen/audio/sfx/creek.mp3",
+          "volume": 4.2,
+          "atSeconds": 0.1
+        }
+      ]
+    },
+    {
+      "id": "scene-06-return-to-study",
+      "label": "回到书前",
+      "eyebrow": "第六幕",
+      "tailSeconds": 2,
+      "background": "projects/tie-chu-mo-zhen/assets/plates/06-study-morning.png",
+      "environmentLayers": [
+        {
+          "id": "morning-window-mountains",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/rear/study-window-mountains.png",
+          "depth": -0.8,
+          "z": 1
+        },
+        {
+          "id": "morning-bookshelf",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/mid/study-bookshelf.png",
+          "depth": 0,
+          "z": 3
+        },
+        {
+          "id": "study-ink",
+          "src": "projects/tie-chu-mo-zhen/assets/environment/foreground/study-ink.png",
+          "depth": 0.9,
+          "z": 6
+        }
+      ],
+      "camera": {
+        "preset": "pull",
+        "intensity": 0.45
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.6
+      },
+      "narration": {
+        "src": "projects/tie-chu-mo-zhen/audio/narration/06-return-to-study.mp3",
+        "startSeconds": 0.4,
+        "durationSeconds": 11.088,
+        "text": "他重新背起书卷，回到山中。难懂的一页再读一遍，写不好的字再写一遍。铁杵磨亮的，是坚持的方向。"
+      },
+      "layers": [
+        {
+          "id": "li-bai-writing",
+          "src": "projects/tie-chu-mo-zhen/assets/characters/alpha/li-bai-writing.png",
+          "role": "primary",
+          "x": 920,
+          "bottom": 60,
+          "width": 560,
+          "z": 4,
+          "delaySeconds": 0.1,
+          "enterFrom": "bottom",
+          "motion": {
+            "idle": "breathe",
+            "intensity": 0.5,
+            "cycleSeconds": 3.5,
+            "phase": 0.25,
+            "enterDurationSeconds": 1.05
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.4,
+          "toSeconds": 3.566666666666667,
+          "text": "他重新背起书卷，回到山中。"
+        },
+        {
+          "fromSeconds": 3.6333333333333333,
+          "toSeconds": 8.3,
+          "text": "难懂的一页再读一遍，写不好的字再写一遍。"
+        },
+        {
+          "fromSeconds": 8.366666666666667,
+          "toSeconds": 11.5,
+          "text": "铁杵磨亮的，是坚持的方向。"
+        }
+      ],
+      "audioEvents": [
+        {
+          "id": "brush-write",
+          "src": "projects/tie-chu-mo-zhen/audio/sfx/brush-write.mp3",
+          "volume": 0.18,
+          "atSeconds": 6
+        }
+      ]
+    }
+  ]
 }

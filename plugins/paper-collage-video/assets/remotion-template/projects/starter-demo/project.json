@@ -46,6 +46,9 @@
     "displayName": "Test tone fixture"
   },
   "audio": {
+    "narration": {
+      "volume": 1
+    },
     "music": null,
     "sfx": {},
     "mastering": {

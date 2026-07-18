@@ -247,6 +247,7 @@ const project = {
   },
   voice: {mode: 'fictional', provider: 'fixture', displayName: 'Test tone fixture'},
   audio: {
+    narration: {volume: 1},
     music: null,
     sfx: {},
     mastering: {targetLufs: -24, toleranceLufs: 3, truePeakDbtp: -18},
