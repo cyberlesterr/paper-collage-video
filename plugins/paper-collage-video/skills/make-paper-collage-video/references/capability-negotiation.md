@@ -29,8 +29,7 @@ Every capability must retain an authorized fallback: an existing `manual-*` prov
 - If every selection is confirmed and every selected host tool still exists in the current host, record `capabilities-ready` and continue without asking again.
 - If a selected host tool is missing, treat that capability as stale and ask again. Do not silently substitute another provider.
 - If any selection is absent, ask once for all unresolved capabilities.
-- For a legacy project that is already beyond `capability-review`, record unresolved selections before the next provider call, then continue from its existing production stage. Do not rewind an approved creative gate.
-- A completed legacy project needs no prompt unless the human requests a revision or new generated asset.
+- A project using a removed schema is invalid. Create a fresh v2 project and repeat its provider and creative decisions; do not carry approvals or provider selections across by inference.
 
 ## Prefer One Structured Confirmation Form
 

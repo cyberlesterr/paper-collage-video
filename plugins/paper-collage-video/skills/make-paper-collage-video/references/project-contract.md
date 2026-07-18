@@ -12,6 +12,7 @@ Read this reference when creating, resuming, validating, or rendering a paper-co
 | `projects/<slug>/prompts.json` | Codex | Reproducible image-generation prompts and outputs |
 | `projects/<slug>/providers.json` | Codex and human configuration | Optional project override for text, image, and voice providers |
 | `projects/<slug>/assets-manifest.json` | Provider CLI | Provider/model/job provenance, hashes, output paths, and request snapshots |
+| `projects/<slug>/quality-report.json` | Quality CLI, Codex visual review | Hash-bound technical and semantic image checks |
 | `projects/<slug>/review.md` | State CLI and Codex transcription | Auto-synced approval summary plus human feedback and revision history |
 
 Never ask the human to maintain `project.json` or `production.json` directly.
@@ -26,11 +27,16 @@ projects/<slug>/
   prompts.json
   providers.json
   assets-manifest.json
+  quality-report.json
   requests/
   review.md
 
 public/projects/<slug>/
+  assets/style/
   assets/plates/
+  assets/environment/rear/
+  assets/environment/mid/
+  assets/environment/foreground/
   assets/characters/source/
   assets/characters/alpha/
   audio/narration/
@@ -86,7 +92,12 @@ Render commands enforce prior approvals. Successful renders record their artifac
 - Give each scene one `primary` subject; use `secondary` and `tertiary` roles for decreasing motion strength.
 - Keep backgrounds character-free and main figures in independent alpha PNG files.
 - Use z-order and foreground occlusion for depth; do not fake all motion with a single flattened image.
+- Use only `project.schemaVersion: 2`. Do not migrate or infer removed v1 fields.
+- Every scene explicitly declares `environmentLayers`, `camera`, `transition`, `audioEvents`, and every character layer declares `motion`.
+- Author `tailSeconds`, `startSeconds`, `delaySeconds`, `durationSeconds`, `atSeconds`, `fromSeconds`, and `toSeconds`; frame counts exist only in normalized renderer state.
+- Run `project:quality` after image generation. Required quality mode must pass before `assets-ready`; changing an asset invalidates its prior review.
 - Let `project:sync` derive narration duration from media. Never guess final timeline duration after audio exists.
+- Run `project:subtitles` after sync. Prefer provider/forced-alignment timings and review the deterministic fallback.
 - Fix validation errors before rendering. Review warnings deliberately and record accepted visual risks in `review.md`.
 
 ## Deterministic Commands
@@ -96,12 +107,16 @@ npm run project:new -- <slug> --title="<title>"
 npm run project:plan -- <slug> --duration=<seconds> --scenes=<count> --rationale="<basis>"
 npm run provider:status -- <slug>
 npm run provider:select -- <slug> <capability> <provider-id> --note="<decision>"
+npm run provider:reuse -- --request=projects/<slug>/requests/<request>.json
+npm run project:quality -- <slug> prepare
 npm run project:sync -- <slug>
+npm run project:subtitles -- <slug>
 npm run project:validate -- <slug>
 npm run project:assets-ready -- <slug>
 npm run project:preview -- <slug>
 npm run project:render -- <slug>
 npm run project:report -- <slug>
+npm run style:proof -- <slug> --input=public/projects/<slug>/assets/style/<sample>.png
 npm run check
 ```
 

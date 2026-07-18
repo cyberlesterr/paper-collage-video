@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "env-grind-water-fg-v2", "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/grind-water.png",
+  "prompt": "Use case: background-extraction\nAsset type: near-foreground rhythmic accent cutout for scene 4 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines paper fibers and restrained accent colors\nPrimary request: a small group of separated celadon water droplets crossing diagonally from lower-left toward center, plus three tiny restrained gold-paper flecks confined near the grinding-contact area; large transparent gaps\nStyle/medium: handcrafted paper cutouts, crisp deckled edges, matte mineral pigments\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background; no people, hands, text, watermark or logo; no #ff00ff in artwork; complete separated shapes\nAvoid: explosion, lens flare, dense spark shower, photoreal droplets",
+  "model": "auto", "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "layout": "environment-foreground", "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent", "edge-clean"]}
+}

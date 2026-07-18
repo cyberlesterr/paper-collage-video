@@ -180,34 +180,3 @@ test('review synchronization is idempotent and preserves human feedback', () => 
   assert.equal((merged.match(/production-state:end/g) ?? []).length, 1);
   assert.match(renderReviewSection(state), /唯一当前状态/);
 });
-
-test('review synchronization removes an untouched legacy status template', () => {
-  const state = makeState('publish-approval');
-  const legacy = `# 验收记录：旧模板
-
-## 文案和镜头
-
-- 状态：待确认
-- 意见：
-
-## 风格和旁白
-
-- 状态：待确认
-- 意见：
-
-## 样片
-
-- 状态：待生成
-- 意见：
-
-## 最终批准
-
-- 内容准确性：待确认
-- 授权和合规：待确认
-- 发布批准：待确认
-`;
-  const migrated = mergeReviewDocument(legacy, state);
-  assert.doesNotMatch(migrated, /## 文案和镜头/);
-  assert.match(migrated, /## 人工反馈与修改记录/);
-  assert.match(migrated, /当前审批状态/);
-});

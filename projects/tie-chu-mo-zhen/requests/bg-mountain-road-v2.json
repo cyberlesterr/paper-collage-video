@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "bg-mountain-road-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/plates/02-mountain-road.png",
+  "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 2 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample and defines the exact paper-collage medium, restrained ink line, mineral pigments and deckled paper shadows\nPrimary request: a descending mountain footpath through bamboo and weathered rocks, bending from upper left toward lower right and leading toward a distant creek\nScene/backdrop: generalized ancient Chinese mountain setting, cool cloud mountains and open sky; no buildings, no people\nStyle/medium: premium handcrafted Chinese paper collage, layered cut-paper silhouettes, visible mulberry-paper fibers, matte celadon and tea-brown pigments, subtle print misregistration\nComposition/framing: wide 16:9; path remains unobstructed for a walking character; middle area readable; calm open upper region and subtitle-safe lower band; do not include foreground branches because they are a separate layer\nLighting/mood: breezy cool afternoon, unsettled but quiet\nConstraints: no written characters, captions, signs, watermark, logo, people, animals, modern items or mockup frame\nAvoid: glossy 3D, plastic cartoon, photorealism, anime, dramatic lens flare, crowded vegetation, text-like marks",
+  "model": "auto",
+  "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

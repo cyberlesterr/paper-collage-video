@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 import {spawn} from 'node:child_process';
+import {availableParallelism} from 'node:os';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {ROOT} from './project-lib.mjs';
+import {resolvePythonCommand} from './python-runtime.mjs';
 
 const args = process.argv.slice(2);
 const positionals = args.filter((arg) => !arg.startsWith('--'));
@@ -17,13 +19,17 @@ const names = (
   .split(',')
   .map((name) => name.trim())
   .filter(Boolean);
-const python = process.env.PYTHON_BIN || 'python3';
+const python = resolvePythonCommand({root: ROOT});
 const keyColor =
   args.find((arg) => arg.startsWith('--key-color='))?.slice('--key-color='.length) ??
   'auto';
 const matteErode = Number(
   args.find((arg) => arg.startsWith('--matte-erode='))?.slice('--matte-erode='.length) ??
     1,
+);
+const requestedConcurrency = Number(
+  args.find((arg) => arg.startsWith('--concurrency='))?.slice('--concurrency='.length) ??
+    Math.min(4, availableParallelism()),
 );
 
 const runInherited = (command, commandArgs) =>
@@ -48,6 +54,9 @@ try {
   if (!Number.isInteger(matteErode) || matteErode < 0 || matteErode > 8) {
     throw new Error('--matte-erode 必须是 0 到 8 的整数。');
   }
+  if (!Number.isInteger(requestedConcurrency) || requestedConcurrency < 1) {
+    throw new Error('--concurrency 必须是正整数。');
+  }
   await fs.mkdir(path.resolve(ROOT, sourceDirectory), {recursive: true});
   await fs.mkdir(path.resolve(ROOT, alphaDirectory), {recursive: true});
   await runInherited(python, [
@@ -61,31 +70,36 @@ try {
     '--suffix',
     'key',
   ]);
-  for (let index = 0; index < count; index += 1) {
-    const source = path.join(sourceDirectory, `${prefix}-${index + 1}-key.png`);
-    const outputName = names[index] || `${prefix}-${index + 1}`;
-    const output = path.join(alphaDirectory, `${outputName}.png`);
-    await runInherited(python, [
-      'scripts/remove_chroma_key.py',
-      '--input',
-      source,
-      '--out',
-      output,
-      '--transparent-threshold',
-      '18',
-      '--opaque-threshold',
-      '95',
-      '--edge-feather',
-      '0.6',
-      '--key-color',
-      keyColor,
-      '--matte-erode',
-      String(matteErode),
-      '--metadata',
-      `${output}.key.json`,
-      '--force',
-    ]);
-  }
+  const concurrency = Math.min(count, requestedConcurrency);
+  await Promise.all(
+    Array.from({length: concurrency}, async (_, workerIndex) => {
+      for (let index = workerIndex; index < count; index += concurrency) {
+        const source = path.join(sourceDirectory, `${prefix}-${index + 1}-key.png`);
+        const outputName = names[index] || `${prefix}-${index + 1}`;
+        const output = path.join(alphaDirectory, `${outputName}.png`);
+        await runInherited(python, [
+          'scripts/remove_chroma_key.py',
+          '--input',
+          source,
+          '--out',
+          output,
+          '--transparent-threshold',
+          '18',
+          '--opaque-threshold',
+          '95',
+          '--edge-feather',
+          '0.6',
+          '--key-color',
+          keyColor,
+          '--matte-erode',
+          String(matteErode),
+          '--metadata',
+          `${output}.key.json`,
+          '--force',
+        ]);
+      }
+    }),
+  );
   console.log(`✓ 已生成 ${count} 个透明角色 PNG：${alphaDirectory}`);
 } catch (error) {
   console.error(`assets:process-sheet failed: ${error.message}`);

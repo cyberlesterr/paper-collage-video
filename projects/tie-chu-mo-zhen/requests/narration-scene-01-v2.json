@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "narration-scene-01-v2", "capability": "voice",
+  "output": "public/projects/tie-chu-mo-zhen/audio/narration/01-study-doubt.mp3",
+  "text": "相传，少年李白在象耳山中读书。艰深的文字像高山压在眼前。他一时气馁，收起书卷，转身下山。",
+  "voiceId": "ruyayichen", "model": "doubao-tts",
+  "settings": {"provider": "doubao", "displayName": "儒雅逸辰", "speedRatio": 0.94, "pitch": -1, "performancePrompt": "温暖、沉静、不说教，像讲述古老寓言；开头保留相传的审慎，气馁处克制，不煽情，停顿自然", "stage": "asset-production"}
+}

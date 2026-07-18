@@ -13,9 +13,8 @@ below or carries its own notice.
 The following material is excluded from the MIT License and is provided under
 the limited permission in this section:
 
-- `projects/tie-chu-mo-zhen/**`
 - `public/projects/tie-chu-mo-zhen/**`
-- `fixtures/starter-demo/**`
+- `fixtures/starter-demo/*.png`
 - `public/textures/**`
 - copies of those fixture and texture assets generated inside
   `plugins/paper-collage-video/assets/remotion-template/**`

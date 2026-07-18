@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/project.schema.json",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "{{slug}}",
   "title": "{{title}}",
   "plan": {
@@ -15,11 +15,13 @@
     "resolved": null,
     "updatedAt": "{{createdAt}}"
   },
+  "quality": {
+    "minimumAssetScale": 1
+  },
   "video": {
     "width": 1920,
     "height": 1080,
-    "fps": 30,
-    "transitionFrames": 12
+    "fps": 30
   },
   "theme": {
     "canvas": "#6e1e19",
@@ -43,8 +45,16 @@
     }
   },
   "audio": {
+    "narration": {
+      "volume": 1
+    },
     "music": null,
-    "sfx": {}
+    "sfx": {},
+    "mastering": {
+      "targetLufs": -16,
+      "toleranceLufs": 3,
+      "truePeakDbtp": -1
+    }
   },
   "scenes": []
 }

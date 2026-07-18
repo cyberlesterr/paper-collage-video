@@ -199,12 +199,37 @@ test('new projects wait for confirmed providers before entering the brief', asyn
       ),
     );
     assert.equal(project.voice.provider, 'auto');
+    assert.equal(project.schemaVersion, 2);
+    assert.deepEqual(project.quality, {minimumAssetScale: 1});
     assert.equal(project.voice.profile, 'warm-storyteller');
     assert.equal(project.plan.status, 'pending');
     assert.equal(manifest.projectSlug, slug);
+    assert.equal(manifest.schemaVersion, 2);
     assert.deepEqual(manifest.assets, []);
     assert.ok(fs.existsSync(path.join(projectDirectory, 'providers.json')));
     assert.ok(fs.existsSync(path.join(projectDirectory, 'requests', '.gitkeep')));
+    assert.ok(fs.existsSync(path.join(publicDirectory, 'assets', 'style', '.gitkeep')));
+    assert.ok(
+      fs.existsSync(
+        path.join(publicDirectory, 'assets', 'environment', 'rear', '.gitkeep'),
+      ),
+    );
+    assert.ok(
+      fs.existsSync(
+        path.join(publicDirectory, 'assets', 'environment', 'mid', '.gitkeep'),
+      ),
+    );
+    assert.ok(
+      fs.existsSync(
+        path.join(
+          publicDirectory,
+          'assets',
+          'environment',
+          'foreground',
+          '.gitkeep',
+        ),
+      ),
+    );
 
     const initialProduction = JSON.parse(
       await fsp.readFile(path.join(projectDirectory, 'production.json'), 'utf8'),

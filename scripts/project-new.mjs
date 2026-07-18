@@ -36,10 +36,15 @@ try {
     'production.json',
     'prompts.json',
     'providers.json',
+    'quality-report.json',
     'review.md',
   ];
   const publicDirectories = [
+    'assets/style',
     'assets/plates',
+    'assets/environment/rear',
+    'assets/environment/mid',
+    'assets/environment/foreground',
     'assets/characters/source',
     'assets/characters/alpha',
     'audio/narration',

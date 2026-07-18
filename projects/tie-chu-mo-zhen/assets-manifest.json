@@ -1,380 +1,1317 @@
 {
   "$schema": "../../schemas/assets-manifest.schema.json",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "projectSlug": "tie-chu-mo-zhen",
   "assets": [
     {
-      "assetId": "concept-text",
+      "assetId": "concept-text-v2",
       "capability": "text",
-      "file": "projects/tie-chu-mo-zhen/brief.md",
+      "file": "projects/tie-chu-mo-zhen/concept.md",
       "provider": "host-text",
       "adapter": "host",
       "tool": "codex-host-model",
-      "model": "codex-host-model",
+      "model": "gpt-5",
       "externalId": null,
-      "sha256": "f7e8942711093088012700bd861821e1ac1415f4f61c0cdc7dc4669a6c85ca45",
-      "sizeBytes": 6174,
-      "recordedAt": "2026-07-17T08:27:30.358Z",
+      "requestFingerprint": "81ce63e2612e07a0cb869a6df80d3a1e7e69e25bfb7b5a5db8f491840089cb5a",
+      "reusedFrom": null,
+      "sha256": "0759dcc2b166e64d5483fb7c0f2a443b409bd70dd8cdb8e7669234125bdeae27",
+      "sizeBytes": 5116,
+      "recordedAt": "2026-07-18T10:34:23.144Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "concept-text",
+        "assetId": "concept-text-v2",
         "capability": "text",
-        "output": "projects/tie-chu-mo-zhen/brief.md",
-        "prompt": "根据南宋《方舆胜览》所载《铁杵磨针》，为5至9岁中文儿童制定一份约50秒、四幕的纸片拼贴视频概念。必须用相传标示传说性质，不虚构李白确切年龄，不表现老妇已经磨出成品针，不把后世谚语冒充古籍原句。输出需包含忠实旁白、四幕分镜、分层方案、素材清单、视觉方向、声音方向与禁止内容。",
-        "model": "codex-host-model",
+        "output": "projects/tie-chu-mo-zhen/concept.md",
+        "prompt": "为传统寓言《铁杵磨针》设计一版从零开始的中文分层纸片动画概念。不要复用旧项目。时长和幕数均由故事节拍推导。必须把李白遇见老妇磨铁杵写成后世传说而非确定史实，并包含旁白草案、六幕分镜、分层与镜头运动、资产清单、风格方向、声音方向和事实边界。",
+        "model": "gpt-5",
         "settings": {
           "language": "zh-CN",
-          "audience": "children-5-9",
-          "factBoundary": "方舆胜览·磨针溪"
+          "format": "markdown",
+          "aspectRatio": "16:9"
         }
       }
     },
     {
-      "assetId": "style-sample",
+      "assetId": "style-sample-creek-v2",
       "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png",
-      "provider": "host-image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
+      "provider": "gpt-image",
       "adapter": "host",
       "tool": "image_gen__imagegen",
-      "model": "gpt-image",
-      "externalId": "019f6f34-ef14-74d0-a3d5-3ce3f73823c7",
-      "sha256": "189fbb167a0e415f3b7053bd5e24e6edfd78f4604a17c83f28a1c67b77e18cdc",
-      "sizeBytes": 2808797,
-      "recordedAt": "2026-07-17T08:37:03.274Z",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "41c8970b0e9f0a012da33df751b31049be042adb659e3d9b168e7ec838369ffc",
+      "reusedFrom": null,
+      "sha256": "a42e305c61a4eabbf2a2f5538ac37fe7ee68cf0fad74adaf894636edcb8a1f03",
+      "sizeBytes": 5299275,
+      "recordedAt": "2026-07-18T10:48:58.217Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "style-sample",
+        "assetId": "style-sample-creek-v2",
         "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png",
-        "prompt": "Use case: historical-scene. Asset type: representative 16:9 visual style sample for a children's Remotion paper-collage story, not a final scene plate. Primary request: illustrate the ancient Chinese folk legend Iron Pestle Ground into a Needle at a quiet mountain creek. Scene/backdrop: Tang-era countryside impression with layered distant blue-green mountains, bamboo, cream paper clouds, a narrow low-saturation blue creek and a broad flat grinding stone. Subject: a fictional young adult scholar representing Li Bai, with a friendly round paper-cut face and simple indigo-and-ivory Tang-inspired scholar clothing, has paused beside the creek and watches respectfully; an elderly woman in muted ochre and tea-green clothing sits steadily at the grinding stone, holding one thick iron pestle horizontally with both hands and grinding it against the stone. The iron pestle remains visibly thick and unfinished; do not show a finished needle. Style/medium: handcrafted layered collage made from torn xuan paper and cotton paper, visible fibers, matte texture, softly raised cut-paper edges, clearly separated background, rear, subject and foreground depth, rounded child-friendly shapes, subtle traditional Chinese ink-wash influence without becoming a flat ink painting. Composition/framing: wide landscape composition with both full figures clearly readable, the woman and grinding action as the main focal point, scholar slightly behind, bamboo and creek paper strips creating foreground parallax; leave a clean lower safe area for subtitles. Lighting/mood: gentle warm morning light, calm curiosity, patient and encouraging, never stern. Color palette: indigo, tea green, ochre, cinnabar accents, rice-paper ivory and muted blue water. Constraints: historically inspired rather than claimed reconstruction; no exact portrait of the real Li Bai; no text, no Chinese characters, no letters, no captions, no watermark, no logo, no modern objects, no magic, no talking animals, no finished needle, no sharp needle close-up, no punishment, no photorealism, no 3D render, no glossy surfaces, no frightening expression, no extra people.",
-        "model": "gpt-image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
+        "prompt": "Use case: historical-scene\nAsset type: representative 16:9 style sample for a layered paper-collage animation\nPrimary request: the traditional Chinese legend of Iron Pestle Ground into a Needle, at the creek encounter; an elderly woman on the right steadily grinding a thick iron pestle across a flat stone, a young scholar Li Bai on the left stopping with a book bundle and watching with surprise\nScene/backdrop: mountain creek beneath bamboo and weathered rocks, generalized Tang-era rural setting interpreted through a Song-dynasty album-page composition; no buildings or modern objects\nSubject: both figures shown clearly and completely; the woman is calm and focused, the young scholar is curious rather than comedic; the pestle, hands and grindstone are visibly readable\nStyle/medium: premium handcrafted Chinese paper collage, hand-torn fibrous paper edges, layered cut-paper silhouettes, restrained ink outlines, mineral pigments, subtle misregistration print texture, dimensional paper shadows; refined editorial animation art, not plastic cartoon and not photorealistic\nComposition/framing: wide 16:9 establishing shot; a clean foreground reed-and-grass band occupies only the bottom 18 percent without overlapping either figure; a horizontal creek-water band remains visible across the lower middle for parallax; distant mountain and bamboo layers read separately; keep breathing room around the figures and a calm open upper area\nLighting/mood: late-afternoon natural light; cool celadon, muted teal and tea-brown in the distance, warming to ochre and restrained gold near the grinding stone; patient, contemplative mood\nMaterials/textures: visible mulberry-paper fibers, deckled edges, lightly embossed paper, matte pigments, tiny gold-paper sparks only at the contact point\nConstraints: period-plausible clothing and props; stable human anatomy; complete hands and feet; no finished needle; no written characters; no captions; no signs; no watermark; no logos; no modern items; no extra people; no frame or mockup border\nAvoid: glossy 3D, anime, chibi, photorealism, cinematic lens flare, crowded scenery, distorted iron pestle, severed limbs, text-like marks",
+        "model": "auto",
         "settings": {
+          "width": 1920,
+          "height": 1080,
           "aspectRatio": "16:9",
-          "purpose": "style-review",
-          "audience": "children-5-9"
+          "stage": "style-review"
+        },
+        "quality": {
+          "kind": "style-sample",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "style-consistent",
+            "subject-complete"
+          ]
         }
       }
     },
     {
-      "assetId": "voice-audition-ruyayichen",
+      "assetId": "voice-audition-ruyayichen-v2",
       "capability": "voice",
-      "file": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen.mp3",
-      "provider": "host-voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen-v2.mp3",
+      "provider": "chatcut-voice",
       "adapter": "host",
       "tool": "mcp__chatcut__submit_voice",
       "model": "doubao-tts",
-      "externalId": "cc3e7dd3f6",
-      "sha256": "be7e9c9c9b97157c34763ca5b7ef1fecd6f404c3c378e8210695bf7b74ea2f78",
-      "sizeBytes": 80493,
-      "recordedAt": "2026-07-17T08:48:20.848Z",
+      "externalId": "5fb25356fa",
+      "requestFingerprint": "93b2a5398af97b5cee97da85114f79f8f6c61ebade0af640f9be74f6fea44704",
+      "reusedFrom": null,
+      "sha256": "1edb3914309416156fc6e8b010df961c9747daa560d6e04060a33dd62644ebbb",
+      "sizeBytes": 105837,
+      "recordedAt": "2026-07-18T11:04:26.640Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "voice-audition-ruyayichen",
+        "assetId": "voice-audition-ruyayichen-v2",
         "capability": "voice",
-        "output": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen.mp3",
-        "text": "相传，李白走到磨针溪边，看见一位老婆婆，正把粗粗的铁杵，一下一下磨在石头上。",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen-v2.mp3",
+        "text": "溪边，李白忍不住问：这么粗的铁杵，要磨成什么？老婆婆抬起头，平静地说：磨成一根针。",
         "voiceId": "ruyayichen",
-        "model": "doubao-seed-tts-2.0",
+        "model": "doubao-tts",
         "settings": {
+          "provider": "doubao",
+          "displayName": "儒雅逸辰",
           "speedRatio": 0.94,
           "pitch": -1,
-          "emotion": "happy",
-          "emotionScale": 1,
-          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；保持好奇感，不说教，不夸张表演"
+          "performancePrompt": "温暖、沉静、不说教，像在溪边讲述古老寓言；问句带轻微好奇，回答平静笃定，停顿自然",
+          "stage": "style-review"
         }
       }
     },
     {
-      "assetId": "narration-scene-1",
+      "assetId": "narration-scene-01-v2",
       "capability": "voice",
-      "file": "public/projects/tie-chu-mo-zhen/audio/narration/scene-1.mp3",
-      "provider": "host-voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/01-study-doubt.mp3",
+      "provider": "chatcut-voice",
       "adapter": "host",
       "tool": "mcp__chatcut__submit_voice",
       "model": "doubao-tts",
-      "externalId": "4284a7d265",
-      "sha256": "c8a7c4e14a7c13c7eb9521425d8954fd59e2a1b1b61e32237731ff87254df160",
-      "sizeBytes": 66861,
-      "recordedAt": "2026-07-17T08:58:22.821Z",
+      "externalId": "5dc29bb39e",
+      "requestFingerprint": "115f3511406ea5a75a4d53920af65e8cd5bde22f366cfc6ce4a88301cc555f3b",
+      "reusedFrom": null,
+      "sha256": "4f184703290156e91046c407e98e463b3dcaf6bfa2ea1b9cac672189e30f2ef6",
+      "sizeBytes": 111021,
+      "recordedAt": "2026-07-18T11:16:52.526Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "narration-scene-1",
+        "assetId": "narration-scene-01-v2",
         "capability": "voice",
-        "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-1.mp3",
-        "text": "相传，李白曾在山中读书。一天，学业还没完成，他却准备离开。",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/01-study-doubt.mp3",
+        "text": "相传，少年李白在象耳山中读书。艰深的文字像高山压在眼前。他一时气馁，收起书卷，转身下山。",
         "voiceId": "ruyayichen",
-        "model": "doubao-seed-tts-2.0",
+        "model": "doubao-tts",
         "settings": {
+          "provider": "doubao",
+          "displayName": "儒雅逸辰",
           "speedRatio": 0.94,
           "pitch": -1,
-          "emotion": "happy",
-          "emotionScale": 1,
-          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；保持好奇感，不说教，不夸张表演"
+          "performancePrompt": "温暖、沉静、不说教，像讲述古老寓言；开头保留相传的审慎，气馁处克制，不煽情，停顿自然",
+          "stage": "asset-production"
         }
       }
     },
     {
-      "assetId": "narration-scene-2",
+      "assetId": "narration-scene-02-v2",
       "capability": "voice",
-      "file": "public/projects/tie-chu-mo-zhen/audio/narration/scene-2.mp3",
-      "provider": "host-voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/02-mountain-road.mp3",
+      "provider": "chatcut-voice",
       "adapter": "host",
       "tool": "mcp__chatcut__submit_voice",
       "model": "doubao-tts",
-      "externalId": "74fece1b72",
-      "sha256": "251a2bab2be88160ee63e2c50e3614f3780de17b5c4e6c77c536cb4afa03e9ba",
-      "sizeBytes": 75117,
-      "recordedAt": "2026-07-17T08:58:23.260Z",
+      "externalId": "acb96d0347",
+      "requestFingerprint": "e68d05ffa78c2d83d1471979e9bbfa8d5fe47d9d014c4e484a082c0830abdb24",
+      "reusedFrom": null,
+      "sha256": "8fe19812d3d1c96c032ef47f62b693d2a1004772a9a6a7b1a8717800b1ded030",
+      "sizeBytes": 71661,
+      "recordedAt": "2026-07-18T11:16:52.741Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "narration-scene-2",
+        "assetId": "narration-scene-02-v2",
         "capability": "voice",
-        "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-2.mp3",
-        "text": "走到象耳山下的磨针溪边，他看见一位老婆婆，正把粗粗的铁杵，一下一下磨在石头上。",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/02-mountain-road.mp3",
+        "text": "山风吹乱竹叶，也吹乱了他的心。走到溪边，一阵沙沙的声音让他停下脚步。",
         "voiceId": "ruyayichen",
-        "model": "doubao-seed-tts-2.0",
+        "model": "doubao-tts",
         "settings": {
+          "provider": "doubao",
+          "displayName": "儒雅逸辰",
           "speedRatio": 0.94,
           "pitch": -1,
-          "emotion": "happy",
-          "emotionScale": 1,
-          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；保持好奇感，不说教，不夸张表演"
+          "performancePrompt": "温暖、沉静、不说教；前半轻微游移，听到沙沙声后自然收住，留一点好奇和空间感",
+          "stage": "asset-production"
         }
       }
     },
     {
-      "assetId": "narration-scene-3",
+      "assetId": "narration-scene-03-v2",
       "capability": "voice",
-      "file": "public/projects/tie-chu-mo-zhen/audio/narration/scene-3.mp3",
-      "provider": "host-voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/03-creek-encounter.mp3",
+      "provider": "chatcut-voice",
       "adapter": "host",
       "tool": "mcp__chatcut__submit_voice",
       "model": "doubao-tts",
-      "externalId": "9c3123e0ed",
-      "sha256": "784a7cd3a242667ad392288e149685c5e6fbbfd2e61ae21dcb7fd467331faddc",
-      "sizeBytes": 140013,
-      "recordedAt": "2026-07-17T08:58:23.690Z",
+      "externalId": "9e30b7d39e",
+      "requestFingerprint": "ab9e63f031dd373f254270aeffd0f15c6a831395911762caa098e154945925e5",
+      "reusedFrom": null,
+      "sha256": "696e1a99ab2d95bb9e99be040b7f352a37ec0e620b3f8e1b366b64a958c23589",
+      "sizeBytes": 101229,
+      "recordedAt": "2026-07-18T11:16:52.960Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "narration-scene-3",
+        "assetId": "narration-scene-03-v2",
         "capability": "voice",
-        "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-3.mp3",
-        "text": "李白问：‘您磨铁杵做什么？’老婆婆回答：‘我要把它磨成针。’李白望着铁杵，又看看她始终不停的双手，明白了坚持的意义。",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/03-creek-encounter.mp3",
+        "text": "老婆婆坐在磨石旁，磨着粗重的铁杵。李白问：这么粗的铁杵，要磨成什么？她说：磨成一根针。",
         "voiceId": "ruyayichen",
-        "model": "doubao-seed-tts-2.0",
+        "model": "doubao-tts",
         "settings": {
+          "provider": "doubao",
+          "displayName": "儒雅逸辰",
           "speedRatio": 0.94,
           "pitch": -1,
-          "emotion": "happy",
-          "emotionScale": 1,
-          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；对白停顿清楚但不夸张角色表演，不说教"
+          "performancePrompt": "温暖、沉静、不说教；叙述从容，李白问句带轻微好奇，老婆婆回答平静笃定，问答之间停顿清楚",
+          "stage": "asset-production"
         }
       }
     },
     {
-      "assetId": "narration-scene-4",
+      "assetId": "narration-scene-04-v2",
       "capability": "voice",
-      "file": "public/projects/tie-chu-mo-zhen/audio/narration/scene-4.mp3",
-      "provider": "host-voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/04-inch-by-inch.mp3",
+      "provider": "chatcut-voice",
       "adapter": "host",
       "tool": "mcp__chatcut__submit_voice",
       "model": "doubao-tts",
-      "externalId": "787263930b",
-      "sha256": "ebf1d5bf798e231dfa160402ac775d6bdab47049ad94d643fcf78fb59b8f9381",
-      "sizeBytes": 119277,
-      "recordedAt": "2026-07-17T08:58:24.237Z",
+      "externalId": "a80608a793",
+      "requestFingerprint": "068d1204069f9f9a3d4b3b1bf6879f6d0c0d6760c14a7ab4a49fbec68ab5053b",
+      "reusedFrom": null,
+      "sha256": "1b98e7bb543a414c290eccc4dace6bd185c2d32fb48c13016decdb9684c524e7",
+      "sizeBytes": 90861,
+      "recordedAt": "2026-07-18T11:16:53.168Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "narration-scene-4",
+        "assetId": "narration-scene-04-v2",
         "capability": "voice",
-        "output": "public/projects/tie-chu-mo-zhen/audio/narration/scene-4.mp3",
-        "text": "于是，他回到山中，继续完成学业。《铁杵磨针》告诉我们：先确定正确的目标，再用合适的方法，一步一步坚持，困难也会慢慢变小。",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/04-inch-by-inch.mp3",
+        "text": "铁杵划过石面，一次，又一次。它没有立刻变细，可每一次摩擦，都让目标靠近一点。",
         "voiceId": "ruyayichen",
-        "model": "doubao-seed-tts-2.0",
+        "model": "doubao-tts",
         "settings": {
+          "provider": "doubao",
+          "displayName": "儒雅逸辰",
           "speedRatio": 0.94,
           "pitch": -1,
-          "emotion": "happy",
-          "emotionScale": 1,
-          "performancePrompt": "温暖从容、清楚自然，像给五至九岁儿童讲古代故事；结尾鼓励而不说教，不夸张表演"
+          "performancePrompt": "温暖、沉静、不说教；一次、又一次要有清楚而克制的节奏落点，后半平稳笃定，不做励志演讲",
+          "stage": "asset-production"
         }
       }
     },
     {
-      "assetId": "scene-1-background",
-      "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-departure-bg.png",
-      "provider": "host-image",
+      "assetId": "narration-scene-05-v2",
+      "capability": "voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/05-reflection.mp3",
+      "provider": "chatcut-voice",
       "adapter": "host",
-      "tool": "image_gen__imagegen",
-      "model": "gpt-image",
-      "externalId": null,
-      "sha256": "a1784fcb921a67a4f33da12121e35808c94e260bbc206cd58a2e4f4ecad31093",
-      "sizeBytes": 2930763,
-      "recordedAt": "2026-07-17T09:01:13.786Z",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "dd13d1be20",
+      "requestFingerprint": "2e7d0d8480e9c8314632b3b3deeb0f2b411287f31e6dc6eb1943178103ec43b3",
+      "reusedFrom": null,
+      "sha256": "bf8e1067936d7a7ff5384c377a35cc1810e2ba03262b5466ce29f2e199559ce5",
+      "sizeBytes": 82029,
+      "recordedAt": "2026-07-18T11:16:53.382Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "scene-1-background",
-        "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-departure-bg.png",
-        "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Recreate the same warm hand-torn xuan-paper and cotton-paper collage language, but remove every person. A wide Tang-era-inspired mountain study courtyard: an open-sided humble study hut occupies the left third, with a low wooden reading desk, two rolled scrolls and one open blank scroll; a winding mountain footpath begins near the hut and leads through the center-right toward layered blue-green mountains and bamboo. Keep the center and right open for separate character cutouts, with clear rear, middle and foreground paper depth and a clean lower subtitle-safe area. Gentle late-morning light, indigo, tea green, ochre, cinnabar accents and rice-paper ivory. No characters, no human silhouettes, no readable writing on scrolls, no text, no letters, no watermark, no logo, no modern objects, no finished needle, no photorealism, no 3D.",
-        "model": "gpt-image",
+        "assetId": "narration-scene-05-v2",
+        "capability": "voice",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/05-reflection.mp3",
+        "text": "李白望着铁杵，想起没读完的书。他明白，本领也在日复一日的练习里，一点一点磨出来。",
+        "voiceId": "ruyayichen",
+        "model": "doubao-tts",
         "settings": {
+          "provider": "doubao",
+          "displayName": "儒雅逸辰",
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "performancePrompt": "温暖、沉静、不说教；像一个想法慢慢清晰，明白处略暖但不突然拔高，一点一点自然放慢",
+          "stage": "asset-production"
+        }
+      }
+    },
+    {
+      "assetId": "narration-scene-06-v2",
+      "capability": "voice",
+      "file": "public/projects/tie-chu-mo-zhen/audio/narration/06-return-to-study.mp3",
+      "provider": "chatcut-voice",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "0640f54639",
+      "requestFingerprint": "f2646139856dd8f3ef7f89cf4e2def0fa89f26d1d44372570b5e0eac946563fa",
+      "reusedFrom": null,
+      "sha256": "445b6a8814de054066b80ff7d049d37d5e431a1a08c2e9042426aaa3e25badb2",
+      "sizeBytes": 88749,
+      "recordedAt": "2026-07-18T11:16:53.608Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "narration-scene-06-v2",
+        "capability": "voice",
+        "output": "public/projects/tie-chu-mo-zhen/audio/narration/06-return-to-study.mp3",
+        "text": "他重新背起书卷，回到山中。难懂的一页再读一遍，写不好的字再写一遍。铁杵磨亮的，是坚持的方向。",
+        "voiceId": "ruyayichen",
+        "model": "doubao-tts",
+        "settings": {
+          "provider": "doubao",
+          "displayName": "儒雅逸辰",
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "performancePrompt": "温暖、沉静、不说教；回到山中要平实坚定，两个再一遍形成柔和重复，结句留有余韵而不是口号",
+          "stage": "asset-production"
+        }
+      }
+    },
+    {
+      "assetId": "bg-study-dusk-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-dusk.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "702720c029de0b17940abfb3c4816d265ceea406e9fcdb2047d8e2fc08ea85d3",
+      "reusedFrom": null,
+      "sha256": "bc3a6c6c751b980bc1096d4bc9e2ccf68844dba753f7fe3f7b3f113610e538bd",
+      "sizeBytes": 3664887,
+      "recordedAt": "2026-07-18T11:21:19.189Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "bg-study-dusk-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-dusk.png",
+        "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 1 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample; use only its paper fibers, mineral-pigment palette, restrained ink outlines, cut-paper edge language and dimensional paper shadows as the visual reference\nPrimary request: a modest generalized Tang-era mountain study room at late afternoon, seen wide from inside; low writing desk with blank paper, rolled blank book bundles, an open lattice window toward misty mountains, simple shelving and a doorway suggesting departure\nScene/backdrop: warm dim interior against cool celadon mountains outside; no people, no human silhouettes\nStyle/medium: premium handcrafted Chinese paper collage, hand-torn mulberry-paper edges, matte mineral pigments, subtle misregistration print texture, Song-album-page compositional calm\nComposition/framing: wide 16:9, center and lower center kept readable for a seated character layer; clean subtitle-safe lower band; window at upper left, desk slightly right of center; clear depth planes without baked-in foreground branches\nLighting/mood: late-afternoon light fading, contemplative and slightly discouraged\nConstraints: blank pages only; no written characters, captions, signs, watermark, logo, people, animals, modern items or frame border\nAvoid: glossy 3D, plastic cartoon, photorealism, anime, crowded props, text-like marks",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
           "aspectRatio": "16:9",
-          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+          "stage": "asset-production",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
         }
       }
     },
     {
-      "assetId": "scene-2-background",
+      "assetId": "bg-mountain-road-v2",
       "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/plates/02-creek-encounter-bg.png",
-      "provider": "host-image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/02-mountain-road.png",
+      "provider": "gpt-image",
       "adapter": "host",
       "tool": "image_gen__imagegen",
-      "model": "gpt-image",
+      "model": "auto",
       "externalId": null,
-      "sha256": "e1ca10b4ad6b3fdf56ce2e4f847dd4228423278afb97d78d4e6e80de3ba4f8ee",
-      "sizeBytes": 3081445,
-      "recordedAt": "2026-07-17T09:01:14.426Z",
+      "requestFingerprint": "8221eeaf8fbfab9418e029a478923a14bcb6057a81ac413f68e7bcac2c8a745e",
+      "reusedFrom": null,
+      "sha256": "4fd5a2f5e17d163ddd19a4331574c72b0cadb4fce1a3ff3dbcce96f2246c7200",
+      "sizeBytes": 3965566,
+      "recordedAt": "2026-07-18T11:21:19.409Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "scene-2-background",
+        "assetId": "bg-mountain-road-v2",
         "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/plates/02-creek-encounter-bg.png",
-        "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Create the same layered hand-torn paper collage style with no people. A wide quiet mountain creek at the foot of layered blue-green peaks, with a low-saturation blue paper-water ribbon crossing the midground, bamboo on the left, an old pine and a tiny distant thatched shelter on the right. Provide a broad flat dry creek bank in the center-right for a separate elderly-woman-and-grinding-stone cutout and open space on the left-center for a separate scholar cutout. Add foreground bamboo leaves and rounded stones for parallax, while keeping the lower subtitle-safe area visually simple. Gentle warm daylight, patient and curious mood, visible paper fibers and matte edges. No characters, no human silhouettes, no grinding stone or iron pestle in the background, no text, no letters, no watermark, no logo, no modern objects, no magic, no photorealism, no 3D.",
-        "model": "gpt-image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/02-mountain-road.png",
+        "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 2 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample and defines the exact paper-collage medium, restrained ink line, mineral pigments and deckled paper shadows\nPrimary request: a descending mountain footpath through bamboo and weathered rocks, bending from upper left toward lower right and leading toward a distant creek\nScene/backdrop: generalized ancient Chinese mountain setting, cool cloud mountains and open sky; no buildings, no people\nStyle/medium: premium handcrafted Chinese paper collage, layered cut-paper silhouettes, visible mulberry-paper fibers, matte celadon and tea-brown pigments, subtle print misregistration\nComposition/framing: wide 16:9; path remains unobstructed for a walking character; middle area readable; calm open upper region and subtitle-safe lower band; do not include foreground branches because they are a separate layer\nLighting/mood: breezy cool afternoon, unsettled but quiet\nConstraints: no written characters, captions, signs, watermark, logo, people, animals, modern items or mockup frame\nAvoid: glossy 3D, plastic cartoon, photorealism, anime, dramatic lens flare, crowded vegetation, text-like marks",
+        "model": "auto",
         "settings": {
+          "width": 1920,
+          "height": 1080,
           "aspectRatio": "16:9",
-          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+          "stage": "asset-production",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
         }
       }
     },
     {
-      "assetId": "scene-3-background",
+      "assetId": "bg-creek-encounter-v2",
       "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-dialogue-bg.png",
-      "provider": "host-image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-encounter.png",
+      "provider": "gpt-image",
       "adapter": "host",
       "tool": "image_gen__imagegen",
-      "model": "gpt-image",
+      "model": "auto",
       "externalId": null,
-      "sha256": "4f6cf51516f64f8bd3cfb0a8c5be7381a2adfc5450138eb356b7f4a66cf27c5d",
-      "sizeBytes": 2969870,
-      "recordedAt": "2026-07-17T09:01:14.870Z",
+      "requestFingerprint": "c05775e7bb0cec2288102fbf3244a5fc002be8de3db3f6bd36bea5aa6e63c7b3",
+      "reusedFrom": null,
+      "sha256": "eadeed6af9f6fb619255692ecac8d416948e6e8b7a485209e16f6441cc2d14e0",
+      "sizeBytes": 4125928,
+      "recordedAt": "2026-07-18T11:21:19.618Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "scene-3-background",
+        "assetId": "bg-creek-encounter-v2",
         "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-dialogue-bg.png",
-        "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Create the same warm layered hand-torn paper collage style with no people. A closer, calmer view of the same mountain creek bank: muted blue water and rounded paper rocks behind, soft blue-green mountains in atmospheric layers, bamboo framing the far left and pine branches framing the upper right. Leave a wide clear dry-ground stage across the center for two separate character cutouts and their grinding-stone prop group; keep the bottom subtitle-safe region uncluttered. The composition should support a gentle conversational close shot without changing locations. Visible paper fibers, matte texture, rice-paper clouds, indigo, tea green, ochre and ivory. No characters, no silhouettes, no grinding stone or iron pestle already present, no text, no letters, no watermark, no logo, no modern objects, no finished needle, no photorealism, no 3D.",
-        "model": "gpt-image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-encounter.png",
+        "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 3 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve its exact paper fibers, mineral palette, ink restraint, creek geography and late-afternoon atmosphere, but remove both people, iron pestle, grindstone and foreground reeds\nPrimary request: the same mountain creek location as the approved sample, empty and ready for separately composited Li Bai and elderly woman cutouts\nScene/backdrop: distant teal mountains, bamboo and weathered rocks, visible horizontal creek-water band across the lower middle, open creek bank on the right\nStyle/medium: premium handcrafted Chinese paper collage with dimensional paper shadows and subtle print misregistration\nComposition/framing: wide 16:9; clear standing area left and seated area right; clean upper breathing room and subtitle-safe lower band; no baked-in people or foreground occluders\nLighting/mood: patient late-afternoon calm, cool celadon distance warming gently near the bank\nConstraints: no people, human silhouettes, iron pestle, grindstone, written characters, captions, signs, watermark, logos, modern items or border\nAvoid: glossy 3D, anime, chibi, photorealism, crowded scenery, text-like marks",
+        "model": "auto",
         "settings": {
+          "width": 1920,
+          "height": 1080,
           "aspectRatio": "16:9",
-          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+          "stage": "asset-production",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
         }
       }
     },
     {
-      "assetId": "scene-4-background",
+      "assetId": "bg-grindstone-close-v2",
       "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/plates/04-study-return-bg.png",
-      "provider": "host-image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/04-grindstone-close.png",
+      "provider": "gpt-image",
       "adapter": "host",
       "tool": "image_gen__imagegen",
-      "model": "gpt-image",
+      "model": "auto",
       "externalId": null,
-      "sha256": "2aee62b7307248078eccf592d6ac2c7b8ddd03dbf057f73e28498d255137146f",
-      "sizeBytes": 2945269,
-      "recordedAt": "2026-07-17T09:05:26.278Z",
+      "requestFingerprint": "cfda918f330c145b02fcfbd398aa936f238bdb04a4464fc74b9052fc1bc6e806",
+      "reusedFrom": null,
+      "sha256": "fed0884a9250dd7a7314741f8d69663e5d70119dcb299869db6934c031cd416a",
+      "sizeBytes": 3639871,
+      "recordedAt": "2026-07-18T11:22:04.041Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "scene-4-background",
+        "assetId": "bg-grindstone-close-v2",
         "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/plates/04-study-return-bg.png",
-        "prompt": "Use case: historical-scene. Asset type: 16:9 Remotion background plate. Image 1 is a style-only reference. Return to the same Tang-era-inspired mountain study courtyard as scene one, in the same hand-torn xuan-paper collage style, with no people. The winding path now leads from the lower right back toward the open study hut on the left; warm early-evening light falls across a low reading desk with an open blank scroll and a small unlit oil lamp, while layered mountains, bamboo and cream paper clouds create hopeful depth. Leave the center-right open for a returning scholar cutout and keep the lower subtitle-safe area simple. Calm, resolved and encouraging mood; indigo, tea green, ochre, cinnabar accents and rice-paper ivory. No characters, no human silhouettes, no readable writing, no text, no letters, no watermark, no logo, no modern objects, no finished needle, no photorealism, no 3D.",
-        "model": "gpt-image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/04-grindstone-close.png",
+        "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 close-up background plate for scene 4 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample and defines the exact fibrous paper, muted mineral colors, restrained ink and handmade shadow language\nPrimary request: close view of the creek-bank work area with a broad flat grinding stone occupying the lower middle and flowing creek beyond it; the stone is empty so separate hands and iron-pestle layers can animate over it\nScene/backdrop: weathered rock, blurred paper-collage creek water, hints of bamboo reflection; no person, hands, iron object or sparks\nStyle/medium: premium handcrafted Chinese paper collage, layered paper relief, visible fibers, matte celadon, gray-brown and restrained ochre\nComposition/framing: wide 16:9 macro-like framing; grinding stone surface clear and unobstructed; generous center area for the animated close-up layer; subtitle-safe lower edge\nLighting/mood: focused rhythmic calm, subtle warm contact area without actual sparks\nConstraints: no people, hands, iron pestle, needle, text, watermark, logo, modern items or frame\nAvoid: photoreal stone, glossy 3D, anime, cinematic lens flare, embedded motion blur, text-like marks",
+        "model": "auto",
         "settings": {
+          "width": 1920,
+          "height": 1080,
           "aspectRatio": "16:9",
-          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+          "stage": "asset-production",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
         }
       }
     },
     {
-      "assetId": "old-woman-character-sheet",
+      "assetId": "bg-creek-reflection-v2",
       "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/old-woman-poses-sheet-magenta.png",
-      "provider": "host-image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/05-creek-reflection.png",
+      "provider": "gpt-image",
       "adapter": "host",
       "tool": "image_gen__imagegen",
-      "model": "gpt-image",
+      "model": "auto",
       "externalId": null,
-      "sha256": "4bd9bf80fe45e0ec51b4a1a3dce0b6c7931a47d4e55d6d24f30019cf61bcb4c4",
-      "sizeBytes": 2061240,
-      "recordedAt": "2026-07-17T09:05:26.709Z",
+      "requestFingerprint": "fe89726413cecfc42795d439669c0435db4962ff4a69593ccb7e508ba3c6c9e1",
+      "reusedFrom": null,
+      "sha256": "67de4eb859fde4e067ed802b497dd6837bfa34a34c83b483d6298b1228eef5f1",
+      "sizeBytes": 3647729,
+      "recordedAt": "2026-07-18T11:22:53.438Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "old-woman-character-sheet",
+        "assetId": "bg-creek-reflection-v2",
         "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/old-woman-poses-sheet-magenta.png",
-        "prompt": "Use case: illustration-story. Asset type: 2x2 full-body character-and-prop sprite sheet for chroma-key extraction. Image 1 is a style-only reference defining the exact child-friendly torn-paper collage design. Create four consistent isolated poses of the same warm elderly woman with gray hair in a simple bun, ochre outer jacket, tea-green robe and dark cloth shoes: top-left seated beside one broad grinding stone, both hands moving one visibly thick unfinished iron pestle horizontally across the stone; top-right paused beside the same stone, one hand resting on the thick iron pestle while she looks up to answer kindly; bottom-left a closer side-facing seated grinding pose with the same stone and still-thick pestle; bottom-right seated calmly beside the stone with a gentle encouraging smile and open hand. Include the full grinding stone and complete thick pestle within each relevant cell; never show a finished needle or sharp point. Each pose group must be fully visible, centered in its equal cell, separated with generous padding and no overlap. Background must be one perfectly flat uniform solid #ff00ff magenta with no shadows, gradients, texture, floor plane, reflections or lighting variation. Do not use magenta in the subject. No labels, no grid lines, no text, no letters, no watermark, no logo, no extra characters, no magic, no modern objects, no photorealism, no 3D.",
-        "model": "gpt-image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/05-creek-reflection.png",
+        "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 5 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample; keep the same location and handcrafted paper language\nPrimary request: the creek at a quieter reflective moment, with an empty bank and a polished iron-pestle silhouette lying near the grinding stone, while the water catches a warmer patch of light\nScene/backdrop: cool teal creek and bamboo reflection transitioning toward muted ochre; no people; leave room for Li Bai and translucent memory-page layers\nStyle/medium: premium handcrafted Chinese paper collage, mulberry fibers, matte mineral pigment, restrained ink, subtle paper relief\nComposition/framing: wide 16:9; visual focus moves from lower-right pestle area toward open center-left standing space; calm negative space, subtitle-safe lower band, no foreground reeds\nLighting/mood: inward-looking, quiet realization; gradual warmth without glow explosion\nConstraints: no finished needle, no people, no hands, no written characters, captions, signs, watermark, logo, modern items or border\nAvoid: magical aura, glossy 3D, plastic cartoon, photorealism, anime, text-like marks",
+        "model": "auto",
         "settings": {
-          "layout": "2x2",
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "bg-study-morning-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/plates/06-study-morning.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "cae82e816bc5e7669b8ae226e2795cbe04488c09771ae294c964b471e238454c",
+      "reusedFrom": null,
+      "sha256": "b3faf9d70712d53b4133cdc5b63937960d0b7729f7c788744f530b41bb5ae1cd",
+      "sizeBytes": 3983057,
+      "recordedAt": "2026-07-18T11:22:53.689Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "bg-study-morning-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/plates/06-study-morning.png",
+        "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 6 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample and defines the visual medium; scene 1's study-room description defines the location\nPrimary request: return to the same modest mountain study room, now in clear early-morning light; low desk with blank paper ready for writing, blank book bundles, lattice window, shelving and mountain view\nScene/backdrop: generalized Tang-era study; warm morning ivory and restrained gold entering from the window, cooler mountains outside; no people\nStyle/medium: premium handcrafted Chinese paper collage, visible mulberry fibers, hand-torn edges, matte mineral pigments, restrained ink, dimensional paper shadows\nComposition/framing: wide 16:9; desk slightly right of center with clear seated-character space; clean upper breathing room and subtitle-safe lower band; no baked-in foreground branches\nLighting/mood: renewed attention, calm resolve, no triumphal spectacle\nConstraints: blank paper only; no written characters, captions, signs, watermark, logo, people, animals, modern items or frame\nAvoid: glossy 3D, plastic cartoon, photorealism, anime, glowing halo, text-like marks",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-study-window-rear-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/rear/study-window-mountains.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "1d3342d4bcc5015b4883f956fb65847866dad52587026d95fd005269d5422dde",
+      "reusedFrom": null,
+      "sha256": "4871c0f0297e65bfc2c3aa58135cbc80ff0995b89edd9a2ae063ea67601c985c",
+      "sizeBytes": 548494,
+      "recordedAt": "2026-07-18T11:25:02.236Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-study-window-rear-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/rear/study-window-mountains.png",
+        "prompt": "Use case: background-extraction\nAsset type: full-frame rear-depth cutout for a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines paper fibers, ink restraint, mineral colors and cut-paper edge language\nPrimary request: a sparse silhouette of distant celadon mountain ridges and two soft cloud-paper shapes designed to sit behind a study-room lattice window; elements occupy mainly the upper-left and upper-middle, with generous empty area\nStyle/medium: premium handcrafted Chinese paper collage, matte mulberry paper, delicate deckled edges\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background for local removal\nConstraints: background is one uniform #ff00ff with no gradients, texture, shadows, floor or reflections; no #ff00ff inside the artwork; no people, text, watermark, logo or border; crisp complete cutout\nAvoid: photorealism, glossy 3D, dense scenery",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-rear",
           "keyColor": "#ff00ff",
-          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
         }
       }
     },
     {
-      "assetId": "li-bai-character-sheet",
+      "assetId": "env-study-bookshelf-mid-v2",
       "capability": "image",
-      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-poses-sheet-magenta.png",
-      "provider": "host-image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/study-bookshelf.png",
+      "provider": "gpt-image",
       "adapter": "host",
       "tool": "image_gen__imagegen",
-      "model": "gpt-image",
+      "model": "auto",
       "externalId": null,
-      "sha256": "6848f821ac7f638f6ab458571ddeb287ea5bd76df87a24d0def14a1e2dc34011",
-      "sizeBytes": 1091212,
-      "recordedAt": "2026-07-17T09:11:34.802Z",
+      "requestFingerprint": "32117aaedf8c60278e0a33b9c01b081f2bf658f81e2d7b5e1f5744b2d949d9e3",
+      "reusedFrom": null,
+      "sha256": "a8bc1f8b653bbb4dfa7c26e6b9fb7396a7c3f97ce3d6cec91bcd2f29e9c2442e",
+      "sizeBytes": 1310380,
+      "recordedAt": "2026-07-18T11:26:35.850Z",
       "request": {
         "$schema": "../../../schemas/asset-request.schema.json",
         "schemaVersion": 1,
         "projectSlug": "tie-chu-mo-zhen",
-        "assetId": "li-bai-character-sheet",
+        "assetId": "env-study-bookshelf-mid-v2",
         "capability": "image",
-        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-poses-sheet-magenta.png",
-        "prompt": "Use case: illustration-story. Asset type: 2x2 full-body character sprite sheet for chroma-key extraction. Image 1 is a style-only reference defining the exact child-friendly torn-paper collage medium and the fictional scholar design. Create four consistent full-body poses of the same fictional young adult scholar representing Li Bai, never an exact historical portrait: top-left seated at a small low desk reading a blank scroll, thoughtful but slightly tired; top-right walking away with a tied scroll bundle held at his side, hesitant expression; bottom-left standing respectfully and leaning forward slightly to observe, hands calmly behind his back; bottom-right walking back with the scroll bundle held close to his chest, newly focused and hopeful. Preserve the same friendly round face, navy cloth cap, indigo outer robe, ivory inner robe, dark sash and black cloth shoes in every cell. Every figure and any small attached desk prop must be fully visible, centered inside its own equal cell, separated with generous padding, no overlap across cells. Background must be one perfectly flat uniform solid #ff00ff magenta with no shadows, gradients, texture, floor plane, reflections or lighting variation. Do not use magenta in the character. No labels, no grid lines, no text, no writing on scrolls, no letters, no watermark, no logo, no extra characters, no needle, no modern objects, no photorealism, no 3D.",
-        "model": "gpt-image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/study-bookshelf.png",
+        "prompt": "Use case: background-extraction\nAsset type: mid-depth interior cutout for scenes 1 and 6 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines the exact handcrafted paper language\nPrimary request: a simple ancient wooden shelf with several rolled blank book bundles and folded blank papers, plus one narrow paper screen edge; grouped along the right third, complete silhouette with generous padding\nStyle/medium: premium handcrafted Chinese paper collage, fibrous paper, restrained ink, matte tea-brown and ivory pigments\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background for local removal\nConstraints: uniform #ff00ff background only, no shadows or gradients; blank papers with no marks; no people, text, watermark, logo; no #ff00ff in subject; complete crisp edges\nAvoid: modern bookshelf, printed symbols, photorealism, glossy 3D",
+        "model": "auto",
         "settings": {
-          "layout": "2x2",
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-mid",
           "keyColor": "#ff00ff",
-          "reference": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png"
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-road-mountains-rear-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/rear/road-mountains.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "9b3f5e78d58e20fc490de51e1ae39b58cd8b74d6fe9b49c14d51e2d689c21c80",
+      "reusedFrom": null,
+      "sha256": "1c7b2aaed13f776ab73cfed8b3a20029b454b59635b157cefcdb05b521a679d3",
+      "sizeBytes": 1953011,
+      "recordedAt": "2026-07-18T11:27:19.388Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-road-mountains-rear-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/rear/road-mountains.png",
+        "prompt": "Use case: background-extraction\nAsset type: rear-depth mountain cutout for scene 2 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines the mineral celadon mountains and paper relief\nPrimary request: three overlapping distant mountain-ridge silhouettes and a few pale cloud-paper strips, spanning the upper half while leaving open sky gaps\nStyle/medium: premium handcrafted Chinese paper collage, mulberry fibers, restrained ink, muted celadon and gray-blue\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key color only; no background shadow or gradient; no #ff00ff in artwork; no people, buildings, text, watermark or logo; complete cutout\nAvoid: photoreal mountains, dense city, glossy 3D",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-rear",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-road-bamboo-mid-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/road-bamboo.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "b9ae64f072ad90da0268323b4e1ba3bf132bc268eabaadff1fe8d317c4e3f69e",
+      "reusedFrom": null,
+      "sha256": "fa734e6bcc36ad047fa97d277c136f4bda07e7195f4fd48410b9ac8d371cafd2",
+      "sizeBytes": 2009915,
+      "recordedAt": "2026-07-18T11:30:51.997Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-road-bamboo-mid-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/road-bamboo.png",
+        "prompt": "Use case: background-extraction\nAsset type: mid-depth bamboo-grove cutout for scene 2 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines the bamboo and handmade paper language\nPrimary request: a loose band of slender bamboo trunks and leaf clusters along the upper-left and right edges, leaving the descending center path open\nStyle/medium: layered Chinese cut-paper, visible fibers, restrained ink, matte teal and tea-brown\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background; no shadows, gradients or texture; no #ff00ff in subject; no people, text, watermark or logo; complete silhouettes\nAvoid: wall of foliage, photorealism, glossy 3D",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-mid",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-road-branches-fg-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/road-branches.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "8a217bac85ade23b676b95dc0ca743196507abed180fe6a7d82b6cd9275dab0f",
+      "reusedFrom": null,
+      "sha256": "0cce822db368613ef89c313a828caa1767ea05a60de7e1fe80ef13d8ed6e12df",
+      "sizeBytes": 459653,
+      "recordedAt": "2026-07-18T11:31:45.782Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-road-branches-fg-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/road-branches.png",
+        "prompt": "Use case: background-extraction\nAsset type: near-foreground moving branch cutout for scene 2 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines paper texture and muted plant colors\nPrimary request: one wind-bent bamboo branch sweeping in from the upper-left and one small rock-grass cluster at bottom-right; center and subtitle band remain clear\nStyle/medium: handcrafted torn-paper silhouettes with fibrous edges and restrained ink\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform background, no shadow, gradient or texture; no #ff00ff in subject; no people, text, watermark, logo; complete crisp cutout\nAvoid: decorative frame, dense foliage, photorealism",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-foreground",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-creek-bank-mid-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/creek-bank.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "2fbe2feb4b11b8365afcf293f486772608654b871bbe03d230737a1ad07113b4",
+      "reusedFrom": null,
+      "sha256": "28c6f0cc14fbf7fed525dec438049a5165ff8ebd0bfcfde900d8ecfa4ab52f76",
+      "sizeBytes": 1939449,
+      "recordedAt": "2026-07-18T11:33:02.748Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-creek-bank-mid-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/creek-bank.png",
+        "prompt": "Use case: background-extraction\nAsset type: mid-depth creek-bank cutout reused in scenes 3 and 4 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample; match its right-side bank rocks, paper texture and ochre-gray palette\nPrimary request: a low irregular creek-bank strip with two weathered rocks and a flat grinding-stone base on the right third, empty and ready for the elderly-woman layer\nStyle/medium: premium layered cut-paper, visible fibers, matte mineral pigment, restrained ink\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background; no people, hands, pestle, needle, text, watermark or logo; no #ff00ff in artwork; complete crisp silhouette\nAvoid: photoreal stone, glossy 3D, extra props",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-mid",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-creek-reeds-fg-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/creek-reeds.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "a6e1a181fc11b2cbdc835e6f65b175a40d618fb5a7acc7cbd81dff6d076f5ca8",
+      "reusedFrom": null,
+      "sha256": "fc99b697dcfd80b5fc2b0c0efbed6f3ea691810f3b8b4c6d18901a2a9ea6e6c3",
+      "sizeBytes": 658347,
+      "recordedAt": "2026-07-18T11:34:29.462Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-creek-reeds-fg-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/creek-reeds.png",
+        "prompt": "Use case: background-extraction\nAsset type: near-foreground reed-and-grass cutout reused in scenes 3 and 5 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample; match its bottom foreground grass band but isolate it cleanly\nPrimary request: a sparse reed-and-grass band across the bottom 16 percent with two taller reed clusters near the far corners, leaving both character zones and center open\nStyle/medium: handcrafted torn-paper foliage with fibers, restrained ink, muted deep teal and tea-brown\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background, no shadow or gradient; no #ff00ff in plants; no people, text, watermark or logo; complete silhouette\nAvoid: dense wall of grass, photorealism, glossy 3D",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-foreground",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-creek-water-mid-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/creek-water.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "3e19dc069a7e744545e5693e6a10bc2345f9c44d3d0b4e55b372f83d6d1fb992",
+      "reusedFrom": null,
+      "sha256": "0a5137d6eae1aecbff946832990cb6decafa15199e63f6d6ebd0fb54e3df2f3e",
+      "sizeBytes": 1086807,
+      "recordedAt": "2026-07-18T11:35:09.561Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-creek-water-mid-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/creek-water.png",
+        "prompt": "Use case: background-extraction\nAsset type: mid-depth horizontal creek-water cutout reused in scenes 3, 4 and 5 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines the celadon water-paper shapes\nPrimary request: three layered horizontal bands of stylized flowing creek water with a few separated white paper ripples, occupying the lower-middle third and leaving the lowest subtitle strip mostly clear\nStyle/medium: handcrafted Chinese cut-paper water, visible fibers, matte celadon, muted teal and ivory, restrained ink\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background; no reflections of people, text, watermark or logo; no #ff00ff in water; complete crisp cutout\nAvoid: photoreal water, gradients in the key background, glossy 3D",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-mid",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-grind-water-fg-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/grind-water.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "02bdb0bfc70433eb41ff3c8963074e04e7dd755df1a6b539516d3f9229aca888",
+      "reusedFrom": null,
+      "sha256": "8a118fdf1c98979b3a3a6021888b6ca7bcc163e5aa76df95926b4282269aa1e8",
+      "sizeBytes": 90056,
+      "recordedAt": "2026-07-18T11:35:58.604Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-grind-water-fg-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/grind-water.png",
+        "prompt": "Use case: background-extraction\nAsset type: near-foreground rhythmic accent cutout for scene 4 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines paper fibers and restrained accent colors\nPrimary request: a small group of separated celadon water droplets crossing diagonally from lower-left toward center, plus three tiny restrained gold-paper flecks confined near the grinding-contact area; large transparent gaps\nStyle/medium: handcrafted paper cutouts, crisp deckled edges, matte mineral pigments\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background; no people, hands, text, watermark or logo; no #ff00ff in artwork; complete separated shapes\nAvoid: explosion, lens flare, dense spark shower, photoreal droplets",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-foreground",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-memory-pages-mid-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/mid/memory-pages.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "90f17fd0d50ca33afe0999c9bae25a61769893523aeb70bd1e69b7b6f7acd328",
+      "reusedFrom": null,
+      "sha256": "843e2775bbdac9fce25827da9d97181f97be4971544b83afff49808e932d0561",
+      "sizeBytes": 1321980,
+      "recordedAt": "2026-07-18T11:36:46.611Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-memory-pages-mid-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/memory-pages.png",
+        "prompt": "Use case: background-extraction\nAsset type: symbolic mid-depth memory cutout for scene 5 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines paper fibers, ink restraint and palette\nPrimary request: three overlapping blank torn-paper pages and two abstract flowing ink-line arcs, arranged from upper-right toward center-left as a quiet memory of unfinished study\nStyle/medium: handcrafted ivory and pale-ochre mulberry paper with deckled edges, minimal charcoal ink curves\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: pages must be completely blank; uniform key background; no people, legible symbols, text, watermark, logo; no #ff00ff in artwork; complete crisp cutout\nAvoid: readable calligraphy, magic glow, photoreal paper, decorative clutter",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-mid",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-study-ink-fg-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-ink.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "b328947257f73be2b60cb513422bdca7d9c53a726c10c793424f1635dec24e56",
+      "reusedFrom": null,
+      "sha256": "51bc82606064deda2d465391fb6ca1218530fe2fb72f01b87da32607c306df4b",
+      "sizeBytes": 606775,
+      "recordedAt": "2026-07-18T11:40:23.583Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-study-ink-fg-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-ink.png",
+        "prompt": "Use case: background-extraction\nAsset type: near-foreground finishing cutout for scene 6 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines the handcrafted paper language\nPrimary request: one sparse warm bamboo-paper branch entering from upper-right, a small torn-paper desk edge along bottom-left, and a single abstract dark-ink brush trail near the lower-right edge; keep center and subtitles clear\nStyle/medium: premium torn-paper collage, visible fibers, restrained charcoal ink, warm ochre and muted teal\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: abstract ink only, no legible character or text; uniform key background; no people, watermark or logo; no #ff00ff in artwork; complete crisp silhouettes\nAvoid: decorative border, calligraphy, photorealism, glossy 3D",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-foreground",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "char-li-bai-sheet-b-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-b.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "571511ef7d8daf140a478d71e1ca86c2f9284ddb3f556d29f3abc0363898d4a1",
+      "reusedFrom": null,
+      "sha256": "35172e74718aedb44639094f86386422ce05474f700d6f6272d334245af03c61",
+      "sizeBytes": 873933,
+      "recordedAt": "2026-07-18T11:46:39.281Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "char-li-bai-sheet-b-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-b.png",
+        "prompt": "Use case: historical-scene\nAsset type: 2×1 character pose sheet for a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve the exact young scholar identity, face, topknot, blue-gray robe, tea-brown sash, blank book bundle and handmade paper construction\nPrimary request: two complete full-body poses of the same young Li Bai, one per equal horizontal cell: 1 walking uphill with renewed purpose and the same book bundle on his back; 2 seated at a low writing desk, calm and focused, brush lowered toward a blank page\nStyle/medium: premium handcrafted Chinese paper collage matching Image 1, fibrous torn edges, restrained ink, matte mineral pigments\nComposition/framing: exact 2 columns × 1 row, consistent scale and identity, generous padding, no overlap, complete head, hands and feet\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in both cells, no floor, shadows, gradient, texture or divider\nConstraints: no written marks on page, text, label, watermark, logo, extra people, modern items or #ff00ff in figure; stable anatomy and costume\nAvoid: anime, chibi, photorealism, glossy 3D, cropped or duplicated limbs, identity drift",
+        "model": "auto",
+        "settings": {
+          "stage": "asset-production",
+          "layout": "2x1",
+          "columns": 2,
+          "count": 2,
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "character-sheet",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "identity-consistent",
+            "cell-separation",
+            "background-uniform",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "char-li-bai-sheet-a-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-a.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "14d57945382848089ba8787ac21835b4fa77c5207b14c58ad1180154daf4624e",
+      "reusedFrom": null,
+      "sha256": "d14c9ffdaf02e768f5eb8357200ca6e8a19ee92c402b96540fe6c8922959bca0",
+      "sizeBytes": 1159413,
+      "recordedAt": "2026-07-18T11:53:10.844Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "char-li-bai-sheet-a-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-sheet-a.png",
+        "prompt": "Use case: historical-scene\nAsset type: 2×2 character pose sheet for a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve the young scholar on its left as the exact identity, facial shape, topknot, muted blue-gray robe, tea-brown sash, book bundle and paper-collage construction\nPrimary request: four complete full-body poses of the same young Li Bai, one pose per equal cell in reading order: 1 seated at a low desk looking discouraged over a blank page; 2 walking downhill carrying the same book bundle; 3 standing with slight surprise and one hand raised as if asking a question; 4 standing still and looking thoughtfully toward the lower right\nStyle/medium: premium handcrafted Chinese paper collage, hand-torn fibrous edges, restrained ink outlines, matte mineral pigments, dimensional paper shadows matching Image 1\nComposition/framing: exact 2 columns × 2 rows, one centered figure per cell, consistent scale and identity, generous padding, no overlap between cells, all heads, hands and feet complete\nScene/backdrop: every cell uses the same perfectly flat solid #ff00ff chroma-key background; no floor plane, shadow, gradient, texture or divider line\nConstraints: generalized Tang-era clothing; no text, labels, watermark, logo, extra people or modern items; no #ff00ff in figure; stable anatomy and costume continuity\nAvoid: anime, chibi, photorealism, glossy 3D, cropped limbs, duplicate limbs, changing outfit or face",
+        "model": "auto",
+        "settings": {
+          "stage": "asset-production",
+          "layout": "2x2",
+          "columns": 2,
+          "count": 4,
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "character-sheet",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "identity-consistent",
+            "cell-separation",
+            "background-uniform",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-study-bamboo-fg-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-bamboo.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "bafd388909797e3f8fd1307cf70231bb1f78e8c443a04488700a391ddbde7866",
+      "reusedFrom": null,
+      "sha256": "399f98cdeecf9832ab8a949a87ccb3908901b54e4376788f3b22f336bdf8ff3d",
+      "sizeBytes": 161154,
+      "recordedAt": "2026-07-18T11:56:19.986Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "env-study-bamboo-fg-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/environment/foreground/study-bamboo.png",
+        "prompt": "Use case: background-extraction\nAsset type: near-foreground occlusion cutout for scene 1 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines bamboo shape, paper texture and muted palette\nPrimary request: two sparse drooping bamboo-paper branches entering from the upper-right and lower-left corners, framing the image without covering the center or subtitle area\nStyle/medium: handcrafted cut-paper bamboo leaves, visible fibers, restrained ink, deep muted teal\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background with no shadow, gradient or texture; no #ff00ff in leaves; complete crisp silhouettes; no people, text, watermark, logo\nAvoid: dense border, photoreal foliage, glossy 3D",
+        "model": "auto",
+        "settings": {
+          "width": 1920,
+          "height": 1080,
+          "aspectRatio": "16:9",
+          "stage": "asset-production",
+          "layout": "environment-foreground",
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent",
+            "edge-clean"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "char-grind-close-sheet-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "fe2f3bd7eadc0c00ff4dbfafe0d886c896d77a14dad930864013bc10293dad1f",
+      "reusedFrom": null,
+      "sha256": "46f7e3d233ee5c824b777d3ed9a5eb76804763325c83d1aa19990d1def419985",
+      "sizeBytes": 788246,
+      "recordedAt": "2026-07-18T14:42:40.523Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "char-grind-close-sheet-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/grind-close-sheet.png",
+        "prompt": "Use case: historical-scene\nAsset type: 2×1 close-up action-parts sheet for scene 4 of a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; match the elderly woman's muted ochre sleeves, aged hands, thick iron pestle and exact handmade paper language\nPrimary request: two complete isolated close-up action phases, one per horizontal cell. In each cell, both elderly hands grip the upper and middle part of ONE thick iron pestle. The shaft slopes downward at a shallow 20–30 degree diagonal. ONLY THE LOWER END touches a small flat grindstone patch at the bottom of the cutout; every other part of the shaft is visibly raised. Cell 2 advances the hands and pestle a short distance ALONG THE SHAFT AXIS, showing the next phase of a lengthwise push-pull stroke while the same tip remains the sole abrasion point. Show a subtle flattened-to-tapered wear shape at that contacted tip, still much thicker than a needle.\nAction mechanics: axial back-and-forth rubbing of one end against stone to make that end gradually pointed. The hands do not roll the pestle around its circumference.\nStyle/medium: premium handcrafted Chinese paper collage, fibrous torn edges, restrained ink, matte iron gray and ochre mineral pigments\nComposition/framing: exact 2 columns × 1 row, consistent hand anatomy and pestle thickness, generous padding, no overlap, complete wrists and fingers; keep the tip-to-stone contact readable\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in both cells, no floor, cast shadow, gradient, texture or divider outside the small stone contact patch\nConstraints: the rod must not lie flat; only one end touches stone; no finished needle, sparks, text, label, watermark, logo, extra limbs or #ff00ff in subject\nAvoid: horizontal rod resting across the stone, one hand at each rod end, sideways rolling, polishing the full cylindrical surface, sawing motion, distorted fingers, warped pestle, photorealism, glossy 3D, cropped hands, motion blur",
+        "model": "auto",
+        "settings": {
+          "stage": "asset-production",
+          "layout": "2x1",
+          "columns": 2,
+          "count": 2,
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "character-sheet",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "identity-consistent",
+            "cell-separation",
+            "background-uniform",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "char-granny-sheet-v2",
+      "capability": "image",
+      "file": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "auto",
+      "externalId": null,
+      "requestFingerprint": "fa9055530884628b27f570f0c350642b80f76fc26482de32d1bbd0562575cb16",
+      "reusedFrom": null,
+      "sha256": "70d3d705523999d52bec88aa8477c69fdc547e8a1824e8278fff6e11a620292d",
+      "sizeBytes": 951713,
+      "recordedAt": "2026-07-18T14:58:53.893Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "tie-chu-mo-zhen",
+        "assetId": "char-granny-sheet-v2",
+        "capability": "image",
+        "output": "public/projects/tie-chu-mo-zhen/assets/characters/source/granny-sheet.png",
+        "prompt": "Use case: historical-scene\nAsset type: 3×1 character pose sheet for a layered Chinese paper-collage animation\nInput images: Image 1 is the approved creek style sample; preserve the elderly woman on its right as the exact identity, lined calm face, gray wrapped hair, muted ochre-brown layered robe and paper-collage construction\nPrimary request: three complete poses of the same elderly woman, one per equal horizontal cell. Cell 1: seated low, both hands spaced along the upper half of one thick iron pestle, holding its shaft at a shallow downward diagonal so ONLY ONE END presses against a small flat grindstone patch below; the rest of the pestle is visibly lifted off the surface. Cell 2: seated upright and answering calmly, one hand still steadying the correctly angled pestle whose same lower tip rests on a small flat stone patch. Cell 3: a second grinding phase of Cell 1, hands and shaft shifted slightly forward ALONG THE PESTLE'S LONG AXIS while the SAME SINGLE END remains the contact point on the same kind of small flat grindstone. The contacted end may be mildly worn and tapered but is still far from a needle.\nAction mechanics: she repeatedly pushes and pulls the pestle lengthwise to abrade one end into a point. This is axial back-and-forth rubbing of one tip, never rolling the whole cylinder sideways.\nStyle/medium: premium handcrafted Chinese paper collage matching Image 1, torn fibrous edges, restrained ink, matte mineral pigments and subtle paper shadows\nComposition/framing: exact 3 columns × 1 row, consistent identity and scale, generous padding, no overlap, all heads, hands, feet and iron pestles complete; make the single tip-to-stone contact unmistakable in Cells 1 and 3\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background in every cell; no floor, cast shadow, gradient, texture or divider outside each small stone contact patch\nConstraints: the pestle must be oblique with only its lower tip touching the stone patch; no text, labels, watermark, logo, extra people, modern items or #ff00ff in subject; stable anatomy\nAvoid: iron rod lying flat across a stone, hands gripping opposite ends, sideways rolling, polishing the full cylindrical surface, sawing motion, finished needle, sparks, witch caricature, comedy, anime, chibi, photorealism, glossy 3D, cropped hands, warped pestle, identity drift",
+        "model": "auto",
+        "settings": {
+          "stage": "asset-production",
+          "layout": "3x1",
+          "columns": 3,
+          "count": 3,
+          "keyColor": "#ff00ff",
+          "referenceImages": [
+            "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"
+          ]
+        },
+        "quality": {
+          "kind": "character-sheet",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "identity-consistent",
+            "cell-separation",
+            "background-uniform",
+            "style-consistent"
+          ]
         }
       }
     }

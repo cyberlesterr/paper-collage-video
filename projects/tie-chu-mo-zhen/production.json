@@ -2,167 +2,111 @@
   "$schema": "../../schemas/production.schema.json",
   "schemaVersion": 1,
   "slug": "tie-chu-mo-zhen",
-  "stage": "human-review",
-  "createdAt": "2026-07-17T08:22:23.886Z",
-  "updatedAt": "2026-07-17T14:22:22.196Z",
+  "stage": "complete",
+  "createdAt": "2026-07-18T08:36:15.079Z",
+  "updatedAt": "2026-07-18T15:25:05.539Z",
   "approvals": {
     "concept": {
       "status": "approved",
-      "decidedAt": "2026-07-17T08:31:17.817Z",
-      "note": "用户批准概念，继续制作样张和音色试听"
+      "decidedAt": "2026-07-18T10:42:00.684Z",
+      "note": "批准概念"
     },
     "styleAndVoice": {
       "status": "approved",
-      "decidedAt": "2026-07-17T08:52:29.125Z",
-      "note": "用户批准沿用手撕宣纸拼贴风格与儒雅逸辰音色，开始批量制作"
+      "decidedAt": "2026-07-18T11:08:40.793Z",
+      "note": "批准风格和音色"
     },
     "preview": {
-      "status": "pending",
-      "decidedAt": null,
-      "note": ""
+      "status": "approved",
+      "decidedAt": "2026-07-18T15:09:10.402Z",
+      "note": "预览通过"
     },
     "publish": {
-      "status": "pending",
-      "decidedAt": null,
-      "note": ""
+      "status": "approved",
+      "decidedAt": "2026-07-18T15:25:05.539Z",
+      "note": "批准发布"
     }
   },
   "workItems": [
     {
-      "id": "style-sample",
-      "label": "代表性纸片风格样张",
+      "id": "style-sample-v2",
+      "label": "生成第三幕溪边风格样片",
       "status": "completed",
-      "updatedAt": "2026-07-17T08:37:10.275Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/style/01-style-sample.png",
+      "updatedAt": "2026-07-18T10:49:07.914Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
       "note": ""
     },
     {
-      "id": "voice-audition",
-      "label": "儒雅逸辰实际旁白试听",
+      "id": "motion-proof-v2",
+      "label": "生成 5 秒蒙版视差与磨杵局部动作证明",
       "status": "completed",
-      "updatedAt": "2026-07-17T08:48:30.081Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen.mp3",
+      "updatedAt": "2026-07-18T10:49:08.230Z",
+      "artifact": "dist/tie-chu-mo-zhen/style-motion-proof.mp4",
       "note": ""
     },
     {
-      "id": "scene-1-background",
-      "label": "第一幕书屋背景板",
+      "id": "voice-audition-ruyayichen-v2",
+      "label": "儒雅逸辰短旁白试听",
       "status": "completed",
-      "updatedAt": "2026-07-17T09:01:13.998Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/plates/01-study-departure-bg.png",
+      "updatedAt": "2026-07-18T11:04:29.804Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/audio/narration/audition-ruyayichen-v2.mp3",
       "note": ""
     },
     {
-      "id": "scene-2-background",
-      "label": "第二幕溪边背景板",
+      "id": "background-plates-v2",
+      "label": "六幕无人物基础背景",
       "status": "completed",
-      "updatedAt": "2026-07-17T09:01:14.630Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/plates/02-creek-encounter-bg.png",
+      "updatedAt": "2026-07-18T11:56:43.302Z",
+      "artifact": null,
       "note": ""
     },
     {
-      "id": "scene-3-background",
-      "label": "第三幕问答背景板",
+      "id": "environment-layers-v2",
+      "label": "十二张分层环境透明素材",
       "status": "completed",
-      "updatedAt": "2026-07-17T09:01:15.205Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/plates/03-creek-dialogue-bg.png",
+      "updatedAt": "2026-07-18T11:56:43.534Z",
+      "artifact": null,
       "note": ""
     },
     {
-      "id": "scene-4-background",
-      "label": "第四幕返回书屋背景板",
+      "id": "character-sheets-v2",
+      "label": "李白、老妇与磨杵特写角色图板",
       "status": "completed",
-      "updatedAt": "2026-07-17T09:05:26.488Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/plates/04-study-return-bg.png",
+      "updatedAt": "2026-07-18T11:56:43.737Z",
+      "artifact": null,
       "note": ""
     },
     {
-      "id": "li-bai-character-sheet",
-      "label": "李白意象人物姿态表",
+      "id": "narration-scenes-v2",
+      "label": "六段儒雅逸辰正式旁白",
       "status": "completed",
-      "updatedAt": "2026-07-17T09:11:43.007Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/source/li-bai-poses-sheet-magenta.png",
+      "updatedAt": "2026-07-18T11:17:08.218Z",
+      "artifact": "projects/tie-chu-mo-zhen/assets-manifest.json",
       "note": ""
     },
     {
-      "id": "old-woman-character-sheet",
-      "label": "老妇人物与磨杵姿态表",
+      "id": "revision-granny-grinding",
+      "label": "修正老妇磨杵全身动作",
       "status": "completed",
-      "updatedAt": "2026-07-17T09:05:26.910Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/source/old-woman-poses-sheet-magenta.png",
+      "updatedAt": "2026-07-18T14:45:08.913Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/granny-grinding-a.png",
       "note": ""
     },
     {
-      "id": "narration-1",
-      "label": "第1幕儒雅逸辰旁白",
+      "id": "revision-grind-close",
+      "label": "修正铁杵端部研磨特写",
       "status": "completed",
-      "updatedAt": "2026-07-17T08:58:23.036Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/audio/narration/scene-1.mp3",
+      "updatedAt": "2026-07-18T14:45:09.075Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/grind-hands-a.png",
       "note": ""
     },
     {
-      "id": "narration-2",
-      "label": "第2幕儒雅逸辰旁白",
+      "id": "revision-granny-contact",
+      "label": "强化第三幕铁杵单端接触磨石",
       "status": "completed",
-      "updatedAt": "2026-07-17T08:58:23.459Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/audio/narration/scene-2.mp3",
+      "updatedAt": "2026-07-18T14:59:40.267Z",
+      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/alpha/granny-grinding-a.png",
       "note": ""
-    },
-    {
-      "id": "narration-3",
-      "label": "第3幕儒雅逸辰旁白",
-      "status": "completed",
-      "updatedAt": "2026-07-17T08:58:23.938Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/audio/narration/scene-3.mp3",
-      "note": ""
-    },
-    {
-      "id": "narration-4",
-      "label": "第4幕儒雅逸辰旁白",
-      "status": "completed",
-      "updatedAt": "2026-07-17T08:58:24.485Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/audio/narration/scene-4.mp3",
-      "note": ""
-    },
-    {
-      "id": "old-woman-alpha",
-      "label": "老妇透明纸片拆分",
-      "status": "completed",
-      "updatedAt": "2026-07-17T09:11:50.177Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/alpha",
-      "note": ""
-    },
-    {
-      "id": "li-bai-alpha",
-      "label": "李白透明纸片拆分",
-      "status": "completed",
-      "updatedAt": "2026-07-17T09:13:06.229Z",
-      "artifact": "public/projects/tie-chu-mo-zhen/assets/characters/alpha",
-      "note": ""
-    },
-    {
-      "id": "timeline-config",
-      "label": "四幕时间线与字幕同步",
-      "status": "completed",
-      "updatedAt": "2026-07-17T09:15:08.930Z",
-      "artifact": "projects/tie-chu-mo-zhen/project.json",
-      "note": "四幕按实测旁白时长同步，详见narration-sync.md"
-    },
-    {
-      "id": "validation",
-      "label": "素材、时间线与项目校验",
-      "status": "completed",
-      "updatedAt": "2026-07-17T09:15:45.625Z",
-      "artifact": "dist/tie-chu-mo-zhen/validation-report.json",
-      "note": "project:validate与npm"
-    },
-    {
-      "id": "preview-render",
-      "label": "52秒预览片与接触表",
-      "status": "completed",
-      "updatedAt": "2026-07-17T09:17:58.425Z",
-      "artifact": "dist/tie-chu-mo-zhen/preview.mp4",
-      "note": "预览、验收报告与接触表均已生成"
     }
   ],
   "artifacts": {
@@ -172,262 +116,220 @@
     "review": "projects/tie-chu-mo-zhen/review.md",
     "validationReport": "dist/tie-chu-mo-zhen/validation-report.json",
     "preview": "dist/tie-chu-mo-zhen/preview.mp4",
-    "final": null,
+    "final": "dist/tie-chu-mo-zhen/final.mp4",
     "report": "dist/tie-chu-mo-zhen/report.json",
     "contactSheet": "dist/tie-chu-mo-zhen/contact-sheet.jpg"
   },
   "history": [
     {
-      "at": "2026-07-17T08:22:23.886Z",
+      "at": "2026-07-18T08:36:15.079Z",
       "action": "project-created",
       "stage": "capability-review",
       "note": ""
     },
     {
-      "at": "2026-07-17T08:24:34.021Z",
+      "at": "2026-07-18T10:31:32.662Z",
       "action": "capabilities-ready",
       "stage": "brief",
-      "note": "用户确认 Codex 脚本、GPT Image 生图、ChatCut 中文虚构旁白"
+      "note": "用户确认 host-text、gpt-image、chatcut-voice"
     },
     {
-      "at": "2026-07-17T08:27:45.368Z",
+      "at": "2026-07-18T10:34:30.875Z",
       "action": "brief-ready",
       "stage": "concept-review",
-      "note": "已按《方舆胜览》事实边界完成约50秒四幕儿童概念"
+      "note": "用户未指定时长和幕数；Skill 根据六个故事转折推导为 78 秒、6 幕"
     },
     {
-      "at": "2026-07-17T08:31:17.817Z",
+      "at": "2026-07-18T10:42:00.684Z",
       "action": "approve-concept",
       "stage": "style-review",
-      "note": "用户批准概念，继续制作样张和音色试听"
+      "note": "批准概念"
     },
     {
-      "at": "2026-07-17T08:32:34.355Z",
+      "at": "2026-07-18T10:43:00.438Z",
       "action": "work-item-in-progress",
       "stage": "style-review",
-      "note": "style-sample"
+      "note": "style-sample-v2"
     },
     {
-      "at": "2026-07-17T08:37:10.275Z",
+      "at": "2026-07-18T10:49:07.914Z",
       "action": "work-item-completed",
       "stage": "style-review",
-      "note": "style-sample"
+      "note": "style-sample-v2"
     },
     {
-      "at": "2026-07-17T08:43:33.891Z",
+      "at": "2026-07-18T10:49:08.230Z",
+      "action": "work-item-completed",
+      "stage": "style-review",
+      "note": "motion-proof-v2"
+    },
+    {
+      "at": "2026-07-18T11:00:50.738Z",
       "action": "work-item-in-progress",
       "stage": "style-review",
-      "note": "voice-audition"
+      "note": "voice-audition-ruyayichen-v2"
     },
     {
-      "at": "2026-07-17T08:48:30.081Z",
+      "at": "2026-07-18T11:04:29.804Z",
       "action": "work-item-completed",
       "stage": "style-review",
-      "note": "voice-audition"
+      "note": "voice-audition-ruyayichen-v2"
     },
     {
-      "at": "2026-07-17T08:52:29.125Z",
+      "at": "2026-07-18T11:08:40.793Z",
       "action": "approve-style-voice",
       "stage": "asset-production",
-      "note": "用户批准沿用手撕宣纸拼贴风格与儒雅逸辰音色，开始批量制作"
+      "note": "批准风格和音色"
     },
     {
-      "at": "2026-07-17T08:55:00.454Z",
+      "at": "2026-07-18T11:14:52.352Z",
       "action": "work-item-in-progress",
       "stage": "asset-production",
-      "note": "scene-1-background"
+      "note": "background-plates-v2"
     },
     {
-      "at": "2026-07-17T08:55:00.653Z",
+      "at": "2026-07-18T11:14:52.561Z",
       "action": "work-item-in-progress",
       "stage": "asset-production",
-      "note": "scene-2-background"
+      "note": "environment-layers-v2"
     },
     {
-      "at": "2026-07-17T08:55:00.848Z",
+      "at": "2026-07-18T11:14:52.763Z",
       "action": "work-item-in-progress",
       "stage": "asset-production",
-      "note": "scene-3-background"
+      "note": "character-sheets-v2"
     },
     {
-      "at": "2026-07-17T08:55:01.048Z",
+      "at": "2026-07-18T11:14:52.977Z",
       "action": "work-item-in-progress",
       "stage": "asset-production",
-      "note": "scene-4-background"
+      "note": "narration-scenes-v2"
     },
     {
-      "at": "2026-07-17T08:55:01.246Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "li-bai-character-sheet"
-    },
-    {
-      "at": "2026-07-17T08:55:01.436Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "old-woman-character-sheet"
-    },
-    {
-      "at": "2026-07-17T08:56:24.000Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "narration-1"
-    },
-    {
-      "at": "2026-07-17T08:56:24.216Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "narration-2"
-    },
-    {
-      "at": "2026-07-17T08:56:24.430Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "narration-3"
-    },
-    {
-      "at": "2026-07-17T08:56:24.737Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "narration-4"
-    },
-    {
-      "at": "2026-07-17T08:58:23.036Z",
+      "at": "2026-07-18T11:17:08.218Z",
       "action": "work-item-completed",
       "stage": "asset-production",
-      "note": "narration-1"
+      "note": "narration-scenes-v2"
     },
     {
-      "at": "2026-07-17T08:58:23.459Z",
+      "at": "2026-07-18T11:56:43.302Z",
       "action": "work-item-completed",
       "stage": "asset-production",
-      "note": "narration-2"
+      "note": "background-plates-v2"
     },
     {
-      "at": "2026-07-17T08:58:23.938Z",
+      "at": "2026-07-18T11:56:43.534Z",
       "action": "work-item-completed",
       "stage": "asset-production",
-      "note": "narration-3"
+      "note": "environment-layers-v2"
     },
     {
-      "at": "2026-07-17T08:58:24.485Z",
+      "at": "2026-07-18T11:56:43.737Z",
       "action": "work-item-completed",
       "stage": "asset-production",
-      "note": "narration-4"
+      "note": "character-sheets-v2"
     },
     {
-      "at": "2026-07-17T09:01:13.998Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "scene-1-background"
-    },
-    {
-      "at": "2026-07-17T09:01:14.630Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "scene-2-background"
-    },
-    {
-      "at": "2026-07-17T09:01:15.205Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "scene-3-background"
-    },
-    {
-      "at": "2026-07-17T09:05:26.488Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "scene-4-background"
-    },
-    {
-      "at": "2026-07-17T09:05:26.910Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "old-woman-character-sheet"
-    },
-    {
-      "at": "2026-07-17T09:05:42.728Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "old-woman-alpha"
-    },
-    {
-      "at": "2026-07-17T09:11:43.007Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "li-bai-character-sheet"
-    },
-    {
-      "at": "2026-07-17T09:11:50.177Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "old-woman-alpha"
-    },
-    {
-      "at": "2026-07-17T09:11:57.598Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "li-bai-alpha"
-    },
-    {
-      "at": "2026-07-17T09:13:06.229Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "li-bai-alpha"
-    },
-    {
-      "at": "2026-07-17T09:13:12.899Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "timeline-config"
-    },
-    {
-      "at": "2026-07-17T09:15:08.930Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "timeline-config · 四幕按实测旁白时长同步，详见narration-sync.md"
-    },
-    {
-      "at": "2026-07-17T09:15:18.833Z",
-      "action": "work-item-in-progress",
-      "stage": "asset-production",
-      "note": "validation"
-    },
-    {
-      "at": "2026-07-17T09:15:45.625Z",
-      "action": "work-item-completed",
-      "stage": "asset-production",
-      "note": "validation · project:validate与npm"
-    },
-    {
-      "at": "2026-07-17T09:15:54.702Z",
+      "at": "2026-07-18T12:03:41.357Z",
       "action": "assets-ready",
       "stage": "preview",
       "note": ""
     },
     {
-      "at": "2026-07-17T09:16:03.847Z",
+      "at": "2026-07-18T12:15:56.925Z",
+      "action": "preview-rendered",
+      "stage": "human-review",
+      "note": "dist/tie-chu-mo-zhen/preview.mp4"
+    },
+    {
+      "at": "2026-07-18T14:31:00.977Z",
+      "action": "request-preview-revision",
+      "stage": "asset-production",
+      "note": "用户指出磨杵动作不准确：应握住铁杵，只让一端在磨石上沿轴向来回摩擦并逐渐磨尖，不应横放滚动整根铁棒"
+    },
+    {
+      "at": "2026-07-18T14:31:01.131Z",
       "action": "work-item-in-progress",
-      "stage": "preview",
-      "note": "preview-render"
+      "stage": "asset-production",
+      "note": "revision-granny-grinding"
     },
     {
-      "at": "2026-07-17T09:17:35.174Z",
-      "action": "preview-rendered",
-      "stage": "human-review",
-      "note": "dist/tie-chu-mo-zhen/preview.mp4"
+      "at": "2026-07-18T14:31:01.281Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "revision-grind-close"
     },
     {
-      "at": "2026-07-17T09:17:58.425Z",
+      "at": "2026-07-18T14:45:08.913Z",
       "action": "work-item-completed",
-      "stage": "human-review",
-      "note": "preview-render · 预览、验收报告与接触表均已生成"
+      "stage": "asset-production",
+      "note": "revision-granny-grinding"
     },
     {
-      "at": "2026-07-17T14:22:22.196Z",
+      "at": "2026-07-18T14:45:09.075Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "revision-grind-close"
+    },
+    {
+      "at": "2026-07-18T14:45:10.201Z",
+      "action": "assets-ready",
+      "stage": "preview",
+      "note": ""
+    },
+    {
+      "at": "2026-07-18T14:48:07.370Z",
       "action": "preview-rendered",
       "stage": "human-review",
       "note": "dist/tie-chu-mo-zhen/preview.mp4"
+    },
+    {
+      "at": "2026-07-18T14:51:43.253Z",
+      "action": "request-preview-revision",
+      "stage": "asset-production",
+      "note": "落实同一条用户反馈时，连续帧复核发现第三幕接触石面不够明确；补强单端落在磨石上的可读性"
+    },
+    {
+      "at": "2026-07-18T14:51:43.631Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "revision-granny-contact"
+    },
+    {
+      "at": "2026-07-18T14:59:40.267Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "revision-granny-contact"
+    },
+    {
+      "at": "2026-07-18T14:59:41.451Z",
+      "action": "assets-ready",
+      "stage": "preview",
+      "note": ""
+    },
+    {
+      "at": "2026-07-18T15:02:45.276Z",
+      "action": "preview-rendered",
+      "stage": "human-review",
+      "note": "dist/tie-chu-mo-zhen/preview.mp4"
+    },
+    {
+      "at": "2026-07-18T15:09:10.402Z",
+      "action": "approve-preview",
+      "stage": "final-render",
+      "note": "预览通过"
+    },
+    {
+      "at": "2026-07-18T15:22:45.761Z",
+      "action": "final-rendered",
+      "stage": "publish-approval",
+      "note": "dist/tie-chu-mo-zhen/final.mp4"
+    },
+    {
+      "at": "2026-07-18T15:25:05.539Z",
+      "action": "approve-publish",
+      "stage": "complete",
+      "note": "批准发布"
     }
   ]
 }

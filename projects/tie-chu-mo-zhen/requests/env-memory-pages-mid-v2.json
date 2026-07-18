@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "env-memory-pages-mid-v2", "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/memory-pages.png",
+  "prompt": "Use case: background-extraction\nAsset type: symbolic mid-depth memory cutout for scene 5 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines paper fibers, ink restraint and palette\nPrimary request: three overlapping blank torn-paper pages and two abstract flowing ink-line arcs, arranged from upper-right toward center-left as a quiet memory of unfinished study\nStyle/medium: handcrafted ivory and pale-ochre mulberry paper with deckled edges, minimal charcoal ink curves\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: pages must be completely blank; uniform key background; no people, legible symbols, text, watermark, logo; no #ff00ff in artwork; complete crisp cutout\nAvoid: readable calligraphy, magic glow, photoreal paper, decorative clutter",
+  "model": "auto", "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "layout": "environment-mid", "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent", "edge-clean"]}
+}

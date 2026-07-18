@@ -15,7 +15,22 @@
     "text": {"type": "string"},
     "voiceId": {"type": "string"},
     "model": {"type": "string"},
-    "settings": {"type": "object"}
+    "settings": {"type": "object"},
+    "quality": {
+      "type": "object",
+      "properties": {
+        "kind": {"enum": ["background", "environment", "character-sheet", "style-sample", "image"]},
+        "requiredChecks": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent", "subject-complete", "identity-consistent", "cell-separation", "background-uniform", "edge-clean"]
+          }
+        }
+      },
+      "additionalProperties": false
+    }
   },
   "additionalProperties": false,
   "allOf": [

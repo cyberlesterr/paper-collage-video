@@ -1,0 +1,7 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json", "schemaVersion": 1, "projectSlug": "tie-chu-mo-zhen", "assetId": "env-road-bamboo-mid-v2", "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/environment/mid/road-bamboo.png",
+  "prompt": "Use case: background-extraction\nAsset type: mid-depth bamboo-grove cutout for scene 2 of a 16:9 Chinese paper-collage animation\nInput images: Image 1 is the approved style sample and defines the bamboo and handmade paper language\nPrimary request: a loose band of slender bamboo trunks and leaf clusters along the upper-left and right edges, leaving the descending center path open\nStyle/medium: layered Chinese cut-paper, visible fibers, restrained ink, matte teal and tea-brown\nScene/backdrop: perfectly flat solid #ff00ff chroma-key background\nConstraints: uniform key background; no shadows, gradients or texture; no #ff00ff in subject; no people, text, watermark or logo; complete silhouettes\nAvoid: wall of foliage, photorealism, glossy 3D",
+  "model": "auto", "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "layout": "environment-mid", "keyColor": "#ff00ff", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent", "edge-clean"]}
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "style-sample-creek-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png",
+  "prompt": "Use case: historical-scene\nAsset type: representative 16:9 style sample for a layered paper-collage animation\nPrimary request: the traditional Chinese legend of Iron Pestle Ground into a Needle, at the creek encounter; an elderly woman on the right steadily grinding a thick iron pestle across a flat stone, a young scholar Li Bai on the left stopping with a book bundle and watching with surprise\nScene/backdrop: mountain creek beneath bamboo and weathered rocks, generalized Tang-era rural setting interpreted through a Song-dynasty album-page composition; no buildings or modern objects\nSubject: both figures shown clearly and completely; the woman is calm and focused, the young scholar is curious rather than comedic; the pestle, hands and grindstone are visibly readable\nStyle/medium: premium handcrafted Chinese paper collage, hand-torn fibrous paper edges, layered cut-paper silhouettes, restrained ink outlines, mineral pigments, subtle misregistration print texture, dimensional paper shadows; refined editorial animation art, not plastic cartoon and not photorealistic\nComposition/framing: wide 16:9 establishing shot; a clean foreground reed-and-grass band occupies only the bottom 18 percent without overlapping either figure; a horizontal creek-water band remains visible across the lower middle for parallax; distant mountain and bamboo layers read separately; keep breathing room around the figures and a calm open upper area\nLighting/mood: late-afternoon natural light; cool celadon, muted teal and tea-brown in the distance, warming to ochre and restrained gold near the grinding stone; patient, contemplative mood\nMaterials/textures: visible mulberry-paper fibers, deckled edges, lightly embossed paper, matte pigments, tiny gold-paper sparks only at the contact point\nConstraints: period-plausible clothing and props; stable human anatomy; complete hands and feet; no finished needle; no written characters; no captions; no signs; no watermark; no logos; no modern items; no extra people; no frame or mockup border\nAvoid: glossy 3D, anime, chibi, photorealism, cinematic lens flare, crowded scenery, distorted iron pestle, severed limbs, text-like marks",
+  "model": "auto",
+  "settings": {
+    "width": 1920,
+    "height": 1080,
+    "aspectRatio": "16:9",
+    "stage": "style-review"
+  },
+  "quality": {
+    "kind": "style-sample",
+    "requiredChecks": [
+      "no-text",
+      "no-watermark",
+      "style-consistent",
+      "subject-complete"
+    ]
+  }
+}

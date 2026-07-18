@@ -71,7 +71,7 @@ npm run project:checkpoint -- <slug> <id> completed --artifact="<workspace path>
 npm run project:checkpoint -- <slug> <id> blocked --note="<exact blocker>"
 ```
 
-Use stable ids for background plates, character sheets, narration clips, alpha extraction, timeline configuration, validation, preview, and final render. On resume, continue the first pending, in-progress, or blocked item that can be recovered safely. Do not regenerate a completed artifact unless revision was requested.
+Use stable ids for background plates, character sheets, narration clips, alpha extraction, semantic quality review, motion proof, subtitle timing, timeline configuration, validation, preview, and final render. On resume, continue the first pending, in-progress, or blocked item that can be recovered safely. Do not regenerate a completed artifact unless revision was requested.
 
 Provider request/job provenance belongs in `assets-manifest.json`; production scheduling and blockers stay in `production.json`. A host provider result, command adapter exit, or async job completion never creates an extra human gate.
 

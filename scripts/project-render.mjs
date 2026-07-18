@@ -12,6 +12,7 @@ import {
   writeValidationReport,
 } from './project-lib.mjs';
 import {assertRenderAllowed, recordRender} from './production-state.mjs';
+import {assertQualityReady, formatQualityStatus} from './quality-lib.mjs';
 
 const [mode, slug] = process.argv.slice(2);
 
@@ -65,6 +66,8 @@ try {
   }
   await assertRenderAllowed(slug, mode);
   await runInherited(process.execPath, ['scripts/project-sync.mjs', slug]);
+  const quality = await assertQualityReady(slug);
+  console.log(formatQualityStatus(quality));
   const {project} = await loadProject(slug);
   const report = await validateProject(project);
   await writeValidationReport(slug, report);
@@ -85,11 +88,13 @@ try {
     'Paper-Collage',
     output,
     `--props=${path.relative(ROOT, paths.projectFile)}`,
+    `--concurrency=${resolveRenderConcurrency()}`,
   ];
   if (mode === 'preview') {
     args.push(
       '--scale=0.5',
-      `--concurrency=${resolveRenderConcurrency()}`,
+      '--crf=28',
+      '--audio-bitrate=96k',
     );
   }
   const remotion = path.join(ROOT, 'node_modules', '.bin', 'remotion');

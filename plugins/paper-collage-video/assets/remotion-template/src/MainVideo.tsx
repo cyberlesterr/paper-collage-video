@@ -8,8 +8,28 @@ import {
 
 export const MainVideo = (project: PaperCollageProject) => {
   const normalized = useMemo(() => normalizeProject(project), [project]);
+  const fontFace = normalized.theme.fontFile
+    ? `@font-face { font-family: "PaperCollageProjectFont"; src: url("${staticFile(normalized.theme.fontFile)}"); font-display: block; }`
+    : null;
   return (
     <AbsoluteFill style={{background: normalized.theme.canvas}}>
+      {fontFace ? <style>{fontFace}</style> : null}
+      {normalized.scenes.length === 0 ? (
+        <AbsoluteFill
+          style={{
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: normalized.theme.subtitle,
+            fontFamily:
+              normalized.theme.fontFamily ??
+              'STKaiti, KaiTi, "Noto Serif SC", serif',
+            fontSize: 52,
+            letterSpacing: 6,
+          }}
+        >
+          {normalized.title} · 等待分镜配置
+        </AbsoluteFill>
+      ) : null}
       {normalized.audio.music ? (
         <Audio
           src={staticFile(normalized.audio.music.src)}
@@ -24,6 +44,7 @@ export const MainVideo = (project: PaperCollageProject) => {
         >
           <ReplicaChapterScene
             scene={scene}
+            narrationVolume={normalized.audio.narration.volume}
             roleSounds={normalized.audio.sfx}
             theme={normalized.theme}
           />

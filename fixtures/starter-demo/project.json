@@ -1,0 +1,55 @@
+{
+  "$schema": "../../schemas/project.schema.json",
+  "schemaVersion": 2,
+  "slug": "starter-demo",
+  "title": "Paper Collage Workspace",
+  "plan": {
+    "schemaVersion": 1,
+    "slug": "starter-demo",
+    "status": "pending",
+    "inputMode": "none",
+    "requested": {
+      "durationSeconds": null,
+      "sceneCount": null
+    },
+    "resolved": null,
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  "quality": {
+    "minimumAssetScale": 1
+  },
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30
+  },
+  "theme": {
+    "canvas": "#6e1e19",
+    "sceneBackground": "#8a271f",
+    "accent": "#a33a2d",
+    "ink": "#4a291f",
+    "subtitle": "#fff8ea",
+    "subtitleBackground": "rgba(58, 25, 18, .72)",
+    "paperEdge": "#f5eedc",
+    "foreground": "#8d251e",
+    "texture": "textures/paper-grain.png"
+  },
+  "voice": {
+    "mode": "fictional",
+    "provider": "auto",
+    "displayName": "Configured fictional narrator"
+  },
+  "audio": {
+    "narration": {
+      "volume": 1
+    },
+    "music": null,
+    "sfx": {},
+    "mastering": {
+      "targetLufs": -16,
+      "toleranceLufs": 3,
+      "truePeakDbtp": -1
+    }
+  },
+  "scenes": []
+}

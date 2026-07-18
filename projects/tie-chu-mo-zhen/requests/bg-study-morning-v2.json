@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "tie-chu-mo-zhen",
+  "assetId": "bg-study-morning-v2",
+  "capability": "image",
+  "output": "public/projects/tie-chu-mo-zhen/assets/plates/06-study-morning.png",
+  "prompt": "Use case: historical-scene\nAsset type: character-free 16:9 background plate for scene 6 of a layered paper-collage animation\nInput images: Image 1 is the approved creek style sample and defines the visual medium; scene 1's study-room description defines the location\nPrimary request: return to the same modest mountain study room, now in clear early-morning light; low desk with blank paper ready for writing, blank book bundles, lattice window, shelving and mountain view\nScene/backdrop: generalized Tang-era study; warm morning ivory and restrained gold entering from the window, cooler mountains outside; no people\nStyle/medium: premium handcrafted Chinese paper collage, visible mulberry fibers, hand-torn edges, matte mineral pigments, restrained ink, dimensional paper shadows\nComposition/framing: wide 16:9; desk slightly right of center with clear seated-character space; clean upper breathing room and subtitle-safe lower band; no baked-in foreground branches\nLighting/mood: renewed attention, calm resolve, no triumphal spectacle\nConstraints: blank paper only; no written characters, captions, signs, watermark, logo, people, animals, modern items or frame\nAvoid: glossy 3D, plastic cartoon, photorealism, anime, glowing halo, text-like marks",
+  "model": "auto",
+  "settings": {"width": 1920, "height": 1080, "aspectRatio": "16:9", "stage": "asset-production", "referenceImages": ["public/projects/tie-chu-mo-zhen/assets/style/01-creek-style-sample.png"]},
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

@@ -7,47 +7,43 @@
       "selection": {
         "status": "confirmed",
         "provider": "host-text",
-        "confirmedAt": "2026-07-17T08:24:13.919Z",
+        "confirmedAt": "2026-07-18T10:31:24.750Z",
         "scope": "project",
-        "note": "用户确认：当前 Codex 负责脚本与分镜"
+        "note": "用户确认：当前 Codex 模型用于文案、分镜与提示词"
       }
     },
     "image": {
-      "defaultProvider": "host-image",
+      "defaultProvider": "gpt-image",
       "providers": {
-        "host-image": {
-          "label": "Host image generation",
+        "gpt-image": {
+          "label": "GPT Image",
           "adapter": "host",
-          "toolHint": "Use an installed image-generation skill or tool, then register the resulting local file with provider:record.",
-          "tool": "image_gen__imagegen",
-          "model": "gpt-image"
+          "tool": "image_gen__imagegen"
         }
       },
       "selection": {
         "status": "confirmed",
-        "provider": "host-image",
-        "confirmedAt": "2026-07-17T08:24:18.301Z",
+        "provider": "gpt-image",
+        "confirmedAt": "2026-07-18T10:31:24.973Z",
         "scope": "project",
-        "note": "用户确认：GPT Image 负责纸片分层图片"
+        "note": "用户确认：GPT Image 用于风格样片、人物和分层场景图"
       }
     },
     "voice": {
-      "defaultProvider": "host-voice",
+      "defaultProvider": "chatcut-voice",
       "providers": {
-        "host-voice": {
-          "label": "Host fictional voice",
+        "chatcut-voice": {
+          "label": "ChatCut fictional voice",
           "adapter": "host",
-          "toolHint": "Use an installed fictional catalog TTS skill or tool, then register the resulting local file with provider:record.",
-          "tool": "mcp__chatcut__submit_voice",
-          "model": "doubao-seed-tts-2.0"
+          "tool": "mcp__chatcut__submit_voice"
         }
       },
       "selection": {
         "status": "confirmed",
-        "provider": "host-voice",
-        "confirmedAt": "2026-07-17T08:24:22.230Z",
+        "provider": "chatcut-voice",
+        "confirmedAt": "2026-07-18T10:31:25.181Z",
         "scope": "project",
-        "note": "用户确认：ChatCut 中文 TTS 负责虚构旁白"
+        "note": "用户确认：ChatCut 虚构语音用于旁白"
       }
     }
   }

@@ -2,14 +2,14 @@
   "$schema": "../../../schemas/asset-request.schema.json",
   "schemaVersion": 1,
   "projectSlug": "tie-chu-mo-zhen",
-  "assetId": "concept-text",
+  "assetId": "concept-text-v2",
   "capability": "text",
-  "output": "projects/tie-chu-mo-zhen/brief.md",
-  "prompt": "根据南宋《方舆胜览》所载《铁杵磨针》，为5至9岁中文儿童制定一份约50秒、四幕的纸片拼贴视频概念。必须用相传标示传说性质，不虚构李白确切年龄，不表现老妇已经磨出成品针，不把后世谚语冒充古籍原句。输出需包含忠实旁白、四幕分镜、分层方案、素材清单、视觉方向、声音方向与禁止内容。",
-  "model": "codex-host-model",
+  "output": "projects/tie-chu-mo-zhen/concept.md",
+  "prompt": "为传统寓言《铁杵磨针》设计一版从零开始的中文分层纸片动画概念。不要复用旧项目。时长和幕数均由故事节拍推导。必须把李白遇见老妇磨铁杵写成后世传说而非确定史实，并包含旁白草案、六幕分镜、分层与镜头运动、资产清单、风格方向、声音方向和事实边界。",
+  "model": "gpt-5",
   "settings": {
     "language": "zh-CN",
-    "audience": "children-5-9",
-    "factBoundary": "方舆胜览·磨针溪"
+    "format": "markdown",
+    "aspectRatio": "16:9"
   }
 }
