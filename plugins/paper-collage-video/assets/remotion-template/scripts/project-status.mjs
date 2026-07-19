@@ -3,6 +3,7 @@ import {
   formatProduction,
   getStageControl,
   loadProduction,
+  summarizeResumeState,
 } from './production-state.mjs';
 import {loadProject} from './project-lib.mjs';
 
@@ -11,13 +12,16 @@ const slug = args.find((arg) => !arg.startsWith('--'));
 const json = args.includes('--json');
 const controlJson = args.includes('--control-json');
 const compactJson = args.includes('--compact-json');
+const resumeJson = args.includes('--resume-json');
 
 try {
   const {state} = await loadProduction(slug);
   const {project} = await loadProject(slug);
   const plan = project.plan ?? null;
   const control = getStageControl(state);
-  if (compactJson) {
+  if (resumeJson) {
+    console.log(JSON.stringify(summarizeResumeState(state, plan), null, 2));
+  } else if (compactJson) {
     console.log(
       JSON.stringify(
         {

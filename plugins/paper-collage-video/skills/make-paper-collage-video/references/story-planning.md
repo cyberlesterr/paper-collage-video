@@ -1,44 +1,34 @@
-# Duration and Scene Planning
+# Story and Production Planning
 
-Read this reference while preparing the brief. Treat duration and scene count as two independent optional user constraints. Do not ask merely because either value is missing.
+Read this while resolving duration, scene count, or production profile. Duration and scene count are independent optional user constraints.
 
-## Resolve the Four Input Modes
+## Resolve Story Shape
 
 | User supplied | Preserve | Infer |
 |---|---|---|
 | Neither | — | Duration and scene count |
 | Duration only | Requested duration | Scene count |
-| Scene count only | Requested scene count | Duration |
-| Both | Requested duration and scene count | Only pacing and content allocation |
+| Scene count only | Requested scenes | Duration |
+| Both | Both values | Pacing and allocation only |
 
-Never replace an explicit value with the old 30-second or three-scene defaults. If the two explicit constraints are materially incompatible with readable storytelling, explain the conflict and ask for one decision instead of silently overriding either value.
+Draft minimum coherent beats and estimate spoken duration before resolving the plan. For Chinese narration, roughly 3.5–4.5 Han characters/second is a planning aid. Reserve time for openings, subtitles, pauses, tails, and transition overlap. Ask only when two explicit constraints are materially incompatible.
 
-## Infer an Unspecified Value
+## Choose a Production Profile
 
-1. Identify the minimum coherent visual beats: setup, problem, important reasoning/action changes, resolution, and takeaway when relevant. Do not create a scene merely to hit a round number.
-2. Draft or outline the narration before resolving the plan. Estimate spoken duration from the selected voice when possible. Before an audition exists, use a language-appropriate conversational estimate; for Chinese narration, roughly 3.5–4.5 Han characters per second is a planning aid, not a hard rule.
-3. Keep one dominant visual idea per scene. Merge adjacent beats when a fixed short duration requires it; split a beat only when the place, time, subject, or key action visibly changes.
-4. Reserve time for scene openings, readable subtitles, pauses, tail frames, and transition overlap. The estimated narration must fit inside the target duration.
-5. When only duration is specified, select as many scenes as the meaningful beats and readable pace can support. When only scene count is specified, size the duration to the narration and visual breathing room. When neither is specified, choose both from the story rather than defaulting mechanically to 30 seconds and three scenes.
+- `draft`: cheapest iteration; one background per scene, heavily reused character sheets, and depth only where essential.
+- `balanced` (default): backgrounds per scene, shared character sheets, and independent depth assets for a few hero locations.
+- `full-depth`: maximum parallax and pose variety; use only when the human accepts the larger asset/cost budget.
 
-There is no fixed maximum scene count or duration in the generic project protocol. For unusually long or dense requests, surface the resulting asset/cost implications at concept review.
-
-## Persist the Resolution
-
-Record user-supplied values only in `--requested-*`. Always provide both resolved values:
+`project:plan` derives a generated-image ceiling from the profile and scene count. Count the style sample, unique generated backgrounds, environment layers, and character sheets. Reused files and deterministic alpha extractions do not consume new generation budget.
 
 ```bash
 npm run project:plan -- <slug> \
-  [--requested-duration=<seconds>] \
-  [--requested-scenes=<count>] \
-  --duration=<resolved-seconds> \
-  --scenes=<resolved-count> \
-  [--narration-seconds=<estimated-spoken-seconds>] \
-  --rationale="<story beats, narration estimate, and pacing basis>"
+  [--requested-duration=<seconds>] [--requested-scenes=<count>] \
+  --duration=<resolved-seconds> --scenes=<resolved-count> \
+  [--narration-seconds=<estimate>] --profile=<draft|balanced|full-depth> \
+  --rationale="<story and pacing basis>"
 ```
 
-The command records `none`, `duration-only`, `scenes-only`, or `both` in `project.json`. It rejects a resolved value that changes an explicit user constraint and rejects a narration estimate longer than the target film.
+Show requested versus inferred values, profile, and image budget in the combined concept/provider decision. Change the profile only through concept revision or another explicit budget decision.
 
-Run `project:plan` before `brief-ready`. At concept review, show both resolved values and label each as `用户指定` or `Skill 推导`. The concept approval is the human's opportunity to revise the inferred plan before image or bulk narration generation.
-
-After real narration exists, `project:sync` still owns exact timeline duration. Validation requires the actual scene count to match the approved plan. When runtime differs from the target by more than 10% or two seconds, whichever is greater, an explicit human duration fails validation while a Skill-inferred duration produces a warning for review.
+After real narration exists, `project:assets-ready` synchronizes exact media duration. Explicit user duration drift blocks validation; inferred duration drift remains a warning for review.

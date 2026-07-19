@@ -60,11 +60,33 @@ commandCheck('ffmpeg', 'ffmpeg', ['-version']);
 commandCheck('ffprobe', 'ffprobe', ['-version']);
 
 const packageFile = path.join(ROOT, 'package.json');
+const requiredWorkspaceScripts = [
+  'project:new',
+  'project:resume',
+  'project:preview',
+  'project:render',
+];
+let workspaceDetails = ROOT;
+let workspaceReady = false;
+if (fs.existsSync(packageFile)) {
+  try {
+    const packageJson = JSON.parse(fs.readFileSync(packageFile, 'utf8'));
+    const missingScripts = requiredWorkspaceScripts.filter(
+      (name) => !packageJson.scripts?.[name],
+    );
+    workspaceReady = missingScripts.length === 0;
+    workspaceDetails = workspaceReady
+      ? ROOT
+      : `缺少 npm scripts：${missingScripts.join(', ')}`;
+  } catch (error) {
+    workspaceDetails = `package.json 无效：${error.message}`;
+  }
+}
 record(
   'workspace',
-  fs.existsSync(packageFile) ? 'ok' : 'error',
-  fs.existsSync(packageFile) ? '工作区结构存在' : '缺少 package.json',
-  ROOT,
+  workspaceReady ? 'ok' : 'error',
+  workspaceReady ? '工作区结构存在' : '工作区结构不完整',
+  fs.existsSync(packageFile) ? workspaceDetails : '缺少 package.json',
 );
 
 const remotionBinary = path.join(

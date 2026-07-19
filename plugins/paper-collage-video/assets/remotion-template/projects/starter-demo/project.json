@@ -8,6 +8,14 @@
     "slug": "starter-demo",
     "status": "resolved",
     "inputMode": "both",
+    "productionProfile": "draft",
+    "assetBudget": {
+      "backgrounds": 1,
+      "environmentLayers": 1,
+      "characterSheets": 1,
+      "styleSamples": 1,
+      "maxGeneratedImages": 4
+    },
     "requested": {
       "durationSeconds": 2,
       "sceneCount": 1

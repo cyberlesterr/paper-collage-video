@@ -1,71 +1,49 @@
 # Asset Quality, Motion, and Delivery
 
-Read this reference before bulk image production, timeline authoring, or technical acceptance. The v2 protocol has one mandatory asset-quality path; there is no advisory, off, or migration mode.
+Read this before style sampling, bulk images, timeline authoring, or delivery tuning.
 
-## Quality Is a Recorded Production Step
+## Review Images in Batches
 
-Run `project:quality <slug> prepare` after generated and processed image files exist. The report combines deterministic checks with a semantic visual rubric and stores the file hash for every asset. Changing a file invalidates its previous review.
+Run `project:quality <slug> prepare` after image files exist. Technical checks and SHA-256 invalidation remain per file. Inspect originals in small same-type batches; a prompt is not evidence that the output complied.
 
-The root workflow must visually inspect every pending asset before recording semantic checks. A prompt constraint is not proof that the generated image obeyed it. Check the original asset at useful resolution, not only a small contact sheet.
+Typical semantic checks:
 
-Typical profiles are:
+- background: no text/watermark/people, usable subtitle-safe area, approved style;
+- environment: complete cutout, correct depth role, no text/watermark, approved style;
+- character sheet: complete/stable figures, separated cells, uniform key, no text/watermark;
+- alpha character: complete subject, stable identity, clean edge, approved style;
+- style sample: coherent subject and reproducible visual language.
 
-- background: no text, watermark, or people; subtitle-safe area is usable; style matches the approved sample;
-- environment layer: complete cutout, no text or watermark, correct style and intended depth role;
-- character sheet: complete figures, stable identity, separated cells, uniform key background, no text or watermark;
-- alpha character: complete subject, clean edge, stable identity, correct style;
-- style sample: coherent subject, no text or watermark, and a reproducible visual language.
+Write one JSON per reviewed batch:
 
-Record a reviewed asset with:
-
-```bash
-npm run project:quality -- <slug> record \
-  --asset=<asset-id> --reviewer=<host-tool-or-human> \
-  --pass=<comma-separated-required-checks> \
-  --note="<brief visual evidence>"
+```json
+{
+  "reviews": [
+    {
+      "assetId": "scene-01-background",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"],
+      "failedChecks": [],
+      "note": "Original inspected at useful resolution"
+    }
+  ]
+}
 ```
 
-Use `--fail=<checks>` when a violation is visible, revise or regenerate only that asset, then prepare and review again. Never mark a check passed merely to unblock `assets-ready`. `project:assets-ready` and every render always enforce the quality report.
-
-## Reuse Before Regeneration
-
-Provider records include a request fingerprint derived from the provider, model, prompt or text, settings, references, and quality intent while excluding project-specific ids and output paths. Before generating, try:
-
 ```bash
-npm run provider:reuse -- --request=projects/<slug>/requests/<request>.json
+npm run project:quality -- <slug> record-batch --input=<reviews.json> --quiet
 ```
 
-Reuse succeeds only when the fingerprint matches exactly and the cached file still matches its recorded hash. Reused images still enter the current project's quality report.
+Regenerate only failed assets, prepare again, and review their new hashes. Never disable the quality gate.
 
-## Build Actual Depth
+## Spend Depth Where It Matters
 
-Keep the base background character-free. When the scene benefits from parallax, generate or extract independent rear, mid, and foreground cutouts and put them in `scene.environmentLayers`. Use `depth` from `-1` (rear) through `1` (near foreground), plus an explicit `z`.
+Honor the approved `draft`, `balanced`, or `full-depth` budget. Reuse environments for the same location and character sheets across scenes. Create independent rear/mid/foreground assets when parallax supports a visible story beat; an empty `environmentLayers` array is valid for simple scenes.
 
-Do not call a flattened illustration “layered” merely because a generic foreground strip is rendered over it. Important subjects, props that move, and foreground occluders should be independent assets.
+Use camera/motion presets and keyframes intentionally. Keep transitions, tails, narration starts, layer delays, SFX, and subtitles in seconds.
 
-## Author Narrative Motion
+## Subtitles and Audio
 
-Use scene-specific motion only when it supports the beat:
+`project:assets-ready` runs narration sync and subtitle derivation. Provider/forced-alignment timing wins; otherwise deterministic punctuation-aware timing is used. Review reading-speed warnings.
 
-- `camera.preset`: `push`, `pull`, `pan-left`, `pan-right`, or `static`;
-- `camera.keyframes`: normalized `at` values from `0` to `1` with optional `x`, `y`, and `zoom`;
-- `layer.motion.idle`: `float`, `breathe`, `grind`, `drift`, or `still`;
-- `layer.motion`: tune `intensity`, `cycleSeconds`, `phase`, and `enterDurationSeconds`;
-- `scene.transition`: `fade` or `none`, with an explicit `durationSeconds`;
-- `scene.audioEvents`: action-timed SFX using `atSeconds`.
-
-Use seconds for scene tails, narration starts, transitions, layer delays, action audio, and subtitle ranges so behavior remains stable across fps values. At the style-and-voice gate, include a short motion proof when the project introduces a new or material motion language; this is part of the existing gate, not an additional approval.
-
-## Delivery Profiles
-
-The renderer adapts titles, subtitles, paper foreground, motion distances, and timing to the configured size and fps. Still generate backgrounds for the actual delivery aspect ratio and resolution. Import a licensed local font through `theme.fontFile` when typography must be reproducible across machines.
-
-After narration is synchronized, run:
-
-```bash
-npm run project:subtitles -- <slug>
-```
-
-When `narration.timingSrc` points at provider or forced-alignment timing JSON, those timings win. Otherwise the command creates a punctuation- and length-aware fallback. Review reading-rate and line-length warnings.
-
-Set the required `audio.narration.volume` from measured preview loudness rather than changing source files or renderer constants. Keep it above `0` and at or below `4`; use `1` for unity gain. Reports measure integrated LUFS and true peak and enforce the required `audio.mastering` target/tolerance. If loudness misses the window, adjust narration gain, rerender, and verify true-peak headroom before human review.
+Tune `audio.narration.volume` from preview loudness rather than rewriting source audio. Reports enforce configured LUFS tolerance and true-peak headroom.

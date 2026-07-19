@@ -4,6 +4,18 @@
 
 ## [Unreleased]
 
+### Added
+
+- `draft`、`balanced` 和 `full-depth` 制作档位，以及可验证的逐项目图片预算。
+- 一次确认概念、制作档位和三类 provider 的组合命令，以及精简的恢复状态输出。
+- 批量、原子写入的素材质量记录。
+
+### Changed
+
+- Skill 改为按当前阶段加载 reference，默认人工停顿从五次收敛为概念/provider、风格/音色、预览三次。
+- `project:assets-ready` 统一负责时长同步、字幕生成、质量门和项目校验，正式本地渲染成功后直接完成交付。
+- Provider 状态、质量状态和恢复状态支持紧凑输出，减少重复读取和长 JSON 回传。
+
 ## [0.5.0] - 2026-07-18
 
 ### Added

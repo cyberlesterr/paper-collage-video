@@ -32,7 +32,6 @@ export const HUMAN_APPROVAL_STAGES = new Set([
   'concept-review',
   'style-review',
   'human-review',
-  'publish-approval',
 ]);
 
 export const HUMAN_GATE_STAGES = new Set([
@@ -74,7 +73,7 @@ const HUMAN_DECISION_ACTIONS = new Set([
 
 const nextActionByStage = {
   'capability-review':
-    '检测当前宿主能力并请人确认 text/image/voice provider；然后记录 capabilities-ready',
+    '准备概念、制作档位与 provider 方案；请人一次确认后直接进入风格样张',
   brief: '完善 brief.md，运行 project:plan 补全时长和幕数，再记录 brief-ready',
   'concept-review': '向人展示文案、分镜和素材清单；确认后记录 approve-concept',
   'style-review': '展示一张风格样张和虚构音色；确认后记录 approve-style-voice',
@@ -82,7 +81,7 @@ const nextActionByStage = {
   preview: '运行 project:preview',
   'human-review': '等待人审预览；确认后记录 approve-preview，或记录 request-preview-revision',
   'final-render': '运行 project:render',
-  'publish-approval': '等待人做发布判断；明确批准后才记录 approve-publish',
+  'publish-approval': '旧版兼容状态：本地成片已交付；外部发布仍需单独请求',
   complete: '流程已完成；系统仍不得自动发布',
 };
 
@@ -91,8 +90,8 @@ const stageControlByStage = {
     mode: 'wait-human',
     gate: 'providers',
     requiredDecision:
-      '请确认是否使用检测到的文本、生图和虚构音色能力；也可以选择已配置服务、自定义服务或手工导入。',
-    expectedArtifacts: ['providers'],
+      '请一次确认概念、制作档位与 text/image/voice provider 方案，或给出修改意见。',
+    expectedArtifacts: ['brief', 'plan', 'providers'],
   },
   brief: {
     mode: 'auto-continue',
@@ -134,10 +133,7 @@ const stageControlByStage = {
     nextCommand: (slug) => `npm run project:render -- ${slug}`,
   },
   'publish-approval': {
-    mode: 'wait-human',
-    gate: 'publish',
-    requiredDecision:
-      '请在确认内容、事实、权利和平台适配后决定是否批准发布；批准发布仍不等于授权上传。',
+    mode: 'complete',
     expectedArtifacts: ['final', 'report', 'contactSheet', 'validationReport'],
   },
   complete: {
@@ -216,6 +212,46 @@ export const assessHandoff = (state, options = {}) => {
     reason: 'auto-continue',
     message: `当前阶段不得结束回合；请继续执行：${control.nextCommand}`,
     control,
+  };
+};
+
+export const summarizeResumeState = (state, plan = null) => {
+  const control = getStageControl(state);
+  const remaining = (state.workItems ?? [])
+    .filter(({status}) => status !== 'completed')
+    .map(({id, label, status, artifact, note}) => ({
+      id,
+      label,
+      status,
+      artifact,
+      note,
+    }));
+  const handoff = assessHandoff(state);
+  const nextCommand =
+    state.stage === 'asset-production'
+      ? remaining.length === 0
+        ? `npm run project:assets-ready -- ${state.slug}`
+        : null
+      : control.nextCommand;
+  return {
+    slug: state.slug,
+    stage: state.stage,
+    productionProfile: plan?.productionProfile ?? null,
+    control: {
+      mode: control.mode,
+      gate: control.gate,
+      requiredDecision: control.requiredDecision,
+      nextCommand,
+      expectedArtifacts: control.expectedArtifacts,
+      workItems: {
+        counts: control.workItems.counts,
+        remaining,
+      },
+    },
+    handoff: {
+      allowed: handoff.allowed,
+      reason: handoff.reason,
+    },
   };
 };
 
@@ -445,7 +481,7 @@ const approvalLabels = {
   concept: '文案、分镜与事实',
   styleAndVoice: '风格样张与虚构音色',
   preview: '预览片',
-  publish: '发布准备',
+  publish: '可选外部发布记录',
 };
 const approvalStatusLabels = {
   pending: '待确认',
@@ -576,7 +612,7 @@ export const transitionProduction = (current, action, options = {}) => {
     case 'request-preview-revision':
       assertStage(
         state,
-        ['human-review', 'final-render', 'publish-approval'],
+        ['human-review', 'final-render', 'publish-approval', 'complete'],
         action,
       );
       setApproval(state, 'preview', 'changes-requested', at, note);
@@ -584,7 +620,7 @@ export const transitionProduction = (current, action, options = {}) => {
       state.stage = 'asset-production';
       break;
     case 'approve-publish':
-      assertStage(state, ['publish-approval'], action);
+      assertStage(state, ['publish-approval', 'complete'], action);
       assertApproved(state, 'preview', action);
       if (!state.artifacts.final) {
         throw new Error('approve-publish 需要已经成功记录 final.mp4。');
@@ -652,8 +688,7 @@ export const transitionRender = (current, mode, artifacts, options = {}) => {
     resetApproval(state, 'preview');
   }
   if (mode === 'render' && state.stage === 'final-render') {
-    state.stage = 'publish-approval';
-    resetApproval(state, 'publish');
+    state.stage = 'complete';
   }
   const action = mode === 'preview' ? 'preview-rendered' : 'final-rendered';
   const artifact =

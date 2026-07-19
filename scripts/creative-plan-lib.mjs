@@ -5,6 +5,42 @@ export const CREATIVE_PLAN_MODES = [
   'both',
 ];
 
+export const PRODUCTION_PROFILES = ['draft', 'balanced', 'full-depth'];
+
+export const deriveAssetBudget = (productionProfile, sceneCount) => {
+  if (!PRODUCTION_PROFILES.includes(productionProfile)) {
+    throw new Error(
+      `productionProfile 必须是：${PRODUCTION_PROFILES.join(', ')}。`,
+    );
+  }
+  if (!Number.isInteger(sceneCount) || sceneCount < 1) {
+    throw new Error('sceneCount 必须是正整数。');
+  }
+  const environmentLayers = {
+    draft: Math.ceil(sceneCount / 4),
+    balanced: Math.min(4, Math.ceil((sceneCount * 2) / 3)),
+    'full-depth': sceneCount * 2,
+  }[productionProfile];
+  const characterSheets = {
+    draft: Math.max(1, Math.ceil(sceneCount / 5)),
+    balanced: Math.max(1, Math.ceil(sceneCount / 3)),
+    'full-depth': Math.max(1, Math.ceil((sceneCount * 2) / 3)),
+  }[productionProfile];
+  const budget = {
+    backgrounds: sceneCount,
+    environmentLayers,
+    characterSheets,
+    styleSamples: 1,
+  };
+  return {
+    ...budget,
+    maxGeneratedImages: Object.values(budget).reduce(
+      (sum, count) => sum + count,
+      0,
+    ),
+  };
+};
+
 const isPositiveNumber = (value) =>
   typeof value === 'number' && Number.isFinite(value) && value > 0;
 
@@ -36,6 +72,16 @@ export const validateCreativePlan = (plan, {slug = null} = {}) => {
   }
   if (!['pending', 'resolved'].includes(plan.status)) {
     add('plan-status', 'plan.status 必须为 pending 或 resolved。', 'plan.status');
+  }
+  if (
+    plan.productionProfile !== undefined &&
+    !PRODUCTION_PROFILES.includes(plan.productionProfile)
+  ) {
+    add(
+      'plan-production-profile',
+      `plan.productionProfile 必须是 ${PRODUCTION_PROFILES.join(', ')}。`,
+      'plan.productionProfile',
+    );
   }
   const requestedDuration = plan.requested?.durationSeconds;
   const requestedScenes = plan.requested?.sceneCount;
@@ -113,6 +159,27 @@ export const validateCreativePlan = (plan, {slug = null} = {}) => {
   if (!isDateTime(resolved.resolvedAt)) {
     add('plan-resolved-at', 'plan.resolved.resolvedAt 必须是有效时间。', 'plan.resolved.resolvedAt');
   }
+  if (plan.assetBudget !== undefined) {
+    let expectedBudget = null;
+    try {
+      expectedBudget = deriveAssetBudget(
+        plan.productionProfile ?? 'balanced',
+        resolved.sceneCount,
+      );
+    } catch {
+      // The profile/scene issue is reported separately.
+    }
+    if (
+      expectedBudget &&
+      JSON.stringify(plan.assetBudget) !== JSON.stringify(expectedBudget)
+    ) {
+      add(
+        'plan-asset-budget',
+        'plan.assetBudget 必须与 productionProfile 和幕数匹配。',
+        'plan.assetBudget',
+      );
+    }
+  }
   if (
     isPositiveNumber(requestedDuration) &&
     resolved.durationSeconds !== requestedDuration
@@ -151,6 +218,7 @@ export const buildCreativePlan = ({
   durationSeconds,
   sceneCount,
   estimatedNarrationSeconds = null,
+  productionProfile = 'balanced',
   rationale,
   at = new Date().toISOString(),
 }) => {
@@ -163,6 +231,7 @@ export const buildCreativePlan = ({
     slug,
     status: 'resolved',
     inputMode: deriveCreativePlanMode(requested),
+    productionProfile,
     requested,
     resolved: {
       durationSeconds,
@@ -171,6 +240,7 @@ export const buildCreativePlan = ({
       rationale: rationale?.trim() ?? '',
       resolvedAt: at,
     },
+    assetBudget: deriveAssetBudget(productionProfile, sceneCount),
     updatedAt: at,
   };
   assertCreativePlanReady(plan, {slug});

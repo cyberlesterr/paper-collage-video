@@ -1,52 +1,41 @@
-# Approval Gates
+# Human Decisions, Cost, and Rights
 
-Read this reference before any creative generation, speech generation, final delivery, or external action.
+Read this before presenting or recording a human gate, making a material paid call, cloning a voice, or taking an external action.
 
-Provider confirmation at `capability-review` is a separate operational selection. It authorizes which capability may be used, but it does not approve the story concept, a paid bulk generation run, the creative result, or publication.
+## Default Creation Gates
 
-## Human Decisions
+Require explicit decisions for:
 
-Require an explicit human decision for:
+1. Combined concept, duration/scenes, production profile/budget, facts, and provider plan.
+2. Representative visual style, fictional voice, and optional motion proof.
+3. Rendered preview and requested creative changes.
 
-1. The resolved duration/scene plan, narration position, storyboard, and factual assumptions.
-2. The representative visual sample and fictional voice identity.
-3. The rendered preview and requested creative changes.
-4. Publication readiness, including facts, rights, branding, and platform suitability.
+The combined first decision may authorize both providers and concept when the request clearly names both. Preserve the human's wording. If approval is ambiguous, ask one concise question.
 
-Treat comments such as “继续”, “这个方向可以”, or “预览通过” as approval only when the immediately preceding request clearly names the gate. Preserve the human's wording in the `--note` value. If the reference is ambiguous, ask one concise question instead of guessing.
+Do not create a fourth default gate after final render. Local final delivery completes the creation task.
 
 ## Cost Boundary
 
-- Do not make bulk image, speech, music, or video-generation calls before the concept is approved.
-- After concept approval, generate at most one representative style sample and one short fictional-voice audition for the style gate.
-- A 3–5 second motion proof may share the style gate when a new motion language needs approval; it is not a fifth creative gate.
-- Before generation, disclose a known material cost or quota impact when the tool exposes it.
-- After style and voice approval, autonomously generate the agreed production set unless a provider asks for new authorization.
-- Reuse approved assets and deterministic local processing whenever possible.
+- Before combined concept approval, use only the current host model for a provisional draft; do not invoke an unconfirmed external/paid provider.
+- Before style approval, create at most one representative image, a short fictional-voice audition, and an optional 3–5 second motion proof.
+- After style approval, produce autonomously within the approved asset budget.
+- Reuse exact-match assets and deterministic local processing before regeneration.
+- Disclose known material costs or quota effects at the decision that authorizes them.
 
-After style and voice approval, “继续” is no longer a scheduler. Remain autonomous through asset production, validation, and preview rendering. A tool-only image result does not create a new gate.
+## Voice, Rights, and Accuracy
 
-## Voice Boundary
+Use the confirmed fictional catalog voice. Real-person cloning is a separate opt-in requiring authorization for licensed reference audio and its transcript.
 
-Default to the fictional catalog voice selected by the merged provider configuration. Prefer `儒雅逸辰 (ruyayichen)` when that provider offers it, but do not silently switch services merely to obtain that voice.
+Stop for unclear logos, likenesses, private media, or third-party copyrighted assets. Offer a fictional or public-domain alternative without silently changing the brief.
 
-Do not clone, imitate, or imply the identity of a real person unless the human explicitly opts into that separate enhancement and confirms authorization for both the reference recording and its transcript. A clean reference clip and corresponding text are inputs supplied or licensed by the human; they are not prerequisites for the fictional-voice P0 path.
+Verify consequential historical, medical, legal, financial, or political claims with suitable current sources before locking narration. Record material uncertainty in the concept.
 
-## Rights and Accuracy
+## External Publication
 
-Stop when a requested visual depends on an unlicensed logo, likeness, private media, or unclear third-party copyrighted asset. Offer a fictional or public-domain alternative without silently changing the brief.
+Technical validation does not prove factual, legal, brand, or editorial readiness. When the human actually requests upload, send, or publication:
 
-For historical, medical, legal, financial, political, or otherwise consequential factual claims, verify with appropriate current sources before locking narration. Record material uncertainty in the concept proposal.
+1. confirm content, facts, rights, branding, and platform fit;
+2. obtain one explicit authorization for the named destination/action;
+3. perform only that authorized external action.
 
-## Publication Boundary
-
-Technical validation proves that files, streams, timing, and basic audio constraints are correct. It does not prove factual, legal, brand, or editorial readiness.
-
-Never:
-
-- infer publication approval from preview approval;
-- upload or publish merely because `final.mp4` exists;
-- send the file to a third party without a separate request;
-- call `approve-publish` on the human's behalf.
-
-After explicit publication approval, record the decision if useful, but still require a separate instruction before any external upload or send action.
+Never infer external authorization from preview approval or the existence of `final.mp4`.

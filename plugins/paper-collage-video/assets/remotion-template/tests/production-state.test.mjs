@@ -9,7 +9,9 @@ import {
   mergeReviewDocument,
   PRODUCTION_STAGES,
   renderReviewSection,
+  summarizeResumeState,
   transitionProduction,
+  transitionRender,
   transitionWorkItem,
 } from '../scripts/production-state.mjs';
 
@@ -54,7 +56,7 @@ const makeState = (stage) => ({
   ],
 });
 
-test('capability setup and the four approvals are the only human wait stages', () => {
+test('publication is no longer a default human wait stage', () => {
   const waitingStages = PRODUCTION_STAGES.filter(
     (stage) => getStageControl(makeState(stage)).mode === 'wait-human',
   );
@@ -63,15 +65,14 @@ test('capability setup and the four approvals are the only human wait stages', (
     'concept-review',
     'style-review',
     'human-review',
-    'publish-approval',
   ]);
   assert.deepEqual(waitingStages, [...HUMAN_GATE_STAGES]);
   assert.deepEqual([...HUMAN_APPROVAL_STAGES], [
     'concept-review',
     'style-review',
     'human-review',
-    'publish-approval',
   ]);
+  assert.equal(getStageControl(makeState('publish-approval')).mode, 'complete');
 });
 
 test('automatic stages explicitly prohibit normal turn termination', () => {
@@ -112,6 +113,70 @@ test('handoff guard blocks automatic stages unless a real blocker is explicit', 
   assert.equal(blocked.reason, 'explicit-blocker');
 
   assert.equal(assessHandoff(makeState('human-review')).allowed, true);
+});
+
+test('resume summaries omit completed history and expose one handoff decision', () => {
+  const state = makeState('asset-production');
+  state.workItems = [
+    {
+      id: 'done',
+      label: 'Done',
+      status: 'completed',
+      updatedAt: state.updatedAt,
+      artifact: 'public/done.png',
+      note: '',
+    },
+    {
+      id: 'next',
+      label: 'Next',
+      status: 'pending',
+      updatedAt: state.updatedAt,
+      artifact: null,
+      note: '',
+    },
+  ];
+  const summary = summarizeResumeState(state, {
+    productionProfile: 'balanced',
+  });
+  assert.deepEqual(Object.keys(summary), [
+    'slug',
+    'stage',
+    'productionProfile',
+    'control',
+    'handoff',
+  ]);
+  assert.equal(summary.control.workItems.remaining.length, 1);
+  assert.equal(summary.control.workItems.remaining[0].id, 'next');
+  assert.equal(summary.control.nextCommand, null);
+  assert.equal(summary.handoff.allowed, false);
+  assert.equal(JSON.stringify(summary).includes('history'), false);
+  assert.equal(summarizeResumeState(state).productionProfile, null);
+
+  state.workItems = [];
+  assert.equal(
+    summarizeResumeState(state).control.nextCommand,
+    'npm run project:assets-ready -- test-film',
+  );
+});
+
+test('a successful final render completes local delivery without publication approval', () => {
+  const current = makeState('final-render');
+  current.approvals.preview = approval('approved', '预览通过');
+  const complete = transitionRender(current, 'render', {
+    final: 'dist/test-film/final.mp4',
+    report: 'dist/test-film/report.json',
+    contactSheet: 'dist/test-film/contact-sheet.jpg',
+    validationReport: 'dist/test-film/validation-report.json',
+  });
+  assert.equal(complete.stage, 'complete');
+  assert.equal(getStageControl(complete).mode, 'complete');
+  assert.equal(complete.approvals.publish.status, 'pending');
+
+  const publishRecorded = transitionProduction(complete, 'approve-publish', {
+    note: '用户另行确认外部发布',
+  });
+  assert.equal(publishRecorded.stage, 'complete');
+  assert.equal(publishRecorded.approvals.publish.status, 'approved');
 });
 
 test('a tool-only image result remains an automatic production checkpoint', () => {

@@ -1,6 +1,6 @@
 {
   "name": "paper-collage-video",
-  "version": "0.5.0",
+  "version": "0.6.0-dev.1",
   "description": "Create editable paper-collage videos with adaptive story planning, asset quality gates, configurable motion and depth, resumable approvals, and a self-contained Remotion workspace.",
   "author": {
     "name": "Paper Collage Video Contributors"
@@ -9,8 +9,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "纸片分层视频制作",
-    "shortDescription": "生成有质量门禁、景深运动和可恢复审批的纸片视频",
-    "longDescription": "初始化独立的 Remotion 工作区，通过可配置的文本、生图和虚构语音服务完成纸片拼贴视频的脚本、分镜、分层素材、哈希绑定质量检查、叙事运动、字幕、预览、正式渲染和响度验收。",
+    "shortDescription": "用预算化素材和三次确认制作纸片分层视频",
+    "longDescription": "初始化独立的 Remotion 工作区，用按阶段加载的流程、预算化分层素材、批量质量记录和三次默认人工确认，完成可恢复的纸片拼贴视频制作与本地交付。",
     "developerName": "Paper Collage Video Contributors",
     "category": "Creativity",
     "capabilities": ["Create", "Render"],

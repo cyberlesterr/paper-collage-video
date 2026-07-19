@@ -1,101 +1,80 @@
-# Provider Configuration
+# Provider Selection and Provenance
 
-Read this reference before drafting text with an external model or generating image and narration assets. The workspace supports `text`, `image`, and `voice` capabilities without binding the skill to a vendor.
+Read this only when discovering, confirming, changing, invoking, or recording a text/image/voice provider.
 
-## Resolution Order
+## Discover Once
 
-Provider configuration is deep-merged in this order:
-
-1. `providers.json` — shareable workspace defaults;
-2. `providers.local.json` — optional machine-specific overrides, ignored by Git;
-3. `projects/<slug>/providers.json` — optional project-specific overrides.
-
-Run this before production:
+Run:
 
 ```bash
-npm run provider:status -- <slug>
+npm run provider:status -- <slug> --compact-json
 ```
 
-`agent-check-required` is expected for a `host` provider: inspect the tools installed in the current host before invoking one. `error` means the configured command, environment variable, or provider id is unavailable and must be fixed or explicitly overridden. `allConfirmed` means the human has selected all three providers; it does not prove a host tool still exists, so verify the recorded tool id against the current host.
+Then verify recorded host tool ids against the current tool registry. `agent-check-required` is expected for host providers; `error` means the configured command, environment variable name, or provider is unavailable. Do not probe availability with a paid generation call.
 
-Never put API keys, bearer tokens, cookies, or other secret values in provider JSON. List only their environment-variable names in `requiredEnv`; the adapter receives values from its process environment.
+Offer actual callable host tools, ready configured providers, manual import, and a user-supplied service. Never request or store secrets; command providers declare environment-variable names in `requiredEnv`.
 
-## Human Selection
+## Confirm With the Concept
 
-Follow `capability-negotiation.md` to discover real host candidates and collect one explicit confirmation. Persist each choice instead of relying on a session-only assumption:
+For the default new-project path, collect text/image/voice plus the concept decision once. Use project scope unless the human explicitly asks to remember choices across projects.
 
-```bash
-npm run provider:select -- <slug> image <provider-id> \
-  --note="<human decision>" \
-  --adapter=host \
-  --tool="<exact callable tool id>" \
-  --model="<known model id>"
+Selection file shape:
+
+```json
+{
+  "scope": "project",
+  "note": "User approved the concept, balanced budget, and these providers",
+  "selections": {
+    "text": {"providerId": "host-text"},
+    "image": {
+      "providerId": "gpt-image",
+      "label": "GPT Image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen"
+    },
+    "voice": {"providerId": "manual-voice"}
+  }
+}
 ```
 
-Existing providers need only their id and `--note`. New host/manual providers also require `--label` and `--adapter`; new host image/voice providers require `--tool`. Configure a new command provider in ignored `providers.local.json` before selecting it.
+Run `project:confirm-concept`. It writes all three choices once, verifies deterministic readiness, and advances directly to `style-review`. The agent still verifies that host tool ids are callable.
 
-Selections default to project scope. `--scope=workspace` stores the choice in ignored `providers.local.json` for reuse, but never use workspace scope without the human's explicit request. Changing a provider requires a fresh confirmation and overwrites the relevant selection record.
+Use `provider:select` only for an isolated provider change or a fallback path. Do not run status again after a successful combined confirmation unless a host tool disappears.
 
 ## Adapter Types
 
-| Adapter | Use when | Execution |
+| Adapter | Use | Execution |
 |---|---|---|
-| `host` | Codex already has a suitable model, skill, app, or generation tool | The root workflow invokes that capability, writes the local output, then runs `provider:record` |
-| `command` | A user has a CLI, script, SDK wrapper, or private API adapter | `provider:run` spawns the configured executable directly, without a shell, waits for exit 0, verifies the output, and records provenance |
-| `manual` | An authorized local asset or human-authored text is supplied | Copy it to the declared output, then run `provider:record` |
+| `host` | Current Codex tool, skill, model, or app | Invoke it, write the local file, then `provider:record` |
+| `command` | User CLI/wrapper/private adapter | `provider:run` executes without a shell and records success |
+| `manual` | Authorized supplied asset or text | Copy to the requested output, then `provider:record` |
 
-Use `providers.local.example.json` as the starting point for custom commands. An async web API belongs behind a small adapter that performs submission and polling itself. The stable skill contract is simply: consume the request JSON, write the declared output file, and exit successfully.
+Configure new command adapters in ignored `providers.local.json`. An async API belongs behind a small adapter that polls and writes the declared output.
 
-## Request Contract
+## Request and Reuse Contract
 
-Keep reproducible requests under `projects/<slug>/requests/`. Example image request:
+Keep one request per generated/imported output under `projects/<slug>/requests/`. It records `assetId`, capability, output, generation input, model/settings, and optional image quality intent.
+
+Minimal image request (validated by `schemas/asset-request.schema.json`):
 
 ```json
 {
   "$schema": "../../../schemas/asset-request.schema.json",
   "schemaVersion": 1,
-  "projectSlug": "my-film",
-  "assetId": "scene-01-background",
+  "projectSlug": "<slug>",
+  "assetId": "scene-01-bg",
   "capability": "image",
-  "output": "public/projects/my-film/assets/plates/01-bg.png",
-  "prompt": "Layered paper collage courtyard, no characters, no text",
-  "model": "auto",
-  "settings": {"width": 1920, "height": 1080}
+  "output": "public/projects/<slug>/assets/plates/01-bg.png",
+  "prompt": "Layered paper-collage background; no people, text, logo, or watermark"
 }
 ```
 
-Use `capability: "text"` with `prompt` for external script/storyboard generation. Use `capability: "voice"` with `text`, optional `voiceId`, and audio settings for fictional narration.
-
-For a command adapter:
+Before paid or slow generation, run `provider:reuse` with the request. An exact-match miss is normal. After host/manual output, run `provider:record`; command adapters use `provider:run`.
 
 ```bash
-npm run provider:run -- --request=projects/<slug>/requests/<request>.json
+npm run provider:reuse -- --request=projects/<slug>/requests/<asset>.json
+npm run provider:run -- --request=projects/<slug>/requests/<asset>.json --provider=<id>
+npm run provider:record -- --request=projects/<slug>/requests/<asset>.json --provider=<id> --model=<model>
 ```
 
-For a host or manual adapter, generate or import the exact `output` file, then record it:
-
-```bash
-npm run provider:record -- \
-  --request=projects/<slug>/requests/<request>.json \
-  --provider=<provider-id> \
-  --model=<actual-model> \
-  --external-id=<optional-job-id>
-```
-
-The command adapter may use these literal placeholders in `command.args` or `command.cwd`:
-
-- `{request}`, `{output}`, `{workspace}`, `{projectDir}`;
-- `{projectSlug}`, `{assetId}`, `{capability}`;
-- `{prompt}`, `{text}`, `{voiceId}`, `{model}`, `{settingsJson}`.
-
-Arguments are passed as an array with `shell: false`; shell substitutions such as `$HOME`, semicolons, and backticks are not evaluated by the skill.
-
-## Provenance and Resume Behavior
-
-Every `provider:run` or `provider:record` call updates `projects/<slug>/assets-manifest.json` by stable `assetId`. Each entry records the provider, adapter, actual model when known, optional external job id, SHA-256, size, time, output path, and request snapshot.
-
-The record also contains a request fingerprint that excludes project-specific ids and output paths. Before invoking a paid or slow provider, run `provider:reuse` with the request. It reuses only an exact provider/model/input/settings match whose file still matches its recorded hash. A cache miss is normal; continue with the selected provider. Reused images still require the current project's quality review.
-
-Both commands refuse an unconfirmed provider or a `--provider` different from the human's recorded selection. Change the selection explicitly before switching services.
-
-Provider provenance does not replace `production.json`: keep material work items there with `project:checkpoint`. If a provider is unavailable, record the exact work-item blocker and preserve the current production stage. Do not manufacture an output or silently switch to a different paid service.
+The manifest owns provider/model/job id, request fingerprint, output hash, path, and request snapshot. Production scheduling stays in `production.json`. Do not duplicate the full manifest into checkpoints or read it on resume unless diagnosing provenance.

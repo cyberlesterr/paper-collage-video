@@ -110,6 +110,8 @@ try {
     'scripts/project-report.mjs',
     slug,
     `--artifact=${output}`,
+    `--validation-report=${paths.validationReport}`,
+    `--quality-report=${path.join(ROOT, 'projects', slug, 'quality-report.json')}`,
   ]);
   const production = await recordRender(slug, mode);
   console.log(`✓ 生产状态：${production.stage}`);

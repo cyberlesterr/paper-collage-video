@@ -8,11 +8,13 @@
     "slug": "{{slug}}",
     "status": "pending",
     "inputMode": "none",
+    "productionProfile": "balanced",
     "requested": {
       "durationSeconds": null,
       "sceneCount": null
     },
     "resolved": null,
+    "assetBudget": null,
     "updatedAt": "{{createdAt}}"
   },
   "quality": {

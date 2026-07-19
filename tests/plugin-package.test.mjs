@@ -12,6 +12,7 @@ const PLUGIN_ROOT = path.join(ROOT, 'plugins', 'paper-collage-video');
 const RUNTIME_ROOT = path.join(PLUGIN_ROOT, 'assets', 'remotion-template');
 
 const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
+const repositoryVersion = readJson(path.join(ROOT, 'package.json')).version;
 
 test('repository marketplace exposes the paper collage plugin', () => {
   const marketplace = readJson(
@@ -32,7 +33,7 @@ test('plugin manifest points at a complete packaged skill', () => {
     path.join(PLUGIN_ROOT, '.codex-plugin', 'plugin.json'),
   );
   assert.equal(manifest.name, 'paper-collage-video');
-  assert.equal(manifest.version, '0.5.0');
+  assert.equal(manifest.version, repositoryVersion);
   assert.equal(manifest.skills, './skills/');
   assert.ok(manifest.interface.defaultPrompt.length > 0);
 
@@ -45,10 +46,6 @@ test('plugin manifest points at a complete packaged skill', () => {
   assert.ok(fs.existsSync(skillFile));
   assert.match(fs.readFileSync(skillFile, 'utf8'), /references\/setup\.md/);
   assert.match(fs.readFileSync(skillFile, 'utf8'), /references\/providers\.md/);
-  assert.match(
-    fs.readFileSync(skillFile, 'utf8'),
-    /references\/capability-negotiation\.md/,
-  );
   assert.match(
     fs.readFileSync(skillFile, 'utf8'),
     /references\/story-planning\.md/,
@@ -72,12 +69,20 @@ test('plugin manifest points at a complete packaged skill', () => {
 test('packaged runtime is lightweight and independent from production projects', () => {
   const packageJson = readJson(path.join(RUNTIME_ROOT, 'package.json'));
   assert.equal(packageJson.name, 'paper-collage-video-workspace');
-  assert.equal(packageJson.version, '0.5.0');
+  assert.equal(packageJson.version, repositoryVersion);
   assert.equal(packageJson.scripts.doctor, 'node scripts/project-doctor.mjs');
   assert.equal(packageJson.scripts['provider:status'], 'node scripts/provider-status.mjs');
   assert.equal(packageJson.scripts['provider:select'], 'node scripts/provider-select.mjs');
   assert.equal(packageJson.scripts['provider:reuse'], 'node scripts/provider-reuse.mjs');
   assert.equal(packageJson.scripts['project:plan'], 'node scripts/project-plan.mjs');
+  assert.equal(
+    packageJson.scripts['project:confirm-concept'],
+    'node scripts/project-confirm-concept.mjs',
+  );
+  assert.equal(
+    packageJson.scripts['project:resume'],
+    'node scripts/project-status.mjs --resume-json',
+  );
   assert.equal(packageJson.scripts['project:quality'], 'node scripts/project-quality.mjs');
   assert.equal(packageJson.scripts['project:subtitles'], 'node scripts/project-subtitles.mjs');
   assert.equal(packageJson.scripts['style:proof'], 'node scripts/style-motion-proof.mjs');
@@ -116,6 +121,7 @@ test('packaged runtime is lightweight and independent from production projects',
     'scripts/project-subtitles.mjs',
     'scripts/creative-plan-lib.mjs',
     'scripts/project-plan.mjs',
+    'scripts/project-confirm-concept.mjs',
     'scripts/style-motion-proof.mjs',
     'src/MainVideo.tsx',
     'src/ReplicaChapterScene.tsx',
@@ -152,7 +158,7 @@ test('bootstrap creates an isolated resumable workspace and is idempotent', asyn
     );
     assert.equal(
       readJson(path.join(target, '.paper-collage-video-workspace.json')).pluginVersion,
-      '0.5.0',
+      repositoryVersion,
     );
     assert.equal(
       readJson(path.join(target, 'package.json')).name,

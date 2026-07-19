@@ -1,6 +1,6 @@
 {
   "name": "paper-collage-video-workspace",
-  "version": "0.5.0",
+  "version": "0.6.0-dev.1",
   "description": "Configuration-driven paper-collage video pipeline and Codex plugin built with Remotion.",
   "private": true,
   "type": "module",
@@ -34,7 +34,9 @@
     "provider:reuse": "node scripts/provider-reuse.mjs",
     "project:new": "node scripts/project-new.mjs",
     "project:plan": "node scripts/project-plan.mjs",
+    "project:confirm-concept": "node scripts/project-confirm-concept.mjs",
     "project:quality": "node scripts/project-quality.mjs",
+    "project:resume": "node scripts/project-status.mjs --resume-json",
     "project:status": "node scripts/project-status.mjs",
     "project:handoff-check": "node scripts/project-handoff-check.mjs",
     "project:checkpoint": "node scripts/project-checkpoint.mjs",

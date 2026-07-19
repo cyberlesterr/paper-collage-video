@@ -9,15 +9,23 @@ import {
   loadProject,
   probeMedia,
   projectPaths,
+  readJson,
   runCommand,
   validateProject,
   writeJson,
 } from './project-lib.mjs';
-import {prepareQualityReport} from './quality-lib.mjs';
+import {
+  prepareQualityReport,
+  readQualityReportStatus,
+} from './quality-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const artifactArgument = args.find((arg) => arg.startsWith('--artifact='));
+const validationArgument = args.find((arg) =>
+  arg.startsWith('--validation-report='),
+);
+const qualityArgument = args.find((arg) => arg.startsWith('--quality-report='));
 
 const escapeXml = (value) =>
   String(value)
@@ -147,7 +155,13 @@ try {
     throw new Error('没有可验收的视频，请先运行 project:preview 或 project:render。');
   }
 
-  const validation = await validateProject(project);
+  const validationFile = validationArgument?.slice('--validation-report='.length);
+  const validation = validationFile
+    ? await readJson(path.resolve(ROOT, validationFile))
+    : await validateProject(project);
+  if (validation.project?.slug !== slug) {
+    throw new Error('validation report 与当前项目不匹配。');
+  }
   const probe = await probeMedia(artifact);
   const durationSeconds = Number(probe.format?.duration ?? 0);
   const videoStream = probe.streams?.find((stream) => stream.codec_type === 'video');
@@ -267,7 +281,9 @@ try {
     framesDirectory: path.join(paths.distDirectory, 'frames'),
   });
 
-  const quality = await prepareQualityReport(slug);
+  const quality = qualityArgument
+    ? await readQualityReportStatus(slug)
+    : await prepareQualityReport(slug);
   const report = {
     schemaVersion: 1,
     generatedAt: new Date().toISOString(),

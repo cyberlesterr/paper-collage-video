@@ -1,87 +1,35 @@
-# Execution Control
+# Recovery and Tool-Only Execution
 
-Read this reference before starting or resuming work. It defines when a turn may end and how tool-only results are contained.
+Read this only when resuming `auto-continue`, recovering a blocker, or invoking a built-in image tool whose calling turn may end without text.
 
-## Stage Control
+## Resume Once
 
-Run this at every new turn, after every interruption, and before ending a turn:
-
-```bash
-npm run project:status -- <slug> --compact-json
-```
-
-Interpret `control.mode` strictly:
-
-| Mode | Required behavior |
-|---|---|
-| `auto-continue` | Keep working. Do not ask the human to say “continue” and do not end merely because one tool call finished. |
-| `wait-human` | Stop only after showing the gate's artifacts, why a decision is needed, and the exact acceptable reply. |
-| `complete` | Report completion and artifacts. Do not infer external publication. |
-
-A real blocker may end an `auto-continue` turn only after reporting the exact failure, preserved stage, attempted safe recovery, and the specific human or external action required. A raw tool error or a tool result bubble is never a handoff.
-
-## Turn-End Contract
-
-Before any final response, run:
+Run once at the beginning of a new turn or after an interruption:
 
 ```bash
-npm run project:handoff-check -- <slug>
+npm run project:resume -- <slug>
 ```
 
-The command exits with code 2 during `auto-continue`. A genuine blocker requires both fields:
+- `auto-continue`: continue to `control.nextCommand` or the first remaining work item.
+- `wait-human`: show the gate artifacts, reason, and exact acceptable response.
+- `complete`: report local delivery artifacts; do not infer external publication.
 
-```bash
-npm run project:handoff-check -- <slug> \
-  --blocker="<exact failure>" \
-  --needs-user="<single required action>"
-```
+Do not pair `project:resume` with full status or `project:handoff-check`. Use `project:status --control-json` only to diagnose corrupt or surprising state.
 
-Then follow this response contract:
+At `asset-production`, resume sets `nextCommand` to null while `workItems.remaining` is non-empty; continue the first remaining batch. Once the list is empty it returns the exact `project:assets-ready` command.
 
-1. Read `control.mode` from `project:status --compact-json` and honor the handoff check result.
-2. If it is `auto-continue`, continue to `control.nextCommand` or the next incomplete work item.
-3. If it is `wait-human`, include all expected artifacts that already exist.
-4. State exactly one of:
-   - `无需你操作，我会继续。`
-   - `请回复：<明确决定或修改意见>。`
-   - `当前阻塞：<原因>；需要你：<唯一必要动作>。`
-5. Never send an empty final response.
+A recoverable tool error is not a handoff. A genuine blocker may end an automatic stage only after recording the failed work batch and reporting one specific human/external action.
 
-Send a short progress update before long calls and at least every 60 seconds while work is active. After a recoverable tool failure, state the recovery and continue without asking for permission unless new authority is actually required.
+## Coarse Recoverable Batches
+
+Use `project:checkpoint` for material batches such as one location's plates, a character-sheet group, narration set, quality-review batch, or timeline pass. Provider provenance remains per asset in `assets-manifest.json`.
+
+Do not create `in-progress` and `completed` history entries for every small deterministic file operation. On resume, continue a pending/in-progress batch and never regenerate completed work without a revision request.
 
 ## Tool-Only Image Generation
 
-Built-in image generation may require its calling turn to end without explanatory text. Contain that behavior so it cannot terminate the main video workflow:
+When collaboration workers are available, delegate bounded built-in image-generation units only. Keep the root workflow responsible for approvals, prompts, asset selection, state transitions, timeline work, and user updates.
 
-1. When collaboration workers are available, delegate each bounded built-in image-generation unit to an asset worker. This skill explicitly permits workers only for image generation, copying the output into the workspace, and deterministic image validation.
-2. Keep the root agent responsible for approvals, production-state transitions, prompts, final asset selection, timeline work, and user updates.
-3. Before dispatching, tell the human that generation is running and no response is needed.
-4. After the worker finishes, verify the workspace file and record the work item as `completed`; a worker's empty/tool-only final response is not a gate.
-5. If workers are unavailable, prefer a generation provider that exposes a pollable job. If only a tool-only surface exists and the host cannot auto-resume, report that capability blocker before starting instead of invoking it and silently stopping.
+Before dispatching, tell the human that generation is running and no response is needed. After a worker returns, verify the workspace file and record its provider provenance/batch checkpoint. A worker result is not a human gate.
 
-Never use a human “continue” message as a scheduler for bulk generation.
-
-## Recoverable Work Items
-
-Track material production steps with:
-
-```bash
-npm run project:checkpoint -- <slug> <id> in-progress --label="<human-readable label>"
-npm run project:checkpoint -- <slug> <id> completed --artifact="<workspace path>"
-npm run project:checkpoint -- <slug> <id> blocked --note="<exact blocker>"
-```
-
-Use stable ids for background plates, character sheets, narration clips, alpha extraction, semantic quality review, motion proof, subtitle timing, timeline configuration, validation, preview, and final render. On resume, continue the first pending, in-progress, or blocked item that can be recovered safely. Do not regenerate a completed artifact unless revision was requested.
-
-Provider request/job provenance belongs in `assets-manifest.json`; production scheduling and blockers stay in `production.json`. A host provider result, command adapter exit, or async job completion never creates an extra human gate.
-
-## Gate Response Minimums
-
-Every `wait-human` response must contain:
-
-- why the workflow is paused;
-- clickable or visible artifacts for this gate;
-- technical results separately from creative judgment;
-- the exact approval phrase or a request for concrete revision notes.
-
-The four creative/publication approval gates are concept, style and fictional voice, rendered preview, and publication readiness. `capability-review` is one additional one-time operational configuration wait stage. All other stages are autonomous.
+If workers are unavailable, prefer a pollable provider. If the only callable image surface forces the main turn to end and cannot resume, report that exact capability blocker before invoking it.

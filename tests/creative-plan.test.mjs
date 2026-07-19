@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   assessCreativePlanTimeline,
   buildCreativePlan,
+  deriveAssetBudget,
   deriveCreativePlanMode,
   validateCreativePlan,
 } from '../scripts/creative-plan-lib.mjs';
@@ -22,6 +23,14 @@ const make = (overrides) =>
 test('creative planning supports all four partial-input modes', () => {
   const none = make({});
   assert.equal(none.inputMode, 'none');
+  assert.equal(none.productionProfile, 'balanced');
+  assert.deepEqual(none.assetBudget, {
+    backgrounds: 3,
+    environmentLayers: 2,
+    characterSheets: 1,
+    styleSamples: 1,
+    maxGeneratedImages: 7,
+  });
   assert.deepEqual(none.requested, {durationSeconds: null, sceneCount: null});
 
   const durationOnly = make({
@@ -52,6 +61,26 @@ test('creative planning supports all four partial-input modes', () => {
   assert.equal(both.inputMode, 'both');
   assert.deepEqual(both.requested, {durationSeconds: 24, sceneCount: 2});
   assert.deepEqual(validateCreativePlan(both, {slug: 'planning-test'}), []);
+});
+
+test('production profiles set explicit generated-image budgets', () => {
+  assert.deepEqual(deriveAssetBudget('draft', 6), {
+    backgrounds: 6,
+    environmentLayers: 2,
+    characterSheets: 2,
+    styleSamples: 1,
+    maxGeneratedImages: 11,
+  });
+  assert.equal(deriveAssetBudget('balanced', 6).maxGeneratedImages, 13);
+  assert.equal(deriveAssetBudget('full-depth', 6).maxGeneratedImages, 23);
+  assert.equal(
+    make({productionProfile: 'full-depth'}).productionProfile,
+    'full-depth',
+  );
+  assert.throws(
+    () => make({productionProfile: 'unbounded'}),
+    /productionProfile/,
+  );
 });
 
 test('creative planning preserves each explicit user constraint', () => {

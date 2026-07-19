@@ -12,6 +12,7 @@ import {ROOT} from './project-lib.mjs';
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--')) ?? null;
 const json = args.includes('--json');
+const compactJson = args.includes('--compact-json');
 
 try {
   const loaded = await loadProviderConfig(slug);
@@ -56,7 +57,33 @@ try {
     issues: loaded.issues,
     capabilities,
   };
-  if (json) {
+  if (compactJson) {
+    console.log(
+      JSON.stringify(
+        {
+          slug,
+          valid: summary.valid,
+          allConfirmed: summary.allConfirmed,
+          issues: summary.issues,
+          capabilities: Object.fromEntries(
+            Object.entries(capabilities).map(([capability, status]) => [
+              capability,
+              {
+                provider: status.provider,
+                readiness: {
+                  status: status.readiness.status,
+                  missingEnv: status.readiness.missingEnv,
+                },
+                confirmed: status.confirmed,
+              },
+            ]),
+          ),
+        },
+        null,
+        2,
+      ),
+    );
+  } else if (json) {
     console.log(JSON.stringify(summary, null, 2));
   } else {
     console.log(`Provider configuration: ${summary.valid ? 'VALID' : 'INVALID'}`);

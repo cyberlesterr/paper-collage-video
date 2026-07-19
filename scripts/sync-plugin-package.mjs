@@ -96,6 +96,7 @@ for (const entry of [
   'scripts/project-advance.mjs',
   'scripts/project-assets-ready.mjs',
   'scripts/project-checkpoint.mjs',
+  'scripts/project-confirm-concept.mjs',
   'scripts/project-doctor.mjs',
   'scripts/project-handoff-check.mjs',
   'scripts/project-lib.mjs',
@@ -135,7 +136,7 @@ const rootPackage = JSON.parse(
 const workspacePackage = {
   ...rootPackage,
   name: 'paper-collage-video-workspace',
-  version: '0.5.0',
+  version: rootPackage.version,
   private: true,
   engines: {node: '>=20'},
   scripts: {
@@ -148,7 +149,9 @@ const workspacePackage = {
     'provider:reuse': rootPackage.scripts['provider:reuse'],
     'project:new': rootPackage.scripts['project:new'],
     'project:plan': rootPackage.scripts['project:plan'],
+    'project:confirm-concept': rootPackage.scripts['project:confirm-concept'],
     'project:quality': rootPackage.scripts['project:quality'],
+    'project:resume': rootPackage.scripts['project:resume'],
     'project:status': rootPackage.scripts['project:status'],
     'project:handoff-check': rootPackage.scripts['project:handoff-check'],
     'project:checkpoint': rootPackage.scripts['project:checkpoint'],
@@ -222,6 +225,14 @@ const project = {
     slug: 'starter-demo',
     status: 'resolved',
     inputMode: 'both',
+    productionProfile: 'draft',
+    assetBudget: {
+      backgrounds: 1,
+      environmentLayers: 1,
+      characterSheets: 1,
+      styleSamples: 1,
+      maxGeneratedImages: 4,
+    },
     requested: {durationSeconds: 2, sceneCount: 1},
     resolved: {
       durationSeconds: 2,
@@ -428,7 +439,7 @@ await writeJson(
 await writeJson(path.join(RUNTIME_ROOT, '.paper-collage-template.json'), {
   schemaVersion: 1,
   plugin: 'paper-collage-video',
-  pluginVersion: '0.5.0',
+  pluginVersion: rootPackage.version,
 });
 
 console.log(`✓ Plugin skill synced: ${path.relative(ROOT, SKILL_TARGET)}`);

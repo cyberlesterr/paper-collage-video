@@ -704,6 +704,30 @@ export const validateProject = async (project, options = {}) => {
     }
   }
 
+  const generatedImageBudget = project.plan?.assetBudget?.maxGeneratedImages;
+  if (Number.isInteger(generatedImageBudget) && generatedImageBudget > 0) {
+    const manifestFile = path.join(
+      ROOT,
+      'projects',
+      project.slug,
+      'assets-manifest.json',
+    );
+    if (await fileExists(manifestFile)) {
+      const manifest = await readJson(manifestFile);
+      const generatedImages = (manifest.assets ?? []).filter(
+        ({capability}) => capability === 'image',
+      ).length;
+      if (generatedImages > generatedImageBudget) {
+        add(
+          'warning',
+          'asset-budget-exceeded',
+          `${project.plan.productionProfile ?? 'balanced'} 档位预算最多 ${generatedImageBudget} 张生成图，当前记录 ${generatedImages} 张；请复用素材或在概念审批时显式升级档位。`,
+          'plan.assetBudget.maxGeneratedImages',
+        );
+      }
+    }
+  }
+
   const errors = issues.filter(({level}) => level === 'error').length;
   const warnings = issues.filter(({level}) => level === 'warning').length;
   return {

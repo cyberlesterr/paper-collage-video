@@ -8,7 +8,7 @@ import {createRequestFingerprint} from '../scripts/provider-lib.mjs';
 import {
   assertQualityReady,
   prepareQualityReport,
-  recordQualityReview,
+  recordQualityReviews,
 } from '../scripts/quality-lib.mjs';
 import {deriveTimeline, validateProject} from '../scripts/project-lib.mjs';
 import {resolvePythonCommand} from '../scripts/python-runtime.mjs';
@@ -191,7 +191,7 @@ test('subtitle fallback splits long narration and fills the measured narration w
   );
 });
 
-test('required asset quality resets on file hashes and blocks until every rubric passes', async () => {
+test('required asset quality resets on hashes and batch reviews write atomically', async () => {
   const slug = `quality-gate-${process.pid}`;
   const projectDirectory = path.join(ROOT, 'projects', slug);
   const publicDirectory = path.join(ROOT, 'public', 'projects', slug);
@@ -285,17 +285,41 @@ test('required asset quality resets on file hashes and blocks until every rubric
     );
     await assert.rejects(() => assertQualityReady(slug), /资产质量门未通过/);
 
-    for (const asset of status.report.assets) {
-      status = await recordQualityReview({
-        slug,
+    const reportFile = path.join(projectDirectory, 'quality-report.json');
+    const beforeInvalidBatch = await fs.readFile(reportFile, 'utf8');
+    await assert.rejects(
+      () =>
+        recordQualityReviews({
+          slug,
+          reviews: [
+            {
+              assetId: status.report.assets[0].assetId,
+              reviewer: 'test-vision',
+              passedChecks: status.report.assets[0].requiredChecks,
+            },
+            {
+              assetId: 'missing-asset',
+              reviewer: 'test-vision',
+              passedChecks: [],
+            },
+          ],
+        }),
+      /未知质量资产：missing-asset/,
+    );
+    assert.equal(await fs.readFile(reportFile, 'utf8'), beforeInvalidBatch);
+
+    status = await recordQualityReviews({
+      slug,
+      reviews: status.report.assets.map((asset) => ({
         assetId: asset.assetId,
         reviewer: 'test-vision',
         passedChecks: asset.requiredChecks,
         note: 'Fixture reviewed',
-      });
-    }
+      })),
+    });
     assert.equal(status.ready, true);
     assert.equal(status.passed, 2);
+    assert.deepEqual(status.changedAssets.sort(), status.report.assets.map(({assetId}) => assetId).sort());
     await assert.doesNotReject(() => assertQualityReady(slug));
 
     const changedBackground = await sharp(backgroundFile)

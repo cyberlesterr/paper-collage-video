@@ -176,6 +176,17 @@ test('bundled provider status is valid and defers host capability selection', ()
   assert.ok(
     status.capabilities.image.candidates.some(({id}) => id === 'manual-image'),
   );
+
+  const compactResult = spawnSync(
+    process.execPath,
+    [path.join(ROOT, 'scripts', 'provider-status.mjs'), '--compact-json'],
+    {cwd: ROOT, encoding: 'utf8'},
+  );
+  assert.equal(compactResult.status, 0, compactResult.stderr);
+  const compact = JSON.parse(compactResult.stdout);
+  assert.equal(compact.valid, true);
+  assert.equal('candidates' in compact.capabilities.image, false);
+  assert.ok(compactResult.stdout.length < result.stdout.length / 2);
 });
 
 test('new projects wait for confirmed providers before entering the brief', async () => {
@@ -389,7 +400,93 @@ test('new projects wait for confirmed providers before entering the brief', asyn
       {cwd: ROOT, encoding: 'utf8'},
     );
     assert.notEqual(latePlan.status, 0);
-    assert.match(latePlan.stderr, /只能在 brief 或 concept-review/);
+    assert.match(
+      latePlan.stderr,
+      /只能在 capability-review、brief 或 concept-review/,
+    );
+  } finally {
+    await fsp.rm(projectDirectory, {recursive: true, force: true});
+    await fsp.rm(publicDirectory, {recursive: true, force: true});
+  }
+});
+
+test('concept and all providers can be confirmed in one workflow command', async () => {
+  const slug = `combined-confirm-${process.pid}`;
+  const projectDirectory = path.join(ROOT, 'projects', slug);
+  const publicDirectory = path.join(ROOT, 'public', 'projects', slug);
+  try {
+    const created = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'project-new.mjs'), slug, '--title=Combined Confirm'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(created.status, 0, created.stderr);
+    const planned = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-plan.mjs'),
+        slug,
+        '--duration=30',
+        '--scenes=3',
+        '--narration-seconds=24',
+        '--profile=balanced',
+        '--rationale=Three concise visual beats',
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(planned.status, 0, planned.stderr);
+    const selectionFile = path.join(projectDirectory, 'concept-confirmation.json');
+    await fsp.writeFile(
+      selectionFile,
+      `${JSON.stringify(
+        {
+          note: 'Approve the concept, balanced budget, and detected providers',
+          selections: {
+            text: {providerId: 'host-text'},
+            image: {providerId: 'manual-image'},
+            voice: {providerId: 'manual-voice'},
+          },
+        },
+        null,
+        2,
+      )}\n`,
+      'utf8',
+    );
+    const confirmed = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-confirm-concept.mjs'),
+        slug,
+        `--input=${path.relative(ROOT, selectionFile)}`,
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(confirmed.status, 0, confirmed.stderr);
+    assert.match(confirmed.stdout, /生产状态：style-review/);
+    const production = JSON.parse(
+      await fsp.readFile(path.join(projectDirectory, 'production.json'), 'utf8'),
+    );
+    assert.equal(production.stage, 'style-review');
+    assert.equal(production.approvals.concept.status, 'approved');
+    const providers = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'provider-status.mjs'), slug, '--json'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(providers.status, 0, providers.stderr);
+    assert.equal(JSON.parse(providers.stdout).allConfirmed, true);
+
+    const resume = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'project-status.mjs'), slug, '--resume-json'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(resume.status, 0, resume.stderr);
+    const resumeStatus = JSON.parse(resume.stdout);
+    assert.equal(resumeStatus.productionProfile, 'balanced');
+    assert.equal(resumeStatus.control.mode, 'wait-human');
+    assert.equal('approvals' in resumeStatus, false);
+    assert.equal('artifacts' in resumeStatus, false);
   } finally {
     await fsp.rm(projectDirectory, {recursive: true, force: true});
     await fsp.rm(publicDirectory, {recursive: true, force: true});

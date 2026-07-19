@@ -261,6 +261,7 @@
         "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
         "status": {"enum": ["pending", "resolved"]},
         "inputMode": {"enum": ["none", "duration-only", "scenes-only", "both"]},
+        "productionProfile": {"enum": ["draft", "balanced", "full-depth"]},
         "requested": {
           "type": "object",
           "required": ["durationSeconds", "sceneCount"],
@@ -282,6 +283,23 @@
                 "estimatedNarrationSeconds": {"$ref": "#/$defs/nullablePositiveNumber"},
                 "rationale": {"type": "string", "minLength": 1},
                 "resolvedAt": {"type": "string", "format": "date-time"}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "assetBudget": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["backgrounds", "environmentLayers", "characterSheets", "styleSamples", "maxGeneratedImages"],
+              "properties": {
+                "backgrounds": {"type": "integer", "minimum": 1},
+                "environmentLayers": {"type": "integer", "minimum": 0},
+                "characterSheets": {"type": "integer", "minimum": 1},
+                "styleSamples": {"type": "integer", "minimum": 1},
+                "maxGeneratedImages": {"type": "integer", "minimum": 1}
               },
               "additionalProperties": false
             }

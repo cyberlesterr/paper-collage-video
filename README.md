@@ -7,7 +7,7 @@
 
 仓库中的 `tie-chu-mo-zhen` 已按 v2 协议从空项目重新开始，不继承旧素材、旧 provider 选择或旧审批。插件发行包另带一个 2 秒低电平测试音技术夹具 `starter-demo`，仅用于自动化烟雾测试。
 
-当前公开预览版本为 `0.5.0`，包含 v2 项目协议、哈希绑定质量门、Motion/Depth、字幕对齐和响度验收；功能和协议仍可能在 `1.0.0` 前调整。
+当前公开预览版本为 `0.5.0`；仓库正在验证尚未发布的 `0.6.0-dev.1` 流程精简版本。公开版本包含 v2 项目协议、哈希绑定质量门、Motion/Depth、字幕对齐和响度验收；功能和协议仍可能在 `1.0.0` 前调整。
 
 ## 完整演示
 
@@ -63,17 +63,17 @@ codex plugin add paper-collage-video@paper-collage-video
 用 $make-paper-collage-video 做一条约 30 秒的玄奘西行纸片分层视频。
 ```
 
-Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于插件包中。它会先检测当前宿主真实可用的文本、生图和虚构语音能力，用一次表单（没有表单能力时改用聊天）让人确认或选择自定义服务；随后只在概念、风格/虚构音色、预览和发布四个创意/发布节点停下来让人决定。其他阶段标记为 `AUTO-CONTINUE`，单次工具调用结束不等于任务暂停。中断后再次调用同一个 Skill，它会先读取 `production.json` 和逐项工作清单，从当前阶段继续。
+Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于插件包中。它按当前阶段加载必要 reference，不再每次读取整套说明。新项目把概念、制作档位/素材预算和三类 provider 放进一次确认；之后只在风格/虚构音色和预览节点停下来。正式成片在本地技术验收通过后即完成交付，只有真正上传、发送或发布时才请求一次外部操作授权。中断后用精简的 `project:resume` 从未完成批次继续。
 
 ## 人在流程中的位置
 
-正常制作一条新视频时，人先做一次可复用的能力确认，再参与四个内容节点：
+正常制作一条新视频时，人参与三个内容节点：
 
-1. 确认是否使用检测到的文本、生图和虚构语音能力，或选择自己的服务/手工导入。
-2. 填写或口述 `brief.md`：主题、受众、平台、核心观点、风格和禁区。
-3. 确认文案、镜头、风格样张和虚构旁白音色。
-4. 查看 `preview.mp4`，用自然语言提出修改意见。
-5. 查看最终视频和验收报告，作出发布批准。
+1. 口述主题后，一次确认概念、时长/幕数、`draft|balanced|full-depth` 制作档位、素材预算和文本/生图/虚构语音 provider。
+2. 确认一张风格样张、短试听和必要时的 3–5 秒动作证明。
+3. 查看 `preview.mp4`，批准或用自然语言提出修改意见。
+
+最终视频和验收报告由系统自动交付；本地完成不等于允许外部发布。
 
 人不需要手写人物坐标、处理透明通道、计算旁白帧数、修改 React 或执行 FFmpeg。`project.json` 是 Codex 和工具维护的机器协议。
 
@@ -141,7 +141,7 @@ public/projects/silk-road/
   audio/sfx/
 ```
 
-新项目先处于 `capability-review`：Codex 检测当前宿主能力并让人确认三类 provider；全部选择落盘后才进入 `brief`。随后由人填写或口述 `brief.md`。时长和幕数可以任选其一、同时指定或都不指定；Codex 保留明确值，只根据故事节拍和旁白估时补全缺失项，并通过 `project:plan` 写入 `project.json`。`production.json` 记录阶段、审批和产物。可以用 `--dry-run` 预览将创建的路径而不写文件：
+新项目先处于 `capability-review`。Codex 使用当前宿主模型准备临时概念，不调用未确认的外部/付费 provider；时长和幕数可以任选其一、同时指定或都不指定。`project:plan` 只补全缺失项，并按 `draft`、默认 `balanced` 或 `full-depth` 生成明确的图片预算。人一次确认概念、预算和三类 provider 后，`project:confirm-concept` 组合记录这些决定并直接进入 `style-review`。可以用 `--dry-run` 预览将创建的路径而不写文件：
 
 ```bash
 npm run project:new -- silk-road --title="玄奘西行" --dry-run
@@ -152,22 +152,24 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | 命令 | 作用 |
 |---|---|
 | `npm run project:new -- <slug>` | 创建人类简报、机器配置和素材目录 |
-| `npm run project:plan -- <slug> ...` | 保留用户指定的时长/幕数，并补全未指定项 |
+| `npm run project:plan -- <slug> ...` | 保留用户时长/幕数，补全缺失项并确定制作档位/图片预算 |
+| `npm run project:confirm-concept -- <slug> --input=<file>` | 一次记录概念、预算和 text/image/voice provider 决定 |
+| `npm run project:resume -- <slug>` | 输出最小恢复状态、下一命令和未完成批次 |
 | `npm run project:status -- <slug>` | 显示当前阶段、审批、产物和下一步 |
 | `npm run project:status -- <slug> --compact-json` | 输出不含冗长历史的机器可读控制信息 |
-| `npm run provider:status -- <slug>` | 合并并检查文本、生图、语音 provider 配置 |
+| `npm run provider:status -- <slug> --compact-json` | 精简检查文本、生图、语音 provider 配置 |
 | `npm run provider:select -- <slug> <capability> <provider-id>` | 记录人确认的 provider、作用域和宿主工具 |
 | `npm run provider:run -- --request=<file>` | 运行用户配置的命令适配器并登记资产来源 |
 | `npm run provider:record -- --request=<file>` | 登记宿主工具或手工导入的本地输出 |
 | `npm run provider:reuse -- --request=<file>` | 按 provider/model/输入指纹复用哈希有效的已有资产 |
-| `npm run project:handoff-check -- <slug>` | 在回合结束前阻止 `AUTO-CONTINUE` 阶段被误当成人工停点 |
-| `npm run project:checkpoint -- <slug> <id> <status>` | 记录素材、旁白、校验或渲染工作项的可恢复进度 |
+| `npm run project:handoff-check -- <slug>` | 旧客户端兼容检查；新 Skill 使用 `project:resume` 的 handoff 字段 |
+| `npm run project:checkpoint -- <slug> <id> <status>` | 记录地点、人物、旁白或质检批次的可恢复进度 |
 | `npm run project:review-sync -- <slug>` | 从生产状态重新生成 `review.md` 的审批摘要 |
 | `npm run project:advance -- <slug> <action>` | 记录明确的审批或确定性阶段完成事件 |
-| `npm run project:assets-ready -- <slug>` | 校验素材并将状态从素材生产推进到预览 |
-| `npm run project:sync -- <slug>` | 用 ffprobe 把真实旁白时长写回项目配置 |
-| `npm run project:subtitles -- <slug>` | 优先使用时间戳 sidecar，否则按标点和阅读长度生成字幕时间 |
-| `npm run project:quality -- <slug> <action>` | 准备、查看或记录与文件哈希绑定的图像质量检查 |
+| `npm run project:assets-ready -- <slug>` | 一次完成旁白同步、字幕、校验、质量门和阶段推进 |
+| `npm run project:sync -- <slug>` | 低层恢复命令：用 ffprobe 写回真实旁白时长 |
+| `npm run project:subtitles -- <slug>` | 低层恢复命令：同步或生成字幕时间 |
+| `npm run project:quality -- <slug> record-batch --input=<file>` | 批量记录与文件哈希绑定的图像语义检查 |
 | `npm run project:validate -- <slug>` | 检查配置、素材、透明通道、色键残边、字幕和时长 |
 | `npm run project:preview -- <slug>` | 校验后渲染 50% 预览，并生成报告 |
 | `npm run project:render -- <slug>` | 校验后渲染正式成片，并生成报告 |
@@ -181,7 +183,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 
 `project:preview` 和 `project:render` 都遵循 fail-fast：素材或配置存在错误时不会开始昂贵渲染；警告会写入报告但不阻塞。
 
-新项目还会受到门控：文本、生图、语音 provider 未确认时不能进入简报；概念和风格/虚构音色未确认时不能渲染预览，预览未获人工批准时不能渲染正式成片。完整动作表见 [docs/workflow.md](docs/workflow.md)。
+新项目仍受严格门控：概念/预算/provider 的组合决定未记录时不能生成样张，风格/虚构音色未确认时不能批量生产，预览未获人工批准时不能渲染正式成片。完整动作表见 [docs/workflow.md](docs/workflow.md)。
 
 涉及人工决定的动作必须带 `--note="人的原话或明确结论"`；这样中断恢复时不会把技术通过误认为创意或发布批准。
 
@@ -193,7 +195,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 2. `providers.local.json`：本机覆盖，已加入 `.gitignore`；
 3. `projects/<slug>/providers.json`：单项目覆盖。
 
-Skill 不会只根据名称猜测能力存在：它先检查当前宿主的实际工具/Skill 元数据，再把检测到的候选、已有配置、手工导入和“我自己提供这个能力”放进一次确认表单。选择通过 `provider:select` 持久化；恢复任务时只要已选宿主工具仍存在，就不重复询问。
+Skill 不会只根据名称猜测能力存在：它先检查当前宿主的实际工具/Skill 元数据，再把检测到的候选、已有配置、手工导入和“我自己提供这个能力”与概念/预算放进一次确认。默认通过 `project:confirm-concept` 批量持久化；`provider:select` 只用于单项变更。恢复任务时只要已选宿主工具仍存在，就不重复询问。
 
 复制 `providers.local.example.json` 为 `providers.local.json`，即可把任意 CLI、SDK 包装脚本或私有 API 接到 `command` adapter。配置只保存 `requiredEnv` 的变量名，API key 仍放在环境变量中。异步服务由用户的 adapter 自行提交和轮询；稳定接口是“读取请求 JSON、写入指定输出、退出码为 0”。
 
@@ -241,9 +243,9 @@ round(旁白开始秒数 × fps) + ceil(真实旁白秒数 × fps) + ceil(尾部
 
 后一个镜头按该镜头显式声明的 `transition.durationSeconds` 与前一个镜头交叠。项目作者只写秒数；帧数由渲染器根据 fps 推导。v1 字段不会被迁移或猜测。
 
-生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、一次能力配置门禁、四个审批、逐项工作进度、已生成产物和追加式事件历史。审批与能力确认完成事件应通过 `project:advance` 记录，工作进度应通过 `project:checkpoint` 记录，不直接改 JSON。
+生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、兼容审批字段、粗粒度生产批次、产物和追加式事件历史。默认路径用组合概念/provider 确认、风格确认和预览确认；发布字段只作为旧版或可选外部操作记录。不要直接改状态 JSON。
 
-`project:status` 会把阶段标为 `AUTO-CONTINUE`、`WAIT-HUMAN` 或 `COMPLETE`。只有 `WAIT-HUMAN` 可以作为正常的人机暂停点；`AUTO-CONTINUE` 阶段若发生真实阻塞，必须报告确切错误和需要的人为动作，不能以空白响应结束。
+`project:resume` 只输出当前阶段、制作档位、控制模式、下一命令、未完成批次和 handoff 决定。只有 `WAIT-HUMAN` 可以作为正常暂停点；`AUTO-CONTINUE` 的真实阻塞必须报告确切错误和唯一必要的人为动作。
 
 ## 验收
 
@@ -263,7 +265,7 @@ round(旁白开始秒数 × fps) + ceil(真实旁白秒数 × fps) + ceil(尾部
 
 ## 当前重建项目
 
-`projects/tie-chu-mo-zhen` 是用当前 v2 模板新建的空项目，目前停在 `capability-review`。它只保存新的项目骨架，不包含旧版故事稿、生成请求、人物图、背景、旁白、预览或历史批准。确认本次使用的文本、生图和虚构语音能力后，再由 Skill 从概念阶段重新制作。
+`projects/tie-chu-mo-zhen` 是当前 v2 协议的完整仓库演示，包含六幕配置、来源记录、质量报告和审批历史。插件发行包不携带这套生产素材，只包含独立的 `starter-demo` 技术夹具。
 
 ## 贡献、支持与安全
 

@@ -1,8 +1,19 @@
 # 人机协作工作流
 
-## 角色定义
+人负责意图、审美、事实/权利判断和外部发布授权。Codex 负责编剧、分镜、素材管理、动画和技术导演；本地脚本负责确定性状态、构建与质检。
 
-人是内容所有者、创意导演和最终验收人。Codex 是编剧助理、分镜师、素材管理员、动画执行和技术导演。本地脚本是确定性的构建与质检系统。
+## 默认用户路径
+
+```text
+主题
+→ 概念 + 时长/幕数 + 制作档位/预算 + provider（一次确认）
+→ 风格样张 + 虚构音色（一次确认）
+→ 自动批量生产、质检和预览
+→ 预览批准或修改（一次确认）
+→ 正式渲染并完成本地交付
+```
+
+外部上传、发送或发布不属于默认制作路径，只在用户实际请求时进行一次针对目标动作的授权。
 
 ## 状态流转
 
@@ -15,159 +26,76 @@ capability-review
 → preview
 → human-review
 → final-render
-→ publish-approval
+→ complete
 ```
 
-### 0. capability-review
+`brief` 和 `concept-review` 由组合确认命令一次完成；保留单独动作只是为了兼容和故障恢复。旧项目的 `publish-approval` 可继续读取，但按已完成本地交付处理。
 
-Codex 先读取 provider 配置，再检查当前宿主真正可调用的文本、生图和虚构语音工具。未确认的能力通过一次结构化表单交给人选择；没有表单能力时使用一条普通聊天消息。每类能力都可选择检测到的宿主工具、已配置服务、手工导入，或描述自己的服务。
+## 1. 组合概念与 provider 确认
 
-选择由 `provider:select` 写入项目或经明确要求写入本机配置。表单与配置中不收集 API key。三类能力都确认且配置可用后记录 `capabilities-ready`，进入 `brief`。这是服务配置，不代表概念、批量生成、创意结果或发布获批。
+新项目位于 `capability-review`。Codex 只用当前宿主模型准备临时 brief/概念，不调用未确认的外部或付费 provider。
 
-### 1. brief
+它执行一次精简 provider 检查，按四种时长/幕数输入模式完成计划，并选择：
 
-人提供：
+- `draft`：低成本迭代，强复用，景深只用于关键场景；
+- `balanced`：默认，逐幕背景、共享角色、少数重点地点独立景深；
+- `full-depth`：完整视差和更多姿态，图片预算最高。
 
-- 主题、受众、平台和时长。
-- 核心观点和期望情绪。
-- 参考风格或允许 Codex 提案。
-- 必须准确的事实、授权边界和禁止项。
+人一次确认叙事、事实、制作档位/图片预算和 text/image/voice provider。`project:confirm-concept` 批量写入 provider 选择并记录 `capabilities-ready`、`brief-ready`、`approve-concept`，直接进入 `style-review`。
 
-系统产出：`projects/<slug>/brief.md`。完成后记录 `brief-ready`。
+## 2. 风格与虚构音色确认
 
-时长和幕数是两个独立的可选约束。人可以只指定时长、只指定幕数、同时指定，或都不指定。Codex 保留已指定的值，并根据叙事节拍、旁白估时和观看节奏只补全缺失项；缺失本身不会触发追问。补全结果通过 `project:plan` 写入 `project.json`，未完成时不能记录 `brief-ready`。
+只生成一张代表性样张和足够判断的短试听。新的关键运动语言可在同一节点附一段 3–5 秒 motion proof。人批准后进入批量生产；真人声音克隆需要单独的授权与合法参考材料。
 
-概念提案会分别标出“用户指定”和“Skill 推导”的值。实际旁白生成后仍由 `project:sync` 用媒体时长校准时间线；幕数必须符合已确认计划。时长明显偏离时，用户明确指定的目标会阻塞校验，Skill 推导的目标会产生待审警告。
+## 3. 批量生产与质量门
 
-文本、生图和语音能力由 `providers.json`、可选的本机 `providers.local.json` 与项目 `providers.json` 依次覆盖。进入本阶段前再次运行 `provider:status`；外部模型的输出通过请求文件和 `assets-manifest.json` 留下可复现记录。
+素材按地点、人物组、旁白组或质检批次记录 checkpoint，不为每个小文件重复写状态。每个生成/导入输出仍保留独立 request 和 provider provenance。
 
-### 2. concept-review
+生成时遵守概念批准的图片预算，优先复用相同地点、人物表和请求指纹。图片技术与语义质量仍逐文件绑定 SHA-256，但语义结果通过 `project:quality record-batch` 分批写入。
 
-Codex 产出：
-
-- 口播文案。
-- 镜头和叙事层级。
-- 背景、人物和前景素材清单。
-- 风格方向与虚构旁白音色建议。
-
-人只需确认“方向正确”或给出自然语言修改意见。未经确认，不生成创意素材和批量旁白。确认后记录 `approve-concept`。
-
-### 3. style-review
-
-Codex 只生成一张代表性风格样张；条件允许时同时提供一小段已配置虚构音色的试听。项目采用新的关键运动语言时，在同一门禁提供 3–5 秒 motion proof，不新增第五个人工门禁。人确认视觉方向、运动语言和虚构音色后记录 `approve-style-voice`，再进入批量素材生产。
-
-### 4. asset-production
-
-Codex 和工具负责：
-
-- 生成无人物背景底板，以及真正需要视差的 rear/mid/foreground 独立环境层。
-- 生成使用服装中未出现的高饱和色键人物素材表，不强制为绿色。
-- 拆分、通用抠图、按真实键色去溢色和透明通道检查。
-- 生成或导入虚构旁白。
-- 用真实音频时长更新 `project.json`。
-- 优先使用 provider/强制对齐时间戳，否则生成标点和阅读长度感知的字幕时间。
-- 为镜头、角色动作、景深、转场和动作音效写入可配置 Motion/Depth 协议。
-
-人只在涉及真人声音、品牌、肖像或外部版权素材时提供授权判断。
-
-每个背景、人物素材表、旁白、透明图层、质量检查、时间线和校验步骤都使用 `project:checkpoint` 记录。生成前先尝试请求指纹缓存；缓存命中仍需进入当前项目的质量报告。内置图像生成产生的仅工具结果不能结束主流程；主流程继续处理下一工作项，并定期报告进度。
-
-图片存在后运行 `project:quality prepare`。Codex 查看原尺寸资产，按类型记录无文字/水印、人物完整性、身份一致性、风格、安全区和边缘等语义检查。质量记录与文件 SHA-256 绑定，文件变化后自动回到待审。v2 项目始终强制执行质量门，不提供 advisory、off 或旧协议迁移分支。
-
-全部素材通过确定性校验和要求的质量门后运行 `project:assets-ready -- <slug>`。校验或质量失败时状态不会进入预览。
-
-### 5. preview
-
-系统执行：
+素材完成后只运行：
 
 ```bash
-npm run project:preview -- <slug>
+npm run project:assets-ready -- <slug>
 ```
 
-输出预览视频、技术校验、关键帧联系表。配置错误和缺失素材会在渲染前阻塞；成功后系统自动进入 `human-review`。
+该命令依次同步真实旁白时长、生成/导入字幕时间、执行项目校验、执行质量门并推进到 `preview`。随后 `project:preview` 渲染半尺寸预览、技术报告和关键帧联系表。
 
-### 6. human-review
+## 4. 预览、修改与正式交付
 
-人查看预览，用自然语言描述问题，例如：
+人查看预览并批准或用自然语言提出修改。修改会回到 `asset-production`，只重做受影响的批次和 hash 失效素材。
 
-- 主角不够突出。
-- 画面太喜庆，希望更克制。
-- 第二幕进入得太快。
-- 这句字幕挡住礼盒。
-- 建筑年代看起来不对。
+预览批准后运行 `project:render`。正式 MP4、报告、联系表和校验报告通过后，状态直接进入 `complete`。这只表示本地制作完成，不授权任何外部发布。
 
-Codex 将意见翻译为文案、素材、层级、坐标、动画或音频调整，并记录到 `review.md`。人不直接维护机器参数。
+## 恢复与控制
 
-通过时记录 `approve-preview`；要求修改时记录 `request-preview-revision`，状态回到素材生产并保留反馈历史。
-
-### 7. final-render
-
-系统执行：
+每个新回合或中断后只运行一次：
 
 ```bash
-npm run project:render -- <slug>
+npm run project:resume -- <slug>
 ```
 
-输出 `final.mp4`、`report.json` 和 `contact-sheet.jpg`，成功后系统自动进入 `publish-approval`。
+- `auto-continue`：继续 `nextCommand` 或第一个未完成批次；
+- `wait-human`：展示当前门禁产物、原因和明确回复方式；
+- `complete`：报告本地交付产物。
 
-### 8. publish-approval
+不再同时运行 full status 和 `project:handoff-check`。只有诊断异常状态时才读取完整历史。
 
-技术报告只能证明文件和时间线正确。人仍需最终确认：
+## 状态与来源边界
 
-- 表达符合意图。
-- 事实准确到可接受程度。
-- 素材、声音和品牌使用有权发布。
-- 作品符合平台和组织要求。
+- `brief.md`：人的意图、事实、风格、格式和权利边界；
+- `production.json`：阶段、审批、粗粒度批次、产物、事件历史；
+- `project.json`：制作计划和 Remotion v2 时间线；
+- `requests/*.json` / `assets-manifest.json`：逐素材生成输入与来源；
+- `quality-report.json`：逐文件技术/语义质量和 hash；
+- `review.md`：自动审批摘要与自然语言修改历史。
 
-系统不会自动发布。
+这些文件各自只维护一种事实，避免在多个上下文中重复完整状态、请求或 provenance。
 
-## 状态文件与命令
+## 必须额外停下的情况
 
-`projects/<slug>/production.json` 是断点恢复的机器记录。Codex 每次恢复任务先运行：
-
-```bash
-npm run project:status -- <slug> --compact-json
-```
-
-`control.mode` 的含义：
-
-- `auto-continue`：无需人操作，继续下一命令或工作项，不得以“请继续”或空白响应结束。
-- `wait-human`：展示本门禁产物、暂停原因和明确回复方式后等待。
-- `complete`：报告完成；仍不得推断外部发布授权。
-
-任何准备结束的回合还必须通过：
-
-```bash
-npm run project:handoff-check -- <slug>
-```
-
-`auto-continue` 阶段会返回非零状态并阻止正常交接。真实阻塞必须同时提供 `--blocker` 和 `--needs-user`，以保证用户能看到原因和唯一必要动作。
-
-生产中的可恢复工作项通过以下命令记录：
-
-```bash
-npm run project:checkpoint -- <slug> <id> in-progress --label="工作项说明"
-npm run project:checkpoint -- <slug> <id> completed --artifact="产物路径"
-npm run project:checkpoint -- <slug> <id> blocked --note="确切阻塞原因"
-```
-
-外部或宿主生成输出另由 `provider:run` / `provider:record` 记录 provider、模型/任务 id、hash 和请求快照；它不替代生产状态，也不增加新的人工门禁。
-
-审批和阶段完成事件通过以下命令记录：
-
-```bash
-npm run project:advance -- <slug> <action> --note="人的决定或验收说明"
-```
-
-允许的动作包括 `capabilities-ready`、`brief-ready`、`approve-concept`、`request-concept-revision`、`approve-style-voice`、`request-style-voice-revision`、`assets-ready`、`approve-preview`、`request-preview-revision` 和 `approve-publish`。预览与正式渲染成功事件由渲染命令自动记录。
-
-审批状态只以 `production.json` 为准，并自动同步到 `review.md`。`brief.md` 不保存会过期的审批状态。
-
-## 默认自治边界
-
-在已确认的题材和风格范围内，Codex可以自主执行素材处理、代码修改、预览渲染和技术修复。以下情况必须停下来让人决定：
-
-- 会改变作品核心立场或目标受众。
-- 需要克隆真人声音或使用不明确授权的素材。
-- 多个视觉方向会产生显著不同的品牌或叙事结果。
-- 准备对外发布、上传或发送给第三方。
+- 会改变核心立场、目标受众或已批准的制作档位/成本；
+- 明确时长与幕数无法同时满足；
+- provider 失效且切换服务会改变费用或授权；
+- 需要真人克隆、品牌/肖像或授权不明素材；
+- 准备上传、发送或发布到具体外部目标。

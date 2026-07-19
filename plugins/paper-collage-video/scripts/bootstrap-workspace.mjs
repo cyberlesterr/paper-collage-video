@@ -14,6 +14,9 @@ const positionalTarget = rawArgs.find((value) => !value.startsWith('--'));
 const targetInput = valueFor('--target') ?? positionalTarget;
 const dryRun = rawArgs.includes('--dry-run');
 const install = rawArgs.includes('--install');
+const pluginManifest = JSON.parse(
+  await fs.readFile(path.join(PLUGIN_ROOT, '.codex-plugin', 'plugin.json'), 'utf8'),
+);
 
 const exists = async (file) => {
   try {
@@ -89,7 +92,7 @@ try {
         {
           schemaVersion: 1,
           plugin: 'paper-collage-video',
-          pluginVersion: '0.5.0',
+          pluginVersion: pluginManifest.version,
           createdAt: new Date().toISOString(),
         },
         null,

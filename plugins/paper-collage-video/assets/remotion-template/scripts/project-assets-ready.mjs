@@ -5,20 +5,28 @@ import {ROOT} from './project-lib.mjs';
 
 const [slug, ...args] = process.argv.slice(2);
 
-if (!slug) {
-  console.error('project:assets-ready failed: 用法：project:assets-ready -- <slug>');
+const run = (script, scriptArgs) =>
+  new Promise((resolve, reject) => {
+    const child = spawn(
+      process.execPath,
+      [path.join(ROOT, 'scripts', script), ...scriptArgs],
+      {cwd: ROOT, stdio: 'inherit'},
+    );
+    child.once('error', reject);
+    child.once('exit', (code, signal) => {
+      if (code === 0) resolve();
+      else reject(new Error(`${script} exited with ${code ?? signal}`));
+    });
+  });
+
+try {
+  if (!slug) {
+    throw new Error('用法：project:assets-ready -- <slug>');
+  }
+  await run('project-sync.mjs', [slug]);
+  await run('project-subtitles.mjs', [slug]);
+  await run('project-advance.mjs', [slug, 'assets-ready', ...args]);
+} catch (error) {
+  console.error(`project:assets-ready failed: ${error.message}`);
   process.exitCode = 1;
-} else {
-  const child = spawn(
-    process.execPath,
-    [path.join(ROOT, 'scripts', 'project-advance.mjs'), slug, 'assets-ready', ...args],
-    {cwd: ROOT, stdio: 'inherit'},
-  );
-  child.once('error', (error) => {
-    console.error(`project:assets-ready failed: ${error.message}`);
-    process.exitCode = 1;
-  });
-  child.once('exit', (code, signal) => {
-    if (code !== 0) process.exitCode = code ?? (signal ? 1 : 0);
-  });
 }

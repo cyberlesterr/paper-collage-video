@@ -1,43 +1,23 @@
-# Plugin Setup and Workspace Bootstrap
+# Workspace Setup
 
-Read this reference before any production command. The installed plugin is immutable distribution code; projects run in a separate writable Remotion workspace.
+Read this only when the current directory is not already a valid paper-collage workspace or doctor fails.
 
-## Locate or Create the Workspace
+A valid workspace exposes `project:new`, `project:resume`, `project:preview`, and `project:render` in `package.json`. Never generate projects inside the immutable plugin cache.
 
-Treat the current directory as an existing workspace only when its `package.json` contains the `project:new`, `project:status`, `project:preview`, and `project:render` scripts.
+If no workspace exists, resolve the plugin root two directories above this Skill and run:
 
-If no valid workspace exists:
+```bash
+node <plugin-root>/scripts/bootstrap-workspace.mjs \
+  --target=<absolute-writable-workspace> --install
+```
 
-1. Resolve the selected skill directory from the skill path shown to Codex.
-2. Resolve the plugin root two directories above it.
-3. Choose the target directory supplied by the human. If none was supplied, create `paper-collage-video-workspace` under the current writable workspace root.
-4. Run the bundled bootstrap script:
+Then work from that target and run:
 
-   ```bash
-   node <plugin-root>/scripts/bootstrap-workspace.mjs \
-     --target=<absolute-workspace-path> \
-     --install
-   ```
+```bash
+npm run doctor -- --ready
+npm run provider:status -- --compact-json
+```
 
-5. Change all subsequent commands to the generated workspace root.
-6. Run:
+The bootstrap owns npm installation and `.venv`; do not ask the human to activate Python manually.
 
-   ```bash
-   npm run doctor -- --ready
-   npm run provider:status
-   ```
-
-Do not write projects, dependencies, renders, or generated media into the installed plugin cache.
-
-The bootstrap installs Python image dependencies into `.venv`. Runtime image commands resolve `PYTHON_BIN` first, then the workspace `.venv`, then the system Python. Do not require the human to activate the virtual environment manually.
-
-## Failure Contract
-
-If bootstrap or doctor fails, preserve any created workspace and report:
-
-- the exact failed check or command;
-- the workspace path;
-- the safe command that can resume setup;
-- the one permission, dependency, or provider action required from the human.
-
-Do not proceed to the brief, concept, or asset generation until required local checks pass. A host provider may report `agent-check-required`; resolve it by inspecting the current host's installed text, image, or fictional-voice capability and obtaining the human's selection at `capability-review`. Read `capability-negotiation.md` for the form/chat fallback protocol and `providers.md` for machine-local and per-project overrides.
+If setup fails, preserve the target and report the failed check, workspace path, safe resume command, and one required permission/dependency/provider action. Do not proceed to generation until required local checks pass.

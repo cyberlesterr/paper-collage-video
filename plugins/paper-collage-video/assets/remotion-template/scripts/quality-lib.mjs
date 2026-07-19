@@ -222,7 +222,7 @@ const inspectTechnicalQuality = async ({asset, project}) => {
   return {passed: checks.every(({passed}) => passed), checks};
 };
 
-const summarizeReport = (report) => {
+export const summarizeQualityReport = (report) => {
   const failed = report.assets.filter(({status}) => status === 'needs-revision');
   const pending = report.assets.filter(({status}) => status === 'pending');
   const actualPassed = failed.length === 0 && pending.length === 0;
@@ -299,46 +299,78 @@ export const prepareQualityReport = async (slug, {write = true} = {}) => {
     assets: inspected,
   };
   if (write) await writeJson(file, report);
-  return {file, ...summarizeReport(report)};
+  return {file, ...summarizeQualityReport(report)};
 };
 
-export const recordQualityReview = async ({
-  slug,
-  assetId,
-  reviewer,
-  passedChecks = [],
-  failedChecks = [],
-  note = '',
-}) => {
-  const prepared = await prepareQualityReport(slug);
-  const asset = prepared.report.assets.find((entry) => entry.assetId === assetId);
-  if (!asset) throw new Error(`未知质量资产：${assetId}`);
-  if (!reviewer?.trim()) throw new Error('质量记录必须提供 --reviewer。');
-  for (const check of [...passedChecks, ...failedChecks]) {
-    if (!QUALITY_CHECKS.includes(check)) throw new Error(`未知质量检查：${check}`);
-    if (!asset.requiredChecks.includes(check)) {
-      throw new Error(`${assetId} 不需要质量检查 ${check}。`);
-    }
+export const recordQualityReviews = async ({slug, reviews}) => {
+  if (!Array.isArray(reviews) || reviews.length === 0) {
+    throw new Error('批量质量记录必须包含至少一项 review。');
   }
-  for (const check of passedChecks) asset.semanticChecks[check] = 'passed';
-  for (const check of failedChecks) asset.semanticChecks[check] = 'failed';
-  const semanticFailed = Object.values(asset.semanticChecks).includes('failed');
-  const semanticPassed = Object.values(asset.semanticChecks).every(
-    (status) => status === 'passed',
-  );
-  asset.status =
-    !asset.technical.passed || semanticFailed
-      ? 'needs-revision'
-      : semanticPassed
-        ? 'passed'
-        : 'pending';
-  asset.reviewer = reviewer.trim();
-  asset.reviewedAt = new Date().toISOString();
-  asset.note = note.trim();
+  const prepared = await prepareQualityReport(slug, {write: false});
+  const normalizedReviews = [];
+  const reviewedAssetIds = new Set();
+  for (const review of reviews) {
+    const {
+      assetId,
+      reviewer,
+      passedChecks = [],
+      failedChecks = [],
+      note = '',
+    } = review;
+    const asset = prepared.report.assets.find((entry) => entry.assetId === assetId);
+    if (!asset) throw new Error(`未知质量资产：${assetId}`);
+    if (reviewedAssetIds.has(assetId)) {
+      throw new Error(`批量质量记录不能重复包含资产：${assetId}`);
+    }
+    reviewedAssetIds.add(assetId);
+    if (!reviewer?.trim()) throw new Error(`${assetId} 的质量记录必须提供 reviewer。`);
+    for (const check of [...passedChecks, ...failedChecks]) {
+      if (!QUALITY_CHECKS.includes(check)) throw new Error(`未知质量检查：${check}`);
+      if (!asset.requiredChecks.includes(check)) {
+        throw new Error(`${assetId} 不需要质量检查 ${check}。`);
+      }
+    }
+    normalizedReviews.push({
+      asset,
+      assetId,
+      reviewer: reviewer.trim(),
+      passedChecks,
+      failedChecks,
+      note: note.trim(),
+    });
+  }
+
+  const changedAssets = [];
+  for (const review of normalizedReviews) {
+    const {asset, assetId, reviewer, passedChecks, failedChecks, note} = review;
+    for (const check of passedChecks) asset.semanticChecks[check] = 'passed';
+    for (const check of failedChecks) asset.semanticChecks[check] = 'failed';
+    const semanticFailed = Object.values(asset.semanticChecks).includes('failed');
+    const semanticPassed = Object.values(asset.semanticChecks).every(
+      (status) => status === 'passed',
+    );
+    asset.status =
+      !asset.technical.passed || semanticFailed
+        ? 'needs-revision'
+        : semanticPassed
+          ? 'passed'
+          : 'pending';
+    asset.reviewer = reviewer;
+    asset.reviewedAt = new Date().toISOString();
+    asset.note = note;
+    changedAssets.push(assetId);
+  }
   prepared.report.updatedAt = new Date().toISOString();
   await writeJson(prepared.file, prepared.report);
-  return {file: prepared.file, ...summarizeReport(prepared.report)};
+  return {
+    file: prepared.file,
+    changedAssets,
+    ...summarizeQualityReport(prepared.report),
+  };
 };
+
+export const recordQualityReview = async (review) =>
+  recordQualityReviews({slug: review.slug, reviews: [review]});
 
 export const assertQualityReady = async (slug) => {
   const status = await prepareQualityReport(slug);
@@ -350,6 +382,12 @@ export const assertQualityReady = async (slug) => {
     throw new Error(`资产质量门未通过：${unresolved}。运行 project:quality 查看或记录检查。`);
   }
   return status;
+};
+
+export const readQualityReportStatus = async (slug) => {
+  const file = qualityReportPath(slug);
+  const report = await readJson(file);
+  return {file, ...summarizeQualityReport(report)};
 };
 
 export const formatQualityStatus = (status) =>

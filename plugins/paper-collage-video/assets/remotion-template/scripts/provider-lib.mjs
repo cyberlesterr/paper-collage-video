@@ -340,15 +340,10 @@ const selectionTarget = (slug, scope) =>
     ? path.join(ROOT, 'providers.local.json')
     : path.join(ROOT, 'projects', slug, 'providers.json');
 
-export const writeProviderSelection = async ({
+export const writeProviderSelections = async ({
   slug,
-  capability,
-  providerId,
+  selections,
   scope = 'project',
-  label = null,
-  adapter = null,
-  tool = null,
-  model = null,
   note,
   at = new Date().toISOString(),
 }) => {
@@ -356,50 +351,19 @@ export const writeProviderSelection = async ({
   if (!(await fileExists(path.join(ROOT, 'projects', slug, 'production.json')))) {
     throw new Error(`项目不存在：${slug}；请先运行 project:new。`);
   }
-  if (!PROVIDER_CAPABILITIES.includes(capability)) {
-    throw new Error(`capability 必须是：${PROVIDER_CAPABILITIES.join(', ')}。`);
-  }
-  if (!PROVIDER_ID_PATTERN.test(providerId ?? '')) {
-    throw new Error('provider id 只能包含小写字母、数字和单个连字符。');
-  }
   if (!PROVIDER_SCOPES.includes(scope)) {
     throw new Error(`scope 必须是：${PROVIDER_SCOPES.join(', ')}。`);
   }
   if (!(note ?? '').trim()) throw new Error('provider 选择必须记录人的明确决定。');
+  if (!Array.isArray(selections) || selections.length === 0) {
+    throw new Error('selections 必须包含至少一个 provider 选择。');
+  }
+  const capabilities = selections.map(({capability}) => capability);
+  if (new Set(capabilities).size !== capabilities.length) {
+    throw new Error('同一个 capability 不能在一次确认中重复。');
+  }
 
   const loaded = assertProviderConfig(await loadProviderConfig(slug));
-  const existing = loaded.config.capabilities[capability].providers[providerId] ?? null;
-  const selectedAdapter = adapter ?? existing?.adapter;
-  if (!PROVIDER_ADAPTERS.includes(selectedAdapter)) {
-    throw new Error(`新 provider 必须指定 adapter：${PROVIDER_ADAPTERS.join(', ')}。`);
-  }
-  if (!existing && !label) throw new Error('新 provider 必须指定 --label。');
-  if (!existing && selectedAdapter === 'command') {
-    throw new Error('新的 command provider 请先在 providers.local.json 配置 command，再选择它。');
-  }
-  const provider = {
-    ...(existing ?? {}),
-    ...(label ? {label} : {}),
-    adapter: selectedAdapter,
-    ...(tool ? {tool} : {}),
-    ...(model ? {model} : {}),
-  };
-  if (provider.adapter === 'host' && capability !== 'text' && !provider.tool) {
-    throw new Error('host image/voice provider 必须用 --tool 记录已发现的可调用工具。');
-  }
-
-  if (scope === 'workspace') {
-    const projectOverlay = await readOptionalJson(
-      path.join(ROOT, 'projects', slug, 'providers.json'),
-    );
-    const projectCapability = projectOverlay?.capabilities?.[capability];
-    if (projectCapability?.defaultProvider || projectCapability?.selection) {
-      throw new Error(
-        `${capability} 已有项目级选择；项目配置优先于 workspace。请保留 --scope=project，或先显式移除该项目覆盖。`,
-      );
-    }
-  }
-
   const target = selectionTarget(slug, scope);
   const overlay = (await fileExists(target))
     ? await readJson(target)
@@ -412,40 +376,109 @@ export const writeProviderSelection = async ({
       };
   overlay.schemaVersion = 1;
   overlay.capabilities ??= {};
-  overlay.capabilities[capability] ??= {};
-  const targetCapability = overlay.capabilities[capability];
-  targetCapability.defaultProvider = providerId;
-  if (!existing || label || adapter || tool || model) {
-    targetCapability.providers ??= {};
-    targetCapability.providers[providerId] = provider;
-  }
-  const selection = {
-    status: 'confirmed',
-    provider: providerId,
-    confirmedAt: at,
-    scope,
-    note: note.trim(),
-  };
-  targetCapability.selection = selection;
-  const prospectiveConfig = deepMerge(loaded.config, {
-    capabilities: {
-      [capability]: {
-        defaultProvider: providerId,
-        providers: {[providerId]: provider},
-        selection,
+  const projectOverlay =
+    scope === 'workspace'
+      ? await readOptionalJson(path.join(ROOT, 'projects', slug, 'providers.json'))
+      : null;
+  let prospectiveConfig = loaded.config;
+  const results = [];
+  for (const input of selections) {
+    const {
+      capability,
+      providerId,
+      label = null,
+      adapter = null,
+      tool = null,
+      model = null,
+    } = input;
+    if (!PROVIDER_CAPABILITIES.includes(capability)) {
+      throw new Error(`capability 必须是：${PROVIDER_CAPABILITIES.join(', ')}。`);
+    }
+    if (!PROVIDER_ID_PATTERN.test(providerId ?? '')) {
+      throw new Error('provider id 只能包含小写字母、数字和单个连字符。');
+    }
+    const existing =
+      prospectiveConfig.capabilities[capability].providers[providerId] ?? null;
+    const selectedAdapter = adapter ?? existing?.adapter;
+    if (!PROVIDER_ADAPTERS.includes(selectedAdapter)) {
+      throw new Error(`新 provider 必须指定 adapter：${PROVIDER_ADAPTERS.join(', ')}。`);
+    }
+    if (!existing && !label) throw new Error('新 provider 必须指定 label。');
+    if (!existing && selectedAdapter === 'command') {
+      throw new Error('新的 command provider 请先在 providers.local.json 配置 command，再选择它。');
+    }
+    const provider = {
+      ...(existing ?? {}),
+      ...(label ? {label} : {}),
+      adapter: selectedAdapter,
+      ...(tool ? {tool} : {}),
+      ...(model ? {model} : {}),
+    };
+    if (provider.adapter === 'host' && capability !== 'text' && !provider.tool) {
+      throw new Error('host image/voice provider 必须记录已发现的可调用 tool。');
+    }
+    if (scope === 'workspace') {
+      const projectCapability = projectOverlay?.capabilities?.[capability];
+      if (projectCapability?.defaultProvider || projectCapability?.selection) {
+        throw new Error(
+          `${capability} 已有项目级选择；项目配置优先于 workspace。请保留 project scope，或先显式移除该项目覆盖。`,
+        );
+      }
+    }
+    const selection = {
+      status: 'confirmed',
+      provider: providerId,
+      confirmedAt: at,
+      scope,
+      note: (input.note ?? note).trim(),
+    };
+    overlay.capabilities[capability] ??= {};
+    const targetCapability = overlay.capabilities[capability];
+    targetCapability.defaultProvider = providerId;
+    if (!existing || label || adapter || tool || model) {
+      targetCapability.providers ??= {};
+      targetCapability.providers[providerId] = provider;
+    }
+    targetCapability.selection = selection;
+    prospectiveConfig = deepMerge(prospectiveConfig, {
+      capabilities: {
+        [capability]: {
+          defaultProvider: providerId,
+          providers: {[providerId]: provider},
+          selection,
+        },
       },
-    },
-  });
-  assertProviderConfig({
-    config: prospectiveConfig,
-    issues: validateProviderConfig(prospectiveConfig),
-  });
+    });
+    assertProviderConfig({
+      config: prospectiveConfig,
+      issues: validateProviderConfig(prospectiveConfig),
+    });
+    results.push({
+      provider: {...provider, id: providerId, capability},
+      selection,
+    });
+  }
   await writeJson(target, overlay);
   return {
     target,
-    provider: {...provider, id: providerId, capability},
-    selection,
+    selections: results,
     loaded: assertProviderConfig(await loadProviderConfig(slug)),
+  };
+};
+
+export const writeProviderSelection = async (input) => {
+  const result = await writeProviderSelections({
+    slug: input.slug,
+    selections: [input],
+    scope: input.scope,
+    note: input.note,
+    at: input.at,
+  });
+  return {
+    target: result.target,
+    provider: result.selections[0].provider,
+    selection: result.selections[0].selection,
+    loaded: result.loaded,
   };
 };
 
