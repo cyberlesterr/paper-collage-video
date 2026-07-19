@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "char-group-sheet-a",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-a.png",
+  "prompt": "Use case: illustration-story\nAsset type: 2x2 character action sheet for chroma-key extraction\nInput images: Image 1 is the approved style and character reference; preserve the three original monk identities, clothing colors, proportions and paper textures\nPrimary request: exactly four equal cells in a 2x2 grid. Cell 1: the small monk alone carrying two water buckets on a shoulder pole. Cell 2: the small monk and tall monk carrying one bucket together on a pole. Cell 3: all three monks standing around an empty jar, each waiting for someone else. Cell 4: all three monks startled and turning toward an off-frame glow, ready to act.\nStyle/medium: same handcrafted Chinese cut-paper collage characters as Image 1\nComposition/framing: every figure full body, fully inside its own cell with generous padding; no character crosses a cell boundary; consistent relative character scale across cells\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key in every cell, no texture, shadow, gradient, floor or reflection\nConstraints: only the requested characters and their carried bucket/pole props; complete hands, feet and shaved heads; respectful robes; no fire, no text, no labels, no borders, no logo, no watermark; do not use #00ff00 inside subjects",
+  "quality": {"kind": "character-sheet", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "identity-consistent", "cell-separation", "background-uniform"]}
+}

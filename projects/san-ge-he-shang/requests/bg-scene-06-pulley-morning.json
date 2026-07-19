@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "bg-scene-06-pulley-morning",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/plates/06-pulley-morning.png",
+  "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 6\nInput images: Image 1 is the approved style reference only\nPrimary request: peaceful mountain-temple courtyard at sunrise with a simple wooden pulley and rope system leading toward a full water jar, showing an ingenious shared routine\nStyle/medium: approved handcrafted Chinese paper collage, layered rice paper, torn edges, fine fibers and restrained ink lines\nComposition/framing: wide celebratory ending, pulley and jar readable but leave open spaces for three working character cutouts; calm lower subtitle area\nLighting/mood: bright, warm, satisfying and hopeful\nConstraints: no people, no animals, no text, no logo, no watermark, no modern machinery, original design",
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

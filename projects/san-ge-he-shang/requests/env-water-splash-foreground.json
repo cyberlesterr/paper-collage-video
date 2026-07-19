@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "env-water-splash-foreground",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/environment/source/water-splash-foreground.png",
+  "prompt": "Use case: background-extraction\nAsset type: foreground action overlay for the water-relay scene\nInput images: Image 1 is the approved style reference only\nPrimary request: one complete sweeping arc of opaque pale-blue paper-cut water splash with several rounded droplets, energetic but simple and readable\nStyle/medium: layered torn rice-paper collage matching Image 1\nComposition/framing: wide low arc with all droplets fully visible and generous padding\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key, no texture, shadow, gradient, floor or reflection\nConstraints: opaque paper shapes only, no transparency inside water, no people, no buckets, no text, no logo, no watermark; do not use #00ff00 in subject",
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "background-uniform", "edge-clean", "style-consistent"]}
+}

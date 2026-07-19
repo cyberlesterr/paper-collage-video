@@ -1,0 +1,32 @@
+{
+  "reviews": [
+    {
+      "assetId": "runtime-52d44ff72c74",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent"],
+      "failedChecks": [],
+      "note": "Transparent mountain-and-mist layer inspected on gray at original size; silhouette and torn-paper edges are complete."
+    },
+    {
+      "assetId": "runtime-09260fb63ca2",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent"],
+      "failedChecks": [],
+      "note": "Transparent eaves-and-bamboo layer inspected on gray at original size; framing subjects are complete and center remains open."
+    },
+    {
+      "assetId": "runtime-6e827242dedb",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent"],
+      "failedChecks": [],
+      "note": "Transparent fire-and-smoke layer inspected on gray at original size after tightened key tolerance; complete and free of visible green residue."
+    },
+    {
+      "assetId": "runtime-b685b96ca8e9",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "style-consistent"],
+      "failedChecks": [],
+      "note": "Transparent water-splash layer inspected on gray at original size; water arc and separated droplets are complete."
+    }
+  ]
+}

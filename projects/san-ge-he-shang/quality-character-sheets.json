@@ -1,0 +1,18 @@
+{
+  "reviews": [
+    {
+      "assetId": "char-group-sheet-a",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "identity-consistent", "cell-separation", "background-uniform"],
+      "failedChecks": [],
+      "note": "Reviewed alpha cutouts were rebuilt into four separated cells on an exact #00ff00 canvas; complete identities and poses inspected at original size. Original generated sheet is preserved."
+    },
+    {
+      "assetId": "char-group-sheet-b",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "identity-consistent", "cell-separation", "background-uniform"],
+      "failedChecks": [],
+      "note": "Reviewed alpha cutouts were rebuilt into four separated cells on an exact #00ff00 canvas; complete identities and poses inspected at original size. Original generated sheet is preserved."
+    }
+  ]
+}

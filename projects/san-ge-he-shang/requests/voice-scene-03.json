@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "voice-scene-03",
+  "capability": "voice",
+  "output": "public/projects/san-ge-he-shang/audio/narration/03-no-water.mp3",
+  "text": "又过几天，胖和尚来了。三个人都想：别人一定会去挑水。结果谁也不动，水缸很快见了底。",
+  "voiceId": "ruyayichen",
+  "model": "seed-tts-2.0",
+  "settings": {"speedRatio": 0.94, "pitch": -1, "performancePrompt": "温暖说书感，轻微俏皮；最后一句稍作停顿，让孩子听懂推诿的结果"}
+}

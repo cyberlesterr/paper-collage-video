@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "bg-scene-02-courtyard-carry",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/plates/02-courtyard-carry.png",
+  "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 2\nInput images: Image 1 is the approved style reference only; preserve its visual language, not its exact layout\nPrimary request: an ancient Chinese mountain-temple courtyard beside a sloping path, with a large water jar near one side and broad open space for two monks carrying a bucket between them\nStyle/medium: handcrafted layered paper collage with torn rice-paper edges, visible fibers and gentle ink-brush accents\nComposition/framing: wide side view, clear horizontal carrying path through the center, uncluttered lower subtitle zone\nLighting/mood: warm late morning, lightly comic\nConstraints: no people, no animals, no text, no logo, no watermark, no modern objects; original design unrelated to existing animation compositions",
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

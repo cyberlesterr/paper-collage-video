@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "style-sample-courtyard",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/style/style-sample-courtyard.png",
+  "prompt": "Use case: illustration-story\nAsset type: representative 16:9 style sample for a layered Remotion paper-collage children's video\nPrimary request: an original scene from the Chinese folk tale Three Monks, showing three friendly monks gathered around a large visibly empty water jar in a small mountain-temple courtyard, realizing that nobody fetched water\nScene/backdrop: timeless ancient Chinese mountain temple courtyard, tiled roof, stone steps, distant layered hills and a winding path; no specific dynasty\nSubject: three respectful, original cartoon monk designs with clearly different silhouettes — one small and quick, one tall and slender, one round and sturdy — expressive puzzled faces and readable body language; do not imitate any existing film or animation designs\nStyle/medium: handcrafted Chinese cut-paper collage, layered rice paper and torn paper edges, subtle paper fibers, simple ink-brush accents, separate foreground/midground/background planes suitable for parallax\nComposition/framing: wide cinematic landscape, full bodies visible, water jar near the visual center, uncluttered lower safe area for later subtitles\nLighting/mood: warm morning light, playful and gentle, child-friendly, humorous rather than mocking\nColor palette: warm ochre, cinnabar red, muted jade green, parchment cream, soft blue-gray mountains\nConstraints: coherent perspective, complete hands and feet, respectful Buddhist clothing, original character design, no text, no logo, no watermark, no modern objects, no fire, no fear, no photorealism",
+  "quality": {
+    "kind": "style-sample",
+    "requiredChecks": [
+      "no-text",
+      "no-watermark",
+      "safe-area-clear",
+      "style-consistent",
+      "subject-complete"
+    ]
+  }
+}

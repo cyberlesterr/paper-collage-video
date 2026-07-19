@@ -1,0 +1,22 @@
+{
+  "scope": "project",
+  "note": "用户批准《三个和尚》的故事、六幕分镜、约 90 秒时长、balanced 档位与最多 13 张生成图的预算，并明确将旁白改为豆包虚构音色‘儒雅逸辰’后继续制作。",
+  "selections": {
+    "text": {
+      "providerId": "host-text"
+    },
+    "image": {
+      "providerId": "gpt-image",
+      "label": "GPT Image via Codex built-in image generation",
+      "adapter": "host",
+      "tool": "image_gen__imagegen"
+    },
+    "voice": {
+      "providerId": "chatcut-doubao",
+      "label": "ChatCut Doubao fictional voice",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "seed-tts-2.0"
+    }
+  }
+}

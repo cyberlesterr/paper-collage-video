@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "voice-scene-06",
+  "capability": "voice",
+  "output": "public/projects/san-ge-he-shang/audio/narration/06-cooperation.mp3",
+  "text": "第二天，他们装好滑轮和水桶，商量着轮流取水。从此水缸天天满满的。人多不一定力量大；愿意负责、懂得合作，才能把事情做好。",
+  "voiceId": "ruyayichen",
+  "model": "seed-tts-2.0",
+  "settings": {"speedRatio": 0.93, "pitch": -1, "performancePrompt": "温暖、明亮、有收束感；寓意清楚但不说教，结尾自然留一点余韵"}
+}

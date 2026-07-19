@@ -1,0 +1,513 @@
+{
+  "$schema": "../../schemas/project.schema.json",
+  "schemaVersion": 2,
+  "slug": "san-ge-he-shang",
+  "title": "三个和尚",
+  "plan": {
+    "schemaVersion": 1,
+    "slug": "san-ge-he-shang",
+    "status": "resolved",
+    "inputMode": "none",
+    "productionProfile": "balanced",
+    "requested": {
+      "durationSeconds": null,
+      "sceneCount": null
+    },
+    "resolved": {
+      "durationSeconds": 90,
+      "sceneCount": 6,
+      "estimatedNarrationSeconds": 78,
+      "rationale": "儿童故事需要完整呈现独自取水、两人争执、三人推诿、失火转折、协作灭火和建立分工六个节拍，并给旁白、停顿与转场留出空间",
+      "resolvedAt": "2026-07-19T15:35:14.588Z"
+    },
+    "assetBudget": {
+      "backgrounds": 6,
+      "environmentLayers": 4,
+      "characterSheets": 2,
+      "styleSamples": 1,
+      "maxGeneratedImages": 13
+    },
+    "updatedAt": "2026-07-19T15:35:14.588Z"
+  },
+  "quality": {
+    "minimumAssetScale": 1
+  },
+  "video": {
+    "width": 1920,
+    "height": 1080,
+    "fps": 30
+  },
+  "theme": {
+    "canvas": "#6e1e19",
+    "sceneBackground": "#8a271f",
+    "accent": "#a33a2d",
+    "ink": "#4a291f",
+    "subtitle": "#fff8ea",
+    "subtitleBackground": "rgba(48, 24, 18, .82)",
+    "paperEdge": "#f5eedc",
+    "foreground": "#8d251e",
+    "texture": "textures/paper-grain.png"
+  },
+  "voice": {
+    "mode": "fictional",
+    "provider": "doubao",
+    "voiceId": "ruyayichen",
+    "profile": "elegant-cultural-storyteller",
+    "displayName": "儒雅逸辰",
+    "settings": {
+      "speedRatio": 0.94,
+      "pitch": -1,
+      "performancePrompt": "温暖、儒雅、略带童趣，像给孩子讲中国民间故事；吐字清楚，避免过度庄严"
+    }
+  },
+  "audio": {
+    "narration": {
+      "volume": 2
+    },
+    "music": null,
+    "sfx": {},
+    "mastering": {
+      "targetLufs": -16,
+      "toleranceLufs": 3,
+      "truePeakDbtp": -1
+    }
+  },
+  "scenes": [
+    {
+      "id": "scene-01-little-monk",
+      "label": "独自挑水",
+      "eyebrow": "第一幕",
+      "tailSeconds": 1.4,
+      "background": "projects/san-ge-he-shang/assets/plates/01-mountain-path.png",
+      "environmentLayers": [
+        {
+          "id": "mountain-mist-01",
+          "src": "projects/san-ge-he-shang/assets/environment/rear/mountain-mist-rear.png",
+          "depth": -0.75,
+          "z": 1,
+          "opacity": 0.82
+        }
+      ],
+      "camera": {
+        "preset": "pan-right",
+        "intensity": 0.52
+      },
+      "transition": {
+        "type": "none",
+        "durationSeconds": 0
+      },
+      "narration": {
+        "src": "projects/san-ge-he-shang/audio/narration/01-little-monk.mp3",
+        "startSeconds": 0.55,
+        "durationSeconds": 11.52,
+        "text": "从前，山顶有一座小庙，住着一个勤快的小和尚。他每天走下山挑水，虽然有点累，水缸却总是满满的。"
+      },
+      "layers": [
+        {
+          "id": "little-monk-carrying",
+          "src": "projects/san-ge-he-shang/assets/characters/alpha/little-carrying.png",
+          "role": "primary",
+          "x": 180,
+          "bottom": 45,
+          "width": 560,
+          "z": 4,
+          "delaySeconds": 0.15,
+          "enterFrom": "left",
+          "motion": {
+            "idle": "drift",
+            "intensity": 0.65,
+            "cycleSeconds": 2.8,
+            "phase": 0.15,
+            "enterDurationSeconds": 1.05
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.5666666666666667,
+          "toSeconds": 6.066666666666666,
+          "text": "从前，山顶有一座小庙，住着一个勤快的小和尚。"
+        },
+        {
+          "fromSeconds": 6.133333333333334,
+          "toSeconds": 12.1,
+          "text": "他每天走下山挑水，虽然有点累，水缸却总是满满的。"
+        }
+      ],
+      "audioEvents": []
+    },
+    {
+      "id": "scene-02-two-monks",
+      "label": "两人抬水",
+      "eyebrow": "第二幕",
+      "tailSeconds": 1.2,
+      "background": "projects/san-ge-he-shang/assets/plates/02-courtyard-carry.png",
+      "environmentLayers": [
+        {
+          "id": "temple-eaves-02",
+          "src": "projects/san-ge-he-shang/assets/environment/foreground/temple-eaves-foreground.png",
+          "depth": 0.82,
+          "z": 3,
+          "opacity": 0.7
+        }
+      ],
+      "camera": {
+        "preset": "pan-left",
+        "intensity": 0.42
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.6
+      },
+      "narration": {
+        "src": "projects/san-ge-he-shang/audio/narration/02-two-monks.mp3",
+        "startSeconds": 0.4,
+        "durationSeconds": 13.872,
+        "text": "后来，高和尚也来了。两个人都想省力，争着让水桶离自己远一点。最后，他们用尺子量好，把桶挂在扁担正中，一起抬水。"
+      },
+      "layers": [
+        {
+          "id": "two-monks-carrying",
+          "src": "projects/san-ge-he-shang/assets/characters/alpha/two-carrying.png",
+          "role": "primary",
+          "x": 420,
+          "bottom": 42,
+          "width": 1030,
+          "z": 4,
+          "delaySeconds": 0.12,
+          "enterFrom": "left",
+          "motion": {
+            "idle": "drift",
+            "intensity": 0.72,
+            "cycleSeconds": 2.45,
+            "phase": 0.25,
+            "enterDurationSeconds": 1
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.4,
+          "toSeconds": 3.1,
+          "text": "后来，高和尚也来了。"
+        },
+        {
+          "fromSeconds": 3.1666666666666665,
+          "toSeconds": 8.133333333333333,
+          "text": "两个人都想省力，争着让水桶离自己远一点。"
+        },
+        {
+          "fromSeconds": 8.2,
+          "toSeconds": 14.3,
+          "text": "最后，他们用尺子量好，把桶挂在扁担正中，一起抬水。"
+        }
+      ],
+      "audioEvents": []
+    },
+    {
+      "id": "scene-03-three-waiting",
+      "label": "谁也不动",
+      "eyebrow": "第三幕",
+      "tailSeconds": 1.2,
+      "background": "projects/san-ge-he-shang/assets/plates/03-empty-jar.png",
+      "environmentLayers": [
+        {
+          "id": "temple-eaves-03",
+          "src": "projects/san-ge-he-shang/assets/environment/foreground/temple-eaves-foreground.png",
+          "depth": 0.75,
+          "z": 3,
+          "opacity": 0.56
+        }
+      ],
+      "camera": {
+        "preset": "push",
+        "intensity": 0.48
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.6
+      },
+      "narration": {
+        "src": "projects/san-ge-he-shang/audio/narration/03-no-water.mp3",
+        "startSeconds": 0.4,
+        "durationSeconds": 11.352,
+        "text": "又过几天，胖和尚来了。三个人都想：别人一定会去挑水。结果谁也不动，水缸很快见了底。"
+      },
+      "layers": [
+        {
+          "id": "three-monks-waiting",
+          "src": "projects/san-ge-he-shang/assets/characters/alpha/three-waiting.png",
+          "role": "primary",
+          "x": 360,
+          "bottom": 42,
+          "width": 1160,
+          "z": 4,
+          "delaySeconds": 0.15,
+          "enterFrom": "bottom",
+          "motion": {
+            "idle": "breathe",
+            "intensity": 0.44,
+            "cycleSeconds": 3.25,
+            "phase": 0.4,
+            "enterDurationSeconds": 1.1
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.4,
+          "toSeconds": 3.5,
+          "text": "又过几天，胖和尚来了。"
+        },
+        {
+          "fromSeconds": 3.566666666666667,
+          "toSeconds": 7.633333333333334,
+          "text": "三个人都想：别人一定会去挑水。"
+        },
+        {
+          "fromSeconds": 7.7,
+          "toSeconds": 11.766666666666667,
+          "text": "结果谁也不动，水缸很快见了底。"
+        }
+      ],
+      "audioEvents": []
+    },
+    {
+      "id": "scene-04-small-fire",
+      "label": "水缸空了",
+      "eyebrow": "第四幕",
+      "tailSeconds": 1.2,
+      "background": "projects/san-ge-he-shang/assets/plates/04-temple-interior.png",
+      "environmentLayers": [
+        {
+          "id": "fire-smoke-04",
+          "src": "projects/san-ge-he-shang/assets/environment/foreground/fire-smoke-foreground.png",
+          "depth": 0.82,
+          "z": 6,
+          "x": 1180,
+          "y": 430,
+          "width": 520,
+          "opacity": 0.78
+        }
+      ],
+      "camera": {
+        "preset": "push",
+        "intensity": 0.64
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.55
+      },
+      "narration": {
+        "src": "projects/san-ge-he-shang/audio/narration/04-small-fire.mp3",
+        "startSeconds": 0.35,
+        "durationSeconds": 10.68,
+        "text": "一天夜里，老鼠碰倒了油灯，窗帘冒起小小的火苗。三个和尚冲向水缸，却发现里面一滴水也没有。"
+      },
+      "layers": [
+        {
+          "id": "three-monks-startled",
+          "src": "projects/san-ge-he-shang/assets/characters/alpha/three-startled.png",
+          "role": "primary",
+          "x": 300,
+          "bottom": 38,
+          "width": 1100,
+          "z": 4,
+          "delaySeconds": 0.08,
+          "enterFrom": "bottom",
+          "motion": {
+            "idle": "float",
+            "intensity": 0.65,
+            "cycleSeconds": 2.15,
+            "phase": 0.2,
+            "enterDurationSeconds": 0.9
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.36666666666666664,
+          "toSeconds": 5.9,
+          "text": "一天夜里，老鼠碰倒了油灯，窗帘冒起小小的火苗。"
+        },
+        {
+          "fromSeconds": 5.966666666666667,
+          "toSeconds": 11.066666666666666,
+          "text": "三个和尚冲向水缸，却发现里面一滴水也没有。"
+        }
+      ],
+      "audioEvents": []
+    },
+    {
+      "id": "scene-05-water-relay",
+      "label": "齐心灭火",
+      "eyebrow": "第五幕",
+      "tailSeconds": 1.4,
+      "background": "projects/san-ge-he-shang/assets/plates/05-water-relay.png",
+      "environmentLayers": [
+        {
+          "id": "fire-smoke-05",
+          "src": "projects/san-ge-he-shang/assets/environment/foreground/fire-smoke-foreground.png",
+          "depth": 0.55,
+          "z": 3,
+          "x": 1410,
+          "y": 430,
+          "width": 360,
+          "opacity": 0.38
+        },
+        {
+          "id": "water-splash-05",
+          "src": "projects/san-ge-he-shang/assets/environment/foreground/water-splash-foreground.png",
+          "depth": 0.88,
+          "z": 6,
+          "x": 1030,
+          "y": 520,
+          "width": 760,
+          "opacity": 0.92
+        }
+      ],
+      "camera": {
+        "preset": "pan-right",
+        "intensity": 0.76
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.55
+      },
+      "narration": {
+        "src": "projects/san-ge-he-shang/audio/narration/05-teamwork.mp3",
+        "startSeconds": 0.35,
+        "durationSeconds": 11.328,
+        "text": "这回，他们不争了：一个下山打水，一个半路接水，一个留在庙里泼水。三个人来回奔跑，终于把火扑灭。"
+      },
+      "layers": [
+        {
+          "id": "three-monks-relay",
+          "src": "projects/san-ge-he-shang/assets/characters/alpha/three-relay.png",
+          "role": "primary",
+          "x": 190,
+          "bottom": 40,
+          "width": 1370,
+          "z": 4,
+          "delaySeconds": 0.05,
+          "enterFrom": "left",
+          "motion": {
+            "idle": "drift",
+            "intensity": 0.9,
+            "cycleSeconds": 1.9,
+            "phase": 0.12,
+            "enterDurationSeconds": 0.85
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.36666666666666664,
+          "toSeconds": 1.1333333333333333,
+          "text": "这回，"
+        },
+        {
+          "fromSeconds": 1.2,
+          "toSeconds": 2.6,
+          "text": "他们不争了："
+        },
+        {
+          "fromSeconds": 2.6666666666666665,
+          "toSeconds": 4.266666666666667,
+          "text": "一个下山打水，"
+        },
+        {
+          "fromSeconds": 4.333333333333333,
+          "toSeconds": 5.933333333333334,
+          "text": "一个半路接水，"
+        },
+        {
+          "fromSeconds": 6,
+          "toSeconds": 8.2,
+          "text": "一个留在庙里泼水。"
+        },
+        {
+          "fromSeconds": 8.266666666666667,
+          "toSeconds": 11.7,
+          "text": "三个人来回奔跑，终于把火扑灭。"
+        }
+      ],
+      "audioEvents": []
+    },
+    {
+      "id": "scene-06-cooperation",
+      "label": "轮流合作",
+      "eyebrow": "第六幕",
+      "tailSeconds": 2.4,
+      "background": "projects/san-ge-he-shang/assets/plates/06-pulley-morning.png",
+      "environmentLayers": [
+        {
+          "id": "mountain-mist-06",
+          "src": "projects/san-ge-he-shang/assets/environment/rear/mountain-mist-rear.png",
+          "depth": -0.7,
+          "z": 1,
+          "opacity": 0.6
+        },
+        {
+          "id": "temple-eaves-06",
+          "src": "projects/san-ge-he-shang/assets/environment/foreground/temple-eaves-foreground.png",
+          "depth": 0.76,
+          "z": 3,
+          "opacity": 0.42
+        }
+      ],
+      "camera": {
+        "preset": "pull",
+        "intensity": 0.52
+      },
+      "transition": {
+        "type": "fade",
+        "durationSeconds": 0.7
+      },
+      "narration": {
+        "src": "projects/san-ge-he-shang/audio/narration/06-cooperation.mp3",
+        "startSeconds": 0.45,
+        "durationSeconds": 16.176,
+        "text": "第二天，他们装好滑轮和水桶，商量着轮流取水。从此水缸天天满满的。人多不一定力量大；愿意负责、懂得合作，才能把事情做好。"
+      },
+      "layers": [
+        {
+          "id": "three-monks-finished",
+          "src": "projects/san-ge-he-shang/assets/characters/alpha/three-finished.png",
+          "role": "primary",
+          "x": 380,
+          "bottom": 48,
+          "width": 1150,
+          "z": 4,
+          "delaySeconds": 0.15,
+          "enterFrom": "bottom",
+          "motion": {
+            "idle": "breathe",
+            "intensity": 0.42,
+            "cycleSeconds": 3.4,
+            "phase": 0.2,
+            "enterDurationSeconds": 1.15
+          }
+        }
+      ],
+      "subtitles": [
+        {
+          "fromSeconds": 0.4666666666666667,
+          "toSeconds": 6.4,
+          "text": "第二天，他们装好滑轮和水桶，商量着轮流取水。"
+        },
+        {
+          "fromSeconds": 6.466666666666667,
+          "toSeconds": 9.4,
+          "text": "从此水缸天天满满的。"
+        },
+        {
+          "fromSeconds": 9.466666666666667,
+          "toSeconds": 16.666666666666668,
+          "text": "人多不一定力量大；愿意负责、懂得合作，才能把事情做好。"
+        }
+      ],
+      "audioEvents": []
+    }
+  ]
+}

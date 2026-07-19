@@ -1,0 +1,32 @@
+{
+  "reviews": [
+    {
+      "assetId": "env-mountain-mist-rear",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "background-uniform", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Reviewed alpha layer was composited onto an exact #00ff00 canvas; original generated source is preserved and the complete torn-paper mountain edge is clean."
+    },
+    {
+      "assetId": "env-temple-eaves-foreground",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "background-uniform", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Reviewed alpha layer was composited onto an exact #00ff00 canvas; eaves and bamboo are complete with clean boundaries and the original source is preserved."
+    },
+    {
+      "assetId": "env-fire-smoke-foreground",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "background-uniform", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Reviewed alpha layer was composited onto an exact #00ff00 canvas; flame and smoke are complete, child-safe and clean-edged. Original source is preserved."
+    },
+    {
+      "assetId": "env-water-splash-foreground",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "subject-complete", "background-uniform", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Reviewed alpha layer was composited onto an exact #00ff00 canvas; splash and droplets are complete with clean edges. Original source is preserved."
+    }
+  ]
+}

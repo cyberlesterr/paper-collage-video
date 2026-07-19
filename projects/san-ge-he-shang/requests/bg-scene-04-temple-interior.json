@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "bg-scene-04-temple-interior",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/plates/04-temple-interior.png",
+  "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 4\nInput images: Image 1 is the approved style reference only\nPrimary request: a simple ancient mountain-temple interior at night, an oil lamp tipped beside a curtain with one small contained orange paper-cut flame, and a large empty water jar clearly visible\nStyle/medium: handcrafted layered rice-paper collage matching the approved sample; opaque paper flame, no realism\nComposition/framing: wide interior with open center for three separate character layers, visible doorway, uncluttered subtitle zone\nLighting/mood: mildly urgent but safe and child-friendly; warm glow against soft indigo shadows\nConstraints: no people, no animals, no frightening blaze, no damage, no smoke obscuring the room, no text, no logo, no watermark, no modern objects, no sacred-statue caricature",
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

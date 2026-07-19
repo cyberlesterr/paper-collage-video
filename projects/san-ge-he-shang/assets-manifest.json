@@ -1,0 +1,672 @@
+{
+  "$schema": "../../schemas/assets-manifest.schema.json",
+  "schemaVersion": 2,
+  "projectSlug": "san-ge-he-shang",
+  "assets": [
+    {
+      "assetId": "style-voice-audition",
+      "capability": "voice",
+      "file": "public/projects/san-ge-he-shang/audio/narration/style-voice-audition.mp3",
+      "provider": "chatcut-doubao",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "1cde635361",
+      "requestFingerprint": "960a30602e7b08f8c503c0bd6796919314d89a413b3b3119bafafba8065b6f68",
+      "reusedFrom": null,
+      "sha256": "635647c2bb773b6d74c938a7debab4a1870ac0ae845bd3dc6ceaf8b4396bd7f3",
+      "sizeBytes": 102381,
+      "recordedAt": "2026-07-19T15:42:28.023Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "style-voice-audition",
+        "capability": "voice",
+        "output": "public/projects/san-ge-he-shang/audio/narration/style-voice-audition.mp3",
+        "text": "从前，山顶有一座小庙。庙里住着一个勤快的小和尚，他每天走下山挑水。虽然有点累，水缸却总是满满的。",
+        "voiceId": "ruyayichen",
+        "model": "seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "performancePrompt": "温暖、儒雅、略带童趣，像给孩子讲中国民间故事；吐字清楚，避免过度庄严"
+        }
+      }
+    },
+    {
+      "assetId": "style-sample-courtyard",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/style/style-sample-courtyard.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "019f7b09-d91f-7531-93ac-2253e49fe9c8",
+      "requestFingerprint": "a03d01ff56bd899fdc7064311f4b7e1c07603df74a97db7ad3c07a9eac23baee",
+      "reusedFrom": null,
+      "sha256": "b6ffa79926f8c38394a3c7749cd8cd46cdefef32e92ac88d43c2131279295932",
+      "sizeBytes": 2914248,
+      "recordedAt": "2026-07-19T15:45:07.584Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "style-sample-courtyard",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/style/style-sample-courtyard.png",
+        "prompt": "Use case: illustration-story\nAsset type: representative 16:9 style sample for a layered Remotion paper-collage children's video\nPrimary request: an original scene from the Chinese folk tale Three Monks, showing three friendly monks gathered around a large visibly empty water jar in a small mountain-temple courtyard, realizing that nobody fetched water\nScene/backdrop: timeless ancient Chinese mountain temple courtyard, tiled roof, stone steps, distant layered hills and a winding path; no specific dynasty\nSubject: three respectful, original cartoon monk designs with clearly different silhouettes — one small and quick, one tall and slender, one round and sturdy — expressive puzzled faces and readable body language; do not imitate any existing film or animation designs\nStyle/medium: handcrafted Chinese cut-paper collage, layered rice paper and torn paper edges, subtle paper fibers, simple ink-brush accents, separate foreground/midground/background planes suitable for parallax\nComposition/framing: wide cinematic landscape, full bodies visible, water jar near the visual center, uncluttered lower safe area for later subtitles\nLighting/mood: warm morning light, playful and gentle, child-friendly, humorous rather than mocking\nColor palette: warm ochre, cinnabar red, muted jade green, parchment cream, soft blue-gray mountains\nConstraints: coherent perspective, complete hands and feet, respectful Buddhist clothing, original character design, no text, no logo, no watermark, no modern objects, no fire, no fear, no photorealism",
+        "quality": {
+          "kind": "style-sample",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "safe-area-clear",
+            "style-consistent",
+            "subject-complete"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "voice-scene-01",
+      "capability": "voice",
+      "file": "public/projects/san-ge-he-shang/audio/narration/01-little-monk.mp3",
+      "provider": "chatcut-doubao",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "d8751b1bfd",
+      "requestFingerprint": "33dd0d690a38765f1076dbb716fa1ef9ee52d7d838622fb1b13b603cd7037fdb",
+      "reusedFrom": null,
+      "sha256": "a7c4cc8b3460c8e709b9200ceefc650946f3ffdbb33ee115a1ce91b0a9df1d56",
+      "sizeBytes": 92205,
+      "recordedAt": "2026-07-19T16:18:37.350Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "voice-scene-01",
+        "capability": "voice",
+        "output": "public/projects/san-ge-he-shang/audio/narration/01-little-monk.mp3",
+        "text": "从前，山顶有一座小庙，住着一个勤快的小和尚。他每天走下山挑水，虽然有点累，水缸却总是满满的。",
+        "voiceId": "ruyayichen",
+        "model": "seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "performancePrompt": "温暖、儒雅、略带童趣，像给孩子讲中国民间故事；吐字清楚，避免过度庄严"
+        }
+      }
+    },
+    {
+      "assetId": "voice-scene-02",
+      "capability": "voice",
+      "file": "public/projects/san-ge-he-shang/audio/narration/02-two-monks.mp3",
+      "provider": "chatcut-doubao",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "f534106415",
+      "requestFingerprint": "52605d8740dda4d0931ba404419a36ef164bfdfb34d600c38680b4397578d4d2",
+      "reusedFrom": null,
+      "sha256": "85b27375596df02d973071fc4b27e964a2b5418f138f039d51968e824b463f92",
+      "sizeBytes": 111021,
+      "recordedAt": "2026-07-19T16:18:37.568Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "voice-scene-02",
+        "capability": "voice",
+        "output": "public/projects/san-ge-he-shang/audio/narration/02-two-monks.mp3",
+        "text": "后来，高和尚也来了。两个人都想省力，争着让水桶离自己远一点。最后，他们用尺子量好，把桶挂在扁担正中，一起抬水。",
+        "voiceId": "ruyayichen",
+        "model": "seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "performancePrompt": "温暖、儒雅、略带童趣；争执部分带一点轻松幽默，吐字清楚，不夸张"
+        }
+      }
+    },
+    {
+      "assetId": "voice-scene-03",
+      "capability": "voice",
+      "file": "public/projects/san-ge-he-shang/audio/narration/03-no-water.mp3",
+      "provider": "chatcut-doubao",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "ed510edb08",
+      "requestFingerprint": "bea64925512d02220fffc4e1391f6dcc8cce19fbb4f4092e9c4fb67fb9a6ecf3",
+      "reusedFrom": null,
+      "sha256": "90920c063ca2d2a0e207e9d426a8531b5ad64325dfb15f160da5705c45beacdd",
+      "sizeBytes": 90861,
+      "recordedAt": "2026-07-19T16:18:37.763Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "voice-scene-03",
+        "capability": "voice",
+        "output": "public/projects/san-ge-he-shang/audio/narration/03-no-water.mp3",
+        "text": "又过几天，胖和尚来了。三个人都想：别人一定会去挑水。结果谁也不动，水缸很快见了底。",
+        "voiceId": "ruyayichen",
+        "model": "seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.94,
+          "pitch": -1,
+          "performancePrompt": "温暖说书感，轻微俏皮；最后一句稍作停顿，让孩子听懂推诿的结果"
+        }
+      }
+    },
+    {
+      "assetId": "voice-scene-04",
+      "capability": "voice",
+      "file": "public/projects/san-ge-he-shang/audio/narration/04-small-fire.mp3",
+      "provider": "chatcut-doubao",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "354c3c6981",
+      "requestFingerprint": "de1776b2a099b3372a1feb73212ace77f39948307aaf41131051001d86d75ef5",
+      "reusedFrom": null,
+      "sha256": "abf212a4a12f3070be8462d29580b4e29c8cb53f5c2b678341b1ee4e46f7138f",
+      "sizeBytes": 85485,
+      "recordedAt": "2026-07-19T16:18:37.960Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "voice-scene-04",
+        "capability": "voice",
+        "output": "public/projects/san-ge-he-shang/audio/narration/04-small-fire.mp3",
+        "text": "一天夜里，老鼠碰倒了油灯，窗帘冒起小小的火苗。三个和尚冲向水缸，却发现里面一滴水也没有。",
+        "voiceId": "ruyayichen",
+        "model": "seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.96,
+          "pitch": -1,
+          "performancePrompt": "紧张但克制，适合儿童；不要惊悚，火苗和空水缸处强调清楚"
+        }
+      }
+    },
+    {
+      "assetId": "voice-scene-05",
+      "capability": "voice",
+      "file": "public/projects/san-ge-he-shang/audio/narration/05-teamwork.mp3",
+      "provider": "chatcut-doubao",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "6e35a6088e",
+      "requestFingerprint": "0384afb3e500e2409ae7ee3d3f0c472675302967776633d1a18d62e89dfff9cf",
+      "reusedFrom": null,
+      "sha256": "3e4b48c0e6a9a7832c8561007db5c3ab752532b8a9a6676d6f9c758ecd0b16f9",
+      "sizeBytes": 90669,
+      "recordedAt": "2026-07-19T16:18:38.162Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "voice-scene-05",
+        "capability": "voice",
+        "output": "public/projects/san-ge-he-shang/audio/narration/05-teamwork.mp3",
+        "text": "这回，他们不争了：一个下山打水，一个半路接水，一个留在庙里泼水。三个人来回奔跑，终于把火扑灭。",
+        "voiceId": "ruyayichen",
+        "model": "seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.97,
+          "pitch": -1,
+          "performancePrompt": "有行动感和节奏感，但保持温暖儒雅；三个分工短句读得清楚有层次"
+        }
+      }
+    },
+    {
+      "assetId": "voice-scene-06",
+      "capability": "voice",
+      "file": "public/projects/san-ge-he-shang/audio/narration/06-cooperation.mp3",
+      "provider": "chatcut-doubao",
+      "adapter": "host",
+      "tool": "mcp__chatcut__submit_voice",
+      "model": "doubao-tts",
+      "externalId": "5fdaabf257",
+      "requestFingerprint": "98b06b86a2890e4750095ca350b99d0fc89bb3606c86dbfd3ea8a3eed9740b82",
+      "reusedFrom": null,
+      "sha256": "58513929fbd6f1c906e65aa8bf4cb5831816c75159b22169479a84231befea3e",
+      "sizeBytes": 129453,
+      "recordedAt": "2026-07-19T16:18:38.375Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "voice-scene-06",
+        "capability": "voice",
+        "output": "public/projects/san-ge-he-shang/audio/narration/06-cooperation.mp3",
+        "text": "第二天，他们装好滑轮和水桶，商量着轮流取水。从此水缸天天满满的。人多不一定力量大；愿意负责、懂得合作，才能把事情做好。",
+        "voiceId": "ruyayichen",
+        "model": "seed-tts-2.0",
+        "settings": {
+          "speedRatio": 0.93,
+          "pitch": -1,
+          "performancePrompt": "温暖、明亮、有收束感；寓意清楚但不说教，结尾自然留一点余韵"
+        }
+      }
+    },
+    {
+      "assetId": "bg-scene-01-mountain-path",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/plates/01-mountain-path.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "6e5be8d3-1bb4-42a5-a636-87ed1c352b9a",
+      "requestFingerprint": "4bf440d2beb6d8f89fcc39b7225a0203a5121e0f6101d63936aca570a5b5b0d4",
+      "reusedFrom": null,
+      "sha256": "837924f662ebab305105c94bb2793e6dac3c90f7499832104539dcac43ac4c15",
+      "sizeBytes": 3842507,
+      "recordedAt": "2026-07-19T16:24:15.698Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "bg-scene-01-mountain-path",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/plates/01-mountain-path.png",
+        "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 1\nInput images: Image 1 is the approved style reference only; do not copy its composition\nPrimary request: a winding ancient Chinese mountain path leading between a clear spring and a small temple at the summit, showing the long daily water-fetching route\nStyle/medium: match Image 1's handcrafted layered rice-paper collage, torn edges, paper fibers, restrained ink accents and warm child-friendly palette\nComposition/framing: wide landscape with a generous open walking area across the middle and lower third for a separate character layer; distant temple and spring both readable\nLighting/mood: fresh golden morning, diligent and hopeful\nConstraints: timeless setting, no specific dynasty, no people, no animals, no text, no logo, no watermark, no modern objects; leave lower subtitle area visually quiet",
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "bg-scene-02-courtyard-carry",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/plates/02-courtyard-carry.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "17f8331f-ce5a-4c6b-b241-9fa68f25c508",
+      "requestFingerprint": "30b3001e593302b6cdc1f6220bda18bc6f932571b27381f69ad0647cee1f883c",
+      "reusedFrom": null,
+      "sha256": "4f3741be0dda3c1096d3cbd87f6d9cbe30db692be8c6768e42f5a304128b2f9f",
+      "sizeBytes": 3782838,
+      "recordedAt": "2026-07-19T16:24:15.895Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "bg-scene-02-courtyard-carry",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/plates/02-courtyard-carry.png",
+        "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 2\nInput images: Image 1 is the approved style reference only; preserve its visual language, not its exact layout\nPrimary request: an ancient Chinese mountain-temple courtyard beside a sloping path, with a large water jar near one side and broad open space for two monks carrying a bucket between them\nStyle/medium: handcrafted layered paper collage with torn rice-paper edges, visible fibers and gentle ink-brush accents\nComposition/framing: wide side view, clear horizontal carrying path through the center, uncluttered lower subtitle zone\nLighting/mood: warm late morning, lightly comic\nConstraints: no people, no animals, no text, no logo, no watermark, no modern objects; original design unrelated to existing animation compositions",
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "bg-scene-03-empty-jar",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/plates/03-empty-jar.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "d604d3e3-fd7e-47b8-94e0-69fc1d1b2aac",
+      "requestFingerprint": "d3e690e25d2dd711fd7ecaf7ef993249dc8ae1666dd21a28552680ef014165b7",
+      "reusedFrom": null,
+      "sha256": "2de100b9c0a20cd518fe1e4aa17ac7d691836bf4a3be420e41d99bc36936f50b",
+      "sizeBytes": 3779443,
+      "recordedAt": "2026-07-19T16:24:16.105Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "bg-scene-03-empty-jar",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/plates/03-empty-jar.png",
+        "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 3\nInput images: Image 1 is the approved style reference only\nPrimary request: the same kind of timeless mountain-temple courtyard at quiet midday, with a large visibly empty water jar centered and three separate open standing areas around it; a dry wooden ladle rests nearby\nStyle/medium: approved handcrafted Chinese cut-paper collage, rice-paper fibers, torn edges, muted ochre, cinnabar and jade\nComposition/framing: wide symmetrical comic staging, empty jar the focal point, quiet lower safe area\nLighting/mood: still, playful anticipation rather than sadness\nConstraints: no people, no animals, no text, no logo, no watermark, no modern objects; original composition",
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "bg-scene-04-temple-interior",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/plates/04-temple-interior.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "5df9d817-6703-49e4-8dfb-7dfe655c4ba4",
+      "requestFingerprint": "74a63f8db4872bf800fd82c14cd4eecf5c2955bd90d527ae719cd5c84c550b2e",
+      "reusedFrom": null,
+      "sha256": "b66df740bec209ec2779b712f68ee0aa7f589134fc51f79f54bc0154610d3094",
+      "sizeBytes": 3423393,
+      "recordedAt": "2026-07-19T16:24:16.306Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "bg-scene-04-temple-interior",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/plates/04-temple-interior.png",
+        "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 4\nInput images: Image 1 is the approved style reference only\nPrimary request: a simple ancient mountain-temple interior at night, an oil lamp tipped beside a curtain with one small contained orange paper-cut flame, and a large empty water jar clearly visible\nStyle/medium: handcrafted layered rice-paper collage matching the approved sample; opaque paper flame, no realism\nComposition/framing: wide interior with open center for three separate character layers, visible doorway, uncluttered subtitle zone\nLighting/mood: mildly urgent but safe and child-friendly; warm glow against soft indigo shadows\nConstraints: no people, no animals, no frightening blaze, no damage, no smoke obscuring the room, no text, no logo, no watermark, no modern objects, no sacred-statue caricature",
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "bg-scene-05-water-relay",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/plates/05-water-relay.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "7f2af646-ca59-4318-ae3-86c29f50705f",
+      "requestFingerprint": "322ed98913a9e7890946065bf420fdd6c6071f141e98d4f60d9daad37460e4db",
+      "reusedFrom": null,
+      "sha256": "9d76e472aa5777b9e01f66942f04283eb03f4354febdc274c5970c7d2dcc16ea",
+      "sizeBytes": 3733610,
+      "recordedAt": "2026-07-19T16:24:16.500Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "bg-scene-05-water-relay",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/plates/05-water-relay.png",
+        "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 5\nInput images: Image 1 is the approved style reference only\nPrimary request: moonlit mountain-temple courtyard and descending path arranged as a clear relay route from a spring at one side toward the open temple doorway; several empty bucket landing spots imply teamwork\nStyle/medium: handcrafted layered rice-paper collage, torn edges, visible fibers, soft ink accents, approved palette shifted to moonlit blue and warm amber\nComposition/framing: wide diagonal action path with open positions for three monk cutouts and water-splash overlays; lower subtitle area readable\nLighting/mood: energetic cooperation, gentle nighttime urgency\nConstraints: no people, no animals, no large fire, no text, no logo, no watermark, no modern objects",
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "bg-scene-06-pulley-morning",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/plates/06-pulley-morning.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "bfa2bba9-fe7b-401b-a85b-c4c921851a14",
+      "requestFingerprint": "5adc468d346a26628628f0973ad49942a166da23985ab05488a13367b5f94c7a",
+      "reusedFrom": null,
+      "sha256": "950b00cc1b3b4fccaec20d9978ee53b55da70db5ab83f8c7afe618d1b5997330",
+      "sizeBytes": 3706572,
+      "recordedAt": "2026-07-19T16:24:16.718Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "bg-scene-06-pulley-morning",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/plates/06-pulley-morning.png",
+        "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 6\nInput images: Image 1 is the approved style reference only\nPrimary request: peaceful mountain-temple courtyard at sunrise with a simple wooden pulley and rope system leading toward a full water jar, showing an ingenious shared routine\nStyle/medium: approved handcrafted Chinese paper collage, layered rice paper, torn edges, fine fibers and restrained ink lines\nComposition/framing: wide celebratory ending, pulley and jar readable but leave open spaces for three working character cutouts; calm lower subtitle area\nLighting/mood: bright, warm, satisfying and hopeful\nConstraints: no people, no animals, no text, no logo, no watermark, no modern machinery, original design",
+        "quality": {
+          "kind": "background",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "no-people",
+            "safe-area-clear",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "char-group-sheet-a",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-a.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "1468a399-5ed1-4681-9db9-8f3ff38de945",
+      "requestFingerprint": "32865e1d1de579e073af1b6bea3be19692108349383c6346ea416857ea383c19",
+      "reusedFrom": null,
+      "sha256": "c647949621a1f70ba739e2d9e843513b27debaccaabc5da2eacbbe54454bb1f9",
+      "sizeBytes": 932659,
+      "recordedAt": "2026-07-19T16:24:16.930Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "char-group-sheet-a",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-a.png",
+        "prompt": "Use case: illustration-story\nAsset type: 2x2 character action sheet for chroma-key extraction\nInput images: Image 1 is the approved style and character reference; preserve the three original monk identities, clothing colors, proportions and paper textures\nPrimary request: exactly four equal cells in a 2x2 grid. Cell 1: the small monk alone carrying two water buckets on a shoulder pole. Cell 2: the small monk and tall monk carrying one bucket together on a pole. Cell 3: all three monks standing around an empty jar, each waiting for someone else. Cell 4: all three monks startled and turning toward an off-frame glow, ready to act.\nStyle/medium: same handcrafted Chinese cut-paper collage characters as Image 1\nComposition/framing: every figure full body, fully inside its own cell with generous padding; no character crosses a cell boundary; consistent relative character scale across cells\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key in every cell, no texture, shadow, gradient, floor or reflection\nConstraints: only the requested characters and their carried bucket/pole props; complete hands, feet and shaved heads; respectful robes; no fire, no text, no labels, no borders, no logo, no watermark; do not use #00ff00 inside subjects",
+        "quality": {
+          "kind": "character-sheet",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "identity-consistent",
+            "cell-separation",
+            "background-uniform"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "char-group-sheet-b",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-b.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "b1a7b97e-2939-47d7-b8c7-a2322e4279ce",
+      "requestFingerprint": "a0fb4a2612cfae23874bfd5530f98623591ae619f6a172358c861e6952db924e",
+      "reusedFrom": null,
+      "sha256": "d84847e4ba4b53de15ba5b30556acb16b229640d12bf2a198d031e5f11be5b7b",
+      "sizeBytes": 1036916,
+      "recordedAt": "2026-07-19T16:24:17.169Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "char-group-sheet-b",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-b.png",
+        "prompt": "Use case: illustration-story\nAsset type: 2x2 character action sheet for chroma-key extraction\nInput images: Image 1 is the approved style and character reference; preserve the three original monk identities, clothing colors, proportions and paper textures\nPrimary request: exactly four equal cells in a 2x2 grid. Cell 1: three monks in a clear relay line passing water buckets. Cell 2: three monks together throwing water forward with a simple opaque paper water splash. Cell 3: three monks cooperatively installing a simple wooden pulley and rope. Cell 4: three monks smiling beside a full water jar, each holding a small tool or bucket.\nStyle/medium: same handcrafted Chinese cut-paper collage characters as Image 1\nComposition/framing: every figure full body and fully inside its cell; no character crosses a boundary; consistent identities and relative scale across all cells\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key in every cell, no texture, shadow, gradient, floor or reflection\nConstraints: complete hands and feet, respectful robes, child-friendly action, no scary fire, no text, no labels, no borders, no logo, no watermark; do not use #00ff00 inside subjects",
+        "quality": {
+          "kind": "character-sheet",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "identity-consistent",
+            "cell-separation",
+            "background-uniform"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-mountain-mist-rear",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/environment/source/mountain-mist-rear.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "235c0b35-3a45-4a39-875c-620cba0f8dba",
+      "requestFingerprint": "9131c60c635bc65dddad92c6c6376f55bebcecaca269cccbc5d76eb621cad16d",
+      "reusedFrom": null,
+      "sha256": "0493fab736bed4f1f43c29cc5fa79827848395900f0dd639cde644d98305f936",
+      "sizeBytes": 570997,
+      "recordedAt": "2026-07-19T16:24:17.667Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "env-mountain-mist-rear",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/environment/source/mountain-mist-rear.png",
+        "prompt": "Use case: background-extraction\nAsset type: wide rear parallax overlay for scenes 1 and 6\nInput images: Image 1 is the approved style reference only\nPrimary request: one long layered band of pale blue-gray paper-cut mountain mist and two distant mountain silhouettes, designed as a single complete wide overlay\nStyle/medium: handcrafted torn rice-paper collage matching Image 1\nComposition/framing: horizontal strip across most of the canvas with generous padding and crisp complete edges\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key, no texture, shadow, gradient, floor or reflection\nConstraints: no people, no buildings, no text, no logo, no watermark; do not use #00ff00 in the overlay",
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "background-uniform",
+            "edge-clean",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-temple-eaves-foreground",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/environment/source/temple-eaves-foreground.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "4d1d9916-bcbf-437c-985f-db783cd36819",
+      "requestFingerprint": "516617ad512ecf29b31a56920a80f61f72b15f6db6fb4e3c204ee7c0e87a0917",
+      "reusedFrom": null,
+      "sha256": "8c60d9bda7666411a5859d65479a78bbd0102d842a6003915a72daf27f357ff4",
+      "sizeBytes": 718105,
+      "recordedAt": "2026-07-19T16:24:17.862Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "env-temple-eaves-foreground",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/environment/source/temple-eaves-foreground.png",
+        "prompt": "Use case: background-extraction\nAsset type: foreground parallax overlay for temple courtyard scenes\nInput images: Image 1 is the approved style reference only\nPrimary request: one complete L-shaped paper-cut foreground element combining a dark blue-gray traditional temple eave across the upper right and a small ochre bamboo branch at the lower left\nStyle/medium: handcrafted layered rice-paper collage matching Image 1\nComposition/framing: complete separated silhouette with generous padding; designed to frame rather than cover the center\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key, no texture, shadow, gradient, floor or reflection\nConstraints: no people, no text, no logo, no watermark; do not use #00ff00 in the overlay",
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "background-uniform",
+            "edge-clean",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-fire-smoke-foreground",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/environment/source/fire-smoke-foreground.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "4797a5c5-472f-471a-b0c9-93655fae657a",
+      "requestFingerprint": "f43deacb70b7fc4c86686816e494b4b6956a89fb176dcdcb3d499a23e2e18bca",
+      "reusedFrom": null,
+      "sha256": "e86afa4c2eb47f4d90a5c84482bbb6d8f7957c3dbfcf94d96398025af6d268d8",
+      "sizeBytes": 693197,
+      "recordedAt": "2026-07-19T16:24:18.068Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "env-fire-smoke-foreground",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/environment/source/fire-smoke-foreground.png",
+        "prompt": "Use case: background-extraction\nAsset type: child-friendly foreground effect overlay for scenes 4 and 5\nInput images: Image 1 is the approved style reference only\nPrimary request: one complete compact cluster of small orange and cinnabar paper-cut flames with two rounded blue-gray opaque paper smoke curls; decorative handcrafted shapes, not realistic fire\nStyle/medium: layered torn rice-paper collage matching Image 1\nComposition/framing: compact lower-corner effect with crisp fully visible edges and generous padding\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key, no texture, shadow, gradient, floor or reflection\nConstraints: gentle non-threatening scale, no people, no building, no text, no logo, no watermark; smoke must be opaque paper shapes; do not use #00ff00 in subject",
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "background-uniform",
+            "edge-clean",
+            "style-consistent"
+          ]
+        }
+      }
+    },
+    {
+      "assetId": "env-water-splash-foreground",
+      "capability": "image",
+      "file": "public/projects/san-ge-he-shang/assets/environment/source/water-splash-foreground.png",
+      "provider": "gpt-image",
+      "adapter": "host",
+      "tool": "image_gen__imagegen",
+      "model": "codex-built-in-imagegen",
+      "externalId": "8d19dd34-d78c-43d5-86df-5208e2fbc815",
+      "requestFingerprint": "e5688d40a080297314b5777a3749d76ecc66002a88fd52a302938d504d34c9d5",
+      "reusedFrom": null,
+      "sha256": "905abb4d536719a2d03760e36094d2ea80f0068a8848954b7f1b9d7a8cd1033f",
+      "sizeBytes": 856816,
+      "recordedAt": "2026-07-19T16:24:18.309Z",
+      "request": {
+        "$schema": "../../../schemas/asset-request.schema.json",
+        "schemaVersion": 1,
+        "projectSlug": "san-ge-he-shang",
+        "assetId": "env-water-splash-foreground",
+        "capability": "image",
+        "output": "public/projects/san-ge-he-shang/assets/environment/source/water-splash-foreground.png",
+        "prompt": "Use case: background-extraction\nAsset type: foreground action overlay for the water-relay scene\nInput images: Image 1 is the approved style reference only\nPrimary request: one complete sweeping arc of opaque pale-blue paper-cut water splash with several rounded droplets, energetic but simple and readable\nStyle/medium: layered torn rice-paper collage matching Image 1\nComposition/framing: wide low arc with all droplets fully visible and generous padding\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key, no texture, shadow, gradient, floor or reflection\nConstraints: opaque paper shapes only, no transparency inside water, no people, no buckets, no text, no logo, no watermark; do not use #00ff00 in subject",
+        "quality": {
+          "kind": "environment",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "background-uniform",
+            "edge-clean",
+            "style-consistent"
+          ]
+        }
+      }
+    }
+  ]
+}

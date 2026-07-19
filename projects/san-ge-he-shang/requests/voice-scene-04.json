@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "voice-scene-04",
+  "capability": "voice",
+  "output": "public/projects/san-ge-he-shang/audio/narration/04-small-fire.mp3",
+  "text": "一天夜里，老鼠碰倒了油灯，窗帘冒起小小的火苗。三个和尚冲向水缸，却发现里面一滴水也没有。",
+  "voiceId": "ruyayichen",
+  "model": "seed-tts-2.0",
+  "settings": {"speedRatio": 0.96, "pitch": -1, "performancePrompt": "紧张但克制，适合儿童；不要惊悚，火苗和空水缸处强调清楚"}
+}

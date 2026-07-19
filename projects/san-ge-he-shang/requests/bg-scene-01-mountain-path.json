@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "bg-scene-01-mountain-path",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/plates/01-mountain-path.png",
+  "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 1\nInput images: Image 1 is the approved style reference only; do not copy its composition\nPrimary request: a winding ancient Chinese mountain path leading between a clear spring and a small temple at the summit, showing the long daily water-fetching route\nStyle/medium: match Image 1's handcrafted layered rice-paper collage, torn edges, paper fibers, restrained ink accents and warm child-friendly palette\nComposition/framing: wide landscape with a generous open walking area across the middle and lower third for a separate character layer; distant temple and spring both readable\nLighting/mood: fresh golden morning, diligent and hopeful\nConstraints: timeless setting, no specific dynasty, no people, no animals, no text, no logo, no watermark, no modern objects; leave lower subtitle area visually quiet",
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

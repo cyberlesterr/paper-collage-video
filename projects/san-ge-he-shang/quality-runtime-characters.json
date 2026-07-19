@@ -1,0 +1,46 @@
+{
+  "reviews": [
+    {
+      "assetId": "runtime-ce70263d511d",
+      "reviewer": "host-vision",
+      "passedChecks": ["subject-complete", "identity-consistent", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Gray-background composite inspected at original size; neighboring-cell contamination was removed by a documented crop and the complete carrying pose remains intact."
+    },
+    {
+      "assetId": "runtime-e4860a21d9b7",
+      "reviewer": "host-vision",
+      "passedChecks": ["subject-complete", "identity-consistent", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Gray-background composite inspected at original size; both monks, pole and bucket are complete with a clean usable alpha edge."
+    },
+    {
+      "assetId": "runtime-641eda5ddf76",
+      "reviewer": "host-vision",
+      "passedChecks": ["subject-complete", "identity-consistent", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Gray-background composite inspected at original size; all three identities and the empty-jar waiting pose are complete and clean."
+    },
+    {
+      "assetId": "runtime-dc3e0e71227b",
+      "reviewer": "host-vision",
+      "passedChecks": ["subject-complete", "identity-consistent", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Gray-background composite inspected at original size; startled group silhouette is complete, readable and child-friendly."
+    },
+    {
+      "assetId": "runtime-d125f0409d29",
+      "reviewer": "host-vision",
+      "passedChecks": ["subject-complete", "identity-consistent", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Gray-background composite inspected at original size; relay group and both water buckets are complete with clean edges."
+    },
+    {
+      "assetId": "runtime-ec8fb176343d",
+      "reviewer": "host-vision",
+      "passedChecks": ["subject-complete", "identity-consistent", "edge-clean", "style-consistent"],
+      "failedChecks": [],
+      "note": "Gray-background composite inspected at original size; final cooperative group, tools and full jar are complete and clean."
+    }
+  ]
+}

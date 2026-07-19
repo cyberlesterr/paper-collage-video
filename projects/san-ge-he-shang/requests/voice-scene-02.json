@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "voice-scene-02",
+  "capability": "voice",
+  "output": "public/projects/san-ge-he-shang/audio/narration/02-two-monks.mp3",
+  "text": "后来，高和尚也来了。两个人都想省力，争着让水桶离自己远一点。最后，他们用尺子量好，把桶挂在扁担正中，一起抬水。",
+  "voiceId": "ruyayichen",
+  "model": "seed-tts-2.0",
+  "settings": {"speedRatio": 0.94, "pitch": -1, "performancePrompt": "温暖、儒雅、略带童趣；争执部分带一点轻松幽默，吐字清楚，不夸张"}
+}

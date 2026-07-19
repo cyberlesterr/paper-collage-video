@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "bg-scene-03-empty-jar",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/plates/03-empty-jar.png",
+  "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 3\nInput images: Image 1 is the approved style reference only\nPrimary request: the same kind of timeless mountain-temple courtyard at quiet midday, with a large visibly empty water jar centered and three separate open standing areas around it; a dry wooden ladle rests nearby\nStyle/medium: approved handcrafted Chinese cut-paper collage, rice-paper fibers, torn edges, muted ochre, cinnabar and jade\nComposition/framing: wide symmetrical comic staging, empty jar the focal point, quiet lower safe area\nLighting/mood: still, playful anticipation rather than sadness\nConstraints: no people, no animals, no text, no logo, no watermark, no modern objects; original composition",
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

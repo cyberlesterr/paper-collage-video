@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "voice-scene-05",
+  "capability": "voice",
+  "output": "public/projects/san-ge-he-shang/audio/narration/05-teamwork.mp3",
+  "text": "这回，他们不争了：一个下山打水，一个半路接水，一个留在庙里泼水。三个人来回奔跑，终于把火扑灭。",
+  "voiceId": "ruyayichen",
+  "model": "seed-tts-2.0",
+  "settings": {"speedRatio": 0.97, "pitch": -1, "performancePrompt": "有行动感和节奏感，但保持温暖儒雅；三个分工短句读得清楚有层次"}
+}

@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "bg-scene-05-water-relay",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/plates/05-water-relay.png",
+  "prompt": "Use case: illustration-story\nAsset type: character-free 16:9 background plate for scene 5\nInput images: Image 1 is the approved style reference only\nPrimary request: moonlit mountain-temple courtyard and descending path arranged as a clear relay route from a spring at one side toward the open temple doorway; several empty bucket landing spots imply teamwork\nStyle/medium: handcrafted layered rice-paper collage, torn edges, visible fibers, soft ink accents, approved palette shifted to moonlit blue and warm amber\nComposition/framing: wide diagonal action path with open positions for three monk cutouts and water-splash overlays; lower subtitle area readable\nLighting/mood: energetic cooperation, gentle nighttime urgency\nConstraints: no people, no animals, no large fire, no text, no logo, no watermark, no modern objects",
+  "quality": {"kind": "background", "requiredChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"]}
+}

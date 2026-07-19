@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "env-fire-smoke-foreground",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/environment/source/fire-smoke-foreground.png",
+  "prompt": "Use case: background-extraction\nAsset type: child-friendly foreground effect overlay for scenes 4 and 5\nInput images: Image 1 is the approved style reference only\nPrimary request: one complete compact cluster of small orange and cinnabar paper-cut flames with two rounded blue-gray opaque paper smoke curls; decorative handcrafted shapes, not realistic fire\nStyle/medium: layered torn rice-paper collage matching Image 1\nComposition/framing: compact lower-corner effect with crisp fully visible edges and generous padding\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key, no texture, shadow, gradient, floor or reflection\nConstraints: gentle non-threatening scale, no people, no building, no text, no logo, no watermark; smoke must be opaque paper shapes; do not use #00ff00 in subject",
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "background-uniform", "edge-clean", "style-consistent"]}
+}

@@ -1,0 +1,46 @@
+{
+  "reviews": [
+    {
+      "assetId": "bg-scene-01-mountain-path",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"],
+      "failedChecks": [],
+      "note": "Original inspected at full resolution; character-free mountain route is clear and the lower band remains readable. Final plate is a preserved-source Lanczos upscale to 1920x1080."
+    },
+    {
+      "assetId": "bg-scene-02-courtyard-carry",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"],
+      "failedChecks": [],
+      "note": "Original inspected at full resolution; broad courtyard path supports the carrying action and subtitle band. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "bg-scene-03-empty-jar",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"],
+      "failedChecks": [],
+      "note": "Original inspected at full resolution; empty jar and ladle are readable while the dark-backed subtitle treatment remains clear. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "bg-scene-04-temple-interior",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"],
+      "failedChecks": [],
+      "note": "Original inspected at full resolution; child-safe contained flame, empty jar and open center are clear. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "bg-scene-05-water-relay",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"],
+      "failedChecks": [],
+      "note": "Original inspected at full resolution. The generated route arrows and bucket markers are retained as intentional child-storybook pictograms; the lower subtitle remains readable through the approved dark solid backing. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "bg-scene-06-pulley-morning",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent"],
+      "failedChecks": [],
+      "note": "Original inspected at full resolution; pulley, well and full jar are readable with room for the ending group and subtitles. Final plate is a preserved-source Lanczos upscale."
+    }
+  ]
+}

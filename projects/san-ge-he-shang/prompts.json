@@ -1,0 +1,19 @@
+{
+  "imageModel": "codex-built-in-imagegen",
+  "styleReference": "public/projects/san-ge-he-shang/assets/style/style-sample-courtyard.png",
+  "assets": [
+    {"assetId": "style-sample-courtyard", "stage": "style-review", "request": "projects/san-ge-he-shang/requests/style-sample-courtyard.json", "output": "public/projects/san-ge-he-shang/assets/style/style-sample-courtyard.png", "purpose": "已批准的视觉语言与角色造型锚点"},
+    {"assetId": "bg-scene-01-mountain-path", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/bg-scene-01-mountain-path.json", "output": "public/projects/san-ge-he-shang/assets/plates/01-mountain-path.png", "purpose": "第一幕山路取水背景"},
+    {"assetId": "bg-scene-02-courtyard-carry", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/bg-scene-02-courtyard-carry.json", "output": "public/projects/san-ge-he-shang/assets/plates/02-courtyard-carry.png", "purpose": "第二幕两人抬水背景"},
+    {"assetId": "bg-scene-03-empty-jar", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/bg-scene-03-empty-jar.json", "output": "public/projects/san-ge-he-shang/assets/plates/03-empty-jar.png", "purpose": "第三幕空水缸背景"},
+    {"assetId": "bg-scene-04-temple-interior", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/bg-scene-04-temple-interior.json", "output": "public/projects/san-ge-he-shang/assets/plates/04-temple-interior.png", "purpose": "第四幕夜间庙内小火背景"},
+    {"assetId": "bg-scene-05-water-relay", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/bg-scene-05-water-relay.json", "output": "public/projects/san-ge-he-shang/assets/plates/05-water-relay.png", "purpose": "第五幕接力取水背景"},
+    {"assetId": "bg-scene-06-pulley-morning", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/bg-scene-06-pulley-morning.json", "output": "public/projects/san-ge-he-shang/assets/plates/06-pulley-morning.png", "purpose": "第六幕滑轮分工背景"},
+    {"assetId": "char-group-sheet-a", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/char-group-sheet-a.json", "output": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-a.png", "purpose": "前四幕角色动作图板"},
+    {"assetId": "char-group-sheet-b", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/char-group-sheet-b.json", "output": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-b.png", "purpose": "后两幕与结尾角色动作图板"},
+    {"assetId": "env-mountain-mist-rear", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/env-mountain-mist-rear.json", "output": "public/projects/san-ge-he-shang/assets/environment/source/mountain-mist-rear.png", "purpose": "山路与结尾远山雾气后景"},
+    {"assetId": "env-temple-eaves-foreground", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/env-temple-eaves-foreground.json", "output": "public/projects/san-ge-he-shang/assets/environment/source/temple-eaves-foreground.png", "purpose": "庭院场景屋檐与竹枝前景"},
+    {"assetId": "env-fire-smoke-foreground", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/env-fire-smoke-foreground.json", "output": "public/projects/san-ge-he-shang/assets/environment/source/fire-smoke-foreground.png", "purpose": "夜间小火与烟雾纸片层"},
+    {"assetId": "env-water-splash-foreground", "stage": "asset-production", "request": "projects/san-ge-he-shang/requests/env-water-splash-foreground.json", "output": "public/projects/san-ge-he-shang/assets/environment/source/water-splash-foreground.png", "purpose": "接力灭火水花纸片层"}
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "operations": [
+    {
+      "kind": "background-upscale",
+      "inputs": "public/projects/san-ge-he-shang/assets/plates/source-original/*.png",
+      "outputs": "public/projects/san-ge-he-shang/assets/plates/*.png",
+      "method": "ffmpeg scale=1920:1080:flags=lanczos",
+      "reason": "meet the project 1920x1080 minimum without additional generation"
+    },
+    {
+      "kind": "character-sheet-rebuild",
+      "inputs": "public/projects/san-ge-he-shang/assets/characters/alpha/*.png",
+      "outputs": [
+        "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-a.png",
+        "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-b.png"
+      ],
+      "originals": "public/projects/san-ge-he-shang/assets/characters/source-original/*.png",
+      "method": "2x2 cells rebuilt from reviewed alpha cutouts on exact #00ff00 canvases",
+      "reason": "remove neighboring-cell contamination and make the key background uniform"
+    },
+    {
+      "kind": "environment-key-rebuild",
+      "inputs": [
+        "public/projects/san-ge-he-shang/assets/environment/rear/mountain-mist-rear.png",
+        "public/projects/san-ge-he-shang/assets/environment/foreground/temple-eaves-foreground.png",
+        "public/projects/san-ge-he-shang/assets/environment/foreground/fire-smoke-foreground.png",
+        "public/projects/san-ge-he-shang/assets/environment/foreground/water-splash-foreground.png"
+      ],
+      "outputs": "public/projects/san-ge-he-shang/assets/environment/source/*.png",
+      "originals": "public/projects/san-ge-he-shang/assets/environment/source-original/*.png",
+      "method": "reviewed alpha cutouts composited on exact #00ff00 canvases",
+      "reason": "normalize generated green-screen variation without additional generation"
+    }
+  ]
+}

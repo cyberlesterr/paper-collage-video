@@ -1,0 +1,241 @@
+{
+  "$schema": "../../schemas/production.schema.json",
+  "schemaVersion": 1,
+  "slug": "san-ge-he-shang",
+  "stage": "complete",
+  "createdAt": "2026-07-19T15:34:29.982Z",
+  "updatedAt": "2026-07-19T17:02:23.263Z",
+  "approvals": {
+    "concept": {
+      "status": "approved",
+      "decidedAt": "2026-07-19T15:40:11.850Z",
+      "note": "用户批准《三个和尚》的故事、六幕分镜、约 90 秒时长、balanced 档位与最多 13 张生成图的预算，并明确将旁白改为豆包虚构音色‘儒雅逸辰’后继续制作。"
+    },
+    "styleAndVoice": {
+      "status": "approved",
+      "decidedAt": "2026-07-19T15:47:52.492Z",
+      "note": "用户明确批准纸片拼贴风格样张与豆包虚构音色儒雅逸辰，继续制作"
+    },
+    "preview": {
+      "status": "approved",
+      "decidedAt": "2026-07-19T16:49:41.563Z",
+      "note": "用户确认修订预览通过"
+    },
+    "publish": {
+      "status": "pending",
+      "decidedAt": null,
+      "note": ""
+    }
+  },
+  "workItems": [
+    {
+      "id": "background-plates",
+      "label": "六幕无人物背景",
+      "status": "completed",
+      "updatedAt": "2026-07-19T16:07:46.669Z",
+      "artifact": "public/projects/san-ge-he-shang/assets/plates",
+      "note": "六幕背景已生成并逐张检查；第五幕保留儿童绘本式路线图标，字幕用深色实底保证可读"
+    },
+    {
+      "id": "character-sheets",
+      "label": "两张角色动作图板与透明分层",
+      "status": "completed",
+      "updatedAt": "2026-07-19T16:07:46.918Z",
+      "artifact": "public/projects/san-ge-he-shang/assets/characters/alpha",
+      "note": "两张动作表已拆分抠像；小和尚挑水裁片已机械裁去相邻格污染，原始图板与中间件保留"
+    },
+    {
+      "id": "environment-layers",
+      "label": "四张前后景与特效透明分层",
+      "status": "completed",
+      "updatedAt": "2026-07-19T16:07:47.117Z",
+      "artifact": "public/projects/san-ge-he-shang/assets/environment",
+      "note": "四张环境层已自动色键并在灰底检查透明边缘；对檐角和火烟层提高色键容差清除绿幕残留"
+    },
+    {
+      "id": "narration-scenes",
+      "label": "六段儒雅逸辰逐幕旁白",
+      "status": "completed",
+      "updatedAt": "2026-07-19T16:19:44.916Z",
+      "artifact": "public/projects/san-ge-he-shang/audio/narration",
+      "note": "六段儒雅逸辰旁白已生成、下载并登记；ffprobe实际时长11.520/13.872/11.352/10.680/11.328/16.176秒，均适配逐幕窗口"
+    },
+    {
+      "id": "timeline-quality",
+      "label": "时间线、质量检查、字幕与预览",
+      "status": "completed",
+      "updatedAt": "2026-07-19T16:26:58.820Z",
+      "artifact": "projects/san-ge-he-shang/quality-report.json",
+      "note": "质量检查23/23通过；六幕v2时间线、真实逐幕旁白和透明分层已就绪，由project:assets-ready统一同步字幕与校验"
+    }
+  ],
+  "artifacts": {
+    "brief": "projects/san-ge-he-shang/brief.md",
+    "project": "projects/san-ge-he-shang/project.json",
+    "prompts": "projects/san-ge-he-shang/prompts.json",
+    "review": "projects/san-ge-he-shang/review.md",
+    "validationReport": "dist/san-ge-he-shang/validation-report.json",
+    "preview": "dist/san-ge-he-shang/preview.mp4",
+    "final": "dist/san-ge-he-shang/final.mp4",
+    "report": "dist/san-ge-he-shang/report.json",
+    "contactSheet": "dist/san-ge-he-shang/contact-sheet.jpg"
+  },
+  "history": [
+    {
+      "at": "2026-07-19T15:34:29.982Z",
+      "action": "project-created",
+      "stage": "capability-review",
+      "note": ""
+    },
+    {
+      "at": "2026-07-19T15:40:11.850Z",
+      "action": "capabilities-ready",
+      "stage": "brief",
+      "note": "用户批准《三个和尚》的故事、六幕分镜、约 90 秒时长、balanced 档位与最多 13 张生成图的预算，并明确将旁白改为豆包虚构音色‘儒雅逸辰’后继续制作。"
+    },
+    {
+      "at": "2026-07-19T15:40:11.850Z",
+      "action": "brief-ready",
+      "stage": "concept-review",
+      "note": ""
+    },
+    {
+      "at": "2026-07-19T15:40:11.850Z",
+      "action": "approve-concept",
+      "stage": "style-review",
+      "note": "用户批准《三个和尚》的故事、六幕分镜、约 90 秒时长、balanced 档位与最多 13 张生成图的预算，并明确将旁白改为豆包虚构音色‘儒雅逸辰’后继续制作。"
+    },
+    {
+      "at": "2026-07-19T15:47:52.492Z",
+      "action": "approve-style-voice",
+      "stage": "asset-production",
+      "note": "用户明确批准纸片拼贴风格样张与豆包虚构音色儒雅逸辰，继续制作"
+    },
+    {
+      "at": "2026-07-19T15:50:33.011Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "background-plates"
+    },
+    {
+      "at": "2026-07-19T15:50:33.220Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "character-sheets"
+    },
+    {
+      "at": "2026-07-19T15:50:33.418Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "environment-layers"
+    },
+    {
+      "at": "2026-07-19T15:50:33.621Z",
+      "action": "work-item-pending",
+      "stage": "asset-production",
+      "note": "narration-scenes"
+    },
+    {
+      "at": "2026-07-19T15:50:33.820Z",
+      "action": "work-item-pending",
+      "stage": "asset-production",
+      "note": "timeline-quality"
+    },
+    {
+      "at": "2026-07-19T16:07:46.669Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "background-plates · 六幕背景已生成并逐张检查；第五幕保留儿童绘本式路线图标，字幕用深色实底保证可读"
+    },
+    {
+      "at": "2026-07-19T16:07:46.918Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "character-sheets · 两张动作表已拆分抠像；小和尚挑水裁片已机械裁去相邻格污染，原始图板与中间件保留"
+    },
+    {
+      "at": "2026-07-19T16:07:47.117Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "environment-layers · 四张环境层已自动色键并在灰底检查透明边缘；对檐角和火烟层提高色键容差清除绿幕残留"
+    },
+    {
+      "at": "2026-07-19T16:07:47.313Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "narration-scenes · 六幕画面锚点已确认，开始生成儒雅逸辰逐幕旁白"
+    },
+    {
+      "at": "2026-07-19T16:09:48.158Z",
+      "action": "work-item-blocked",
+      "stage": "asset-production",
+      "note": "narration-scenes · ChatCut正式TTS提交被系统用量上限拦截；六段均未创建生成任务。系统提示可在2026-07-25T12:46+08:00后重试，或用户补充额度后继续"
+    },
+    {
+      "at": "2026-07-19T16:15:00.109Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "narration-scenes · 用户在获知用量阻断后明确要求继续制作；先重试第一幕儒雅逸辰旁白验证计费入口"
+    },
+    {
+      "at": "2026-07-19T16:19:44.916Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "narration-scenes · 六段儒雅逸辰旁白已生成、下载并登记；ffprobe实际时长11.520/13.872/11.352/10.680/11.328/16.176秒，均适配逐幕窗口"
+    },
+    {
+      "at": "2026-07-19T16:19:45.127Z",
+      "action": "work-item-in-progress",
+      "stage": "asset-production",
+      "note": "timeline-quality · 开始记录图像质量检查、封存时间线并生成预览"
+    },
+    {
+      "at": "2026-07-19T16:26:58.820Z",
+      "action": "work-item-completed",
+      "stage": "asset-production",
+      "note": "timeline-quality · 质量检查23/23通过；六幕v2时间线、真实逐幕旁白和透明分层已就绪，由project:assets-ready统一同步字幕与校验"
+    },
+    {
+      "at": "2026-07-19T16:26:59.506Z",
+      "action": "assets-ready",
+      "stage": "preview",
+      "note": ""
+    },
+    {
+      "at": "2026-07-19T16:30:45.861Z",
+      "action": "preview-rendered",
+      "stage": "human-review",
+      "note": "dist/san-ge-he-shang/preview.mp4"
+    },
+    {
+      "at": "2026-07-19T16:39:30.936Z",
+      "action": "request-preview-revision",
+      "stage": "asset-production",
+      "note": "用户指出第2、3、6幕的前景屋檐遮在人物前面，要求调整为屋檐位于人物后方"
+    },
+    {
+      "at": "2026-07-19T16:42:47.610Z",
+      "action": "assets-ready",
+      "stage": "preview",
+      "note": ""
+    },
+    {
+      "at": "2026-07-19T16:46:08.574Z",
+      "action": "preview-rendered",
+      "stage": "human-review",
+      "note": "dist/san-ge-he-shang/preview.mp4"
+    },
+    {
+      "at": "2026-07-19T16:49:41.563Z",
+      "action": "approve-preview",
+      "stage": "final-render",
+      "note": "用户确认修订预览通过"
+    },
+    {
+      "at": "2026-07-19T17:02:23.263Z",
+      "action": "final-rendered",
+      "stage": "complete",
+      "note": "dist/san-ge-he-shang/final.mp4"
+    }
+  ]
+}

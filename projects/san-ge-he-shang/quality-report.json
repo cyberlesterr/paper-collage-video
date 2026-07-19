@@ -1,0 +1,1078 @@
+{
+  "$schema": "../../schemas/quality-report.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "updatedAt": "2026-07-19T16:50:06.496Z",
+  "assets": [
+    {
+      "assetId": "bg-scene-01-mountain-path",
+      "file": "public/projects/san-ge-he-shang/assets/plates/01-mountain-path.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-01-little-monk:background",
+        "manifest:bg-scene-01-mountain-path"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "837924f662ebab305105c94bb2793e6dac3c90f7499832104539dcac43ac4c15",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3842507
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:32.938Z",
+      "note": "Original inspected at full resolution; character-free mountain route is clear and the lower band remains readable. Final plate is a preserved-source Lanczos upscale to 1920x1080."
+    },
+    {
+      "assetId": "runtime-52d44ff72c74",
+      "file": "public/projects/san-ge-he-shang/assets/environment/rear/mountain-mist-rear.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-01-little-monk:environment:mountain-mist-01",
+        "scene:scene-06-cooperation:environment:mountain-mist-06"
+      ],
+      "sha256": "7407dd51a509d400ead2f9d520428eab98e82bd02d6a21e08d100dc69803db08",
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 822018
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1562x363"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.486Z",
+      "note": "Transparent mountain-and-mist layer inspected on gray at original size; silhouette and torn-paper edges are complete."
+    },
+    {
+      "assetId": "runtime-ce70263d511d",
+      "file": "public/projects/san-ge-he-shang/assets/characters/alpha/little-carrying.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-01-little-monk:layer:little-monk-carrying"
+      ],
+      "sha256": "4c66733393d55773a5c89f2dc842aabca51b8703c9b1bef272b16ac841a1dec2",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 316136
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "500x450"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.0002777621542575058
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.194Z",
+      "note": "Gray-background composite inspected at original size; neighboring-cell contamination was removed by a documented crop and the complete carrying pose remains intact."
+    },
+    {
+      "assetId": "bg-scene-02-courtyard-carry",
+      "file": "public/projects/san-ge-he-shang/assets/plates/02-courtyard-carry.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-02-two-monks:background",
+        "manifest:bg-scene-02-courtyard-carry"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "4f3741be0dda3c1096d3cbd87f6d9cbe30db692be8c6768e42f5a304128b2f9f",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3782838
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:32.938Z",
+      "note": "Original inspected at full resolution; broad courtyard path supports the carrying action and subtitle band. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "runtime-09260fb63ca2",
+      "file": "public/projects/san-ge-he-shang/assets/environment/foreground/temple-eaves-foreground.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-02-two-monks:environment:temple-eaves-02",
+        "scene:scene-03-three-waiting:environment:temple-eaves-03",
+        "scene:scene-06-cooperation:environment:temple-eaves-06"
+      ],
+      "sha256": "b40407f08e13cfc522834b712b7ee60fbdec672184fdae609885feb89cd84388",
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1755615
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1536x995"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.486Z",
+      "note": "Transparent eaves-and-bamboo layer inspected on gray at original size; framing subjects are complete and center remains open."
+    },
+    {
+      "assetId": "runtime-e4860a21d9b7",
+      "file": "public/projects/san-ge-he-shang/assets/characters/alpha/two-carrying.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-02-two-monks:layer:two-monks-carrying"
+      ],
+      "sha256": "36c87e62e4d33b650550dd8512df23ecb521dc0eaedf76fd96af0ab15b2b1273",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 423626
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "604x517"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.003941863305413388
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.194Z",
+      "note": "Gray-background composite inspected at original size; both monks, pole and bucket are complete with a clean usable alpha edge."
+    },
+    {
+      "assetId": "bg-scene-03-empty-jar",
+      "file": "public/projects/san-ge-he-shang/assets/plates/03-empty-jar.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-03-three-waiting:background",
+        "manifest:bg-scene-03-empty-jar"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "2de100b9c0a20cd518fe1e4aa17ac7d691836bf4a3be420e41d99bc36936f50b",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3779443
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:32.938Z",
+      "note": "Original inspected at full resolution; empty jar and ladle are readable while the dark-backed subtitle treatment remains clear. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "runtime-641eda5ddf76",
+      "file": "public/projects/san-ge-he-shang/assets/characters/alpha/three-waiting.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-03-three-waiting:layer:three-monks-waiting"
+      ],
+      "sha256": "52424124f2a4e865fd8809a8043d77d95c9862e8730e00c969ca7af38136951c",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 528677
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "624x519"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.009065439034242163
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.194Z",
+      "note": "Gray-background composite inspected at original size; all three identities and the empty-jar waiting pose are complete and clean."
+    },
+    {
+      "assetId": "bg-scene-04-temple-interior",
+      "file": "public/projects/san-ge-he-shang/assets/plates/04-temple-interior.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-04-small-fire:background",
+        "manifest:bg-scene-04-temple-interior"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "b66df740bec209ec2779b712f68ee0aa7f589134fc51f79f54bc0154610d3094",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3423393
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:32.938Z",
+      "note": "Original inspected at full resolution; child-safe contained flame, empty jar and open center are clear. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "runtime-6e827242dedb",
+      "file": "public/projects/san-ge-he-shang/assets/environment/foreground/fire-smoke-foreground.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-04-small-fire:environment:fire-smoke-04",
+        "scene:scene-05-water-relay:environment:fire-smoke-05"
+      ],
+      "sha256": "3fa4c120f68be10d6a1d3a64362452f366df170a27c4c3678984104d339a93f0",
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1013707
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "778x821"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.486Z",
+      "note": "Transparent fire-and-smoke layer inspected on gray at original size after tightened key tolerance; complete and free of visible green residue."
+    },
+    {
+      "assetId": "runtime-dc3e0e71227b",
+      "file": "public/projects/san-ge-he-shang/assets/characters/alpha/three-startled.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-04-small-fire:layer:three-monks-startled"
+      ],
+      "sha256": "6d58a0c58b8c90096e1adc098400a51360a91b12f3238d819b59f8c71478a75c",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 515513
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "626x513"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.00232496862533727
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.194Z",
+      "note": "Gray-background composite inspected at original size; startled group silhouette is complete, readable and child-friendly."
+    },
+    {
+      "assetId": "bg-scene-05-water-relay",
+      "file": "public/projects/san-ge-he-shang/assets/plates/05-water-relay.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-05-water-relay:background",
+        "manifest:bg-scene-05-water-relay"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "9d76e472aa5777b9e01f66942f04283eb03f4354febdc274c5970c7d2dcc16ea",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3733610
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:32.938Z",
+      "note": "Original inspected at full resolution. The generated route arrows and bucket markers are retained as intentional child-storybook pictograms; the lower subtitle remains readable through the approved dark solid backing. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "runtime-b685b96ca8e9",
+      "file": "public/projects/san-ge-he-shang/assets/environment/foreground/water-splash-foreground.png",
+      "kind": "environment",
+      "sources": [
+        "scene:scene-05-water-relay:environment:water-splash-05"
+      ],
+      "sha256": "b015f5968dae996feb50e01af056716683568ec53ad293f323552ffd437d4740",
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1498124
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1609x661"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.486Z",
+      "note": "Transparent water-splash layer inspected on gray at original size; water arc and separated droplets are complete."
+    },
+    {
+      "assetId": "runtime-d125f0409d29",
+      "file": "public/projects/san-ge-he-shang/assets/characters/alpha/three-relay.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-05-water-relay:layer:three-monks-relay"
+      ],
+      "sha256": "c7013d37f2755b0ba44cb48a3c9f1191e195822c68adaaad2d638fdbeeb1394a",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 435727
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "617x464"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.0053814820485469095
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.194Z",
+      "note": "Gray-background composite inspected at original size; relay group and both water buckets are complete with clean edges."
+    },
+    {
+      "assetId": "bg-scene-06-pulley-morning",
+      "file": "public/projects/san-ge-he-shang/assets/plates/06-pulley-morning.png",
+      "kind": "background",
+      "sources": [
+        "scene:scene-06-cooperation:background",
+        "manifest:bg-scene-06-pulley-morning"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "no-people",
+        "safe-area-clear",
+        "style-consistent"
+      ],
+      "sha256": "950b00cc1b3b4fccaec20d9978ee53b55da70db5ab83f8c7afe618d1b5997330",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 3706572
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1920x1080"
+          },
+          {
+            "id": "minimum-resolution",
+            "passed": true,
+            "expected": "1920x1080",
+            "actual": "1920x1080"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "no-people": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:32.938Z",
+      "note": "Original inspected at full resolution; pulley, well and full jar are readable with room for the ending group and subtitles. Final plate is a preserved-source Lanczos upscale."
+    },
+    {
+      "assetId": "runtime-ec8fb176343d",
+      "file": "public/projects/san-ge-he-shang/assets/characters/alpha/three-finished.png",
+      "kind": "character",
+      "sources": [
+        "scene:scene-06-cooperation:layer:three-monks-finished"
+      ],
+      "sha256": "77583c4afbd77296cd17870a268e21fd82eeb4cca9db152e9c5b53ca4c6dbbf4",
+      "requiredChecks": [
+        "subject-complete",
+        "identity-consistent",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 557240
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "614x545"
+          },
+          {
+            "id": "alpha-present",
+            "passed": true,
+            "actual": true
+          },
+          {
+            "id": "key-edge-clean",
+            "passed": true,
+            "expected": "<= 0.12",
+            "actual": 0.0018687287877916312
+          }
+        ]
+      },
+      "semanticChecks": {
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.194Z",
+      "note": "Gray-background composite inspected at original size; final cooperative group, tools and full jar are complete and clean."
+    },
+    {
+      "assetId": "style-sample-courtyard",
+      "file": "public/projects/san-ge-he-shang/assets/style/style-sample-courtyard.png",
+      "kind": "style-sample",
+      "sources": [
+        "manifest:style-sample-courtyard"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "safe-area-clear",
+        "style-consistent",
+        "subject-complete"
+      ],
+      "sha256": "b6ffa79926f8c38394a3c7749cd8cd46cdefef32e92ac88d43c2131279295932",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 2914248
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1672x941"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "safe-area-clear": "passed",
+        "style-consistent": "passed",
+        "subject-complete": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:33.768Z",
+      "note": "Approved by the user after original-resolution inspection; all three complete monk identities, empty jar and reproducible paper-collage language are clear."
+    },
+    {
+      "assetId": "char-group-sheet-a",
+      "file": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-a.png",
+      "kind": "character-sheet",
+      "sources": [
+        "manifest:char-group-sheet-a"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "identity-consistent",
+        "cell-separation",
+        "background-uniform"
+      ],
+      "sha256": "c647949621a1f70ba739e2d9e843513b27debaccaabc5da2eacbbe54454bb1f9",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 932659
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1254x1254"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "cell-separation": "passed",
+        "background-uniform": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:34.067Z",
+      "note": "Reviewed alpha cutouts were rebuilt into four separated cells on an exact #00ff00 canvas; complete identities and poses inspected at original size. Original generated sheet is preserved."
+    },
+    {
+      "assetId": "char-group-sheet-b",
+      "file": "public/projects/san-ge-he-shang/assets/characters/source/monks-sheet-b.png",
+      "kind": "character-sheet",
+      "sources": [
+        "manifest:char-group-sheet-b"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "identity-consistent",
+        "cell-separation",
+        "background-uniform"
+      ],
+      "sha256": "d84847e4ba4b53de15ba5b30556acb16b229640d12bf2a198d031e5f11be5b7b",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 1036916
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1254x1254"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "identity-consistent": "passed",
+        "cell-separation": "passed",
+        "background-uniform": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:34.067Z",
+      "note": "Reviewed alpha cutouts were rebuilt into four separated cells on an exact #00ff00 canvas; complete identities and poses inspected at original size. Original generated sheet is preserved."
+    },
+    {
+      "assetId": "env-mountain-mist-rear",
+      "file": "public/projects/san-ge-he-shang/assets/environment/source/mountain-mist-rear.png",
+      "kind": "environment",
+      "sources": [
+        "manifest:env-mountain-mist-rear"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "background-uniform",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "sha256": "0493fab736bed4f1f43c29cc5fa79827848395900f0dd639cde644d98305f936",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 570997
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1672x941"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "background-uniform": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:34.385Z",
+      "note": "Reviewed alpha layer was composited onto an exact #00ff00 canvas; original generated source is preserved and the complete torn-paper mountain edge is clean."
+    },
+    {
+      "assetId": "env-temple-eaves-foreground",
+      "file": "public/projects/san-ge-he-shang/assets/environment/source/temple-eaves-foreground.png",
+      "kind": "environment",
+      "sources": [
+        "manifest:env-temple-eaves-foreground"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "background-uniform",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "sha256": "8c60d9bda7666411a5859d65479a78bbd0102d842a6003915a72daf27f357ff4",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 718105
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1536x1024"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "background-uniform": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:34.385Z",
+      "note": "Reviewed alpha layer was composited onto an exact #00ff00 canvas; eaves and bamboo are complete with clean boundaries and the original source is preserved."
+    },
+    {
+      "assetId": "env-fire-smoke-foreground",
+      "file": "public/projects/san-ge-he-shang/assets/environment/source/fire-smoke-foreground.png",
+      "kind": "environment",
+      "sources": [
+        "manifest:env-fire-smoke-foreground"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "background-uniform",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "sha256": "e86afa4c2eb47f4d90a5c84482bbb6d8f7957c3dbfcf94d96398025af6d268d8",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 693197
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1254x1254"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "background-uniform": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:34.385Z",
+      "note": "Reviewed alpha layer was composited onto an exact #00ff00 canvas; flame and smoke are complete, child-safe and clean-edged. Original source is preserved."
+    },
+    {
+      "assetId": "env-water-splash-foreground",
+      "file": "public/projects/san-ge-he-shang/assets/environment/source/water-splash-foreground.png",
+      "kind": "environment",
+      "sources": [
+        "manifest:env-water-splash-foreground"
+      ],
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "background-uniform",
+        "edge-clean",
+        "style-consistent"
+      ],
+      "sha256": "905abb4d536719a2d03760e36094d2ea80f0068a8848954b7f1b9d7a8cd1033f",
+      "technical": {
+        "passed": true,
+        "checks": [
+          {
+            "id": "file-exists",
+            "passed": true,
+            "actual": 856816
+          },
+          {
+            "id": "dimensions-readable",
+            "passed": true,
+            "actual": "1672x941"
+          }
+        ]
+      },
+      "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
+        "subject-complete": "passed",
+        "background-uniform": "passed",
+        "edge-clean": "passed",
+        "style-consistent": "passed"
+      },
+      "status": "passed",
+      "reviewer": "host-vision",
+      "reviewedAt": "2026-07-19T16:26:34.385Z",
+      "note": "Reviewed alpha layer was composited onto an exact #00ff00 canvas; splash and droplets are complete with clean edges. Original source is preserved."
+    }
+  ]
+}

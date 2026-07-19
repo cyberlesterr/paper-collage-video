@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "env-mountain-mist-rear",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/environment/source/mountain-mist-rear.png",
+  "prompt": "Use case: background-extraction\nAsset type: wide rear parallax overlay for scenes 1 and 6\nInput images: Image 1 is the approved style reference only\nPrimary request: one long layered band of pale blue-gray paper-cut mountain mist and two distant mountain silhouettes, designed as a single complete wide overlay\nStyle/medium: handcrafted torn rice-paper collage matching Image 1\nComposition/framing: horizontal strip across most of the canvas with generous padding and crisp complete edges\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key, no texture, shadow, gradient, floor or reflection\nConstraints: no people, no buildings, no text, no logo, no watermark; do not use #00ff00 in the overlay",
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "background-uniform", "edge-clean", "style-consistent"]}
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "voice-scene-01",
+  "capability": "voice",
+  "output": "public/projects/san-ge-he-shang/audio/narration/01-little-monk.mp3",
+  "text": "从前，山顶有一座小庙，住着一个勤快的小和尚。他每天走下山挑水，虽然有点累，水缸却总是满满的。",
+  "voiceId": "ruyayichen",
+  "model": "seed-tts-2.0",
+  "settings": {"speedRatio": 0.94, "pitch": -1, "performancePrompt": "温暖、儒雅、略带童趣，像给孩子讲中国民间故事；吐字清楚，避免过度庄严"}
+}

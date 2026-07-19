@@ -1,0 +1,51 @@
+{
+  "$schema": "../../schemas/providers.schema.json",
+  "schemaVersion": 1,
+  "capabilities": {
+    "text": {
+      "defaultProvider": "host-text",
+      "selection": {
+        "status": "confirmed",
+        "provider": "host-text",
+        "confirmedAt": "2026-07-19T15:40:11.850Z",
+        "scope": "project",
+        "note": "用户批准《三个和尚》的故事、六幕分镜、约 90 秒时长、balanced 档位与最多 13 张生成图的预算，并明确将旁白改为豆包虚构音色‘儒雅逸辰’后继续制作。"
+      }
+    },
+    "image": {
+      "defaultProvider": "gpt-image",
+      "providers": {
+        "gpt-image": {
+          "label": "GPT Image via Codex built-in image generation",
+          "adapter": "host",
+          "tool": "image_gen__imagegen"
+        }
+      },
+      "selection": {
+        "status": "confirmed",
+        "provider": "gpt-image",
+        "confirmedAt": "2026-07-19T15:40:11.850Z",
+        "scope": "project",
+        "note": "用户批准《三个和尚》的故事、六幕分镜、约 90 秒时长、balanced 档位与最多 13 张生成图的预算，并明确将旁白改为豆包虚构音色‘儒雅逸辰’后继续制作。"
+      }
+    },
+    "voice": {
+      "defaultProvider": "chatcut-doubao",
+      "providers": {
+        "chatcut-doubao": {
+          "label": "ChatCut Doubao fictional voice",
+          "adapter": "host",
+          "tool": "mcp__chatcut__submit_voice",
+          "model": "seed-tts-2.0"
+        }
+      },
+      "selection": {
+        "status": "confirmed",
+        "provider": "chatcut-doubao",
+        "confirmedAt": "2026-07-19T15:40:11.850Z",
+        "scope": "project",
+        "note": "用户批准《三个和尚》的故事、六幕分镜、约 90 秒时长、balanced 档位与最多 13 张生成图的预算，并明确将旁白改为豆包虚构音色‘儒雅逸辰’后继续制作。"
+      }
+    }
+  }
+}

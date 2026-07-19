@@ -1,0 +1,10 @@
+{
+  "$schema": "../../../schemas/asset-request.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "san-ge-he-shang",
+  "assetId": "env-temple-eaves-foreground",
+  "capability": "image",
+  "output": "public/projects/san-ge-he-shang/assets/environment/source/temple-eaves-foreground.png",
+  "prompt": "Use case: background-extraction\nAsset type: foreground parallax overlay for temple courtyard scenes\nInput images: Image 1 is the approved style reference only\nPrimary request: one complete L-shaped paper-cut foreground element combining a dark blue-gray traditional temple eave across the upper right and a small ochre bamboo branch at the lower left\nStyle/medium: handcrafted layered rice-paper collage matching Image 1\nComposition/framing: complete separated silhouette with generous padding; designed to frame rather than cover the center\nScene/backdrop: perfectly flat uniform solid #00ff00 chroma-key, no texture, shadow, gradient, floor or reflection\nConstraints: no people, no text, no logo, no watermark; do not use #00ff00 in the overlay",
+  "quality": {"kind": "environment", "requiredChecks": ["no-text", "no-watermark", "subject-complete", "background-uniform", "edge-clean", "style-consistent"]}
+}

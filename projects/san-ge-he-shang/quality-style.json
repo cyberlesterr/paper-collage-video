@@ -1,0 +1,11 @@
+{
+  "reviews": [
+    {
+      "assetId": "style-sample-courtyard",
+      "reviewer": "host-vision",
+      "passedChecks": ["no-text", "no-watermark", "safe-area-clear", "style-consistent", "subject-complete"],
+      "failedChecks": [],
+      "note": "Approved by the user after original-resolution inspection; all three complete monk identities, empty jar and reproducible paper-collage language are clear."
+    }
+  ]
+}
