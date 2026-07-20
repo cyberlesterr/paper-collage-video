@@ -177,7 +177,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 | `npm run project:preview -- <slug>` | 校验后渲染 50% 预览，并生成报告 |
 | `npm run project:render -- <slug>` | 校验后渲染正式成片，并生成报告 |
 | `npm run project:report -- <slug>` | 对已有成片生成技术报告和关键帧联系表 |
-| `npm run style:proof -- <slug>` | 用真实 v4 组合拓扑生成 3–5 秒风格/运动证明 |
+| `npm run style:proof -- <slug>` | 用真实 v4 组合生成 3–5 秒风格/运动证明、当前 fingerprint 和逐成员 alpha/棋盘格/紧裁/stress 证据 |
 | `npm run doctor -- --ready` | 检查 Node、FFmpeg、ffprobe、npm 和 Python 图像依赖 |
 | `npm run plugin:sync` | 从维护源重新生成插件 Skill 和轻量 Remotion 工作区模板 |
 | `npm run dev` | 在 Remotion Studio 中打开通用开发 composition |

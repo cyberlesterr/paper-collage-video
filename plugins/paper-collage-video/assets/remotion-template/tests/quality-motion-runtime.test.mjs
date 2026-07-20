@@ -477,7 +477,12 @@ test('asset approval cannot bypass a pending or stale supported-subject composit
     assert.equal(status.scopes.composites.pending, 1);
     status = await recordQualityReviews({
       slug,
-      reviews: status.report.assets.map((entry) => ({assetId: entry.assetId, reviewer: 'fixture-reviewer', passedChecks: entry.requiredChecks})),
+      reviews: status.report.assets.map((entry) => ({
+        assetId: entry.assetId,
+        reviewer: 'fixture-reviewer',
+        passedChecks: entry.requiredChecks,
+        evidenceFiles: [path.relative(ROOT, frame)],
+      })),
     });
     assert.equal(status.ready, false);
     assert.equal(status.scopes.assets.pending, 0);
@@ -485,7 +490,12 @@ test('asset approval cannot bypass a pending or stale supported-subject composit
     const composite = status.report.composites[0];
     status = await recordQualityReviews({
       slug,
-      reviews: [{compositeId: composite.compositeId, reviewer: 'fixture-reviewer', passedChecks: composite.requiredChecks}],
+      reviews: [{
+        compositeId: composite.compositeId,
+        reviewer: 'fixture-reviewer',
+        passedChecks: composite.requiredChecks,
+        evidenceFiles: [path.relative(ROOT, frame)],
+      }],
     });
     assert.equal(status.ready, true);
 

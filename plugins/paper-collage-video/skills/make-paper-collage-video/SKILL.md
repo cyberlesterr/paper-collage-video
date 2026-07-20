@@ -65,13 +65,13 @@ If a custom provider or incompatible explicit duration/scenes cannot be resolved
 
 ## Style and Fictional Voice Gate
 
-At `style-review`, create one representative image and only enough fictional speech to judge the voice. Add a 3–5 second proof in the same gate when motion is materially new or the project uses `supported-subject`/`registered-environment`; that proof must use a real v4 group and its registered derivatives, not a masked surrogate. Show provider/model, voice identity, sample artifacts, and known cost. After explicit approval, run:
+At `style-review`, create one representative image and only enough fictional speech to judge the voice. Add a 3–5 second proof in the same gate when motion is materially new or the project uses `supported-subject`/`registered-environment`; that proof must use a real v4 group and its registered derivatives, not a masked surrogate. For a coupled proof, run `style:proof`, inspect its full-resolution relationship crops, alpha masks, checkerboard isolates, tight crops, and motion-stress sheets, then record the required asset and composite semantic checks with those evidence files. Show provider/model, voice identity, sample artifacts, and known cost. After explicit approval, run:
 
 ```bash
 npm run project:advance -- <slug> approve-style-voice --note="<explicit decision>"
 ```
 
-After revisions, remain at this gate.
+`approve-style-voice` refuses coupled projects whose style-proof fingerprint is missing/stale, whose evidence bundle is incomplete, or whose participating assets/composite have pending semantic checks. This strengthens the existing gate; it does not add another human wait. After revisions, remain at this gate.
 
 Never substitute a real-person clone. Treat cloning as a separate opt-in requiring licensed audio and transcript authorization.
 
@@ -82,9 +82,11 @@ At `asset-production`:
 1. Group checkpoints by recoverable batch or location, not by every file. Keep provider provenance per asset.
 2. Route relationships before generation: persistent `inside`/`on`/`held-by`/`worn-by` contact uses `supported-subject`; a shared shoreline/horizon/edge uses `registered-environment`; only independent elements use `free`. If no pattern represents the approved meaning, extend the reusable contract before bulk generation.
 3. For every coupled group, generate or import one complete master, derive all registered members and masks from it, and record the same `registrationId` and `sourceMasterAssetId`. Never generate coupled members independently or repair the relationship with arbitrary z-index offsets.
+   - Do not use a coarse polygon matte for an articulated or internally open subject such as a person, animal, vehicle, chair, tree, rope, or bicycle. Use a capable segmentation/matting path or a carefully reviewed manual matte.
+   - If reliable extraction is unavailable, preserve the approved complete master as one rigid visual family and limit motion to whole-master/camera movement. Less local motion is preferable to a damaged silhouette.
 4. Create a schema-v2 request for every generated/imported output and try `provider:reuse` before paid or slow generation. Run `provider:record` after host/manual output or `provider:run` for command adapters.
 5. Stay within the approved asset budget. Deterministic masks, crops, and alpha extractions from a registered master do not consume another generated-image slot.
-6. Run `project:quality prepare`, inspect original-resolution files, and record asset reviews in batches. Do not pass a semantic check merely to unblock production.
+6. Run `project:quality prepare`, inspect original-resolution files plus generated alpha/checkerboard/motion-stress evidence, and record asset reviews in batches with `evidenceFiles` for topology-sensitive checks. Do not pass a semantic check merely to unblock production. A hard-alpha `key-edge-clean` result proves only that no soft matte contamination was detected; it does not prove silhouette fidelity or subject completeness.
 7. Generate/import one narration file per scene so revisions remain local. Assemble `scene.composition` with local child transforms and authored `at=0..1` keyframes. Copy approved proof ids/times/assertions exactly. Map every storyboard beat to one `scene.cues[]` entry; bind critical visual/sound events to `proofTimeId`.
 8. Run `project:composition-proof`; it synchronizes real narration duration before rendering. Inspect real full frames, relationship crops, and debug frames. Run `project:quality prepare` again and record composite reviews in the same batch format using `compositeId`.
 9. Seal the production set with one command:

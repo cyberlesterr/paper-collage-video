@@ -77,7 +77,7 @@ const nextActionByStage = {
     '准备概念、故事板、制作档位与 provider 方案；请人一次确认后直接进入风格样张',
   brief: '完善 brief.md，运行 project:plan 并锁定 storyboard，再记录 brief-ready',
   'concept-review': '向人展示文案、分镜和素材清单；确认后记录 approve-concept',
-  'style-review': '展示一张风格样张和虚构音色；确认后记录 approve-style-voice',
+  'style-review': '展示风格样张、虚构音色及所需拓扑证据；确认且证明通过后记录 approve-style-voice',
   'asset-production': '生产素材与旁白、同步时长并通过校验；然后记录 assets-ready',
   preview: '运行 project:preview',
   'human-review': '等待人审预览；确认后记录 approve-preview，或记录 request-preview-revision',
@@ -108,8 +108,8 @@ const stageControlByStage = {
   'style-review': {
     mode: 'wait-human',
     gate: 'styleAndVoice',
-    requiredDecision: '请明确批准风格样张和虚构音色，或给出修改意见。',
-    expectedArtifacts: ['styleSample', 'voiceAudition'],
+    requiredDecision: '请明确批准风格样张、虚构音色和所需运动拓扑，或给出修改意见。',
+    expectedArtifacts: ['styleSample', 'voiceAudition', 'topologyProofWhenRequired'],
   },
   'asset-production': {
     mode: 'auto-continue',

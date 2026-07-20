@@ -505,7 +505,7 @@ Implementation should extend existing commands rather than create a fragmented o
 | composition proof | add one script invoked during asset production and rechecked by assets-ready |
 | `project:assets-ready` | enforce current v4 validation, proof fingerprints, and both quality scopes |
 | `project:report` | include cue event table and composite proof summary |
-| `style:proof` | use actual v4 groups instead of a surrogate masked sample |
+| `style:proof` | use actual v4 groups, emit current style fingerprints, full-resolution proof/crop/debug frames, and per-member alpha/checkerboard/tight/motion-stress evidence; style approval fails closed when evidence or semantic review is missing |
 | `plugin:sync` | package all schema, runtime, script, fixture, reference, and starter changes |
 
 Detailed schema examples and check catalogs belong in `references/project-contract.md` and `references/quality-motion.md`. The top-level Skill should only contain pattern-selection rules and the normal execution order.

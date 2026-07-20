@@ -67,6 +67,7 @@ const requiredWorkspaceScripts = [
   'project:quality',
   'project:preview',
   'project:render',
+  'style:proof',
 ];
 let workspaceDetails = ROOT;
 let workspaceReady = false;

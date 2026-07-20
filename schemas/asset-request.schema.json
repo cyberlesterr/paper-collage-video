@@ -61,7 +61,7 @@
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {"enum": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent", "subject-complete", "identity-consistent", "cell-separation", "background-uniform", "edge-clean"]}
+          "items": {"enum": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent", "subject-complete", "identity-consistent", "cell-separation", "background-uniform", "edge-clean", "silhouette-fidelity", "negative-space-clean", "background-leak-free"]}
         }
       },
       "additionalProperties": false

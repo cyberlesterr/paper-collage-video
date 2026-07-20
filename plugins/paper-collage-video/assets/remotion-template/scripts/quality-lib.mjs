@@ -32,6 +32,9 @@ export const ASSET_QUALITY_CHECKS = [
   'cell-separation',
   'background-uniform',
   'edge-clean',
+  'silhouette-fidelity',
+  'negative-space-clean',
+  'background-leak-free',
 ];
 
 export const COMPOSITE_QUALITY_CHECKS = [
@@ -40,6 +43,7 @@ export const COMPOSITE_QUALITY_CHECKS = [
   'front-occlusion',
   'shared-motion',
   'identity-continuity',
+  'motion-isolation-clean',
   'registration-aligned',
   'boundary-respected',
   'no-semantic-duplication',
@@ -68,13 +72,16 @@ const QUALITY_PROFILES = {
 };
 
 const COMPOSITE_PROFILES = {
-  'supported-subject': ['support-contact', 'inside-or-on-readable', 'front-occlusion', 'shared-motion', 'identity-continuity'],
+  'supported-subject': ['support-contact', 'inside-or-on-readable', 'front-occlusion', 'shared-motion', 'identity-continuity', 'motion-isolation-clean'],
   'registered-environment': ['registration-aligned', 'boundary-respected', 'no-semantic-duplication', 'depth-readable', 'final-composition-readable'],
   cue: ['visual-event-visible', 'sound-event-bound', 'proof-time-bound', 'final-state-preserved'],
 };
 
 const qualityReportPath = (slug) => path.join(ROOT, 'projects', slug, 'quality-report.json');
 export const compositionProofReportPath = (slug) => path.join(ROOT, 'dist', slug, 'composition-proof', 'report.json');
+
+const TOPOLOGY_ASSET_CHECKS = ['silhouette-fidelity', 'negative-space-clean', 'background-leak-free'];
+const EVIDENCE_REQUIRED_CHECKS = new Set([...TOPOLOGY_ASSET_CHECKS, 'motion-isolation-clean']);
 
 const hashFile = async (file) => createHash('sha256').update(await fs.readFile(file)).digest('hex');
 const runtimeAssetId = (file) => `runtime-${createHash('sha256').update(file).digest('hex').slice(0, 12)}`;
@@ -107,7 +114,7 @@ const collectQualityAssets = async (project, manifest) => {
     if (existing) {
       existing.sources = [...new Set([...existing.sources, source])];
       if (['background', 'environment', 'character', 'prop'].includes(kind)) existing.kind = kind;
-      if (requiredChecks?.length) existing.requiredChecks = requiredChecks;
+      if (requiredChecks?.length) existing.requiredChecks = [...new Set([...(existing.requiredChecks ?? []), ...requiredChecks])];
       if (assetId) existing.assetId = assetId;
       return;
     }
@@ -115,8 +122,11 @@ const collectQualityAssets = async (project, manifest) => {
   };
 
   for (const scene of project.scenes ?? []) {
-    for (const {node} of collectCompositionAssets(scene.composition)) {
-      add({file: resolvePublicFile(node.src), kind: node.assetRole, source: `scene:${scene.id}:node:${node.id}`});
+    for (const {node, parent} of collectCompositionAssets(scene.composition)) {
+      const topologyChecks = parent && ['supported-subject', 'registered-environment'].includes(parent.pattern)
+        ? [...(QUALITY_PROFILES[node.assetRole] ?? QUALITY_PROFILES.image), ...TOPOLOGY_ASSET_CHECKS]
+        : null;
+      add({file: resolvePublicFile(node.src), kind: node.assetRole, source: `scene:${scene.id}:node:${node.id}`, requiredChecks: topologyChecks});
     }
     for (const {node} of collectCompositionGroups(scene.composition)) {
       for (const boundary of node.boundaries ?? []) {
@@ -335,13 +345,29 @@ export const summarizeQualityReport = (report) => {
   return {ready: total.pending === 0 && total.failed === 0, actualPassed: total.pending === 0 && total.failed === 0, ...total, scopes: {assets, composites}, report};
 };
 
-const preservedReview = ({previous, fingerprint, requiredChecks}) => {
-  const preserve = previous?.fingerprint === fingerprint || previous?.sha256 === fingerprint;
+const evidenceFilesAreCurrent = async (evidenceFiles) => {
+  if (!Array.isArray(evidenceFiles) || evidenceFiles.length === 0) return true;
+  try {
+    const current = await Promise.all(evidenceFiles.map(async (evidence) => {
+      if (typeof evidence?.file !== 'string' || typeof evidence?.sha256 !== 'string') return false;
+      const absoluteFile = assertWorkspaceFile(evidence.file);
+      return (await fileExists(absoluteFile)) && await hashFile(absoluteFile) === evidence.sha256;
+    }));
+    return current.every(Boolean);
+  } catch {
+    return false;
+  }
+};
+
+const preservedReview = async ({previous, fingerprint, requiredChecks}) => {
+  const sameTarget = previous?.fingerprint === fingerprint || previous?.sha256 === fingerprint;
+  const preserve = sameTarget && await evidenceFilesAreCurrent(previous?.evidenceFiles);
   return {
     semanticChecks: Object.fromEntries(requiredChecks.map((check) => [check, preserve ? previous.semanticChecks?.[check] ?? 'pending' : 'pending'])),
     reviewer: preserve ? previous.reviewer ?? null : null,
     reviewedAt: preserve ? previous.reviewedAt ?? null : null,
     note: preserve ? previous.note ?? '' : '',
+    evidenceFiles: preserve ? previous.evidenceFiles ?? [] : [],
   };
 };
 
@@ -359,7 +385,7 @@ export const prepareQualityReport = async (slug, {write = true} = {}) => {
     const requiredChecks = [...new Set(asset.requiredChecks?.length ? asset.requiredChecks : QUALITY_PROFILES[asset.kind] ?? QUALITY_PROFILES.image)];
     const unknownChecks = requiredChecks.filter((check) => !ASSET_QUALITY_CHECKS.includes(check));
     if (unknownChecks.length) throw new Error(`${asset.assetId} 含未知资产质量检查：${unknownChecks.join(', ')}`);
-    const review = preservedReview({previous: previousAssets.get(asset.assetId), fingerprint: sha256, requiredChecks});
+    const review = await preservedReview({previous: previousAssets.get(asset.assetId), fingerprint: sha256, requiredChecks});
     const technical = await inspectTechnicalQuality({asset, project});
     return {...asset, sha256, requiredChecks, technical, ...review, status: entryStatus({technical, semanticChecks: review.semanticChecks})};
   }));
@@ -368,7 +394,7 @@ export const prepareQualityReport = async (slug, {write = true} = {}) => {
   const proofReport = (await fileExists(proofFile)) ? await readJson(proofFile) : null;
   const targets = await collectCompositeQualityTargets(project, {manifest});
   const inspectedComposites = await Promise.all(targets.map(async (target) => {
-    const review = preservedReview({previous: previousComposites.get(target.compositeId), fingerprint: target.fingerprint, requiredChecks: target.requiredChecks});
+    const review = await preservedReview({previous: previousComposites.get(target.compositeId), fingerprint: target.fingerprint, requiredChecks: target.requiredChecks});
     const technical = await inspectCompositeTechnical({target, proofReport});
     return {
       compositeId: target.compositeId,
@@ -420,7 +446,17 @@ export const recordQualityReviews = async ({slug, reviews}) => {
       if (!QUALITY_CHECKS.includes(check)) throw new Error(`未知质量检查：${check}`);
       if (!entry.requiredChecks.includes(check)) throw new Error(`${reviewId} 不需要质量检查 ${check}。`);
     }
-    normalized.push({entry, reviewId, reviewer: review.reviewer.trim(), passedChecks, failedChecks, note: (review.note ?? '').trim()});
+    const evidenceFiles = [];
+    for (const evidenceFile of review.evidenceFiles ?? []) {
+      if (typeof evidenceFile !== 'string' || evidenceFile.trim().length === 0) throw new Error(`${reviewId} 的 evidenceFiles 必须是非空路径。`);
+      const absoluteFile = assertWorkspaceFile(evidenceFile.trim());
+      if (!(await fileExists(absoluteFile))) throw new Error(`${reviewId} 的质量证据不存在：${evidenceFile}`);
+      evidenceFiles.push({file: path.relative(ROOT, absoluteFile), sha256: await hashFile(absoluteFile)});
+    }
+    if (passedChecks.some((check) => EVIDENCE_REQUIRED_CHECKS.has(check)) && evidenceFiles.length === 0) {
+      throw new Error(`${reviewId} 的拓扑质量检查必须提供 evidenceFiles。`);
+    }
+    normalized.push({entry, reviewId, reviewer: review.reviewer.trim(), passedChecks, failedChecks, note: (review.note ?? '').trim(), evidenceFiles});
   }
   const changedIds = [];
   for (const item of normalized) {
@@ -430,6 +466,7 @@ export const recordQualityReviews = async ({slug, reviews}) => {
     item.entry.reviewer = item.reviewer;
     item.entry.reviewedAt = new Date().toISOString();
     item.entry.note = item.note;
+    if (item.evidenceFiles.length > 0) item.entry.evidenceFiles = item.evidenceFiles;
     changedIds.push(item.reviewId);
   }
   prepared.report.updatedAt = new Date().toISOString();

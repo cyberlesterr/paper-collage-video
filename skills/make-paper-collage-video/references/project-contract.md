@@ -30,6 +30,8 @@ Never ask the human to edit machine JSON. Paths in `project.json` are relative t
 
 The combined confirmation is the normal path. Composition proof is machine evidence inside the existing style or asset stage, not a fourth human gate.
 
+When the approved storyboard uses `supported-subject` or `registered-environment`, `approve-style-voice` additionally requires a current schema-v3 `style-motion-proof.json`. The report fingerprint binds the representative group, member hashes, timing/proof inputs, and source family. Its full-resolution frames and per-member alpha/checkerboard/tight/motion-stress evidence must exist, and the participating asset/composite semantic checks must already be recorded. This is an executable precondition inside `style-review`, not another approval state.
+
 ## v4 Composition Tree
 
 Schema v4 is the only supported project contract. A scene has `composition.nodes`; it must not contain legacy `background`, `layers`, or `environmentLayers` arrays. Nodes are recursive `asset` or `group` records. All transforms and keyframe deltas are normalized to the immediate parent.
@@ -46,6 +48,8 @@ Groups own carrier motion; children own only local motion. Do not repeat the gro
 
 Coupled members share `registration.id`, `sourceMasterAssetId`, canvas dimensions, origin, and source-family provenance. Generate/import one complete master and derive members from it. Independent generation calls for the two sides of one contact or boundary are invalid.
 
+Derivation method is part of correctness. Complex silhouettes and negative spaces require capable segmentation/matting or careful manual tracing; a coarse enclosing polygon is invalid even when it has clean hard alpha. When extraction quality cannot be proved, keep the complete master rigid and use whole-family/camera motion instead of fabricating independent parts.
+
 ## Proof and Cue Contract
 
 - Scene id, blueprint, `compositionPlan`, proof ids/times/assertions, and beat ids must match the approved storyboard.
@@ -59,6 +63,6 @@ Coupled members share `registration.id`, `sourceMasterAssetId`, canvas dimension
 
 Run `project:composition-proof` after assembling real groups. It renders authored proof frames, focused relationship crops, debug copies, and the cue table through the production renderer. `project:assets-ready` rejects missing/stale proof fingerprints and pending/failed asset or composite quality.
 
-Fix a wrong mask, crop, anchor, registration, or derivative without another human decision when the approved meaning and budget remain unchanged. Return to concept only when the relationship meaning changes. Return to provider/budget approval only for a provider switch or budget increase. Never hide a contract failure with arbitrary z-index or pixel nudges.
+Fix a wrong mask, crop, anchor, registration, or derivative without another human decision when the approved meaning and budget remain unchanged. Regenerate `style:proof` or `project:composition-proof` after the fix; member hashes invalidate prior evidence automatically. Return to concept only when the relationship meaning changes. Return to provider/budget approval only for a provider switch or budget increase. Never hide a contract failure with arbitrary z-index, pixel nudges, or a coarse polygon matte.
 
 Use repository scripts rather than reproducing ffprobe, FFmpeg, Remotion, extraction, proof, or report logic ad hoc. v3 is not migrated or executed.

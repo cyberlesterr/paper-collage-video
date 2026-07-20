@@ -16,6 +16,7 @@ import {assertSelectedProvidersReady} from './provider-lib.mjs';
 import {assertCreativePlanReady} from './creative-plan-lib.mjs';
 import {assertQualityReady, formatQualityStatus} from './quality-lib.mjs';
 import {assertStoryboardReady} from './storyboard-lib.mjs';
+import {assertStyleProofReady} from './style-proof-lib.mjs';
 
 const args = process.argv.slice(2);
 const positional = args.filter((arg) => !arg.startsWith('--'));
@@ -62,6 +63,13 @@ try {
     const quality = await assertQualityReady(slug);
     console.log(formatQualityStatus(quality));
     artifacts.validationReport = path.relative(ROOT, reportFile);
+  }
+  if (action === 'approve-style-voice') {
+    const styleProof = await assertStyleProofReady(slug);
+    if (styleProof.required) {
+      console.log(`✓ 风格拓扑证明：${styleProof.composites.join(', ')}`);
+      artifacts.styleProof = path.relative(ROOT, styleProof.report);
+    }
   }
   if (action === 'approve-preview') {
     await requirePassingArtifact(slug, 'preview.mp4');

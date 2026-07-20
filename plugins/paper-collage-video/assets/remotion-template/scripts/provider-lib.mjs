@@ -28,6 +28,9 @@ const IMAGE_QUALITY_CHECKS = [
   'cell-separation',
   'background-uniform',
   'edge-clean',
+  'silhouette-fidelity',
+  'negative-space-clean',
+  'background-leak-free',
 ];
 const PROVIDER_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
