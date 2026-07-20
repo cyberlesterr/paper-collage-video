@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/project.schema.json",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "slug": "starter-demo",
   "title": "Paper Collage Workspace",
   "plan": {
@@ -44,7 +44,6 @@
       "volume": 1
     },
     "music": null,
-    "sfx": {},
     "mastering": {
       "targetLufs": -16,
       "toleranceLufs": 3,

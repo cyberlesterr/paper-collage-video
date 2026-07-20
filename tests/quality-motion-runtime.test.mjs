@@ -72,7 +72,7 @@ test('request fingerprints ignore project-specific destinations but preserve gen
   assert.notEqual(first, changed);
 });
 
-test('v2 scene transitions use one seconds-based timing protocol', () => {
+test('v3 scene transitions use one seconds-based timing protocol', () => {
   const timeline = deriveTimeline({
     video: {fps: 30},
     scenes: [
@@ -102,28 +102,28 @@ test('v2 scene transitions use one seconds-based timing protocol', () => {
   assert.equal(timeline.durationInFrames, 160);
 });
 
-test('v1 projects are rejected instead of migrated', async () => {
+test('pre-v3 projects are rejected instead of migrated', async () => {
   const report = await validateProject({
     schemaVersion: 1,
     slug: 'old-project',
     title: 'Old project',
     video: {width: 1920, height: 1080, fps: 30, transitionFrames: 12},
     theme: {},
-    audio: {music: null, sfx: {}},
+    audio: {music: null},
     scenes: [],
   });
   assert.equal(report.passed, false);
   assert.ok(
     report.issues.some(
       ({code, message}) =>
-        code === 'schema-version' && message.includes('必须为 2'),
+        code === 'schema-version' && message.includes('必须为 3'),
     ),
   );
 });
 
-test('v2 projects require an explicit bounded narration gain', async () => {
+test('v3 projects require an explicit bounded narration gain', async () => {
   const base = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     slug: 'narration-gain-test',
     title: 'Narration gain test',
     quality: {minimumAssetScale: 1},
@@ -132,7 +132,6 @@ test('v2 projects require an explicit bounded narration gain', async () => {
     voice: {mode: 'fictional'},
     audio: {
       music: null,
-      sfx: {},
       mastering: {targetLufs: -16, toleranceLufs: 3, truePeakDbtp: -1},
     },
     scenes: [],
@@ -155,6 +154,13 @@ test('v2 projects require an explicit bounded narration gain', async () => {
   assert.equal(
     valid.issues.some(({code}) => code === 'audio-narration-volume'),
     false,
+  );
+  const legacyRoleSounds = await validateProject({
+    ...base,
+    audio: {...base.audio, narration: {volume: 1}, sfx: {}},
+  });
+  assert.ok(
+    legacyRoleSounds.issues.some(({code}) => code === 'unsupported-v2-audio-sfx'),
   );
 });
 
@@ -232,13 +238,13 @@ test('required asset quality resets on hashes and batch reviews write atomically
       path.join(projectDirectory, 'project.json'),
       `${JSON.stringify(
         {
-          schemaVersion: 2,
+          schemaVersion: 3,
           slug,
           title: 'Quality Gate',
           quality: {minimumAssetScale: 1},
           video: {width: 640, height: 360, fps: 30},
           theme: {},
-          audio: {music: null, sfx: {}},
+          audio: {music: null},
           scenes: [
             {
               id: 'scene',

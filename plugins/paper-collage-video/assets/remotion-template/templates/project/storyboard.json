@@ -1,0 +1,15 @@
+{
+  "$schema": "../../schemas/storyboard.schema.json",
+  "schemaVersion": 1,
+  "slug": "{{slug}}",
+  "status": "pending",
+  "arc": "",
+  "style": {
+    "visualThesis": "",
+    "compositionRules": [],
+    "motionLanguage": [],
+    "layerStrategy": ""
+  },
+  "scenes": [],
+  "updatedAt": "{{createdAt}}"
+}

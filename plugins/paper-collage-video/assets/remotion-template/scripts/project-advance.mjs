@@ -15,6 +15,7 @@ import {advanceProduction, formatProduction} from './production-state.mjs';
 import {assertSelectedProvidersReady} from './provider-lib.mjs';
 import {assertCreativePlanReady} from './creative-plan-lib.mjs';
 import {assertQualityReady, formatQualityStatus} from './quality-lib.mjs';
+import {assertStoryboardReady} from './storyboard-lib.mjs';
 
 const args = process.argv.slice(2);
 const positional = args.filter((arg) => !arg.startsWith('--'));
@@ -48,6 +49,7 @@ try {
   if (action === 'brief-ready') {
     const {project} = await loadProject(slug);
     assertCreativePlanReady(project.plan, {slug});
+    await assertStoryboardReady(slug, project.plan);
   }
   if (action === 'assets-ready') {
     const {project} = await loadProject(slug);

@@ -54,6 +54,7 @@
       "required": [
         "brief",
         "project",
+        "storyboard",
         "prompts",
         "review",
         "validationReport",
@@ -65,6 +66,7 @@
       "properties": {
         "brief": {"type": "string", "minLength": 1},
         "project": {"type": "string", "minLength": 1},
+        "storyboard": {"type": "string", "minLength": 1},
         "prompts": {"type": "string", "minLength": 1},
         "review": {"type": "string", "minLength": 1},
         "validationReport": {"$ref": "#/$defs/nullablePath"},

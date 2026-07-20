@@ -31,4 +31,24 @@ npm run project:plan -- <slug> \
 
 Show requested versus inferred values, profile, and image budget in the combined concept/provider decision. Change the profile only through concept revision or another explicit budget decision.
 
+## Lock the Rhythmic Storyboard
+
+After `project:plan`, create a storyboard input and run:
+
+```bash
+npm run project:storyboard -- <slug> --input=<storyboard.json>
+```
+
+The storyboard is not another human gate. It is part of the existing combined concept decision and becomes the execution contract for production.
+
+- Give the whole film one explicit arc and one shared visual/motion language.
+- Give each planned scene a narrative role, single message, blueprint, estimated duration, and at least three ordered beats.
+- Use normalized beat time (`at=0..1`) so rhythm survives narration resync.
+- Choose one of the bounded blueprints: `layered-reveal`, `map-journey`, `archive-stack`, `character-procession`, `discovery-wipe`, `transformation-tableau`, `chapter-tableau`, or `quiet-lockup`.
+- Define at least three proof moments per scene: an establishing state, an action/peak state, and a `final` state at or after `0.82`.
+- Keep proof moments outside the scene's fade-in/fade-out interval so every sampled frame clearly proves the intended composition.
+- If a beat names an `audioCue`, production must attach a real sound asset to its matching cue.
+
+The sum of scene estimates must stay within 8% of the resolved duration. Scene count must match exactly.
+
 After real narration exists, `project:assets-ready` synchronizes exact media duration. Explicit user duration drift blocks validation; inferred duration drift remains a warning for review.

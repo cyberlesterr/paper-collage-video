@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/project.schema.json",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "slug": "starter-demo",
   "title": "Paper Collage Starter",
   "plan": {
@@ -58,7 +58,6 @@
       "volume": 1
     },
     "music": null,
-    "sfx": {},
     "mastering": {
       "targetLufs": -24,
       "toleranceLufs": 3,
@@ -73,13 +72,35 @@
       "tailSeconds": 1,
       "background": "projects/starter-demo/assets/plates/01-bg.png",
       "environmentLayers": [],
+      "motion": {
+        "blueprint": "layered-reveal",
+        "intensity": 0.7,
+        "seed": 17,
+        "proofTimes": [
+          {
+            "at": 0.08,
+            "label": "建立纸面空间",
+            "kind": "establish"
+          },
+          {
+            "at": 0.5,
+            "label": "主体进入画面",
+            "kind": "peak"
+          },
+          {
+            "at": 0.9,
+            "label": "标题与主体稳定",
+            "kind": "final"
+          }
+        ]
+      },
       "camera": {
         "preset": "push",
         "intensity": 0.6
       },
       "transition": {
-        "type": "fade",
-        "durationSeconds": 0.4
+        "type": "none",
+        "durationSeconds": 0
       },
       "narration": {
         "src": "projects/starter-demo/audio/narration/01-test-tone.wav",
@@ -102,7 +123,29 @@
             "idle": "breathe",
             "intensity": 0.5,
             "cycleSeconds": 2.8,
-            "enterDurationSeconds": 1
+            "enterDurationSeconds": 1,
+            "keyframes": [
+              {
+                "at": 0,
+                "x": -18,
+                "opacity": 0.72,
+                "ease": "ease-out"
+              },
+              {
+                "at": 0.5,
+                "x": 6,
+                "scale": 1.03,
+                "opacity": 1,
+                "ease": "ease-in-out"
+              },
+              {
+                "at": 1,
+                "x": 0,
+                "scale": 1,
+                "opacity": 1,
+                "ease": "ease-out"
+              }
+            ]
           }
         }
       ],
@@ -113,7 +156,35 @@
           "text": "Paper Collage Video"
         }
       ],
-      "audioEvents": []
+      "cues": [
+        {
+          "id": "establish",
+          "beatId": "establish",
+          "at": 0,
+          "durationSeconds": 0.35,
+          "targetId": "scene",
+          "action": "reveal",
+          "intensity": 0.7
+        },
+        {
+          "id": "subject-arrives",
+          "beatId": "subject-arrives",
+          "at": 0.5,
+          "durationSeconds": 0.5,
+          "targetId": "traveler",
+          "action": "lift",
+          "intensity": 0.8
+        },
+        {
+          "id": "lockup",
+          "beatId": "lockup",
+          "at": 0.9,
+          "durationSeconds": 0.25,
+          "targetId": "traveler",
+          "action": "settle",
+          "intensity": 0.55
+        }
+      ]
     }
   ]
 }

@@ -75,6 +75,7 @@ test('packaged runtime is lightweight and independent from production projects',
   assert.equal(packageJson.scripts['provider:select'], 'node scripts/provider-select.mjs');
   assert.equal(packageJson.scripts['provider:reuse'], 'node scripts/provider-reuse.mjs');
   assert.equal(packageJson.scripts['project:plan'], 'node scripts/project-plan.mjs');
+  assert.equal(packageJson.scripts['project:storyboard'], 'node scripts/project-storyboard.mjs');
   assert.equal(
     packageJson.scripts['project:confirm-concept'],
     'node scripts/project-confirm-concept.mjs',
@@ -103,7 +104,9 @@ test('packaged runtime is lightweight and independent from production projects',
   const starterQuality = readJson(
     path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'quality-report.json'),
   );
-  assert.equal(starterProject.schemaVersion, 2);
+  assert.equal(starterProject.schemaVersion, 3);
+  assert.equal(starterProject.scenes[0].motion.proofTimes.length, 3);
+  assert.equal(starterProject.scenes[0].cues.length, 3);
   assert.deepEqual(starterProject.quality, {minimumAssetScale: 0.5});
   assert.equal(starterManifest.schemaVersion, 2);
   assert.equal(starterQuality.assets.length, 2);
@@ -121,15 +124,20 @@ test('packaged runtime is lightweight and independent from production projects',
     'scripts/project-subtitles.mjs',
     'scripts/creative-plan-lib.mjs',
     'scripts/project-plan.mjs',
+    'scripts/project-storyboard.mjs',
+    'scripts/storyboard-lib.mjs',
     'scripts/project-confirm-concept.mjs',
     'scripts/style-motion-proof.mjs',
     'src/MainVideo.tsx',
+    'src/motion.ts',
     'src/ReplicaChapterScene.tsx',
     'src/project.ts',
     'schemas/project.schema.json',
+    'schemas/storyboard.schema.json',
     'schemas/providers.schema.json',
     'schemas/quality-report.schema.json',
     'templates/project/production.json',
+    'templates/project/storyboard.json',
     'templates/project/quality-report.json',
     'providers.json',
   ]) {

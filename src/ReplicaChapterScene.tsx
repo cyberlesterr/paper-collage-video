@@ -14,12 +14,12 @@ import type {
   CharacterLayer,
   EnvironmentLayer,
   NormalizedProjectScene,
-  ProjectSound,
-  ProjectAudioEvent,
+  ProjectCue,
   ProjectTheme,
   NormalizedSubtitleCue,
 } from './project';
-import {roleMotion, type Role} from './roleMotion';
+import {roleMotion} from './roleMotion';
+import {resolveCueState, resolveMotionState} from './motion';
 
 const clamp = {
   extrapolateLeft: 'clamp',
@@ -35,9 +35,15 @@ const backgroundStyle: CSSProperties = {
 const Character = ({
   layer,
   paperEdge,
+  cues,
+  progress,
+  durationSeconds,
 }: {
   layer: CharacterLayer;
   paperEdge: string;
+  cues: ProjectCue[];
+  progress: number;
+  durationSeconds: number;
 }) => {
   const frame = useCurrentFrame();
   const {fps, width, height} = useVideoConfig();
@@ -91,6 +97,13 @@ const Character = ({
   const yOffset = (1 - entrance) * motion.rise * layoutScale + idleY;
   const scale =
     (motion.startScale + (1 - motion.startScale) * entrance) * idleScale;
+  const authored = resolveMotionState(layerMotion.keyframes, progress);
+  const cue = resolveCueState({
+    cues,
+    targetId: layer.id,
+    progress,
+    durationSeconds,
+  });
   const cutoutFilter = `
     drop-shadow(4px 0 ${paperEdge})
     drop-shadow(-4px 0 ${paperEdge})
@@ -106,8 +119,8 @@ const Character = ({
         bottom: layer.bottom,
         width: layer.width,
         zIndex: layer.z,
-        opacity: entrance,
-        transform: `translate3d(${xOffset * layoutScale + idleX}px, ${yOffset}px, 0) scale(${scale}) rotate(${idleRotation}deg)`,
+        opacity: entrance * authored.opacity * cue.opacity,
+        transform: `translate3d(${xOffset * layoutScale + idleX + (authored.x + cue.x) * layoutScale}px, ${yOffset + (authored.y + cue.y) * layoutScale}px, 0) scale(${scale * authored.scale * cue.scale}) rotate(${idleRotation + authored.rotation + cue.rotation}deg)`,
         transformOrigin: '50% 100%',
         filter: cutoutFilter,
       }}
@@ -300,14 +313,27 @@ const EnvironmentCutout = ({
   cameraX,
   cameraY,
   cameraZoom,
+  cues,
+  progress,
+  durationSeconds,
 }: {
   layer: EnvironmentLayer;
   cameraX: number;
   cameraY: number;
   cameraZoom: number;
+  cues: ProjectCue[];
+  progress: number;
+  durationSeconds: number;
 }) => {
   const depthStrength = Math.max(-1, Math.min(1, layer.depth));
   const parallax = 1 + depthStrength;
+  const authored = resolveMotionState(layer.motion.keyframes, progress);
+  const cue = resolveCueState({
+    cues,
+    targetId: layer.id,
+    progress,
+    durationSeconds,
+  });
   const style: CSSProperties = layer.width
     ? {
         position: 'absolute',
@@ -329,47 +355,29 @@ const EnvironmentCutout = ({
       style={{
         ...style,
         zIndex: layer.z,
-        opacity: layer.opacity ?? 1,
-        transform: `translate3d(${cameraX * parallax}px, ${cameraY * parallax}px, 0) scale(${1 + (cameraZoom - 1) * (1 + depthStrength * 0.4)})`,
+        opacity: (layer.opacity ?? 1) * authored.opacity * cue.opacity,
+        transform: `translate3d(${cameraX * parallax + authored.x + cue.x}px, ${cameraY * parallax + authored.y + cue.y}px, 0) scale(${(1 + (cameraZoom - 1) * (1 + depthStrength * 0.4)) * authored.scale * cue.scale}) rotate(${authored.rotation + cue.rotation}deg)`,
         transformOrigin: '50% 54%',
       }}
     />
   );
 };
 
-const RoleSounds = ({
-  layers,
-  roleSounds,
+const CueSounds = ({
+  cues,
+  durationInFrames,
 }: {
-  layers: CharacterLayer[];
-  roleSounds: Partial<Record<Role, ProjectSound>>;
+  cues: ProjectCue[];
+  durationInFrames: number;
 }) => {
-  const {fps} = useVideoConfig();
   return (
     <>
-      {layers.map((layer) => {
-        const sound = roleSounds[layer.role];
-        if (!sound) return null;
-        const from = Math.round(layer.delaySeconds * fps);
+      {cues.map((cue) => {
+        if (!cue.sound) return null;
+        const from = Math.min(durationInFrames - 1, Math.round(cue.at * durationInFrames));
         return (
-          <Sequence key={`sound-${layer.id}`} from={from} layout="none">
-            <Audio src={staticFile(sound.src)} volume={sound.volume} />
-          </Sequence>
-        );
-      })}
-    </>
-  );
-};
-
-const AudioEvents = ({events}: {events: ProjectAudioEvent[]}) => {
-  const {fps} = useVideoConfig();
-  return (
-    <>
-      {events.map((event) => {
-        const from = Math.round(event.atSeconds * fps);
-        return (
-          <Sequence key={event.id} from={from} layout="none">
-            <Audio src={staticFile(event.src)} volume={event.volume} />
+          <Sequence key={`cue-sound-${cue.id}`} from={from} layout="none">
+            <Audio src={staticFile(cue.sound.src)} volume={cue.sound.volume} />
           </Sequence>
         );
       })}
@@ -434,12 +442,10 @@ const cameraValue = ({
 export const ReplicaChapterScene = ({
   scene,
   narrationVolume,
-  roleSounds,
   theme,
 }: {
   scene: NormalizedProjectScene;
   narrationVolume: number;
-  roleSounds: Partial<Record<Role, ProjectSound>>;
   theme: ProjectTheme;
 }) => {
   const frame = useCurrentFrame();
@@ -449,6 +455,14 @@ export const ReplicaChapterScene = ({
     width / (landscape ? 1920 : 1080),
     height / (landscape ? 1080 : 1920),
   );
+  const progress = Math.max(0, Math.min(1, frame / Math.max(1, scene.durationInFrames - 1)));
+  const durationSeconds = scene.durationInFrames / fps;
+  const sceneCue = resolveCueState({
+    cues: scene.cues,
+    targetId: 'scene',
+    progress,
+    durationSeconds,
+  });
   const rawKeyframes =
     scene.camera.keyframes && scene.camera.keyframes.length >= 2
       ? [...scene.camera.keyframes].sort((left, right) => left.at - right.at)
@@ -502,48 +516,69 @@ export const ReplicaChapterScene = ({
     >
       <AbsoluteFill
         style={{
-          transform: `translate3d(${cameraX}px, ${cameraY}px, 0) scale(${cameraZoom})`,
+          transform: `translate3d(${sceneCue.x * layoutScale}px, ${sceneCue.y * layoutScale}px, 0) scale(${sceneCue.scale}) rotate(${sceneCue.rotation}deg)`,
+          opacity: sceneCue.opacity,
           transformOrigin: '50% 54%',
         }}
       >
-        <Img alt="" src={staticFile(scene.background)} style={backgroundStyle} />
+        <AbsoluteFill
+          style={{
+            transform: `translate3d(${cameraX}px, ${cameraY}px, 0) scale(${cameraZoom})`,
+            transformOrigin: '50% 54%',
+          }}
+        >
+          <Img alt="" src={staticFile(scene.background)} style={backgroundStyle} />
+        </AbsoluteFill>
+        <AbsoluteFill
+          style={{
+            opacity: 0.14,
+            mixBlendMode: 'multiply',
+            backgroundImage: `url(${staticFile(theme.texture)})`,
+            backgroundSize: 'cover',
+            zIndex: 6,
+            pointerEvents: 'none',
+          }}
+        />
+        {scene.environmentLayers
+          .filter(({z}) => z < 4)
+          .map((layer) => (
+            <EnvironmentCutout
+              key={layer.id}
+              layer={layer}
+              cameraX={cameraX}
+              cameraY={cameraY}
+              cameraZoom={cameraZoom}
+              cues={scene.cues}
+              progress={progress}
+              durationSeconds={durationSeconds}
+            />
+          ))}
+        {scene.layers.map((layer) => (
+          <Character
+            key={layer.id}
+            layer={layer}
+            paperEdge={theme.paperEdge}
+            cues={scene.cues}
+            progress={progress}
+            durationSeconds={durationSeconds}
+          />
+        ))}
+        {scene.environmentLayers
+          .filter(({z}) => z >= 4)
+          .map((layer) => (
+            <EnvironmentCutout
+              key={layer.id}
+              layer={layer}
+              cameraX={cameraX}
+              cameraY={cameraY}
+              cameraZoom={cameraZoom}
+              cues={scene.cues}
+              progress={progress}
+              durationSeconds={durationSeconds}
+            />
+          ))}
+        <ForegroundPaper color={theme.foreground} />
       </AbsoluteFill>
-      <AbsoluteFill
-        style={{
-          opacity: 0.14,
-          mixBlendMode: 'multiply',
-          backgroundImage: `url(${staticFile(theme.texture)})`,
-          backgroundSize: 'cover',
-          zIndex: 6,
-          pointerEvents: 'none',
-        }}
-      />
-      {scene.environmentLayers
-        .filter(({z}) => z < 4)
-        .map((layer) => (
-          <EnvironmentCutout
-            key={layer.id}
-            layer={layer}
-            cameraX={cameraX}
-            cameraY={cameraY}
-            cameraZoom={cameraZoom}
-          />
-        ))}
-      {scene.layers.map((layer) => (
-        <Character key={layer.id} layer={layer} paperEdge={theme.paperEdge} />
-      ))}
-      {scene.environmentLayers
-        .filter(({z}) => z >= 4)
-        .map((layer) => (
-          <EnvironmentCutout
-            key={layer.id}
-            layer={layer}
-            cameraX={cameraX}
-            cameraY={cameraY}
-            cameraZoom={cameraZoom}
-          />
-        ))}
-      <ForegroundPaper color={theme.foreground} />
       <ChapterLabel eyebrow={scene.eyebrow} label={scene.label} theme={theme} />
       <Subtitle cues={scene.subtitles} theme={theme} />
       <Sequence from={scene.narrationStartFrame} layout="none">
@@ -552,8 +587,7 @@ export const ReplicaChapterScene = ({
           volume={narrationVolume}
         />
       </Sequence>
-      <RoleSounds layers={scene.layers} roleSounds={roleSounds} />
-      <AudioEvents events={scene.audioEvents} />
+      <CueSounds cues={scene.cues} durationInFrames={scene.durationInFrames} />
     </AbsoluteFill>
   );
 };

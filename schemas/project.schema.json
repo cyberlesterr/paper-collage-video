@@ -6,7 +6,7 @@
   "required": ["schemaVersion", "slug", "title", "plan", "quality", "video", "theme", "voice", "audio", "scenes"],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 2},
+    "schemaVersion": {"const": 3},
     "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "title": {"type": "string", "minLength": 1},
     "plan": {"$ref": "#/$defs/creativePlan"},
@@ -61,7 +61,7 @@
     },
     "audio": {
       "type": "object",
-      "required": ["narration", "music", "sfx", "mastering"],
+      "required": ["narration", "music", "mastering"],
       "properties": {
         "narration": {
           "type": "object",
@@ -77,7 +77,6 @@
             {"$ref": "#/$defs/sound"}
           ]
         },
-        "sfx": {"type": "object"},
         "mastering": {
           "type": "object",
           "required": ["targetLufs", "toleranceLufs", "truePeakDbtp"],
@@ -96,7 +95,7 @@
       "minItems": 0,
       "items": {
         "type": "object",
-        "required": ["id", "label", "eyebrow", "tailSeconds", "background", "environmentLayers", "camera", "transition", "narration", "layers", "subtitles", "audioEvents"],
+        "required": ["id", "label", "eyebrow", "tailSeconds", "background", "environmentLayers", "motion", "camera", "transition", "narration", "layers", "subtitles", "cues"],
         "properties": {
           "id": {"type": "string", "minLength": 1},
           "label": {"type": "string"},
@@ -107,7 +106,7 @@
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["id", "src", "depth", "z"],
+              "required": ["id", "src", "depth", "z", "motion"],
               "properties": {
                 "id": {"type": "string", "minLength": 1},
                 "src": {"type": "string", "minLength": 1},
@@ -116,10 +115,33 @@
                 "x": {"type": "number"},
                 "y": {"type": "number"},
                 "width": {"type": "number", "exclusiveMinimum": 0},
-                "opacity": {"type": "number", "minimum": 0, "maximum": 1}
+                "opacity": {"type": "number", "minimum": 0, "maximum": 1},
+                "motion": {
+                  "type": "object",
+                  "required": ["keyframes"],
+                  "properties": {
+                    "keyframes": {"$ref": "#/$defs/motionKeyframes"}
+                  },
+                  "additionalProperties": false
+                }
               },
               "additionalProperties": false
             }
+          },
+          "motion": {
+            "type": "object",
+            "required": ["blueprint", "intensity", "seed", "proofTimes"],
+            "properties": {
+              "blueprint": {"enum": ["layered-reveal", "map-journey", "archive-stack", "character-procession", "discovery-wipe", "transformation-tableau", "chapter-tableau", "quiet-lockup"]},
+              "intensity": {"type": "number", "minimum": 0, "maximum": 3},
+              "seed": {"type": "integer"},
+              "proofTimes": {
+                "type": "array",
+                "minItems": 3,
+                "items": {"$ref": "#/$defs/proofTime"}
+              }
+            },
+            "additionalProperties": false
           },
           "camera": {
             "type": "object",
@@ -184,13 +206,14 @@
                 "enterFrom": {"enum": ["left", "right", "bottom"]},
                 "motion": {
                   "type": "object",
-                  "required": ["idle", "intensity", "cycleSeconds", "enterDurationSeconds"],
+                  "required": ["idle", "intensity", "cycleSeconds", "enterDurationSeconds", "keyframes"],
                   "properties": {
                     "idle": {"enum": ["float", "breathe", "grind", "drift", "still"]},
                     "intensity": {"type": "number", "minimum": 0, "maximum": 3},
                     "cycleSeconds": {"type": "number", "exclusiveMinimum": 0},
                     "phase": {"type": "number"},
-                    "enterDurationSeconds": {"type": "number", "exclusiveMinimum": 0}
+                    "enterDurationSeconds": {"type": "number", "exclusiveMinimum": 0},
+                    "keyframes": {"$ref": "#/$defs/motionKeyframes"}
                   },
                   "additionalProperties": false
                 }
@@ -211,16 +234,20 @@
               "additionalProperties": false
             }
           },
-          "audioEvents": {
+          "cues": {
             "type": "array",
             "items": {
               "type": "object",
-              "required": ["id", "src", "volume", "atSeconds"],
+              "required": ["id", "beatId", "at", "durationSeconds", "targetId", "action", "intensity"],
               "properties": {
                 "id": {"type": "string", "minLength": 1},
-                "src": {"type": "string", "minLength": 1},
-                "volume": {"type": "number", "minimum": 0},
-                "atSeconds": {"type": "number", "minimum": 0}
+                "beatId": {"type": "string", "minLength": 1},
+                "at": {"type": "number", "minimum": 0, "maximum": 1},
+                "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
+                "targetId": {"type": "string", "minLength": 1},
+                "action": {"enum": ["reveal", "pulse", "stamp", "shake", "lift", "settle"]},
+                "intensity": {"type": "number", "minimum": 0, "maximum": 3},
+                "sound": {"$ref": "#/$defs/sound"}
               },
               "additionalProperties": false
             }
@@ -232,6 +259,34 @@
   },
   "additionalProperties": false,
   "$defs": {
+    "motionKeyframes": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["at"],
+        "properties": {
+          "at": {"type": "number", "minimum": 0, "maximum": 1},
+          "x": {"type": "number"},
+          "y": {"type": "number"},
+          "scale": {"type": "number", "exclusiveMinimum": 0},
+          "rotation": {"type": "number"},
+          "opacity": {"type": "number", "minimum": 0, "maximum": 1},
+          "ease": {"enum": ["linear", "ease-in", "ease-out", "ease-in-out", "hold"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "proofTime": {
+      "type": "object",
+      "required": ["at", "label", "kind"],
+      "properties": {
+        "at": {"type": "number", "minimum": 0, "maximum": 1},
+        "label": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["establish", "action", "peak", "final"]}
+      },
+      "additionalProperties": false
+    },
     "sound": {
       "type": "object",
       "required": ["src", "volume"],

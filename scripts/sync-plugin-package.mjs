@@ -107,6 +107,8 @@ for (const entry of [
   'scripts/project-report.mjs',
   'scripts/project-review-sync.mjs',
   'scripts/project-status.mjs',
+  'scripts/project-storyboard.mjs',
+  'scripts/storyboard-lib.mjs',
   'scripts/project-sync.mjs',
   'scripts/project-subtitles.mjs',
   'scripts/project-validate.mjs',
@@ -117,6 +119,7 @@ for (const entry of [
   'scripts/subtitle-lib.mjs',
   'scripts/style-motion-proof.mjs',
   'src/MainVideo.tsx',
+  'src/motion.ts',
   'src/ReplicaChapterScene.tsx',
   'src/index.ts',
   'src/project.ts',
@@ -125,6 +128,7 @@ for (const entry of [
   'tests/creative-plan.test.mjs',
   'tests/production-state.test.mjs',
   'tests/quality-motion-runtime.test.mjs',
+  'tests/storyboard-motion.test.mjs',
   'public/textures/paper-grain.png',
 ]) {
   await copy(entry);
@@ -149,6 +153,7 @@ const workspacePackage = {
     'provider:reuse': rootPackage.scripts['provider:reuse'],
     'project:new': rootPackage.scripts['project:new'],
     'project:plan': rootPackage.scripts['project:plan'],
+    'project:storyboard': rootPackage.scripts['project:storyboard'],
     'project:confirm-concept': rootPackage.scripts['project:confirm-concept'],
     'project:quality': rootPackage.scripts['project:quality'],
     'project:resume': rootPackage.scripts['project:resume'],
@@ -217,7 +222,7 @@ await fs.writeFile(path.join(RUNTIME_ROOT, 'src', 'Root.tsx'), rootSource, 'utf8
 
 const project = {
   $schema: '../../schemas/project.schema.json',
-  schemaVersion: 2,
+  schemaVersion: 3,
   slug: 'starter-demo',
   title: 'Paper Collage Starter',
   plan: {
@@ -260,7 +265,6 @@ const project = {
   audio: {
     narration: {volume: 1},
     music: null,
-    sfx: {},
     mastering: {targetLufs: -24, toleranceLufs: 3, truePeakDbtp: -18},
   },
   scenes: [
@@ -271,8 +275,18 @@ const project = {
       tailSeconds: 1,
       background: 'projects/starter-demo/assets/plates/01-bg.png',
       environmentLayers: [],
+      motion: {
+        blueprint: 'layered-reveal',
+        intensity: 0.7,
+        seed: 17,
+        proofTimes: [
+          {at: 0.08, label: '建立纸面空间', kind: 'establish'},
+          {at: 0.5, label: '主体进入画面', kind: 'peak'},
+          {at: 0.9, label: '标题与主体稳定', kind: 'final'},
+        ],
+      },
       camera: {preset: 'push', intensity: 0.6},
-      transition: {type: 'fade', durationSeconds: 0.4},
+      transition: {type: 'none', durationSeconds: 0},
       narration: {
         src: 'projects/starter-demo/audio/narration/01-test-tone.wav',
         startSeconds: 0,
@@ -295,17 +309,65 @@ const project = {
             intensity: 0.5,
             cycleSeconds: 2.8,
             enterDurationSeconds: 1,
+            keyframes: [
+              {at: 0, x: -18, opacity: 0.72, ease: 'ease-out'},
+              {at: 0.5, x: 6, scale: 1.03, opacity: 1, ease: 'ease-in-out'},
+              {at: 1, x: 0, scale: 1, opacity: 1, ease: 'ease-out'},
+            ],
           },
         },
       ],
       subtitles: [{fromSeconds: 0, toSeconds: 1.8, text: 'Paper Collage Video'}],
-      audioEvents: [],
+      cues: [
+        {id: 'establish', beatId: 'establish', at: 0, durationSeconds: 0.35, targetId: 'scene', action: 'reveal', intensity: 0.7},
+        {id: 'subject-arrives', beatId: 'subject-arrives', at: 0.5, durationSeconds: 0.5, targetId: 'traveler', action: 'lift', intensity: 0.8},
+        {id: 'lockup', beatId: 'lockup', at: 0.9, durationSeconds: 0.25, targetId: 'traveler', action: 'settle', intensity: 0.55},
+      ],
     },
   ],
 };
 await writeJson(
   path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'project.json'),
   project,
+);
+
+const storyboard = {
+  $schema: '../../schemas/storyboard.schema.json',
+  schemaVersion: 1,
+  slug: 'starter-demo',
+  status: 'ready',
+  arc: '从空纸面建立分层空间，再让主体进入并稳定成标题画面。',
+  style: {
+    visualThesis: '以可见纸张深度和克制动作证明可编辑的拼贴空间。',
+    compositionRules: ['主体保持在字幕安全区上方', '前中后景至少形成两个深度层次'],
+    motionLanguage: ['先建立空间，再触发主体，最后稳定锁定'],
+    layerStrategy: '背景承载空间，透明主体承载动作，前景纸片负责压边。',
+  },
+  scenes: [
+    {
+      id: 'starter',
+      title: '纸片分层视频',
+      narrativeRole: '开场与能力证明',
+      message: '纸拼贴镜头由有节奏的分层运动构成。',
+      blueprint: 'layered-reveal',
+      estimatedDurationSeconds: 2,
+      beats: [
+        {id: 'establish', at: 0, purpose: '建立空间', visual: '纸面与背景出现', motion: '场景淡入', audioCue: null},
+        {id: 'subject-arrives', at: 0.5, purpose: '交付主体', visual: '人物纸片进入中心', motion: '主体上提并轻微放大', audioCue: null},
+        {id: 'lockup', at: 0.9, purpose: '稳定结论', visual: '人物与标题形成锁定构图', motion: '主体回落稳定', audioCue: null},
+      ],
+      proofTimes: [
+        {at: 0.08, label: '建立纸面空间', kind: 'establish'},
+        {at: 0.5, label: '主体进入画面', kind: 'peak'},
+        {at: 0.9, label: '标题与主体稳定', kind: 'final'},
+      ],
+    },
+  ],
+  updatedAt: '2026-01-01T00:00:00.000Z',
+};
+await writeJson(
+  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'storyboard.json'),
+  storyboard,
 );
 
 const at = '2026-01-01T00:00:00.000Z';
@@ -326,6 +388,7 @@ const production = {
   artifacts: {
     brief: 'projects/starter-demo/brief.md',
     project: 'projects/starter-demo/project.json',
+    storyboard: 'projects/starter-demo/storyboard.json',
     prompts: 'projects/starter-demo/prompts.json',
     review: 'projects/starter-demo/review.md',
     validationReport: null,

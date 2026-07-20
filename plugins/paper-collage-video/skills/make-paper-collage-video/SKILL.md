@@ -1,6 +1,6 @@
 ---
 name: make-paper-collage-video
-description: Initialize, create, resume, revise, or productize editable Remotion paper-collage videos with adaptive story planning, configurable text/image/fictional-voice providers, layered assets, quality review, preview approval, and local final delivery. Use for paper-cutout, historical collage, layered illustration, parallax explainer, or an interrupted project that has production.json.
+description: Initialize, create, resume, revise, or productize editable Remotion paper-collage videos with rhythmic storyboards, layered keyframe motion, audiovisual cues, proof-time validation, configurable providers, quality review, and local final delivery. Use for paper-cutout, historical collage, layered illustration, parallax explainer, or an interrupted project that has production.json.
 ---
 
 # Make Paper Collage Video
@@ -24,7 +24,7 @@ Build an editable video while keeping the human in charge of concept, style/voic
 
 - Workspace creation or doctor failure: [references/setup.md](references/setup.md)
 - Provider discovery, confirmation, change, or output recording: [references/providers.md](references/providers.md)
-- Duration, scenes, or production-profile planning: [references/story-planning.md](references/story-planning.md)
+- Duration, scenes, rhythmic storyboard, or production-profile planning: [references/story-planning.md](references/story-planning.md)
 - Concept/style/preview decisions, rights, or external action: [references/approval-gates.md](references/approval-gates.md)
 - Image review, depth, motion, subtitles, or delivery tuning: [references/quality-motion.md](references/quality-motion.md)
 - Editing project/state files or diagnosing validation: [references/project-contract.md](references/project-contract.md)
@@ -47,12 +47,13 @@ At `capability-review`, use the current host model only to prepare a provisional
 1. Read `providers.md`, `story-planning.md`, and `approval-gates.md`.
 2. Run `provider:status -- <slug> --compact-json` once and inspect actual callable host tools.
 3. Fill `brief.md`. Run `project:plan` with resolved duration, scenes, narration estimate, rationale, and `--profile=draft|balanced|full-depth`.
-4. Present one compact decision containing:
-   - narration position, scene outline, facts, style, and reusable asset plan;
+4. Author one `storyboard.json` input with a whole-film arc, shared composition/motion language, and one scene record per planned scene. Every scene needs a named blueprint, at least three ordered beats, and at least three proof moments including a final state after `at=0.82`. Lock it with `project:storyboard`.
+5. Present one compact decision containing:
+   - narration position, scene outline, facts, style, reusable asset plan, and each scene's blueprint/beat rhythm;
    - requested versus inferred duration/scenes;
    - production profile and generated-image budget;
    - proposed text/image/voice providers, model/voice identity, and material cost.
-5. Ask once to approve the concept, budget, and all unresolved providers. On approval, write one selection JSON and run:
+6. Ask once to approve the concept, storyboard, budget, and all unresolved providers. On approval, write one selection JSON and run:
 
    ```bash
    npm run project:confirm-concept -- <slug> --input=<selection.json>
@@ -84,7 +85,7 @@ At `asset-production`:
 4. Prefer reliable transparent output; otherwise create complete high-chroma character sheets and process them with `assets:process-sheet`.
 5. Run `provider:record` after host/manual output or `provider:run` for command adapters.
 6. Run `project:quality prepare`. Inspect original-resolution images in small same-type batches and submit one `record-batch` JSON per reviewed batch. Do not pass a semantic check merely to unblock production.
-7. Generate/import one narration file per scene so revisions remain local. Populate the v2 timeline in seconds.
+7. Generate/import one narration file per scene so revisions remain local. Populate the v3 timeline in seconds. Copy each approved scene blueprint and proof-time list exactly into `scene.motion`; give every character and environment layer an authored `at=0..1` keyframe path; map every storyboard beat to one `scene.cues[]` entry by `beatId`. Use cue `sound` only when the approved beat calls for it.
 8. Seal the production set with one command:
 
    ```bash

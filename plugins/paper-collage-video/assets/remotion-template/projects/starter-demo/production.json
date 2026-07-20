@@ -31,6 +31,7 @@
   "artifacts": {
     "brief": "projects/starter-demo/brief.md",
     "project": "projects/starter-demo/project.json",
+    "storyboard": "projects/starter-demo/storyboard.json",
     "prompts": "projects/starter-demo/prompts.json",
     "review": "projects/starter-demo/review.md",
     "validationReport": null,

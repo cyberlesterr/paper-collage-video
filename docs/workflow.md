@@ -6,7 +6,7 @@
 
 ```text
 主题
-→ 概念 + 时长/幕数 + 制作档位/预算 + provider（一次确认）
+→ 概念 + 节奏故事板 + 时长/幕数 + 制作档位/预算 + provider（一次确认）
 → 风格样张 + 虚构音色（一次确认）
 → 自动批量生产、质检和预览
 → 预览批准或修改（一次确认）
@@ -29,7 +29,7 @@ capability-review
 → complete
 ```
 
-`brief` 和 `concept-review` 由组合确认命令一次完成；保留单独动作只是为了兼容和故障恢复。旧项目的 `publish-approval` 可继续读取，但按已完成本地交付处理。
+`brief` 和 `concept-review` 由组合确认命令一次完成。
 
 ## 1. 组合概念与 provider 确认
 
@@ -41,7 +41,7 @@ capability-review
 - `balanced`：默认，逐幕背景、共享角色、少数重点地点独立景深；
 - `full-depth`：完整视差和更多姿态，图片预算最高。
 
-人一次确认叙事、事实、制作档位/图片预算和 text/image/voice provider。`project:confirm-concept` 批量写入 provider 选择并记录 `capabilities-ready`、`brief-ready`、`approve-concept`，直接进入 `style-review`。
+计划完成后，Codex 先用 `project:storyboard` 锁定全片叙事弧、逐幕蓝图、三个以上节拍和三个以上证明时刻。它不增加审批次数，而是与叙事、事实、制作档位/图片预算和 text/image/voice provider 一起由人一次确认。`project:confirm-concept` 批量写入 provider 选择并记录 `capabilities-ready`、`brief-ready`、`approve-concept`，直接进入 `style-review`。
 
 ## 2. 风格与虚构音色确认
 
@@ -59,7 +59,7 @@ capability-review
 npm run project:assets-ready -- <slug>
 ```
 
-该命令依次同步真实旁白时长、生成/导入字幕时间、执行项目校验、执行质量门并推进到 `preview`。随后 `project:preview` 渲染半尺寸预览、技术报告和关键帧联系表。
+该命令依次同步真实旁白时长、生成/导入字幕时间、核对故事板蓝图/关键帧/cue、执行项目校验、执行质量门并推进到 `preview`。随后 `project:preview` 渲染半尺寸预览、技术报告和证明时刻联系表。
 
 ## 4. 预览、修改与正式交付
 
@@ -85,7 +85,8 @@ npm run project:resume -- <slug>
 
 - `brief.md`：人的意图、事实、风格、格式和权利边界；
 - `production.json`：阶段、审批、粗粒度批次、产物、事件历史；
-- `project.json`：制作计划和 Remotion v2 时间线；
+- `storyboard.json`：已批准的叙事弧、逐幕节拍、蓝图和证明时刻；
+- `project.json`：制作计划和 Remotion v3 执行时间线；
 - `requests/*.json` / `assets-manifest.json`：逐素材生成输入与来源；
 - `quality-report.json`：逐文件技术/语义质量和 hash；
 - `review.md`：自动审批摘要与自然语言修改历史。

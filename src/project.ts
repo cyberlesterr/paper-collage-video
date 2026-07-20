@@ -2,6 +2,26 @@ import type {Role} from './roleMotion';
 
 export type EnterFrom = 'left' | 'right' | 'bottom';
 export type IdleMotionPreset = 'float' | 'breathe' | 'grind' | 'drift' | 'still';
+export type SceneBlueprint =
+  | 'layered-reveal'
+  | 'map-journey'
+  | 'archive-stack'
+  | 'character-procession'
+  | 'discovery-wipe'
+  | 'transformation-tableau'
+  | 'chapter-tableau'
+  | 'quiet-lockup';
+export type MotionEase = 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'hold';
+
+export type MotionKeyframe = {
+  at: number;
+  x?: number;
+  y?: number;
+  scale?: number;
+  rotation?: number;
+  opacity?: number;
+  ease?: MotionEase;
+};
 
 export type LayerMotion = {
   idle: IdleMotionPreset;
@@ -9,6 +29,7 @@ export type LayerMotion = {
   cycleSeconds: number;
   phase?: number;
   enterDurationSeconds: number;
+  keyframes: MotionKeyframe[];
 };
 
 export type CharacterLayer = {
@@ -33,6 +54,9 @@ export type EnvironmentLayer = {
   y?: number;
   width?: number;
   opacity?: number;
+  motion: {
+    keyframes: MotionKeyframe[];
+  };
 };
 
 export type SubtitleCue = {
@@ -65,9 +89,28 @@ export type SceneTransition = {
   durationSeconds: number;
 };
 
-export type ProjectAudioEvent = ProjectSound & {
+export type ProjectCue = {
   id: string;
-  atSeconds: number;
+  beatId: string;
+  at: number;
+  durationSeconds: number;
+  targetId: string;
+  action: 'reveal' | 'pulse' | 'stamp' | 'shake' | 'lift' | 'settle';
+  intensity: number;
+  sound?: ProjectSound;
+};
+
+export type ProofTime = {
+  at: number;
+  label: string;
+  kind: 'establish' | 'action' | 'peak' | 'final';
+};
+
+export type SceneMotion = {
+  blueprint: SceneBlueprint;
+  intensity: number;
+  seed: number;
+  proofTimes: ProofTime[];
 };
 
 export type ProjectTheme = {
@@ -102,6 +145,7 @@ export type ProjectScene = {
   tailSeconds: number;
   background: string;
   environmentLayers: EnvironmentLayer[];
+  motion: SceneMotion;
   camera: SceneCamera;
   transition: SceneTransition;
   narration: {
@@ -113,12 +157,12 @@ export type ProjectScene = {
   };
   layers: CharacterLayer[];
   subtitles: SubtitleCue[];
-  audioEvents: ProjectAudioEvent[];
+  cues: ProjectCue[];
 };
 
 export type PaperCollageProject = {
   $schema?: string;
-  schemaVersion: 2;
+  schemaVersion: 3;
   slug: string;
   title: string;
   plan: {
@@ -161,7 +205,6 @@ export type PaperCollageProject = {
       volume: number;
     };
     music: ProjectSound | null;
-    sfx: Partial<Record<Role, ProjectSound>>;
     mastering: ProjectAudioMastering;
   };
   scenes: ProjectScene[];

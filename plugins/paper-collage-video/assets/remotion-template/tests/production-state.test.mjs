@@ -38,6 +38,7 @@ const makeState = (stage) => ({
   artifacts: {
     brief: 'projects/test-film/brief.md',
     project: 'projects/test-film/project.json',
+    storyboard: 'projects/test-film/storyboard.json',
     prompts: 'projects/test-film/prompts.json',
     review: 'projects/test-film/review.md',
     validationReport: null,
@@ -142,6 +143,7 @@ test('resume summaries omit completed history and expose one handoff decision', 
     'slug',
     'stage',
     'productionProfile',
+    'storyboard',
     'control',
     'handoff',
   ]);

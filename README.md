@@ -3,17 +3,17 @@
 [![CI](https://github.com/cyberlesterr/paper-collage-video/actions/workflows/ci.yml/badge.svg)](https://github.com/cyberlesterr/paper-collage-video/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-一个配置驱动的本地纸片分层视频生产系统。人负责内容意图、审美选择和最终批准；Codex 与本地工具负责文案拆镜、素材组织、抠图、动画、旁白同步、渲染和技术验收。
+一个配置驱动的本地纸片分层视频生产系统。人负责内容意图、审美选择和最终批准；Codex 与本地工具负责节奏故事板、素材组织、分层关键帧、视听 cue、旁白同步、渲染和技术验收。
 
-仓库中的 `tie-chu-mo-zhen` 已按 v2 协议从空项目重新开始，不继承旧素材、旧 provider 选择或旧审批。插件发行包另带一个 2 秒低电平测试音技术夹具 `starter-demo`，仅用于自动化烟雾测试。
+项目协议已直接推进到 v3；v2 项目不会自动迁移或回退。插件发行包带一个 2 秒低电平测试音技术夹具 `starter-demo`，用于验证故事板、关键帧、cue 和证明时刻。
 
-当前公开预览版本为 `0.5.0`；仓库正在验证尚未发布的 `0.6.0-dev.1` 流程精简版本。公开版本包含 v2 项目协议、哈希绑定质量门、Motion/Depth、字幕对齐和响度验收；功能和协议仍可能在 `1.0.0` 前调整。
+当前公开预览版本为 `0.5.0`；仓库正在验证尚未发布的 `0.7.0-dev.1`。新协议加入必需的节奏故事板、人物/环境关键帧、逐节拍视听 cue 和证明时刻验收；功能和协议仍可能在 `1.0.0` 前调整。
 
 ## 完整演示
 
 [观看或下载唯一完整演示：《铁杵磨针》77.7 秒 1080p 纸片故事](https://github.com/cyberlesterr/paper-collage-video/releases/download/v0.5.0/tie-chu-mo-zhen-final.mp4)
 
-Release 页只保留这一份最终成片，不附带预览、动作证明、联系表或素材包。它仅用于展示 v2 质量门、六幕时间线、景深运动、字幕、虚构旁白、动作音效和技术验收能力；使用边界见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
+Release 页的旧演示用于展示上一代质量门、六幕时间线、景深运动、字幕、虚构旁白和技术验收能力，不代表当前 v3 数据合同；使用边界见 [ASSET_LICENSES.md](ASSET_LICENSES.md)。
 
 ## 从 GitHub 安装 Plugin
 
@@ -63,13 +63,13 @@ codex plugin add paper-collage-video@paper-collage-video
 用 $make-paper-collage-video 做一条约 30 秒的玄奘西行纸片分层视频。
 ```
 
-Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于插件包中。它按当前阶段加载必要 reference，不再每次读取整套说明。新项目把概念、制作档位/素材预算和三类 provider 放进一次确认；之后只在风格/虚构音色和预览节点停下来。正式成片在本地技术验收通过后即完成交付，只有真正上传、发送或发布时才请求一次外部操作授权。中断后用精简的 `project:resume` 从未完成批次继续。
+Skill 的维护源位于 `skills/make-paper-collage-video/`，发行副本位于插件包中。它按当前阶段加载必要 reference。新项目先锁定逐幕节拍与证明时刻，再把故事板、概念、制作档位/素材预算和三类 provider 放进同一次确认；之后只在风格/虚构音色和预览节点停下来。正式成片在本地技术验收通过后即完成交付，只有真正上传、发送或发布时才请求一次外部操作授权。中断后用精简的 `project:resume` 从未完成批次继续。
 
 ## 人在流程中的位置
 
 正常制作一条新视频时，人参与三个内容节点：
 
-1. 口述主题后，一次确认概念、时长/幕数、`draft|balanced|full-depth` 制作档位、素材预算和文本/生图/虚构语音 provider。
+1. 口述主题后，一次确认概念、节奏故事板、时长/幕数、`draft|balanced|full-depth` 制作档位、素材预算和文本/生图/虚构语音 provider。
 2. 确认一张风格样张、短试听和必要时的 3–5 秒动作证明。
 3. 查看 `preview.mp4`，批准或用自然语言提出修改意见。
 
@@ -122,6 +122,7 @@ projects/silk-road/
   brief.md
   production.json
   project.json
+  storyboard.json
   prompts.json
   providers.json
   quality-report.json
@@ -141,7 +142,7 @@ public/projects/silk-road/
   audio/sfx/
 ```
 
-新项目先处于 `capability-review`。Codex 使用当前宿主模型准备临时概念，不调用未确认的外部/付费 provider；时长和幕数可以任选其一、同时指定或都不指定。`project:plan` 只补全缺失项，并按 `draft`、默认 `balanced` 或 `full-depth` 生成明确的图片预算。人一次确认概念、预算和三类 provider 后，`project:confirm-concept` 组合记录这些决定并直接进入 `style-review`。可以用 `--dry-run` 预览将创建的路径而不写文件：
+新项目先处于 `capability-review`。Codex 使用当前宿主模型准备临时概念，不调用未确认的外部/付费 provider；`project:plan` 解析时长、幕数和图片预算，`project:storyboard` 再锁定逐幕蓝图、节拍和证明时刻。人一次确认故事板、概念、预算和三类 provider 后，`project:confirm-concept` 组合记录这些决定并直接进入 `style-review`。可以用 `--dry-run` 预览将创建的路径而不写文件：
 
 ```bash
 npm run project:new -- silk-road --title="玄奘西行" --dry-run
@@ -153,6 +154,7 @@ npm run project:new -- silk-road --title="玄奘西行" --dry-run
 |---|---|
 | `npm run project:new -- <slug>` | 创建人类简报、机器配置和素材目录 |
 | `npm run project:plan -- <slug> ...` | 保留用户时长/幕数，补全缺失项并确定制作档位/图片预算 |
+| `npm run project:storyboard -- <slug> --input=<file>` | 锁定全片叙事弧、逐幕蓝图、节拍和证明时刻 |
 | `npm run project:confirm-concept -- <slug> --input=<file>` | 一次记录概念、预算和 text/image/voice provider 决定 |
 | `npm run project:resume -- <slug>` | 输出最小恢复状态、下一命令和未完成批次 |
 | `npm run project:status -- <slug>` | 显示当前阶段、审批、产物和下一步 |
@@ -232,8 +234,8 @@ python3 scripts/remove_chroma_key.py --input KEY.png --out ALPHA.png --key-color
 - `quality`：强制质量门使用的最低素材分辨率比例。
 - `theme`：纸张、字幕、描边和前景颜色。
 - `voice`：虚构音色或后续可选的克隆音色元数据。
-- `audio`：背景音乐、角色音效和必填 LUFS/true-peak 交付规格。
-- `scenes`：背景、环境景深层、镜头 keyframe、旁白、角色 motion、动作音效、转场和字幕。
+- `audio`：旁白、背景音乐和必填 LUFS/true-peak 交付规格。
+- `scenes`：故事板蓝图、证明时刻、背景、环境景深层、人物/环境 keyframe、旁白、逐节拍 cue、转场和字幕。
 
 镜头时长不是人工填写的常量，而是：
 
@@ -241,9 +243,9 @@ python3 scripts/remove_chroma_key.py --input KEY.png --out ALPHA.png --key-color
 round(旁白开始秒数 × fps) + ceil(真实旁白秒数 × fps) + ceil(尾部留白秒数 × fps)
 ```
 
-后一个镜头按该镜头显式声明的 `transition.durationSeconds` 与前一个镜头交叠。项目作者只写秒数；帧数由渲染器根据 fps 推导。v1 字段不会被迁移或猜测。
+后一个镜头按该镜头显式声明的 `transition.durationSeconds` 与前一个镜头交叠。项目作者只写秒数和归一化的节拍/关键帧位置；帧数由渲染器根据 fps 推导。v2 及更早字段不会被迁移或猜测。
 
-生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、兼容审批字段、粗粒度生产批次、产物和追加式事件历史。默认路径用组合概念/provider 确认、风格确认和预览确认；发布字段只作为旧版或可选外部操作记录。不要直接改状态 JSON。
+生产状态遵循 [schemas/production.schema.json](schemas/production.schema.json)。它是断点恢复协议，不是创意配置：记录 `stage`、审批、粗粒度生产批次、产物和追加式事件历史。默认路径用组合故事板/概念/provider 确认、风格确认和预览确认。不要直接改状态 JSON。
 
 `project:resume` 只输出当前阶段、制作档位、控制模式、下一命令、未完成批次和 handoff 决定。只有 `WAIT-HUMAN` 可以作为正常暂停点；`AUTO-CONTINUE` 的真实阻塞必须报告确切错误和唯一必要的人为动作。
 
@@ -258,14 +260,16 @@ round(旁白开始秒数 × fps) + ceil(真实旁白秒数 × fps) + ceil(尾部
 - 背景宽高比是否与视频接近。
 - 背景像素是否达到输出规格；同一素材在一次校验中只解码一次。
 - 旁白配置时长是否等于 ffprobe 实测时长。
+- 项目逐幕蓝图和证明时刻是否与已批准故事板一致。
+- 人物和环境关键帧是否覆盖完整镜头，每个故事节拍是否有唯一 cue 和有效目标。
 - 字幕范围、重叠、越界、单条长度和阅读速度。
 - 每幕是否有 primary 主体，人物是否完全跑出画布。
 
-`project:quality` 对实际使用的背景、环境层、角色、人物表和样张建立技术检查与语义检查；文件哈希变化会自动使旧审查失效。`project:report` 继续检查成片编码、分辨率、帧率、音轨、音量峰值、集成 LUFS 和 true peak，并以受控并发按场景前/后段生成最多八帧联系表。
+`project:quality` 对实际使用的背景、环境层、角色、人物表和样张建立技术检查与语义检查；文件哈希变化会自动使旧审查失效。`project:report` 继续检查成片编码、分辨率、帧率、音轨、音量峰值、集成 LUFS 和 true peak，并以受控并发从逐幕 `proofTimes` 生成最多十六帧动作证明联系表。
 
-## 当前重建项目
+## 历史项目
 
-`projects/tie-chu-mo-zhen` 是当前 v2 协议的完整仓库演示，包含六幕配置、来源记录、质量报告和审批历史。插件发行包不携带这套生产素材，只包含独立的 `starter-demo` 技术夹具。
+仓库中的旧演示成片及其 v2 项目数据只保留为历史制作记录，当前运行时不会迁移或执行它们。插件发行包只携带符合 v3 的独立 `starter-demo` 技术夹具。
 
 ## 贡献、支持与安全
 

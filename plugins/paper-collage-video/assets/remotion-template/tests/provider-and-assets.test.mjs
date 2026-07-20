@@ -23,6 +23,44 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
+const storyboardInput = ({slug, sceneCount, durationSeconds}) => ({
+  arc: 'A concise progression from setup through action to resolution.',
+  style: {
+    visualThesis: 'Layered paper depth carries the story.',
+    compositionRules: ['Keep the subject clear of subtitle space.'],
+    motionLanguage: ['Establish, act, then settle.'],
+    layerStrategy: 'Background establishes place; cutouts carry action.',
+  },
+  scenes: Array.from({length: sceneCount}, (_, index) => ({
+    id: `scene-${String(index + 1).padStart(2, '0')}`,
+    title: `Scene ${index + 1}`,
+    narrativeRole: index === 0 ? 'setup' : index === sceneCount - 1 ? 'resolution' : 'development',
+    message: `Narrative beat ${index + 1}`,
+    blueprint: index === sceneCount - 1 ? 'quiet-lockup' : 'layered-reveal',
+    estimatedDurationSeconds: durationSeconds / sceneCount,
+    beats: [
+      {id: `s${index + 1}-establish`, at: 0, purpose: 'establish', visual: 'Reveal the paper stage', motion: 'Scene reveal', audioCue: null},
+      {id: `s${index + 1}-action`, at: 0.5, purpose: 'develop', visual: 'Move the main cutout', motion: 'Subject lift', audioCue: null},
+      {id: `s${index + 1}-settle`, at: 0.9, purpose: 'resolve', visual: 'Lock the composition', motion: 'Settle all layers', audioCue: null},
+    ],
+    proofTimes: [
+      {at: 0.08, label: 'Establish', kind: 'establish'},
+      {at: 0.5, label: 'Action', kind: 'peak'},
+      {at: 0.9, label: 'Resolved', kind: 'final'},
+    ],
+  })),
+});
+
+const writeAndLockStoryboard = async ({slug, projectDirectory, sceneCount, durationSeconds}) => {
+  const input = path.join(projectDirectory, 'storyboard-input.json');
+  await fsp.writeFile(input, `${JSON.stringify(storyboardInput({slug, sceneCount, durationSeconds}), null, 2)}\n`, 'utf8');
+  return spawnSync(
+    process.execPath,
+    [path.join(ROOT, 'scripts', 'project-storyboard.mjs'), slug, `--input=${path.relative(ROOT, input)}`],
+    {cwd: ROOT, encoding: 'utf8'},
+  );
+};
+
 test('preview rendering caps concurrency at available CPU capacity', () => {
   assert.equal(resolveRenderConcurrency(16), 8);
   assert.equal(resolveRenderConcurrency(8), 8);
@@ -189,14 +227,14 @@ test('bundled provider status is valid and defers host capability selection', ()
   assert.ok(compactResult.stdout.length < result.stdout.length / 2);
 });
 
-test('new projects wait for confirmed providers before entering the brief', async () => {
-  const slug = `v2-smoke-${process.pid}`;
+test('new projects require a locked storyboard before concept approval', async () => {
+  const slug = `v3-smoke-${process.pid}`;
   const projectDirectory = path.join(ROOT, 'projects', slug);
   const publicDirectory = path.join(ROOT, 'public', 'projects', slug);
   try {
     const result = spawnSync(
       process.execPath,
-      [path.join(ROOT, 'scripts', 'project-new.mjs'), slug, '--title=V2 Smoke'],
+      [path.join(ROOT, 'scripts', 'project-new.mjs'), slug, '--title=V3 Smoke'],
       {cwd: ROOT, encoding: 'utf8'},
     );
     assert.equal(result.status, 0, result.stderr);
@@ -210,7 +248,7 @@ test('new projects wait for confirmed providers before entering the brief', asyn
       ),
     );
     assert.equal(project.voice.provider, 'auto');
-    assert.equal(project.schemaVersion, 2);
+    assert.equal(project.schemaVersion, 3);
     assert.deepEqual(project.quality, {minimumAssetScale: 1});
     assert.equal(project.voice.profile, 'warm-storyteller');
     assert.equal(project.plan.status, 'pending');
@@ -218,6 +256,7 @@ test('new projects wait for confirmed providers before entering the brief', asyn
     assert.equal(manifest.schemaVersion, 2);
     assert.deepEqual(manifest.assets, []);
     assert.ok(fs.existsSync(path.join(projectDirectory, 'providers.json')));
+    assert.ok(fs.existsSync(path.join(projectDirectory, 'storyboard.json')));
     assert.ok(fs.existsSync(path.join(projectDirectory, 'requests', '.gitkeep')));
     assert.ok(fs.existsSync(path.join(publicDirectory, 'assets', 'style', '.gitkeep')));
     assert.ok(
@@ -358,6 +397,22 @@ test('new projects wait for confirmed providers before entering the brief', asyn
     assert.equal(plannedProject.plan.requested.sceneCount, null);
     assert.equal(plannedProject.plan.resolved.sceneCount, 4);
 
+    const missingStoryboard = spawnSync(
+      process.execPath,
+      [path.join(ROOT, 'scripts', 'project-advance.mjs'), slug, 'brief-ready'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.notEqual(missingStoryboard.status, 0);
+    assert.match(missingStoryboard.stderr, /project:storyboard/);
+
+    const storyboard = await writeAndLockStoryboard({
+      slug,
+      projectDirectory,
+      sceneCount: 4,
+      durationSeconds: 45,
+    });
+    assert.equal(storyboard.status, 0, storyboard.stderr);
+
     const compactStatus = spawnSync(
       process.execPath,
       [path.join(ROOT, 'scripts', 'project-status.mjs'), slug, '--compact-json'],
@@ -365,6 +420,7 @@ test('new projects wait for confirmed providers before entering the brief', asyn
     );
     assert.equal(compactStatus.status, 0, compactStatus.stderr);
     assert.equal(JSON.parse(compactStatus.stdout).plan.inputMode, 'duration-only');
+    assert.equal(JSON.parse(compactStatus.stdout).storyboard.status, 'ready');
 
     const briefReady = spawnSync(
       process.execPath,
@@ -435,6 +491,13 @@ test('concept and all providers can be confirmed in one workflow command', async
       {cwd: ROOT, encoding: 'utf8'},
     );
     assert.equal(planned.status, 0, planned.stderr);
+    const storyboard = await writeAndLockStoryboard({
+      slug,
+      projectDirectory,
+      sceneCount: 3,
+      durationSeconds: 30,
+    });
+    assert.equal(storyboard.status, 0, storyboard.stderr);
     const selectionFile = path.join(projectDirectory, 'concept-confirmation.json');
     await fsp.writeFile(
       selectionFile,
@@ -484,6 +547,7 @@ test('concept and all providers can be confirmed in one workflow command', async
     assert.equal(resume.status, 0, resume.stderr);
     const resumeStatus = JSON.parse(resume.stdout);
     assert.equal(resumeStatus.productionProfile, 'balanced');
+    assert.equal(resumeStatus.storyboard.sceneCount, 3);
     assert.equal(resumeStatus.control.mode, 'wait-human');
     assert.equal('approvals' in resumeStatus, false);
     assert.equal('artifacts' in resumeStatus, false);
@@ -493,12 +557,12 @@ test('concept and all providers can be confirmed in one workflow command', async
   }
 });
 
-test('contact sheet sampling covers the front and back of every short project scene', () => {
+test('contact sheet sampling renders the authored proof moments', () => {
   const timeline = {
     scenes: [
-      {id: 'one', label: '第一幕', from: 0, durationInFrames: 90},
-      {id: 'two', label: '第二幕', from: 78, durationInFrames: 120},
-      {id: 'three', label: '第三幕', from: 186, durationInFrames: 75},
+      {id: 'one', label: '第一幕', from: 0, durationInFrames: 90, motion: {proofTimes: [{at: 0.08, label: '建立', kind: 'establish'}, {at: 0.5, label: '动作', kind: 'peak'}, {at: 0.9, label: '落定', kind: 'final'}]}},
+      {id: 'two', label: '第二幕', from: 78, durationInFrames: 120, motion: {proofTimes: [{at: 0.08, label: '建立', kind: 'establish'}, {at: 0.5, label: '动作', kind: 'peak'}, {at: 0.9, label: '落定', kind: 'final'}]}},
+      {id: 'three', label: '第三幕', from: 186, durationInFrames: 75, motion: {proofTimes: [{at: 0.08, label: '建立', kind: 'establish'}, {at: 0.5, label: '动作', kind: 'peak'}, {at: 0.9, label: '落定', kind: 'final'}]}},
     ],
   };
   const samples = deriveContactSheetSamples({
@@ -506,11 +570,12 @@ test('contact sheet sampling covers the front and back of every short project sc
     fps: 30,
     durationSeconds: 8.7,
   });
-  assert.equal(samples.length, 6);
+  assert.equal(samples.length, 9);
   assert.deepEqual(
     samples.map(({sceneId}) => sceneId),
-    ['one', 'one', 'two', 'two', 'three', 'three'],
+    ['one', 'one', 'one', 'two', 'two', 'two', 'three', 'three', 'three'],
   );
+  assert.equal(samples.filter(({kind}) => kind === 'final').length, 3);
   assert.ok(samples.every(({time}) => time >= 0 && time < 8.7));
 });
 
