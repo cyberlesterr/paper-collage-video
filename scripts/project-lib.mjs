@@ -30,6 +30,16 @@ export const resolveRenderConcurrency = (
   maximum = 8,
 ) => Math.max(1, Math.min(maximum, Math.floor(parallelism)));
 
+export const countProviderGeneratedImages = (assets = []) =>
+  assets.filter((asset) => {
+    if (asset.capability !== 'image') return false;
+    const derivationMethod =
+      asset.request?.compositionBinding?.derivation?.method ??
+      asset.compositionBinding?.derivation?.method ??
+      null;
+    return ['provider-generation', 'provider-edit'].includes(derivationMethod);
+  }).length;
+
 export const projectPaths = (slug) => ({
   slug,
   projectDirectory: path.join(ROOT, 'projects', slug),
@@ -811,9 +821,7 @@ export const validateProject = async (project, options = {}) => {
     );
     if (await fileExists(manifestFile)) {
       const manifest = await readJson(manifestFile);
-      const generatedImages = (manifest.assets ?? []).filter(
-        ({capability}) => capability === 'image',
-      ).length;
+      const generatedImages = countProviderGeneratedImages(manifest.assets);
       if (generatedImages > generatedImageBudget) {
         add(
           'warning',

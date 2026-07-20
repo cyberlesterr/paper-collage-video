@@ -17,6 +17,7 @@ import {
   validateProviderConfig,
 } from '../scripts/provider-lib.mjs';
 import {
+  countProviderGeneratedImages,
   deriveContactSheetSamples,
   inspectCharacterPng,
   resolveRenderConcurrency,
@@ -74,6 +75,24 @@ test('preview rendering caps concurrency at available CPU capacity', () => {
   assert.equal(resolveRenderConcurrency(4), 4);
   assert.equal(resolveRenderConcurrency(1), 1);
   assert.equal(resolveRenderConcurrency(0), 1);
+});
+
+test('generated-image budgets exclude deterministic derivatives and manual SVG assets', () => {
+  const image = (method) => ({
+    capability: 'image',
+    request: {compositionBinding: {derivation: {method}}},
+  });
+  assert.equal(
+    countProviderGeneratedImages([
+      image('provider-generation'),
+      image('provider-edit'),
+      image('alpha-extraction'),
+      image('mask-application'),
+      image('manual-import'),
+      {capability: 'voice'},
+    ]),
+    2,
+  );
 });
 
 test('provider overlays add local adapters without replacing bundled providers', () => {
