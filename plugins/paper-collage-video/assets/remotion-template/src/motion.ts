@@ -1,4 +1,4 @@
-import type {MotionKeyframe, ProjectCue} from './project';
+import type {IdleMotion, MotionKeyframe, ProjectCue} from './project';
 
 export type MotionState = {
   x: number;
@@ -51,6 +51,35 @@ export const resolveMotionState = (
   ) as MotionState;
 };
 
+export const resolveIdleState = ({
+  idle,
+  frame,
+  fps,
+  phase,
+}: {
+  idle?: IdleMotion;
+  frame: number;
+  fps: number;
+  phase: number;
+}): MotionState => {
+  if (!idle || idle.preset === 'still') return defaults;
+  const cycleFrames = Math.max(1, idle.cycleSeconds * fps);
+  const wave = Math.sin((frame / cycleFrames) * Math.PI * 2 + (idle.phase ?? phase));
+  const intensity = idle.intensity;
+  switch (idle.preset) {
+    case 'breathe':
+      return {...defaults, scale: 1 + wave * 0.008 * intensity};
+    case 'float':
+      return {...defaults, y: wave * 0.006 * intensity};
+    case 'drift':
+      return {...defaults, x: wave * 0.005 * intensity, y: Math.cos(frame / cycleFrames * Math.PI * 2) * 0.003 * intensity};
+    case 'grind':
+      return {...defaults, x: wave * 0.008 * intensity, rotation: wave * 0.55 * intensity};
+    default:
+      return defaults;
+  }
+};
+
 export const resolveCueState = ({
   cues,
   targetId,
@@ -72,7 +101,7 @@ export const resolveCueState = ({
       case 'reveal':
         result.opacity *= clamp01(cueProgress * 2.5);
         result.scale *= 0.9 + clamp01(cueProgress * 2.5) * 0.1;
-        result.y += (1 - clamp01(cueProgress * 2.5)) * 24 * cue.intensity;
+        result.y += (1 - clamp01(cueProgress * 2.5)) * 0.04 * cue.intensity;
         break;
       case 'pulse':
         result.scale *= 1 + envelope * 0.055;
@@ -82,15 +111,24 @@ export const resolveCueState = ({
         result.rotation += (1 - cueProgress) * 2.2 * cue.intensity;
         break;
       case 'shake':
-        result.x += Math.sin(cueProgress * Math.PI * 8) * envelope * 12;
+        result.x += Math.sin(cueProgress * Math.PI * 8) * envelope * 0.008;
         result.rotation += Math.sin(cueProgress * Math.PI * 6) * envelope * 0.8;
         break;
       case 'lift':
-        result.y -= envelope * 22;
+        result.y -= envelope * 0.025;
         break;
       case 'settle':
-        result.y += envelope * 12;
+        result.y += envelope * 0.014;
         result.rotation -= envelope * 0.65;
+        break;
+      case 'drop-impact':
+        result.y += cueProgress < 0.62 ? cueProgress * 0.08 * cue.intensity : (1 - cueProgress) * 0.018 * cue.intensity;
+        result.rotation += envelope * 4.5;
+        result.scale *= 1 + Math.max(0, envelope) * 0.025;
+        break;
+      case 'carve':
+        result.x += Math.sin(cueProgress * Math.PI * 10) * envelope * 0.004;
+        result.rotation += Math.sin(cueProgress * Math.PI * 8) * envelope * 1.2;
         break;
     }
   }

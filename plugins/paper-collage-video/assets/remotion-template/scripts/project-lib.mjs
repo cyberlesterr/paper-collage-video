@@ -14,6 +14,10 @@ import {
   STORY_BLUEPRINTS,
   validateStoryboard,
 } from './storyboard-lib.mjs';
+import {
+  CUE_ACTIONS,
+  validateCompositionStructure,
+} from './composition-lib.mjs';
 
 const execFileAsync = promisify(execFile);
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -58,8 +62,8 @@ export const loadProject = async (slug) => {
   assertSlug(slug);
   const paths = projectPaths(slug);
   const project = await readJson(paths.projectFile);
-  if (project.schemaVersion !== 3) {
-    throw new Error('project.json 必须使用 schemaVersion 3；请重新创建项目。');
+  if (project.schemaVersion !== 4) {
+    throw new Error('project.json 必须使用 schemaVersion 4；旧项目不会自动迁移。');
   }
   return {paths, project};
 };
@@ -299,48 +303,6 @@ const makeIssue = (level, code, message, location) => ({
 const isPositiveNumber = (value) =>
   typeof value === 'number' && Number.isFinite(value) && value > 0;
 
-const MOTION_EASES = ['linear', 'ease-in', 'ease-out', 'ease-in-out', 'hold'];
-const CUE_ACTIONS = ['reveal', 'pulse', 'stamp', 'shake', 'lift', 'settle'];
-
-const validateMotionKeyframes = (keyframes, location, add) => {
-  if (!Array.isArray(keyframes) || keyframes.length < 2) {
-    add('error', 'motion-keyframes-required', '分层运动必须包含至少两个关键帧。', location);
-    return;
-  }
-  let previousAt = -1;
-  let authoredValues = 0;
-  for (const [index, keyframe] of keyframes.entries()) {
-    const keyframeLocation = `${location}[${index}]`;
-    if (!Number.isFinite(keyframe.at) || keyframe.at < 0 || keyframe.at > 1 || keyframe.at <= previousAt) {
-      add('error', 'motion-keyframe-at', '关键帧 at 必须位于 0..1 且严格递增。', `${keyframeLocation}.at`);
-    }
-    previousAt = keyframe.at;
-    for (const property of ['x', 'y', 'scale', 'rotation', 'opacity']) {
-      if (keyframe[property] !== undefined) {
-        authoredValues += 1;
-        if (!Number.isFinite(keyframe[property])) {
-          add('error', 'motion-keyframe-value', `${property} 必须是有限数字。`, `${keyframeLocation}.${property}`);
-        }
-      }
-    }
-    if (keyframe.scale !== undefined && keyframe.scale <= 0) {
-      add('error', 'motion-keyframe-scale', 'scale 必须大于 0。', `${keyframeLocation}.scale`);
-    }
-    if (keyframe.opacity !== undefined && (keyframe.opacity < 0 || keyframe.opacity > 1)) {
-      add('error', 'motion-keyframe-opacity', 'opacity 必须位于 0..1。', `${keyframeLocation}.opacity`);
-    }
-    if (keyframe.ease !== undefined && !MOTION_EASES.includes(keyframe.ease)) {
-      add('error', 'motion-keyframe-ease', `未知 ease：${keyframe.ease}`, `${keyframeLocation}.ease`);
-    }
-  }
-  if (keyframes[0]?.at !== 0 || keyframes.at(-1)?.at !== 1) {
-    add('error', 'motion-keyframe-boundaries', '关键帧必须从 at=0 覆盖到 at=1。', location);
-  }
-  if (authoredValues === 0) {
-    add('error', 'motion-keyframe-empty', '关键帧必须显式编排至少一个运动属性。', location);
-  }
-};
-
 export const validateProject = async (project, options = {}) => {
   const issues = [];
   const assets = [];
@@ -354,8 +316,8 @@ export const validateProject = async (project, options = {}) => {
   const add = (level, code, message, location) =>
     issues.push(makeIssue(level, code, message, location));
 
-  if (project.schemaVersion !== 3) {
-    add('error', 'schema-version', 'schemaVersion 必须为 3。', 'schemaVersion');
+  if (project.schemaVersion !== 4) {
+    add('error', 'schema-version', 'schemaVersion 必须为 4。', 'schemaVersion');
   }
   if (!SLUG_PATTERN.test(project.slug ?? '')) {
     add('error', 'slug', 'slug 格式无效。', 'slug');
@@ -373,13 +335,13 @@ export const validateProject = async (project, options = {}) => {
     add('error', 'video-fps', 'fps 必须为正数。', 'video.fps');
   }
   if (project.plan === undefined) {
-    add('error', 'plan-required', 'v3 项目必须包含 plan。', 'plan');
+    add('error', 'plan-required', 'v4 项目必须包含 plan。', 'plan');
   }
   if (!project.voice || typeof project.voice !== 'object') {
-    add('error', 'voice-required', 'v3 项目必须包含 voice。', 'voice');
+    add('error', 'voice-required', 'v4 项目必须包含 voice。', 'voice');
   }
   if (project.audio?.sfx !== undefined) {
-    add('error', 'unsupported-v2-audio-sfx', 'v3 不支持 audio.sfx；请用逐节拍 cue.sound。', 'audio.sfx');
+    add('error', 'unsupported-audio-sfx', 'v4 不支持 audio.sfx；请用逐节拍 cue.sound。', 'audio.sfx');
   }
   if (!isPositiveNumber(project.quality?.minimumAssetScale)) {
     add(
@@ -415,7 +377,7 @@ export const validateProject = async (project, options = {}) => {
     add(
       'error',
       'audio-mastering-required',
-      'audio.mastering 是 v3 项目的必填交付规格。',
+      'audio.mastering 是 v4 项目的必填交付规格。',
       'audio.mastering',
     );
   }
@@ -492,14 +454,22 @@ export const validateProject = async (project, options = {}) => {
       }
       let previousProof = -1;
       let finalProof = false;
+      const proofIds = new Set();
       for (const [proofIndex, proof] of (proofs ?? []).entries()) {
         const proofLocation = `${sceneLocation}.motion.proofTimes[${proofIndex}]`;
+        if (!proof.id || proofIds.has(proof.id)) {
+          add('error', 'scene-proof-id', '证明时刻 id 缺失或重复。', `${proofLocation}.id`);
+        }
+        proofIds.add(proof.id);
         if (!Number.isFinite(proof.at) || proof.at < 0 || proof.at > 1 || proof.at <= previousProof) {
           add('error', 'scene-proof-time', '证明时刻 at 必须位于 0..1 且严格递增。', `${proofLocation}.at`);
         }
         previousProof = proof.at;
         if (!['establish', 'action', 'peak', 'final'].includes(proof.kind)) {
           add('error', 'scene-proof-kind', `未知证明类型：${proof.kind}`, `${proofLocation}.kind`);
+        }
+        if (!Array.isArray(proof.assertions) || proof.assertions.length === 0) {
+          add('error', 'scene-proof-assertions', '证明时刻必须包含可见关系断言。', `${proofLocation}.assertions`);
         }
         if (proof.kind === 'final' && proof.at >= 0.82) finalProof = true;
         if (
@@ -525,9 +495,11 @@ export const validateProject = async (project, options = {}) => {
           proofs?.some((proof, index) => {
             const approved = storyboardScene.proofTimes[index];
             return (
+              proof.id !== approved.id ||
               proof.at !== approved.at ||
               proof.label !== approved.label ||
-              proof.kind !== approved.kind
+              proof.kind !== approved.kind ||
+              JSON.stringify(proof.assertions) !== JSON.stringify(approved.assertions)
             );
           }));
       if (proofDrift) {
@@ -555,44 +527,6 @@ export const validateProject = async (project, options = {}) => {
     }
     if (!Number.isFinite(scene.tailSeconds) || scene.tailSeconds < 0) {
       add('error', 'scene-tail', 'tailSeconds 必须是非负秒数。', `${sceneLocation}.tailSeconds`);
-    }
-
-    const backgroundLocation = `${sceneLocation}.background`;
-    try {
-      const backgroundFile = resolvePublicFile(scene.background);
-      if (!(await fileExists(backgroundFile))) {
-        add('error', 'background-missing', `缺少背景：${scene.background}`, backgroundLocation);
-      } else {
-        const inspection = await memoize(
-          backgroundInspectionCache,
-          backgroundFile,
-          () => inspectBackground(backgroundFile),
-        );
-        assets.push({kind: 'background', src: scene.background, ...inspection});
-        const sourceRatio = inspection.width / inspection.height;
-        const videoRatio = project.video.width / project.video.height;
-        if (Math.abs(sourceRatio - videoRatio) > 0.035) {
-          add(
-            'warning',
-            'background-aspect',
-            `背景宽高比 ${sourceRatio.toFixed(3)} 与视频 ${videoRatio.toFixed(3)} 差异较大。`,
-            backgroundLocation,
-          );
-        }
-        const minimumScale = project.quality.minimumAssetScale;
-        const minimumWidth = Math.round(project.video.width * minimumScale);
-        const minimumHeight = Math.round(project.video.height * minimumScale);
-        if (inspection.width < minimumWidth || inspection.height < minimumHeight) {
-          add(
-            'error',
-            'background-resolution',
-            `背景 ${inspection.width}x${inspection.height} 低于质量规格 ${minimumWidth}x${minimumHeight}。`,
-            backgroundLocation,
-          );
-        }
-      }
-    } catch (error) {
-      add('error', 'background-path', error.message, backgroundLocation);
     }
 
     const narrationLocation = `${sceneLocation}.narration`;
@@ -636,128 +570,116 @@ export const validateProject = async (project, options = {}) => {
       }
     }
 
-    const layerIds = new Set();
-    let primaryCount = 0;
-    for (const [layerIndex, layer] of (scene.layers ?? []).entries()) {
-      const layerLocation = `${sceneLocation}.layers[${layerIndex}]`;
-      if (!layer.id || layerIds.has(layer.id)) {
-        add('error', 'layer-id', '图层 id 缺失或重复。', `${layerLocation}.id`);
+    const compositionResult = validateCompositionStructure({
+      composition: scene.composition,
+      video: project.video,
+      proofTimes: scene.motion?.proofTimes ?? [],
+      location: `${sceneLocation}.composition`,
+    });
+    for (const issue of compositionResult.issues) {
+      add(issue.level, issue.code, issue.message, issue.location);
+    }
+
+    const actualPatterns = new Set(
+      compositionResult.groups.map(({node}) => node.pattern),
+    );
+    if (compositionResult.assets.some(({parent}) => parent === null)) {
+      actualPatterns.add('free');
+    }
+    for (const pattern of storyboardScene?.compositionPlan?.patterns ?? []) {
+      if (!actualPatterns.has(pattern)) {
+        add(
+          'error',
+          'composition-pattern-drift',
+          `故事板要求组合模式 ${pattern}，项目镜头没有实现。`,
+          `${sceneLocation}.composition`,
+        );
       }
-      layerIds.add(layer.id);
-      if (layer.role === 'primary') primaryCount += 1;
-      if (!['primary', 'secondary', 'tertiary'].includes(layer.role)) {
-        add('error', 'layer-role', `未知角色类型：${layer.role}`, `${layerLocation}.role`);
-      }
-      if (!['left', 'right', 'bottom'].includes(layer.enterFrom)) {
-        add('error', 'layer-enter', `未知入场方向：${layer.enterFrom}`, `${layerLocation}.enterFrom`);
-      }
-      if (!Number.isFinite(layer.delaySeconds) || layer.delaySeconds < 0) {
-        add('error', 'layer-delay', '人物 delaySeconds 必须是非负秒数。', `${layerLocation}.delaySeconds`);
-      }
-      if (!layer.motion) {
-        add('error', 'layer-motion-required', '每个人物图层必须显式配置 motion。', `${layerLocation}.motion`);
-      }
-      if (
-        layer.motion?.idle !== undefined &&
-        !['float', 'breathe', 'grind', 'drift', 'still'].includes(layer.motion.idle)
-      ) {
-        add('error', 'layer-motion', `未知 idle 动画：${layer.motion.idle}`, `${layerLocation}.motion.idle`);
-      }
-      validateMotionKeyframes(layer.motion?.keyframes, `${layerLocation}.motion.keyframes`, add);
-      if (
-        layer.motion &&
-        (!Number.isFinite(layer.motion.intensity) ||
-          layer.motion.intensity < 0 ||
-          !isPositiveNumber(layer.motion.cycleSeconds) ||
-          !isPositiveNumber(layer.motion.enterDurationSeconds))
-      ) {
-        add('error', 'layer-motion-values', 'motion 必须包含有效的 intensity、cycleSeconds 和 enterDurationSeconds。', `${layerLocation}.motion`);
-      }
-      if (!isPositiveNumber(layer.width)) {
-        add('error', 'layer-width', '人物宽度必须大于 0。', `${layerLocation}.width`);
-      }
-      if (layer.x + layer.width < 0 || layer.x > project.video.width) {
-        add('warning', 'layer-off-canvas', '人物完全位于画布之外。', layerLocation);
-      }
+    }
+
+    for (const {node, parent} of compositionResult.assets) {
+      const nodeLocation = `${sceneLocation}.composition.nodes#${node.id}`;
       try {
-        const layerFile = resolvePublicFile(layer.src);
-        if (!(await fileExists(layerFile))) {
-          add('error', 'layer-missing', `缺少人物素材：${layer.src}`, `${layerLocation}.src`);
-        } else {
-          const inspection = await memoize(
-            characterInspectionCache,
-            layerFile,
-            () => inspectCharacterPng(layerFile),
+        const assetFile = resolvePublicFile(node.src);
+        if (!(await fileExists(assetFile))) {
+          add('error', 'composition-asset-missing', `缺少组合素材：${node.src}`, `${nodeLocation}.src`);
+          continue;
+        }
+        const isCutout = ['character', 'prop'].includes(node.assetRole);
+        const inspection = await memoize(
+          isCutout ? characterInspectionCache : backgroundInspectionCache,
+          assetFile,
+          () => isCutout ? inspectCharacterPng(assetFile) : inspectBackground(assetFile),
+        );
+        assets.push({
+          kind: node.assetRole,
+          src: node.src,
+          sceneId: scene.id,
+          nodeId: node.id,
+          parentId: parent?.id ?? null,
+          registrationId: node.registrationId ?? null,
+          ...inspection,
+        });
+        if (isCutout && (!inspection.hasAlpha || inspection.transparentPixels === 0)) {
+          add('error', 'composition-asset-alpha', '人物或道具素材必须包含有效透明区域。', `${nodeLocation}.src`);
+        }
+        if (isCutout && inspection.keyEdgeRatio > 0.12) {
+          add(
+            'warning',
+            'composition-key-edge',
+            `可见半透明边缘中 ${(inspection.keyEdgeRatio * 100).toFixed(1)}% 疑似残留色键 ${inspection.keyColor ?? ''}。`,
+            `${nodeLocation}.src`,
           );
-          assets.push({kind: 'character', src: layer.src, ...inspection});
-          if (!inspection.hasAlpha || inspection.transparentPixels === 0) {
-            add('error', 'layer-alpha', '人物 PNG 没有有效透明区域。', `${layerLocation}.src`);
-          }
-          if (inspection.keyEdgeRatio > 0.12) {
+        }
+        if (parent?.registration) {
+          const {width, height} = parent.registration.canvas;
+          if (inspection.width !== width || inspection.height !== height) {
             add(
-              'warning',
-              'layer-key-edge',
-              `可见半透明边缘中 ${(inspection.keyEdgeRatio * 100).toFixed(1)}% 疑似残留色键 ${inspection.keyColor ?? ''}。`,
-              `${layerLocation}.src`,
+              'error',
+              'composition-registration-dimensions',
+              `注册成员必须与母版画布 ${width}x${height} 完全一致，当前为 ${inspection.width}x${inspection.height}。`,
+              `${nodeLocation}.src`,
+            );
+          }
+        } else if (['background', 'environment'].includes(node.assetRole)) {
+          const requiredWidth = project.video.width * project.quality.minimumAssetScale;
+          const requiredHeight = project.video.height * project.quality.minimumAssetScale;
+          if (inspection.width < requiredWidth || inspection.height < requiredHeight) {
+            add(
+              'error',
+              'composition-asset-scale',
+              `场景素材至少需要 ${Math.ceil(requiredWidth)}x${Math.ceil(requiredHeight)}，当前为 ${inspection.width}x${inspection.height}。`,
+              `${nodeLocation}.src`,
             );
           }
         }
       } catch (error) {
-        add('error', 'layer-inspect', error.message, `${layerLocation}.src`);
+        add('error', 'composition-asset-inspect', error.message, `${nodeLocation}.src`);
       }
-    }
-    if (primaryCount === 0) {
-      add('warning', 'primary-missing', '镜头没有 primary 主体。', `${sceneLocation}.layers`);
     }
 
-    if (!Array.isArray(scene.environmentLayers)) {
-      add('error', 'environment-layers-required', '每个镜头必须包含 environmentLayers 数组。', `${sceneLocation}.environmentLayers`);
-    }
-    const environmentIds = new Set();
-    for (const [environmentIndex, environment] of (
-      scene.environmentLayers ?? []
-    ).entries()) {
-      const environmentLocation = `${sceneLocation}.environmentLayers[${environmentIndex}]`;
-      if (!environment.id || environmentIds.has(environment.id)) {
-        add(
-          'error',
-          'environment-id',
-          '环境图层 id 缺失或重复。',
-          `${environmentLocation}.id`,
-        );
-      }
-      environmentIds.add(environment.id);
-      if (!environment.motion) {
-        add('error', 'environment-motion-required', '环境图层必须包含 motion。', `${environmentLocation}.motion`);
-      }
-      validateMotionKeyframes(environment.motion?.keyframes, `${environmentLocation}.motion.keyframes`, add);
-      if (environment.depth < -1 || environment.depth > 1) {
-        add(
-          'error',
-          'environment-depth',
-          '环境图层 depth 必须位于 -1 到 1。',
-          `${environmentLocation}.depth`,
-        );
-      }
-      try {
-        const environmentFile = resolvePublicFile(environment.src);
-        if (!(await fileExists(environmentFile))) {
-          add(
-            'error',
-            'environment-missing',
-            `缺少环境图层：${environment.src}`,
-            `${environmentLocation}.src`,
-          );
-        } else {
-          const inspection = await memoize(
-            backgroundInspectionCache,
-            environmentFile,
-            () => inspectBackground(environmentFile),
-          );
-          assets.push({kind: 'environment', src: environment.src, ...inspection});
+    for (const {node} of compositionResult.groups) {
+      for (const boundary of node.boundaries ?? []) {
+        for (const [side, maskSrc] of [
+          ['upper', boundary.upperMaskSrc],
+          ['lower', boundary.lowerMaskSrc],
+        ]) {
+          if (!maskSrc) continue;
+          const maskLocation = `${sceneLocation}.composition.nodes#${node.id}.boundaries#${boundary.id}.${side}MaskSrc`;
+          try {
+            const maskFile = resolvePublicFile(maskSrc);
+            if (!(await fileExists(maskFile))) {
+              add('error', 'composition-boundary-mask-missing', `缺少边界 mask：${maskSrc}`, maskLocation);
+              continue;
+            }
+            const inspection = await memoize(backgroundInspectionCache, maskFile, () => inspectBackground(maskFile));
+            if (inspection.width !== node.registration?.canvas.width || inspection.height !== node.registration?.canvas.height) {
+              add('error', 'composition-boundary-mask-dimensions', '边界 mask 必须与注册母版画布完全一致。', maskLocation);
+            }
+          } catch (error) {
+            add('error', 'composition-boundary-mask-inspect', error.message, maskLocation);
+          }
         }
-      } catch (error) {
-        add('error', 'environment-inspect', error.message, `${environmentLocation}.src`);
       }
     }
 
@@ -779,11 +701,12 @@ export const validateProject = async (project, options = {}) => {
       add('error', 'scene-cues-required', '每个镜头必须包含与故事节拍对应的 cues。', `${sceneLocation}.cues`);
     }
     if (scene.audioEvents !== undefined) {
-      add('error', 'unsupported-v2-audio-events', 'v3 不支持 audioEvents；请按 beatId 使用 cues。', `${sceneLocation}.audioEvents`);
+      add('error', 'unsupported-audio-events', 'v4 只允许 scene.cues 作为视听事件源。', `${sceneLocation}.audioEvents`);
     }
     const cueIds = new Set();
     const cueBeatIds = new Set();
-    const validTargets = new Set(['scene', ...layerIds, ...environmentIds]);
+    const validTargets = new Set(['scene', ...compositionResult.nodeIds]);
+    const proofTimesById = new Map((scene.motion?.proofTimes ?? []).map((proof) => [proof.id, proof]));
     const storyboardBeats = new Map((storyboardScene?.beats ?? []).map((beat) => [beat.id, beat]));
     for (const [cueIndex, cue] of (scene.cues ?? []).entries()) {
       const cueLocation = `${sceneLocation}.cues[${cueIndex}]`;
@@ -799,6 +722,17 @@ export const validateProject = async (project, options = {}) => {
       if (!validTargets.has(cue.targetId)) add('error', 'scene-cue-target', `cue 目标不存在：${cue.targetId}`, `${cueLocation}.targetId`);
       if (!CUE_ACTIONS.includes(cue.action)) add('error', 'scene-cue-action', `未知 cue action：${cue.action}`, `${cueLocation}.action`);
       if (!Number.isFinite(cue.intensity) || cue.intensity < 0 || cue.intensity > 3) add('error', 'scene-cue-intensity', 'cue.intensity 必须位于 0..3。', `${cueLocation}.intensity`);
+      if (cue.proofTimeId) {
+        const proof = proofTimesById.get(cue.proofTimeId);
+        if (!proof) {
+          add('error', 'scene-cue-proof-missing', `cue 绑定的证明时刻不存在：${cue.proofTimeId}`, `${cueLocation}.proofTimeId`);
+        } else {
+          const cueWindowEnd = cue.at + cue.durationSeconds / Math.max(0.001, scene.durationInFrames / project.video.fps);
+          if (proof.at < cue.at - 0.01 || proof.at > cueWindowEnd + 0.01) {
+            add('error', 'scene-cue-proof-window', '绑定的证明时刻必须落在 cue 动作窗口内。', `${cueLocation}.proofTimeId`);
+          }
+        }
+      }
       if (beat?.audioCue && !cue.sound) add('error', 'scene-cue-sound-required', `节拍要求声音 ${beat.audioCue}，对应 cue 必须配置 sound。`, `${cueLocation}.sound`);
       if (cue.sound) {
         try {

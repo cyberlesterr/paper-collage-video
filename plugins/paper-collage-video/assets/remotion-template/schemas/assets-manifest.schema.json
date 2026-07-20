@@ -6,13 +6,13 @@
   "required": ["schemaVersion", "projectSlug", "assets"],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 2},
+    "schemaVersion": {"const": 3},
     "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "assets": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["assetId", "capability", "file", "provider", "adapter", "requestFingerprint", "reusedFrom", "sha256", "sizeBytes", "recordedAt", "request"],
+        "required": ["assetId", "capability", "file", "provider", "adapter", "requestFingerprint", "reusedFrom", "sha256", "sizeBytes", "recordedAt", "request", "compositionBinding", "familyFingerprint"],
         "properties": {
           "assetId": {"type": "string"},
           "capability": {"enum": ["text", "image", "voice"]},
@@ -27,7 +27,9 @@
           "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
           "sizeBytes": {"type": "integer", "minimum": 1},
           "recordedAt": {"type": "string", "format": "date-time"},
-          "request": {"type": "object"}
+          "request": {"type": "object"},
+          "compositionBinding": {"type": ["object", "null"]},
+          "familyFingerprint": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
         },
         "additionalProperties": false
       }

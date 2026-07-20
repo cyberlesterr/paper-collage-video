@@ -51,21 +51,47 @@
       ],
       "proofTimes": [
         {
+          "id": "proof-establish",
           "at": 0.08,
           "label": "建立纸面空间",
-          "kind": "establish"
+          "kind": "establish",
+          "assertions": [
+            "背景完整建立"
+          ]
         },
         {
+          "id": "proof-action",
           "at": 0.5,
           "label": "主体进入画面",
-          "kind": "peak"
+          "kind": "peak",
+          "assertions": [
+            "主体位于画面中央"
+          ]
         },
         {
+          "id": "proof-final",
           "at": 0.9,
           "label": "标题与主体稳定",
-          "kind": "final"
+          "kind": "final",
+          "assertions": [
+            "主体与标题构图稳定"
+          ]
         }
-      ]
+      ],
+      "compositionPlan": {
+        "patterns": [
+          "free"
+        ],
+        "relationships": [
+          {
+            "id": "traveler-over-background",
+            "subject": "traveler",
+            "predicate": "free",
+            "object": "background",
+            "proof": "主体独立于背景运动且构图可读"
+          }
+        ]
+      }
     }
   ],
   "updatedAt": "2026-01-01T00:00:00.000Z"

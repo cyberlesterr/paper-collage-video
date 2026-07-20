@@ -13,6 +13,7 @@ import {
   recordAssetProvenance,
   resolveConfirmedProvider,
   runProviderCommand,
+  validateAssetRequest,
   validateProviderConfig,
 } from '../scripts/provider-lib.mjs';
 import {
@@ -38,15 +39,21 @@ const storyboardInput = ({slug, sceneCount, durationSeconds}) => ({
     message: `Narrative beat ${index + 1}`,
     blueprint: index === sceneCount - 1 ? 'quiet-lockup' : 'layered-reveal',
     estimatedDurationSeconds: durationSeconds / sceneCount,
+    compositionPlan: {
+      patterns: ['free'],
+      relationships: [
+        {id: `s${index + 1}-free`, subject: 'subject', predicate: 'free', object: 'background', proof: 'Independent cutout remains readable'},
+      ],
+    },
     beats: [
       {id: `s${index + 1}-establish`, at: 0, purpose: 'establish', visual: 'Reveal the paper stage', motion: 'Scene reveal', audioCue: null},
       {id: `s${index + 1}-action`, at: 0.5, purpose: 'develop', visual: 'Move the main cutout', motion: 'Subject lift', audioCue: null},
       {id: `s${index + 1}-settle`, at: 0.9, purpose: 'resolve', visual: 'Lock the composition', motion: 'Settle all layers', audioCue: null},
     ],
     proofTimes: [
-      {at: 0.08, label: 'Establish', kind: 'establish'},
-      {at: 0.5, label: 'Action', kind: 'peak'},
-      {at: 0.9, label: 'Resolved', kind: 'final'},
+      {id: `s${index + 1}-proof-establish`, at: 0.08, label: 'Establish', kind: 'establish', assertions: ['World is readable']},
+      {id: `s${index + 1}-proof-action`, at: 0.5, label: 'Action', kind: 'peak', assertions: ['Action is visible']},
+      {id: `s${index + 1}-proof-final`, at: 0.9, label: 'Resolved', kind: 'final', assertions: ['Final composition is stable']},
     ],
   })),
 });
@@ -176,7 +183,7 @@ test('command adapters write a local output and provenance records its hash', as
     );
     const recorded = await recordAssetProvenance({
       request: {
-        schemaVersion: 1,
+        schemaVersion: 2,
         projectSlug: slug,
         assetId: 'draft-script',
         capability: 'text',
@@ -191,11 +198,33 @@ test('command adapters write a local output and provenance records its hash', as
     assert.match(recorded.record.sha256, /^[a-f0-9]{64}$/);
     assert.equal(recorded.record.externalId, 'job-123');
     assert.equal(recorded.record.capability, 'text');
+    assert.equal(recorded.record.compositionBinding, null);
+    assert.equal(recorded.record.familyFingerprint, null);
     const manifest = JSON.parse(await fsp.readFile(recorded.manifestFile, 'utf8'));
     assert.equal(manifest.assets[0].assetId, 'draft-script');
   } finally {
     await fsp.rm(projectDirectory, {recursive: true, force: true});
   }
+});
+
+test('v2 image requests require complete composition bindings', () => {
+  assert.throws(
+    () => validateAssetRequest({schemaVersion: 2, projectSlug: 'binding-test', assetId: 'water', capability: 'image', output: 'public/water.png', prompt: 'water'}),
+    /compositionBinding/,
+  );
+  assert.doesNotThrow(() => validateAssetRequest({
+    schemaVersion: 2,
+    projectSlug: 'binding-test',
+    assetId: 'water',
+    capability: 'image',
+    output: 'public/water.png',
+    prompt: 'derive water from registered master',
+    compositionBinding: {
+      sceneId: 'scene-01', nodeId: 'water', pattern: 'registered-environment', registrationId: 'river-family',
+      sourceMasterAssetId: 'river-master', outputRole: 'lower-band', canvas: {width: 1920, height: 1080},
+      derivation: {method: 'alpha-extraction', parentAssetId: 'river-master'},
+    },
+  }));
 });
 
 test('bundled provider status is valid and defers host capability selection', () => {
@@ -228,13 +257,13 @@ test('bundled provider status is valid and defers host capability selection', ()
 });
 
 test('new projects require a locked storyboard before concept approval', async () => {
-  const slug = `v3-smoke-${process.pid}`;
+  const slug = `v4-smoke-${process.pid}`;
   const projectDirectory = path.join(ROOT, 'projects', slug);
   const publicDirectory = path.join(ROOT, 'public', 'projects', slug);
   try {
     const result = spawnSync(
       process.execPath,
-      [path.join(ROOT, 'scripts', 'project-new.mjs'), slug, '--title=V3 Smoke'],
+      [path.join(ROOT, 'scripts', 'project-new.mjs'), slug, '--title=V4 Smoke'],
       {cwd: ROOT, encoding: 'utf8'},
     );
     assert.equal(result.status, 0, result.stderr);
@@ -248,12 +277,12 @@ test('new projects require a locked storyboard before concept approval', async (
       ),
     );
     assert.equal(project.voice.provider, 'auto');
-    assert.equal(project.schemaVersion, 3);
+    assert.equal(project.schemaVersion, 4);
     assert.deepEqual(project.quality, {minimumAssetScale: 1});
     assert.equal(project.voice.profile, 'warm-storyteller');
     assert.equal(project.plan.status, 'pending');
     assert.equal(manifest.projectSlug, slug);
-    assert.equal(manifest.schemaVersion, 2);
+    assert.equal(manifest.schemaVersion, 3);
     assert.deepEqual(manifest.assets, []);
     assert.ok(fs.existsSync(path.join(projectDirectory, 'providers.json')));
     assert.ok(fs.existsSync(path.join(projectDirectory, 'storyboard.json')));

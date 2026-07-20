@@ -8,18 +8,14 @@ Read this only when creating/changing project files or diagnosing validation/sta
 |---|---|
 | `brief.md` | Human intent, audience, facts, format, style, rights, prohibitions |
 | `production.json` | State, approvals, coarse work batches, artifacts, event history |
-| `storyboard.json` | Approved story arc, scene blueprints, beats, and proof moments |
-| `project.json` | Resolved plan and v3 Remotion execution timeline |
-| `prompts.json` | Small index of image requests and outputs |
-| `providers.json` | Optional project provider overrides/selections |
-| `requests/*.json` | Per-output generation/import request |
-| `assets-manifest.json` | Provider/model/job provenance, fingerprints, hashes, snapshots |
-| `quality-report.json` | Hash-bound technical and semantic image checks |
+| `storyboard.json` | Approved arc, beats, composition patterns, relationships, and proof assertions |
+| `project.json` | Resolved plan and v4 Remotion execution tree |
+| `requests/*.json` | Per-output generation/import request plus composition binding |
+| `assets-manifest.json` | Provider provenance, source families, fingerprints, and hashes |
+| `quality-report.json` | Hash-bound asset and composite quality |
 | `review.md` | Generated approval summary plus natural-language revision history |
 
-Never ask the human to edit machine JSON. Do not copy live approvals into `brief.md`, full requests into checkpoints, or manifest history into `review.md`.
-
-Paths in `project.json` are relative to `public/`; production artifacts are relative to the workspace root.
+Never ask the human to edit machine JSON. Paths in `project.json` are relative to `public/`; production artifacts are relative to the workspace root.
 
 ## Normal State Path
 
@@ -32,22 +28,37 @@ Paths in `project.json` are relative to `public/`; production artifacts are rela
 | `human-review` | `approve-preview` | `final-render` |
 | `final-render` | successful `project:render` | `complete` |
 
-The combined confirmation is the normal path. Revision requests return to concept, style, or asset production as appropriate.
+The combined confirmation is the normal path. Composition proof is machine evidence inside the existing style or asset stage, not a fourth human gate.
 
-## v3 Configuration Rules
+## v4 Composition Tree
 
-- Preserve explicit duration/scenes; resolve a profile and asset budget before concept approval.
-- Keep backgrounds character-free and main figures in independent alpha PNGs.
-- Every scene id and `motion.blueprint` must match `storyboard.json`.
-- Every scene copies its approved `motion.proofTimes` exactly; reports sample these authored moments instead of arbitrary front/middle/back frames.
-- Proof moments must remain outside transition fade intervals; a technically sampled but visually obscured frame is a validation error.
-- Every scene declares `environmentLayers`, `motion`, `camera`, `transition`, and non-empty `cues`.
-- Every storyboard beat has exactly one cue linked by `beatId`; cue time may drift from the planned beat by at most 0.035 normalized units.
-- Every character and environment layer declares a keyframe path that starts at `at=0`, ends at `at=1`, and contains an authored transform/opacity value.
-- Cue targets must be `scene` or an existing layer id. `reveal`, `pulse`, `stamp`, `shake`, `lift`, and `settle` are the supported actions.
-- Author all offsets/durations in seconds; renderer frames are derived.
-- Let `project:assets-ready` own narration sync, subtitle derivation, validation, quality enforcement, and state advance.
-- Fix validation errors before rendering. Review warnings and record accepted creative risks in `review.md`.
-- Use repository scripts rather than reproducing ffprobe, FFmpeg, Remotion, chroma-key, or reporting logic ad hoc.
+Schema v4 is the only supported project contract. A scene has `composition.nodes`; it must not contain legacy `background`, `layers`, or `environmentLayers` arrays. Nodes are recursive `asset` or `group` records. All transforms and keyframe deltas are normalized to the immediate parent.
 
-Schema v3 is the only supported contract. Do not migrate, infer, or preserve v2 `audioEvents`, role-SFX, or motion-only scene data.
+Use only these patterns:
+
+| Pattern | Intended relationship | Required structure |
+|---|---|---|
+| `free` | independent label, bird, leaf, stamp, or cutout | no persistent support/shared boundary |
+| `supported-subject` | person in boat, object on table, hand holding prop | rear support, subject, front support, shared registration, contact and occlusion zones |
+| `registered-environment` | land/water, sky/ground, wall/floor, tabletop edge | shared master canvas, registration, fixed boundary, upper/lower clipped members |
+
+Groups own carrier motion; children own only local motion. Do not repeat the group's world path on attached children. Local z-order is deterministic: support rear, optional contact shadow, subject, support front. Registered environment members use the complete master canvas with top-left origin; textures may move within a fixed clip, but the boundary must not move across semantic content.
+
+Coupled members share `registration.id`, `sourceMasterAssetId`, canvas dimensions, origin, and source-family provenance. Generate/import one complete master and derive members from it. Independent generation calls for the two sides of one contact or boundary are invalid.
+
+## Proof and Cue Contract
+
+- Scene id, blueprint, `compositionPlan`, proof ids/times/assertions, and beat ids must match the approved storyboard.
+- Each scene has establish, action/peak, and final proof moments; final remains at or after `0.82` and proofs stay outside fades.
+- Every node keyframe path starts at `0`, ends at `1`, and authors at least one value.
+- `scene.cues` is the only visual/sound event source. Every storyboard beat has exactly one cue; cue drift is at most `0.035` normalized units.
+- Cue targets are `scene` or an existing composition node. Supported actions come from `schemas/composition.schema.json`, including `drop-impact` and `carve`.
+- Bind a critical cue to `proofTimeId`; the proof must fall inside its action window. If the approved beat names audio, the same cue owns the sound.
+
+## Validation and Failure Routing
+
+Run `project:composition-proof` after assembling real groups. It renders authored proof frames, focused relationship crops, debug copies, and the cue table through the production renderer. `project:assets-ready` rejects missing/stale proof fingerprints and pending/failed asset or composite quality.
+
+Fix a wrong mask, crop, anchor, registration, or derivative without another human decision when the approved meaning and budget remain unchanged. Return to concept only when the relationship meaning changes. Return to provider/budget approval only for a provider switch or budget increase. Never hide a contract failure with arbitrary z-index or pixel nudges.
+
+Use repository scripts rather than reproducing ffprobe, FFmpeg, Remotion, extraction, proof, or report logic ad hoc. v3 is not migrated or executed.

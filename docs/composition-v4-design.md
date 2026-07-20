@@ -1,6 +1,6 @@
 # Paper Collage Composition Contract v4
 
-Status: approved direction; implementation pending
+Status: implemented and validated
 Date: 2026-07-20
 
 ## 1. Problem
@@ -225,7 +225,8 @@ The front support must have visible alpha inside the declared occlusion zone. Th
   "boundaries": [
     {
       "id": "shoreline",
-      "maskSrc": "projects/example/assets/environments/river/shoreline-mask.png",
+      "upperMaskSrc": "projects/example/assets/environments/river/shoreline-upper-mask.png",
+      "lowerMaskSrc": "projects/example/assets/environments/river/shoreline-lower-mask.png",
       "upperSemantic": "land",
       "lowerSemantic": "water"
     }
@@ -577,7 +578,20 @@ The v4 optimization is complete only when:
 - `plugin:sync` produces a packaged runtime that passes the same contract in an installed-cache smoke workspace;
 - a fresh forward test succeeds without project-specific instructions or leaked diagnosis.
 
-## 15. Implementation slices
+## 15. Implementation record
+
+All six slices were completed on 2026-07-20:
+
+1. v4 schemas and fixtures reject the flat v3 model and malformed relationship groups;
+2. the recursive Remotion renderer applies camera, group, and child transforms once, with pattern-owned local stacking and fixed boundary clips;
+3. image requests and manifests bind derivatives to registered source families and compound fingerprints;
+4. the quality system independently gates file assets and rendered composites, including fingerprint-bound full frames, focused crops, debug overlays, and cue events;
+5. storyboard planning, real-topology style proof, `project:assets-ready`, reporting, and the Skill now route the v4 workflow without adding a human gate;
+6. source and packaged-plugin tests passed, the installed-cache fixture visibly kept a traveler behind the front gunwale and trees above the river boundary, and a diagnosis-blind fresh-agent `cao-chong-cheng-xiang` test selected both required composition patterns before stopping at the existing approval gate.
+
+The original `ke-zhou-qiu-jian` project was deliberately not repaired as part of this implementation.
+
+## 16. Implementation slices
 
 Implementation should proceed in independently verifiable slices:
 
@@ -590,7 +604,7 @@ Implementation should proceed in independently verifiable slices:
 
 Do not begin by repairing the original test video. After slices 1–5 pass, `ke-zhou-qiu-jian` may be regenerated through the normal v4 path as a regression observation, not used as the implementation substrate.
 
-## 16. Borrowed principles and boundaries
+## 17. Borrowed principles and boundaries
 
 The design borrows these principles without importing either external renderer:
 

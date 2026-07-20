@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/project.schema.json",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "{{slug}}",
   "title": "{{title}}",
   "plan": {

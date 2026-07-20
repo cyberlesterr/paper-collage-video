@@ -6,7 +6,7 @@
   "required": ["schemaVersion", "projectSlug", "assetId", "capability", "output"],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 1},
+    "schemaVersion": {"const": 2},
     "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "assetId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "capability": {"enum": ["text", "image", "voice"]},
@@ -16,17 +16,52 @@
     "voiceId": {"type": "string"},
     "model": {"type": "string"},
     "settings": {"type": "object"},
+    "compositionBinding": {
+      "type": "object",
+      "required": ["sceneId", "nodeId", "pattern", "outputRole", "canvas", "derivation"],
+      "properties": {
+        "sceneId": {"type": "string", "minLength": 1},
+        "nodeId": {"type": "string", "minLength": 1},
+        "pattern": {"enum": ["free", "supported-subject", "registered-environment"]},
+        "registrationId": {"type": "string", "minLength": 1},
+        "sourceMasterAssetId": {"type": "string", "minLength": 1},
+        "outputRole": {"type": "string", "minLength": 1},
+        "canvas": {
+          "type": "object",
+          "required": ["width", "height"],
+          "properties": {
+            "width": {"type": "integer", "minimum": 1},
+            "height": {"type": "integer", "minimum": 1}
+          },
+          "additionalProperties": false
+        },
+        "derivation": {
+          "type": "object",
+          "required": ["method"],
+          "properties": {
+            "method": {"enum": ["provider-generation", "provider-edit", "alpha-extraction", "crop", "mask-application", "manual-import"]},
+            "parentAssetId": {"type": "string", "minLength": 1}
+          },
+          "additionalProperties": false
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"pattern": {"enum": ["supported-subject", "registered-environment"]}}},
+          "then": {"required": ["registrationId", "sourceMasterAssetId"]}
+        }
+      ],
+      "additionalProperties": false
+    },
     "quality": {
       "type": "object",
       "properties": {
-        "kind": {"enum": ["background", "environment", "character-sheet", "style-sample", "image"]},
+        "kind": {"enum": ["background", "environment", "character", "prop", "decorative", "character-sheet", "style-sample", "image"]},
         "requiredChecks": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {
-            "enum": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent", "subject-complete", "identity-consistent", "cell-separation", "background-uniform", "edge-clean"]
-          }
+          "items": {"enum": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent", "subject-complete", "identity-consistent", "cell-separation", "background-uniform", "edge-clean"]}
         }
       },
       "additionalProperties": false
@@ -34,17 +69,8 @@
   },
   "additionalProperties": false,
   "allOf": [
-    {
-      "if": {"properties": {"capability": {"const": "text"}}},
-      "then": {"required": ["prompt"]}
-    },
-    {
-      "if": {"properties": {"capability": {"const": "image"}}},
-      "then": {"required": ["prompt"]}
-    },
-    {
-      "if": {"properties": {"capability": {"const": "voice"}}},
-      "then": {"required": ["text"]}
-    }
+    {"if": {"properties": {"capability": {"const": "text"}}}, "then": {"required": ["prompt"]}},
+    {"if": {"properties": {"capability": {"const": "image"}}}, "then": {"required": ["prompt", "compositionBinding"]}},
+    {"if": {"properties": {"capability": {"const": "voice"}}}, "then": {"required": ["text"]}}
   ]
 }

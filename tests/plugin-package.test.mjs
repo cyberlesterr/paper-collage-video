@@ -85,6 +85,7 @@ test('packaged runtime is lightweight and independent from production projects',
     'node scripts/project-status.mjs --resume-json',
   );
   assert.equal(packageJson.scripts['project:quality'], 'node scripts/project-quality.mjs');
+  assert.equal(packageJson.scripts['project:composition-proof'], 'node scripts/project-composition-proof.mjs');
   assert.equal(packageJson.scripts['project:subtitles'], 'node scripts/project-subtitles.mjs');
   assert.equal(packageJson.scripts['style:proof'], 'node scripts/style-motion-proof.mjs');
   assert.ok(fs.existsSync(path.join(RUNTIME_ROOT, 'projects', 'starter-demo')));
@@ -104,11 +105,14 @@ test('packaged runtime is lightweight and independent from production projects',
   const starterQuality = readJson(
     path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'quality-report.json'),
   );
-  assert.equal(starterProject.schemaVersion, 3);
+  assert.equal(starterProject.schemaVersion, 4);
+  assert.ok(starterProject.scenes[0].composition.nodes.length >= 2);
   assert.equal(starterProject.scenes[0].motion.proofTimes.length, 3);
   assert.equal(starterProject.scenes[0].cues.length, 3);
   assert.deepEqual(starterProject.quality, {minimumAssetScale: 0.5});
-  assert.equal(starterManifest.schemaVersion, 2);
+  assert.equal(starterManifest.schemaVersion, 3);
+  assert.equal(starterQuality.schemaVersion, 2);
+  assert.deepEqual(starterQuality.composites, []);
   assert.equal(starterQuality.assets.length, 2);
   assert.ok(starterQuality.assets.every(({status}) => status === 'passed'));
 
@@ -123,6 +127,8 @@ test('packaged runtime is lightweight and independent from production projects',
     'scripts/subtitle-lib.mjs',
     'scripts/project-subtitles.mjs',
     'scripts/creative-plan-lib.mjs',
+    'scripts/composition-lib.mjs',
+    'scripts/project-composition-proof.mjs',
     'scripts/project-plan.mjs',
     'scripts/project-storyboard.mjs',
     'scripts/storyboard-lib.mjs',

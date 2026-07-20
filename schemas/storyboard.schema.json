@@ -25,7 +25,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "title", "narrativeRole", "message", "blueprint", "estimatedDurationSeconds", "beats", "proofTimes"],
+        "required": ["id", "title", "narrativeRole", "message", "blueprint", "estimatedDurationSeconds", "compositionPlan", "beats", "proofTimes"],
         "properties": {
           "id": {"type": "string", "minLength": 1},
           "title": {"type": "string", "minLength": 1},
@@ -33,6 +33,35 @@
           "message": {"type": "string", "minLength": 1},
           "blueprint": {"enum": ["layered-reveal", "map-journey", "archive-stack", "character-procession", "discovery-wipe", "transformation-tableau", "chapter-tableau", "quiet-lockup"]},
           "estimatedDurationSeconds": {"type": "number", "exclusiveMinimum": 0},
+          "compositionPlan": {
+            "type": "object",
+            "required": ["patterns", "relationships"],
+            "properties": {
+              "patterns": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {"enum": ["free", "supported-subject", "registered-environment"]}
+              },
+              "relationships": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["id", "subject", "predicate", "object", "proof"],
+                  "properties": {
+                    "id": {"type": "string", "minLength": 1},
+                    "subject": {"type": "string", "minLength": 1},
+                    "predicate": {"enum": ["free", "inside", "on", "held-by", "worn-by", "above-boundary", "below-boundary"]},
+                    "object": {"type": "string", "minLength": 1},
+                    "proof": {"type": "string", "minLength": 1}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
           "beats": {
             "type": "array",
             "minItems": 3,
@@ -55,11 +84,13 @@
             "minItems": 3,
             "items": {
               "type": "object",
-              "required": ["at", "label", "kind"],
+              "required": ["id", "at", "label", "kind", "assertions"],
               "properties": {
+                "id": {"type": "string", "minLength": 1},
                 "at": {"type": "number", "minimum": 0, "maximum": 1},
                 "label": {"type": "string", "minLength": 1},
-                "kind": {"enum": ["establish", "action", "peak", "final"]}
+                "kind": {"enum": ["establish", "action", "peak", "final"]},
+                "assertions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
               },
               "additionalProperties": false
             }

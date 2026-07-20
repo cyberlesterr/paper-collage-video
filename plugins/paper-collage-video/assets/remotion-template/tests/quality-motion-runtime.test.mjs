@@ -7,6 +7,8 @@ import sharp from 'sharp';
 import {createRequestFingerprint} from '../scripts/provider-lib.mjs';
 import {
   assertQualityReady,
+  collectCompositeQualityTargets,
+  compositionProofReportPath,
   prepareQualityReport,
   recordQualityReviews,
 } from '../scripts/quality-lib.mjs';
@@ -70,9 +72,34 @@ test('request fingerprints ignore project-specific destinations but preserve gen
   });
   assert.equal(first, second);
   assert.notEqual(first, changed);
+  const registered = createRequestFingerprint({
+    request: {
+      ...base,
+      compositionBinding: {
+        sceneId: 'scene-01', nodeId: 'water', pattern: 'registered-environment',
+        registrationId: 'river-a', sourceMasterAssetId: 'river-master', outputRole: 'lower-band',
+        canvas: {width: 1920, height: 1080}, derivation: {method: 'alpha-extraction'},
+      },
+    },
+    providerId: 'host-image',
+    model: 'image-model',
+  });
+  const otherFamily = createRequestFingerprint({
+    request: {
+      ...base,
+      compositionBinding: {
+        sceneId: 'scene-01', nodeId: 'water', pattern: 'registered-environment',
+        registrationId: 'river-b', sourceMasterAssetId: 'river-master', outputRole: 'lower-band',
+        canvas: {width: 1920, height: 1080}, derivation: {method: 'alpha-extraction'},
+      },
+    },
+    providerId: 'host-image',
+    model: 'image-model',
+  });
+  assert.notEqual(registered, otherFamily);
 });
 
-test('v3 scene transitions use one seconds-based timing protocol', () => {
+test('v4 scene transitions use one seconds-based timing protocol', () => {
   const timeline = deriveTimeline({
     video: {fps: 30},
     scenes: [
@@ -102,7 +129,7 @@ test('v3 scene transitions use one seconds-based timing protocol', () => {
   assert.equal(timeline.durationInFrames, 160);
 });
 
-test('pre-v3 projects are rejected instead of migrated', async () => {
+test('pre-v4 projects are rejected instead of migrated', async () => {
   const report = await validateProject({
     schemaVersion: 1,
     slug: 'old-project',
@@ -116,14 +143,14 @@ test('pre-v3 projects are rejected instead of migrated', async () => {
   assert.ok(
     report.issues.some(
       ({code, message}) =>
-        code === 'schema-version' && message.includes('必须为 3'),
+        code === 'schema-version' && message.includes('必须为 4'),
     ),
   );
 });
 
-test('v3 projects require an explicit bounded narration gain', async () => {
+test('v4 projects require an explicit bounded narration gain', async () => {
   const base = {
-    schemaVersion: 3,
+    schemaVersion: 4,
     slug: 'narration-gain-test',
     title: 'Narration gain test',
     quality: {minimumAssetScale: 1},
@@ -160,7 +187,7 @@ test('v3 projects require an explicit bounded narration gain', async () => {
     audio: {...base.audio, narration: {volume: 1}, sfx: {}},
   });
   assert.ok(
-    legacyRoleSounds.issues.some(({code}) => code === 'unsupported-v2-audio-sfx'),
+    legacyRoleSounds.issues.some(({code}) => code === 'unsupported-audio-sfx'),
   );
 });
 
@@ -238,7 +265,7 @@ test('required asset quality resets on hashes and batch reviews write atomically
       path.join(projectDirectory, 'project.json'),
       `${JSON.stringify(
         {
-          schemaVersion: 3,
+          schemaVersion: 4,
           slug,
           title: 'Quality Gate',
           quality: {minimumAssetScale: 1},
@@ -248,13 +275,29 @@ test('required asset quality resets on hashes and batch reviews write atomically
           scenes: [
             {
               id: 'scene',
-              background: `projects/${slug}/assets/plates/bg.png`,
-              layers: [
-                {
-                  id: 'hero',
-                  src: `projects/${slug}/assets/characters/alpha/hero.png`,
-                },
-              ],
+              composition: {
+                coordinateSpace: {width: 640, height: 360},
+                nodes: [
+                  {
+                    id: 'background',
+                    kind: 'asset',
+                    assetRole: 'background',
+                    src: `projects/${slug}/assets/plates/bg.png`,
+                    z: 0,
+                    transform: {x: 0, y: 0, width: 1, height: 1, anchorX: 0, anchorY: 0},
+                    motion: {keyframes: [{at: 0, scale: 1}, {at: 1, scale: 1}]},
+                  },
+                  {
+                    id: 'hero',
+                    kind: 'asset',
+                    assetRole: 'character',
+                    src: `projects/${slug}/assets/characters/alpha/hero.png`,
+                    z: 1,
+                    transform: {x: 0.5, y: 1, width: 0.2, anchorX: 0.5, anchorY: 1},
+                    motion: {keyframes: [{at: 0, y: 0}, {at: 1, y: 0}]},
+                  },
+                ],
+              },
             },
           ],
         },
@@ -266,7 +309,7 @@ test('required asset quality resets on hashes and batch reviews write atomically
     await fs.writeFile(
       path.join(projectDirectory, 'assets-manifest.json'),
       `${JSON.stringify({
-        schemaVersion: 2,
+        schemaVersion: 3,
         projectSlug: slug,
         assets: [
           {
@@ -289,7 +332,7 @@ test('required asset quality resets on hashes and batch reviews write atomically
       status.report.assets.find(({kind}) => kind === 'character').requiredChecks,
       ['edge-clean'],
     );
-    await assert.rejects(() => assertQualityReady(slug), /资产质量门未通过/);
+    await assert.rejects(() => assertQualityReady(slug), /资产与组合质量门未通过/);
 
     const reportFile = path.join(projectDirectory, 'quality-report.json');
     const beforeInvalidBatch = await fs.readFile(reportFile, 'utf8');
@@ -310,7 +353,7 @@ test('required asset quality resets on hashes and batch reviews write atomically
             },
           ],
         }),
-      /未知质量资产：missing-asset/,
+      /未知质量对象：missing-asset/,
     );
     assert.equal(await fs.readFile(reportFile, 'utf8'), beforeInvalidBatch);
 
@@ -342,5 +385,119 @@ test('required asset quality resets on hashes and batch reviews write atomically
   } finally {
     await fs.rm(projectDirectory, {recursive: true, force: true});
     await fs.rm(publicDirectory, {recursive: true, force: true});
+  }
+});
+
+test('asset approval cannot bypass a pending or stale supported-subject composite', async () => {
+  const slug = `composite-gate-${process.pid}`;
+  const projectDirectory = path.join(ROOT, 'projects', slug);
+  const publicDirectory = path.join(ROOT, 'public', 'projects', slug);
+  const distDirectory = path.join(ROOT, 'dist', slug);
+  const sources = Object.fromEntries(['boat-rear', 'traveler', 'boat-front'].map((id) => [id, path.join(publicDirectory, `${id}.png`)]));
+  const relativeSource = (id) => path.relative(ROOT, sources[id]);
+  const binding = (nodeId, outputRole) => ({
+    sceneId: 'scene',
+    nodeId,
+    pattern: 'supported-subject',
+    registrationId: 'boat-family',
+    sourceMasterAssetId: 'boat-master',
+    outputRole,
+    canvas: {width: 100, height: 100},
+    derivation: {method: 'alpha-extraction', parentAssetId: 'boat-master'},
+  });
+  const node = (id, slot, role = 'prop') => ({
+    id,
+    kind: 'asset',
+    assetRole: role,
+    src: path.relative(path.join(ROOT, 'public'), sources[id]),
+    z: 0,
+    slot,
+    registrationId: 'boat-family',
+    transform: {x: 0, y: 0, width: 1, height: 1, anchorX: 0, anchorY: 0},
+    motion: {keyframes: [{at: 0, x: 0}, {at: 1, x: 0}]},
+  });
+  try {
+    await fs.mkdir(publicDirectory, {recursive: true});
+    await fs.mkdir(projectDirectory, {recursive: true});
+    for (const [index, file] of Object.values(sources).entries()) {
+      const block = await sharp({create: {width: 62, height: 34, channels: 4, background: {r: 80 + index * 40, g: 90, b: 120, alpha: 1}}}).png().toBuffer();
+      await sharp({create: {width: 100, height: 100, channels: 4, background: {r: 0, g: 0, b: 0, alpha: 0}}})
+        .composite([{input: block, left: 19, top: 56}])
+        .png()
+        .toFile(file);
+    }
+    const project = {
+      schemaVersion: 4,
+      slug,
+      quality: {minimumAssetScale: 1},
+      video: {width: 100, height: 100, fps: 30},
+      scenes: [{
+        id: 'scene',
+        motion: {proofTimes: [{id: 'establish', at: 0.08}, {id: 'action', at: 0.5}, {id: 'final', at: 0.9}]},
+        composition: {
+          coordinateSpace: {width: 100, height: 100},
+          nodes: [{
+            id: 'boat-rig', kind: 'group', pattern: 'supported-subject', z: 0,
+            coordinateSpace: {width: 100, height: 100},
+            transform: {x: 0, y: 0, width: 1, height: 1, anchorX: 0, anchorY: 0},
+            motion: {keyframes: [{at: 0, x: 0}, {at: 1, x: 0}]},
+            registration: {id: 'boat-family', sourceMasterAssetId: 'boat-master', canvas: {width: 100, height: 100}, origin: 'top-left'},
+            support: {
+              subjectId: 'traveler', contactAnchor: {x: 0.5, y: 0.7},
+              contactZone: [[0.25, 0.5], [0.8, 0.5], [0.8, 0.9], [0.25, 0.9]],
+              occlusionZone: [[0.18, 0.52], [0.82, 0.52], [0.82, 0.92], [0.18, 0.92]],
+            },
+            children: [node('boat-rear', 'support-rear'), node('traveler', 'subject', 'character'), node('boat-front', 'support-front')],
+          }],
+        },
+        cues: [],
+      }],
+    };
+    await fs.writeFile(path.join(projectDirectory, 'project.json'), `${JSON.stringify(project, null, 2)}\n`, 'utf8');
+    await fs.writeFile(path.join(projectDirectory, 'assets-manifest.json'), `${JSON.stringify({
+      schemaVersion: 3,
+      projectSlug: slug,
+      assets: [
+        ['boat-rear', 'support-rear'],
+        ['traveler', 'subject'],
+        ['boat-front', 'support-front'],
+      ].map(([assetId, outputRole]) => ({assetId, capability: 'image', file: relativeSource(assetId), compositionBinding: binding(assetId, outputRole)})),
+    }, null, 2)}\n`, 'utf8');
+
+    const [target] = await collectCompositeQualityTargets(project);
+    const proofFile = compositionProofReportPath(slug);
+    const frame = path.join(path.dirname(proofFile), 'frame.png');
+    const crop = path.join(path.dirname(proofFile), 'crop.png');
+    await fs.mkdir(path.dirname(proofFile), {recursive: true});
+    await fs.copyFile(sources['boat-front'], frame);
+    await fs.copyFile(sources['boat-front'], crop);
+    await fs.writeFile(proofFile, `${JSON.stringify({schemaVersion: 1, projectSlug: slug, composites: [{compositeId: target.compositeId, fingerprint: target.fingerprint, proofFrames: [{proofTimeId: 'final', fullFrame: path.relative(ROOT, frame), crop: path.relative(ROOT, crop)}]}]}, null, 2)}\n`, 'utf8');
+
+    let status = await prepareQualityReport(slug);
+    assert.equal(status.scopes.composites.pending, 1);
+    status = await recordQualityReviews({
+      slug,
+      reviews: status.report.assets.map((entry) => ({assetId: entry.assetId, reviewer: 'fixture-reviewer', passedChecks: entry.requiredChecks})),
+    });
+    assert.equal(status.ready, false);
+    assert.equal(status.scopes.assets.pending, 0);
+    assert.equal(status.scopes.composites.pending, 1);
+    const composite = status.report.composites[0];
+    status = await recordQualityReviews({
+      slug,
+      reviews: [{compositeId: composite.compositeId, reviewer: 'fixture-reviewer', passedChecks: composite.requiredChecks}],
+    });
+    assert.equal(status.ready, true);
+
+    await sharp(sources['boat-front']).modulate({brightness: 0.96}).png().toFile(`${sources['boat-front']}.changed.png`);
+    await fs.rename(`${sources['boat-front']}.changed.png`, sources['boat-front']);
+    status = await prepareQualityReport(slug);
+    assert.equal(status.ready, false);
+    assert.equal(status.report.composites[0].status, 'needs-revision');
+    assert.ok(status.report.composites[0].technical.checks.some(({id, passed}) => id === 'proof-current' && !passed));
+  } finally {
+    await fs.rm(projectDirectory, {recursive: true, force: true});
+    await fs.rm(publicDirectory, {recursive: true, force: true});
+    await fs.rm(distDirectory, {recursive: true, force: true});
   }
 });

@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 4,
+  "slug": "composition-v4-fixture",
+  "title": "Composition v4 Fixture",
+  "plan": {
+    "schemaVersion": 1,
+    "slug": "composition-v4-fixture",
+    "status": "resolved",
+    "inputMode": "both",
+    "productionProfile": "draft",
+    "assetBudget": {"backgrounds": 1, "environmentLayers": 2, "characterSheets": 1, "styleSamples": 0, "maxGeneratedImages": 4},
+    "requested": {"durationSeconds": 2, "sceneCount": 1},
+    "resolved": {"durationSeconds": 2, "sceneCount": 1, "estimatedNarrationSeconds": 1, "rationale": "Deterministic renderer fixture", "resolvedAt": "2026-01-01T00:00:00.000Z"},
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  "quality": {"minimumAssetScale": 0.5},
+  "video": {"width": 1920, "height": 1080, "fps": 30},
+  "theme": {
+    "canvas": "#6e1e19", "sceneBackground": "#d9dfcf", "accent": "#a33a2d", "ink": "#4a291f",
+    "subtitle": "#fff8ea", "subtitleBackground": "rgba(58,25,18,.72)", "paperEdge": "#f5eedc",
+    "foreground": "#8d251e", "texture": "textures/paper-grain.png"
+  },
+  "voice": {"mode": "fictional", "provider": "fixture", "displayName": "Fixture"},
+  "audio": {"narration": {"volume": 0.01}, "music": null, "mastering": {"targetLufs": -24, "toleranceLufs": 3, "truePeakDbtp": -18}},
+  "scenes": [{
+    "id": "fixture", "label": "注册组合", "eyebrow": "V4", "tailSeconds": 1,
+    "motion": {
+      "blueprint": "chapter-tableau", "intensity": 0.6, "seed": 41,
+      "proofTimes": [
+        {"id": "establish", "at": 0.08, "label": "岸水建立", "kind": "establish", "assertions": ["树位于岸线上方，水位于下方"]},
+        {"id": "action", "at": 0.5, "label": "船中主体", "kind": "peak", "assertions": ["人物下身被前船舷遮挡"]},
+        {"id": "final", "at": 0.9, "label": "关系稳定", "kind": "final", "assertions": ["船人共享运动且岸水边界不漂移"]}
+      ]
+    },
+    "composition": {
+      "coordinateSpace": {"width": 1920, "height": 1080},
+      "nodes": [
+        {
+          "id": "river", "kind": "group", "pattern": "registered-environment", "z": 0,
+          "coordinateSpace": {"width": 1920, "height": 1080},
+          "transform": {"x": 0, "y": 0, "width": 1, "height": 1, "anchorX": 0, "anchorY": 0},
+          "motion": {"keyframes": [{"at": 0, "scale": 1}, {"at": 1, "scale": 1.01}]},
+          "registration": {"id": "river-family", "sourceMasterAssetId": "river-master", "canvas": {"width": 1920, "height": 1080}, "origin": "top-left"},
+          "boundaries": [{"id": "shoreline", "normalizedY": 0.58, "upperSemantic": "land", "lowerSemantic": "water"}],
+          "children": [
+            {"id": "sky", "kind": "asset", "assetRole": "background", "src": "fixtures/composition-v4/sky.svg", "z": 0, "registrationId": "river-family", "semanticCoverage": ["sky"], "transform": {"x": 0, "y": 0, "width": 1, "height": 1, "anchorX": 0, "anchorY": 0}, "motion": {"keyframes": [{"at": 0, "x": 0}, {"at": 1, "x": 0}] }},
+            {"id": "bank", "kind": "asset", "assetRole": "environment", "src": "fixtures/composition-v4/bank.svg", "z": 1, "registrationId": "river-family", "semanticCoverage": ["bank", "trees"], "clip": {"boundaryId": "shoreline", "side": "upper"}, "transform": {"x": 0, "y": 0, "width": 1, "height": 1, "anchorX": 0, "anchorY": 0}, "motion": {"keyframes": [{"at": 0, "x": 0}, {"at": 1, "x": 0}] }},
+            {"id": "water", "kind": "asset", "assetRole": "environment", "src": "fixtures/composition-v4/water.svg", "z": 2, "registrationId": "river-family", "semanticCoverage": ["water"], "clip": {"boundaryId": "shoreline", "side": "lower"}, "transform": {"x": 0, "y": 0, "width": 1, "height": 1, "anchorX": 0, "anchorY": 0}, "motion": {"keyframes": [{"at": 0, "x": -0.005}, {"at": 1, "x": 0.005}] }}
+          ]
+        },
+        {
+          "id": "boat-rig", "kind": "group", "pattern": "supported-subject", "z": 5,
+          "coordinateSpace": {"width": 1000, "height": 600},
+          "transform": {"x": 0.52, "y": 0.62, "width": 0.58, "anchorX": 0.5, "anchorY": 0.5},
+          "motion": {"keyframes": [{"at": 0, "x": -0.01}, {"at": 1, "x": 0.01}]},
+          "registration": {"id": "boat-family", "sourceMasterAssetId": "boat-master", "canvas": {"width": 1000, "height": 600}, "origin": "top-left"},
+          "support": {"subjectId": "traveler", "contactAnchor": {"x": 0.5, "y": 0.7}, "contactZone": [[0.25,0.55],[0.78,0.55],[0.8,0.86],[0.22,0.86]], "occlusionZone": [[0.16,0.58],[0.85,0.58],[0.85,0.9],[0.16,0.9]]},
+          "children": [
+            {"id": "boat-rear", "kind": "asset", "assetRole": "prop", "src": "fixtures/composition-v4/boat-rear.svg", "slot": "support-rear", "z": 0, "registrationId": "boat-family", "transform": {"x": 0, "y": 0, "width": 1, "height": 1, "anchorX": 0, "anchorY": 0}, "motion": {"keyframes": [{"at": 0, "x": 0}, {"at": 1, "x": 0}]}},
+            {"id": "traveler", "kind": "asset", "assetRole": "character", "src": "fixtures/composition-v4/traveler.svg", "slot": "subject", "z": 1, "registrationId": "boat-family", "transform": {"x": 0, "y": 0, "width": 1, "height": 1, "anchorX": 0, "anchorY": 0}, "motion": {"keyframes": [{"at": 0, "y": 0}, {"at": 1, "y": -0.01}]}},
+            {"id": "boat-front", "kind": "asset", "assetRole": "prop", "src": "fixtures/composition-v4/boat-front.svg", "slot": "support-front", "z": 2, "registrationId": "boat-family", "transform": {"x": 0, "y": 0, "width": 1, "height": 1, "anchorX": 0, "anchorY": 0}, "motion": {"keyframes": [{"at": 0, "x": 0}, {"at": 1, "x": 0}]}}
+          ]
+        }
+      ]
+    },
+    "camera": {"preset": "static", "intensity": 0.2},
+    "transition": {"type": "none", "durationSeconds": 0},
+    "narration": {"src": "projects/starter-demo/audio/narration/01-test-tone.wav", "startSeconds": 0, "durationSeconds": 1, "text": ""},
+    "subtitles": [{"fromSeconds": 0.1, "toSeconds": 1.8, "text": "注册边界与支撑遮挡"}],
+    "cues": [
+      {"id": "establish-cue", "beatId": "establish", "at": 0, "durationSeconds": 0.3, "targetId": "scene", "action": "reveal", "intensity": 0.5},
+      {"id": "boat-cue", "beatId": "action", "at": 0.5, "durationSeconds": 0.4, "targetId": "boat-rig", "action": "lift", "intensity": 0.4},
+      {"id": "final-cue", "beatId": "final", "at": 0.9, "durationSeconds": 0.2, "targetId": "boat-rig", "action": "settle", "intensity": 0.3}
+    ]
+  }]
+}

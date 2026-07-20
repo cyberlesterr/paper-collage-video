@@ -18,6 +18,16 @@ export const STORY_BLUEPRINTS = [
 ];
 
 export const PROOF_KINDS = ['establish', 'action', 'peak', 'final'];
+export const COMPOSITION_PATTERNS = ['free', 'supported-subject', 'registered-environment'];
+export const RELATIONSHIP_PREDICATES = [
+  'free',
+  'inside',
+  'on',
+  'held-by',
+  'worn-by',
+  'above-boundary',
+  'below-boundary',
+];
 
 const nonEmpty = (value) => typeof value === 'string' && value.trim().length > 0;
 const normalizedTime = (value) =>
@@ -88,6 +98,43 @@ export const validateStoryboard = (storyboard, {slug, plan} = {}) => {
     } else {
       estimatedDuration += scene.estimatedDurationSeconds;
     }
+    const compositionPlan = scene.compositionPlan;
+    if (!compositionPlan || typeof compositionPlan !== 'object') {
+      add('storyboard-composition-plan', '每个镜头必须声明 compositionPlan。', `${location}.compositionPlan`);
+    } else {
+      if (
+        !Array.isArray(compositionPlan.patterns) ||
+        compositionPlan.patterns.length === 0 ||
+        compositionPlan.patterns.some((pattern) => !COMPOSITION_PATTERNS.includes(pattern))
+      ) {
+        add('storyboard-composition-pattern', 'compositionPlan.patterns 必须使用受支持的组合模式。', `${location}.compositionPlan.patterns`);
+      }
+      if (!Array.isArray(compositionPlan.relationships) || compositionPlan.relationships.length === 0) {
+        add('storyboard-composition-relationships', 'compositionPlan.relationships 至少需要一项。', `${location}.compositionPlan.relationships`);
+      }
+      const relationshipIds = new Set();
+      for (const [relationshipIndex, relationship] of (compositionPlan.relationships ?? []).entries()) {
+        const relationshipLocation = `${location}.compositionPlan.relationships[${relationshipIndex}]`;
+        if (!nonEmpty(relationship.id) || relationshipIds.has(relationship.id)) {
+          add('storyboard-relationship-id', '关系 id 缺失或重复。', `${relationshipLocation}.id`);
+        }
+        relationshipIds.add(relationship.id);
+        for (const key of ['subject', 'object', 'proof']) {
+          if (!nonEmpty(relationship[key])) add(`storyboard-relationship-${key}`, `关系 ${key} 不能为空。`, `${relationshipLocation}.${key}`);
+        }
+        if (!RELATIONSHIP_PREDICATES.includes(relationship.predicate)) {
+          add('storyboard-relationship-predicate', `未知关系 predicate：${relationship.predicate}`, `${relationshipLocation}.predicate`);
+        }
+        const requiredPattern = ['inside', 'on', 'held-by', 'worn-by'].includes(relationship.predicate)
+          ? 'supported-subject'
+          : ['above-boundary', 'below-boundary'].includes(relationship.predicate)
+            ? 'registered-environment'
+            : 'free';
+        if (!(compositionPlan.patterns ?? []).includes(requiredPattern)) {
+          add('storyboard-relationship-pattern', `关系 ${relationship.id} 必须声明模式 ${requiredPattern}。`, `${location}.compositionPlan.patterns`);
+        }
+      }
+    }
     if (!Array.isArray(scene.beats) || scene.beats.length < 3) {
       add('storyboard-beats', '每个镜头至少需要 3 个节拍。', `${location}.beats`);
     }
@@ -113,14 +160,22 @@ export const validateStoryboard = (storyboard, {slug, plan} = {}) => {
     }
     let previousProof = -1;
     let hasFinal = false;
+    const proofIds = new Set();
     for (const [proofIndex, proof] of (scene.proofTimes ?? []).entries()) {
       const proofLocation = `${location}.proofTimes[${proofIndex}]`;
+      if (!nonEmpty(proof.id) || proofIds.has(proof.id)) {
+        add('storyboard-proof-id', '证明时刻 id 缺失或重复。', `${proofLocation}.id`);
+      }
+      proofIds.add(proof.id);
       if (!normalizedTime(proof.at) || proof.at <= previousProof) {
         add('storyboard-proof-time', '证明时刻 at 必须位于 0..1 且严格递增。', `${proofLocation}.at`);
       }
       previousProof = proof.at;
       if (!nonEmpty(proof.label)) add('storyboard-proof-label', '证明时刻必须有 label。', `${proofLocation}.label`);
       if (!PROOF_KINDS.includes(proof.kind)) add('storyboard-proof-kind', `未知证明类型：${proof.kind}`, `${proofLocation}.kind`);
+      if (!Array.isArray(proof.assertions) || proof.assertions.length === 0 || proof.assertions.some((item) => !nonEmpty(item))) {
+        add('storyboard-proof-assertions', '证明时刻必须声明至少一项可见关系断言。', `${proofLocation}.assertions`);
+      }
       if (proof.kind === 'final' && proof.at >= 0.82) hasFinal = true;
     }
     if (!hasFinal) add('storyboard-final-proof', '每个镜头必须在 0.82 之后设置 final 证明时刻。', `${location}.proofTimes`);
@@ -162,11 +217,12 @@ export const summarizeStoryboard = (storyboard) => ({
   sceneCount: Array.isArray(storyboard?.scenes) ? storyboard.scenes.length : 0,
   scenes:
     storyboard?.status === 'ready'
-      ? storyboard.scenes.map(({id, title, narrativeRole, blueprint, beats, proofTimes}) => ({
+      ? storyboard.scenes.map(({id, title, narrativeRole, blueprint, compositionPlan, beats, proofTimes}) => ({
           id,
           title,
           narrativeRole,
           blueprint,
+          patterns: compositionPlan.patterns,
           beatCount: beats.length,
           proofCount: proofTimes.length,
         }))

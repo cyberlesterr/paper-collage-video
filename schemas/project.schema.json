@@ -1,30 +1,90 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://local.paper-collage.dev/project.schema.json",
-  "title": "Paper Collage Video Project",
+  "title": "Paper Collage Project v4",
   "type": "object",
   "required": ["schemaVersion", "slug", "title", "plan", "quality", "video", "theme", "voice", "audio", "scenes"],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 3},
+    "schemaVersion": {"const": 4},
     "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "title": {"type": "string", "minLength": 1},
-    "plan": {"$ref": "#/$defs/creativePlan"},
+    "plan": {"$ref": "#/$defs/plan"},
     "quality": {
       "type": "object",
       "required": ["minimumAssetScale"],
-      "properties": {
-        "minimumAssetScale": {"type": "number", "exclusiveMinimum": 0, "maximum": 2}
-      },
+      "properties": {"minimumAssetScale": {"type": "number", "exclusiveMinimum": 0}},
       "additionalProperties": false
     },
     "video": {
       "type": "object",
       "required": ["width", "height", "fps"],
       "properties": {
-        "width": {"type": "integer", "minimum": 320},
-        "height": {"type": "integer", "minimum": 320},
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1},
         "fps": {"type": "number", "exclusiveMinimum": 0}
+      },
+      "additionalProperties": false
+    },
+    "theme": {"$ref": "#/$defs/theme"},
+    "voice": {"$ref": "#/$defs/voice"},
+    "audio": {"$ref": "#/$defs/audio"},
+    "scenes": {"type": "array", "items": {"$ref": "#/$defs/scene"}}
+  },
+  "$defs": {
+    "plan": {
+      "type": "object",
+      "required": ["schemaVersion", "slug", "status", "inputMode", "requested", "resolved", "updatedAt"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "slug": {"type": "string"},
+        "status": {"enum": ["pending", "resolved"]},
+        "inputMode": {"enum": ["none", "duration-only", "scenes-only", "both"]},
+        "productionProfile": {"enum": ["draft", "balanced", "full-depth"]},
+        "assetBudget": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["backgrounds", "environmentLayers", "characterSheets", "styleSamples", "maxGeneratedImages"],
+              "properties": {
+                "backgrounds": {"type": "integer", "minimum": 0},
+                "environmentLayers": {"type": "integer", "minimum": 0},
+                "characterSheets": {"type": "integer", "minimum": 0},
+                "styleSamples": {"type": "integer", "minimum": 0},
+                "maxGeneratedImages": {"type": "integer", "minimum": 0}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "requested": {
+          "type": "object",
+          "required": ["durationSeconds", "sceneCount"],
+          "properties": {
+            "durationSeconds": {"oneOf": [{"type": "null"}, {"type": "number", "exclusiveMinimum": 0}]},
+            "sceneCount": {"oneOf": [{"type": "null"}, {"type": "integer", "minimum": 1}]}
+          },
+          "additionalProperties": false
+        },
+        "resolved": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["durationSeconds", "sceneCount", "estimatedNarrationSeconds", "rationale", "resolvedAt"],
+              "properties": {
+                "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
+                "sceneCount": {"type": "integer", "minimum": 1},
+                "estimatedNarrationSeconds": {"oneOf": [{"type": "null"}, {"type": "number", "minimum": 0}]},
+                "rationale": {"type": "string", "minLength": 1},
+                "resolvedAt": {"type": "string", "format": "date-time"}
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "updatedAt": {"type": "string", "format": "date-time"}
       },
       "additionalProperties": false
     },
@@ -32,17 +92,17 @@
       "type": "object",
       "required": ["canvas", "sceneBackground", "accent", "ink", "subtitle", "subtitleBackground", "paperEdge", "foreground", "texture"],
       "properties": {
-        "canvas": {"type": "string", "minLength": 1},
-        "sceneBackground": {"type": "string", "minLength": 1},
-        "accent": {"type": "string", "minLength": 1},
-        "ink": {"type": "string", "minLength": 1},
-        "subtitle": {"type": "string", "minLength": 1},
-        "subtitleBackground": {"type": "string", "minLength": 1},
-        "paperEdge": {"type": "string", "minLength": 1},
-        "foreground": {"type": "string", "minLength": 1},
-        "texture": {"type": "string", "minLength": 1},
-        "fontFamily": {"type": "string", "minLength": 1},
-        "fontFile": {"type": "string", "minLength": 1}
+        "canvas": {"type": "string"},
+        "sceneBackground": {"type": "string"},
+        "accent": {"type": "string"},
+        "ink": {"type": "string"},
+        "subtitle": {"type": "string"},
+        "subtitleBackground": {"type": "string"},
+        "paperEdge": {"type": "string"},
+        "foreground": {"type": "string"},
+        "texture": {"type": "string"},
+        "fontFamily": {"type": "string"},
+        "fontFile": {"type": "string"}
       },
       "additionalProperties": false
     },
@@ -55,7 +115,16 @@
         "voiceId": {"type": "string"},
         "profile": {"type": "string"},
         "displayName": {"type": "string"},
-        "settings": {"type": "object"}
+        "settings": {"type": "object", "additionalProperties": {"type": ["string", "number", "boolean"]}}
+      },
+      "additionalProperties": false
+    },
+    "sound": {
+      "type": "object",
+      "required": ["src", "volume"],
+      "properties": {
+        "src": {"type": "string", "minLength": 1},
+        "volume": {"type": "number", "minimum": 0, "maximum": 4}
       },
       "additionalProperties": false
     },
@@ -66,17 +135,10 @@
         "narration": {
           "type": "object",
           "required": ["volume"],
-          "properties": {
-            "volume": {"type": "number", "exclusiveMinimum": 0, "maximum": 4}
-          },
+          "properties": {"volume": {"type": "number", "exclusiveMinimum": 0, "maximum": 4}},
           "additionalProperties": false
         },
-        "music": {
-          "oneOf": [
-            {"type": "null"},
-            {"$ref": "#/$defs/sound"}
-          ]
-        },
+        "music": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/sound"}]},
         "mastering": {
           "type": "object",
           "required": ["targetLufs", "toleranceLufs", "truePeakDbtp"],
@@ -90,279 +152,102 @@
       },
       "additionalProperties": false
     },
-    "scenes": {
-      "type": "array",
-      "minItems": 0,
-      "items": {
-        "type": "object",
-        "required": ["id", "label", "eyebrow", "tailSeconds", "background", "environmentLayers", "motion", "camera", "transition", "narration", "layers", "subtitles", "cues"],
-        "properties": {
-          "id": {"type": "string", "minLength": 1},
-          "label": {"type": "string"},
-          "eyebrow": {"type": "string"},
-          "tailSeconds": {"type": "number", "minimum": 0},
-          "background": {"type": "string", "minLength": 1},
-          "environmentLayers": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["id", "src", "depth", "z", "motion"],
-              "properties": {
-                "id": {"type": "string", "minLength": 1},
-                "src": {"type": "string", "minLength": 1},
-                "depth": {"type": "number", "minimum": -1, "maximum": 1},
-                "z": {"type": "integer"},
-                "x": {"type": "number"},
-                "y": {"type": "number"},
-                "width": {"type": "number", "exclusiveMinimum": 0},
-                "opacity": {"type": "number", "minimum": 0, "maximum": 1},
-                "motion": {
-                  "type": "object",
-                  "required": ["keyframes"],
-                  "properties": {
-                    "keyframes": {"$ref": "#/$defs/motionKeyframes"}
-                  },
-                  "additionalProperties": false
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "motion": {
-            "type": "object",
-            "required": ["blueprint", "intensity", "seed", "proofTimes"],
-            "properties": {
-              "blueprint": {"enum": ["layered-reveal", "map-journey", "archive-stack", "character-procession", "discovery-wipe", "transformation-tableau", "chapter-tableau", "quiet-lockup"]},
-              "intensity": {"type": "number", "minimum": 0, "maximum": 3},
-              "seed": {"type": "integer"},
-              "proofTimes": {
-                "type": "array",
-                "minItems": 3,
-                "items": {"$ref": "#/$defs/proofTime"}
-              }
-            },
-            "additionalProperties": false
-          },
-          "camera": {
-            "type": "object",
-            "required": ["preset", "intensity"],
-            "properties": {
-              "preset": {"enum": ["push", "pull", "pan-left", "pan-right", "static"]},
-              "intensity": {"type": "number", "minimum": 0, "maximum": 3},
-              "keyframes": {
-                "type": "array",
-                "minItems": 2,
-                "items": {
-                  "type": "object",
-                  "required": ["at"],
-                  "properties": {
-                    "at": {"type": "number", "minimum": 0, "maximum": 1},
-                    "x": {"type": "number"},
-                    "y": {"type": "number"},
-                    "zoom": {"type": "number", "exclusiveMinimum": 0}
-                  },
-                  "additionalProperties": false
-                }
-              }
-            },
-            "additionalProperties": false
-          },
-          "transition": {
-            "type": "object",
-            "required": ["type", "durationSeconds"],
-            "properties": {
-              "type": {"enum": ["fade", "none"]},
-              "durationSeconds": {"type": "number", "minimum": 0}
-            },
-            "additionalProperties": false
-          },
-          "narration": {
-            "type": "object",
-            "required": ["src", "startSeconds", "durationSeconds", "text"],
-            "properties": {
-              "src": {"type": "string", "minLength": 1},
-              "timingSrc": {"type": "string", "minLength": 1},
-              "startSeconds": {"type": "number", "minimum": 0},
-              "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
-              "text": {"type": "string"}
-            },
-            "additionalProperties": false
-          },
-          "layers": {
-            "type": "array",
-            "minItems": 1,
-            "items": {
-              "type": "object",
-              "required": ["id", "src", "role", "x", "bottom", "width", "z", "delaySeconds", "enterFrom", "motion"],
-              "properties": {
-                "id": {"type": "string"},
-                "src": {"type": "string"},
-                "role": {"enum": ["primary", "secondary", "tertiary"]},
-                "x": {"type": "number"},
-                "bottom": {"type": "number"},
-                "width": {"type": "number", "exclusiveMinimum": 0},
-                "z": {"type": "integer"},
-                "delaySeconds": {"type": "number", "minimum": 0},
-                "enterFrom": {"enum": ["left", "right", "bottom"]},
-                "motion": {
-                  "type": "object",
-                  "required": ["idle", "intensity", "cycleSeconds", "enterDurationSeconds", "keyframes"],
-                  "properties": {
-                    "idle": {"enum": ["float", "breathe", "grind", "drift", "still"]},
-                    "intensity": {"type": "number", "minimum": 0, "maximum": 3},
-                    "cycleSeconds": {"type": "number", "exclusiveMinimum": 0},
-                    "phase": {"type": "number"},
-                    "enterDurationSeconds": {"type": "number", "exclusiveMinimum": 0},
-                    "keyframes": {"$ref": "#/$defs/motionKeyframes"}
-                  },
-                  "additionalProperties": false
-                }
-              },
-              "additionalProperties": false
-            }
-          },
-          "subtitles": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["fromSeconds", "toSeconds", "text"],
-              "properties": {
-                "fromSeconds": {"type": "number", "minimum": 0},
-                "toSeconds": {"type": "number", "exclusiveMinimum": 0},
-                "text": {"type": "string", "minLength": 1}
-              },
-              "additionalProperties": false
-            }
-          },
-          "cues": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": ["id", "beatId", "at", "durationSeconds", "targetId", "action", "intensity"],
-              "properties": {
-                "id": {"type": "string", "minLength": 1},
-                "beatId": {"type": "string", "minLength": 1},
-                "at": {"type": "number", "minimum": 0, "maximum": 1},
-                "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
-                "targetId": {"type": "string", "minLength": 1},
-                "action": {"enum": ["reveal", "pulse", "stamp", "shake", "lift", "settle"]},
-                "intensity": {"type": "number", "minimum": 0, "maximum": 3},
-                "sound": {"$ref": "#/$defs/sound"}
-              },
-              "additionalProperties": false
-            }
-          }
-        },
-        "additionalProperties": false
-      }
-    }
-  },
-  "additionalProperties": false,
-  "$defs": {
-    "motionKeyframes": {
-      "type": "array",
-      "minItems": 2,
-      "items": {
-        "type": "object",
-        "required": ["at"],
-        "properties": {
-          "at": {"type": "number", "minimum": 0, "maximum": 1},
-          "x": {"type": "number"},
-          "y": {"type": "number"},
-          "scale": {"type": "number", "exclusiveMinimum": 0},
-          "rotation": {"type": "number"},
-          "opacity": {"type": "number", "minimum": 0, "maximum": 1},
-          "ease": {"enum": ["linear", "ease-in", "ease-out", "ease-in-out", "hold"]}
-        },
-        "additionalProperties": false
-      }
-    },
     "proofTime": {
       "type": "object",
-      "required": ["at", "label", "kind"],
+      "required": ["id", "at", "label", "kind", "assertions"],
       "properties": {
+        "id": {"type": "string", "minLength": 1},
         "at": {"type": "number", "minimum": 0, "maximum": 1},
         "label": {"type": "string", "minLength": 1},
-        "kind": {"enum": ["establish", "action", "peak", "final"]}
+        "kind": {"enum": ["establish", "action", "peak", "final"]},
+        "assertions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
       },
       "additionalProperties": false
     },
-    "sound": {
+    "cue": {
       "type": "object",
-      "required": ["src", "volume"],
+      "required": ["id", "beatId", "at", "durationSeconds", "targetId", "action", "intensity"],
       "properties": {
-        "src": {"type": "string", "minLength": 1},
-        "volume": {"type": "number", "minimum": 0}
+        "id": {"type": "string", "minLength": 1},
+        "beatId": {"type": "string", "minLength": 1},
+        "at": {"type": "number", "minimum": 0, "maximum": 1},
+        "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
+        "targetId": {"type": "string", "minLength": 1},
+        "action": {"$ref": "composition.schema.json#/$defs/cueAction"},
+        "intensity": {"type": "number", "minimum": 0, "maximum": 3},
+        "proofTimeId": {"type": "string", "minLength": 1},
+        "sound": {"$ref": "#/$defs/sound"}
       },
       "additionalProperties": false
     },
-    "nullablePositiveNumber": {
-      "oneOf": [
-        {"type": "number", "exclusiveMinimum": 0},
-        {"type": "null"}
-      ]
-    },
-    "nullablePositiveInteger": {
-      "oneOf": [
-        {"type": "integer", "minimum": 1},
-        {"type": "null"}
-      ]
-    },
-    "creativePlan": {
+    "scene": {
       "type": "object",
-      "required": ["schemaVersion", "slug", "status", "inputMode", "requested", "resolved", "updatedAt"],
+      "required": ["id", "label", "eyebrow", "tailSeconds", "motion", "composition", "camera", "transition", "narration", "subtitles", "cues"],
       "properties": {
-        "schemaVersion": {"const": 1},
-        "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
-        "status": {"enum": ["pending", "resolved"]},
-        "inputMode": {"enum": ["none", "duration-only", "scenes-only", "both"]},
-        "productionProfile": {"enum": ["draft", "balanced", "full-depth"]},
-        "requested": {
+        "id": {"type": "string", "minLength": 1},
+        "label": {"type": "string"},
+        "eyebrow": {"type": "string"},
+        "tailSeconds": {"type": "number", "minimum": 0},
+        "motion": {
           "type": "object",
-          "required": ["durationSeconds", "sceneCount"],
+          "required": ["blueprint", "intensity", "seed", "proofTimes"],
           "properties": {
-            "durationSeconds": {"$ref": "#/$defs/nullablePositiveNumber"},
-            "sceneCount": {"$ref": "#/$defs/nullablePositiveInteger"}
+            "blueprint": {"enum": ["layered-reveal", "map-journey", "archive-stack", "character-procession", "discovery-wipe", "transformation-tableau", "chapter-tableau", "quiet-lockup"]},
+            "intensity": {"type": "number", "minimum": 0, "maximum": 3},
+            "seed": {"type": "integer"},
+            "proofTimes": {"type": "array", "minItems": 3, "items": {"$ref": "#/$defs/proofTime"}}
           },
           "additionalProperties": false
         },
-        "resolved": {
-          "oneOf": [
-            {"type": "null"},
-            {
-              "type": "object",
-              "required": ["durationSeconds", "sceneCount", "estimatedNarrationSeconds", "rationale", "resolvedAt"],
-              "properties": {
-                "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
-                "sceneCount": {"type": "integer", "minimum": 1},
-                "estimatedNarrationSeconds": {"$ref": "#/$defs/nullablePositiveNumber"},
-                "rationale": {"type": "string", "minLength": 1},
-                "resolvedAt": {"type": "string", "format": "date-time"}
-              },
-              "additionalProperties": false
-            }
-          ]
+        "composition": {"$ref": "composition.schema.json#/$defs/composition"},
+        "camera": {
+          "type": "object",
+          "required": ["preset", "intensity"],
+          "properties": {
+            "preset": {"enum": ["push", "pull", "pan-left", "pan-right", "static"]},
+            "intensity": {"type": "number", "minimum": 0, "maximum": 3},
+            "keyframes": {"type": "array", "minItems": 2, "items": {"type": "object"}}
+          },
+          "additionalProperties": false
         },
-        "assetBudget": {
-          "oneOf": [
-            {"type": "null"},
-            {
-              "type": "object",
-              "required": ["backgrounds", "environmentLayers", "characterSheets", "styleSamples", "maxGeneratedImages"],
-              "properties": {
-                "backgrounds": {"type": "integer", "minimum": 1},
-                "environmentLayers": {"type": "integer", "minimum": 0},
-                "characterSheets": {"type": "integer", "minimum": 1},
-                "styleSamples": {"type": "integer", "minimum": 1},
-                "maxGeneratedImages": {"type": "integer", "minimum": 1}
-              },
-              "additionalProperties": false
-            }
-          ]
+        "transition": {
+          "type": "object",
+          "required": ["type", "durationSeconds"],
+          "properties": {
+            "type": {"enum": ["fade", "none"]},
+            "durationSeconds": {"type": "number", "minimum": 0}
+          },
+          "additionalProperties": false
         },
-        "updatedAt": {"type": "string", "format": "date-time"}
+        "narration": {
+          "type": "object",
+          "required": ["src", "startSeconds", "durationSeconds", "text"],
+          "properties": {
+            "src": {"type": "string", "minLength": 1},
+            "timingSrc": {"type": "string", "minLength": 1},
+            "startSeconds": {"type": "number", "minimum": 0},
+            "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
+            "text": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
+        "subtitles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["fromSeconds", "toSeconds", "text"],
+            "properties": {
+              "fromSeconds": {"type": "number", "minimum": 0},
+              "toSeconds": {"type": "number", "exclusiveMinimum": 0},
+              "text": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "cues": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/cue"}}
       },
       "additionalProperties": false
     }
-  }
+  },
+  "additionalProperties": false
 }

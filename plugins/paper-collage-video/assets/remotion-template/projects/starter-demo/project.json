@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/project.schema.json",
-  "schemaVersion": 3,
+  "schemaVersion": 4,
   "slug": "starter-demo",
   "title": "Paper Collage Starter",
   "plan": {
@@ -70,27 +70,117 @@
       "label": "纸片分层视频",
       "eyebrow": "STARTER",
       "tailSeconds": 1,
-      "background": "projects/starter-demo/assets/plates/01-bg.png",
-      "environmentLayers": [],
       "motion": {
         "blueprint": "layered-reveal",
         "intensity": 0.7,
         "seed": 17,
         "proofTimes": [
           {
+            "id": "proof-establish",
             "at": 0.08,
             "label": "建立纸面空间",
-            "kind": "establish"
+            "kind": "establish",
+            "assertions": [
+              "背景完整建立"
+            ]
           },
           {
+            "id": "proof-action",
             "at": 0.5,
             "label": "主体进入画面",
-            "kind": "peak"
+            "kind": "peak",
+            "assertions": [
+              "主体位于画面中央"
+            ]
           },
           {
+            "id": "proof-final",
             "at": 0.9,
             "label": "标题与主体稳定",
-            "kind": "final"
+            "kind": "final",
+            "assertions": [
+              "主体与标题构图稳定"
+            ]
+          }
+        ]
+      },
+      "composition": {
+        "coordinateSpace": {
+          "width": 1920,
+          "height": 1080
+        },
+        "nodes": [
+          {
+            "id": "background",
+            "kind": "asset",
+            "assetRole": "background",
+            "src": "projects/starter-demo/assets/plates/01-bg.png",
+            "z": 0,
+            "transform": {
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "anchorX": 0,
+              "anchorY": 0
+            },
+            "motion": {
+              "keyframes": [
+                {
+                  "at": 0,
+                  "scale": 1
+                },
+                {
+                  "at": 1,
+                  "scale": 1.015,
+                  "ease": "ease-in-out"
+                }
+              ]
+            }
+          },
+          {
+            "id": "traveler",
+            "kind": "asset",
+            "assetRole": "character",
+            "src": "projects/starter-demo/assets/characters/alpha/01-traveler.png",
+            "z": 4,
+            "transform": {
+              "x": 0,
+              "y": 0,
+              "width": 1,
+              "height": 1,
+              "anchorX": 0,
+              "anchorY": 0
+            },
+            "motion": {
+              "idle": {
+                "preset": "breathe",
+                "intensity": 0.5,
+                "cycleSeconds": 2.8
+              },
+              "keyframes": [
+                {
+                  "at": 0,
+                  "x": -0.01,
+                  "opacity": 0.72,
+                  "ease": "ease-out"
+                },
+                {
+                  "at": 0.5,
+                  "x": 0.003,
+                  "scale": 1.03,
+                  "opacity": 1,
+                  "ease": "ease-in-out"
+                },
+                {
+                  "at": 1,
+                  "x": 0,
+                  "scale": 1,
+                  "opacity": 1,
+                  "ease": "ease-out"
+                }
+              ]
+            }
           }
         ]
       },
@@ -108,47 +198,6 @@
         "durationSeconds": 1,
         "text": ""
       },
-      "layers": [
-        {
-          "id": "traveler",
-          "src": "projects/starter-demo/assets/characters/alpha/01-traveler.png",
-          "role": "primary",
-          "x": 0,
-          "bottom": 0,
-          "width": 1920,
-          "z": 4,
-          "delaySeconds": 0,
-          "enterFrom": "left",
-          "motion": {
-            "idle": "breathe",
-            "intensity": 0.5,
-            "cycleSeconds": 2.8,
-            "enterDurationSeconds": 1,
-            "keyframes": [
-              {
-                "at": 0,
-                "x": -18,
-                "opacity": 0.72,
-                "ease": "ease-out"
-              },
-              {
-                "at": 0.5,
-                "x": 6,
-                "scale": 1.03,
-                "opacity": 1,
-                "ease": "ease-in-out"
-              },
-              {
-                "at": 1,
-                "x": 0,
-                "scale": 1,
-                "opacity": 1,
-                "ease": "ease-out"
-              }
-            ]
-          }
-        }
-      ],
       "subtitles": [
         {
           "fromSeconds": 0,

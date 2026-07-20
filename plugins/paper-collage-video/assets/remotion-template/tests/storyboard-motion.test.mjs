@@ -26,15 +26,21 @@ const readyStoryboard = () => ({
       message: 'A subject enters a layered world.',
       blueprint: 'layered-reveal',
       estimatedDurationSeconds: 6,
+      compositionPlan: {
+        patterns: ['supported-subject'],
+        relationships: [
+          {id: 'subject-on-stage', subject: 'subject', predicate: 'on', object: 'stage', proof: 'The subject visibly contacts the stage'},
+        ],
+      },
       beats: [
         {id: 'establish', at: 0, purpose: 'place', visual: 'Empty paper world', motion: 'Reveal the scene', audioCue: null},
         {id: 'action', at: 0.48, purpose: 'act', visual: 'Subject rises', motion: 'Lift the subject', audioCue: 'paper lift'},
         {id: 'settle', at: 0.9, purpose: 'resolve', visual: 'Composition locks', motion: 'Settle the subject', audioCue: null},
       ],
       proofTimes: [
-        {at: 0.08, label: 'World established', kind: 'establish'},
-        {at: 0.5, label: 'Action peaks', kind: 'peak'},
-        {at: 0.9, label: 'Composition resolves', kind: 'final'},
+        {id: 'proof-establish', at: 0.08, label: 'World established', kind: 'establish', assertions: ['The stage is readable']},
+        {id: 'proof-action', at: 0.5, label: 'Action peaks', kind: 'peak', assertions: ['The subject contacts the stage']},
+        {id: 'proof-final', at: 0.9, label: 'Composition resolves', kind: 'final', assertions: ['The final relationship is stable']},
       ],
     },
   ],
@@ -72,6 +78,7 @@ test('ready storyboards require ordered beats, final proof, and plan alignment',
     title: 'The reveal',
     narrativeRole: 'setup',
     blueprint: 'layered-reveal',
+    patterns: ['supported-subject'],
     beatCount: 3,
     proofCount: 3,
   });
@@ -79,9 +86,11 @@ test('ready storyboards require ordered beats, final proof, and plan alignment',
   const invalid = readyStoryboard();
   invalid.scenes[0].beats[1].at = 0;
   invalid.scenes[0].proofTimes[2] = {
+    id: 'proof-final',
     at: 0.7,
     label: 'Too early',
     kind: 'final',
+    assertions: ['Too early'],
   };
   const issues = validateStoryboard(invalid, {
     slug: 'rhythm-test',

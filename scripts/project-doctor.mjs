@@ -63,6 +63,8 @@ const packageFile = path.join(ROOT, 'package.json');
 const requiredWorkspaceScripts = [
   'project:new',
   'project:resume',
+  'project:composition-proof',
+  'project:quality',
   'project:preview',
   'project:render',
 ];

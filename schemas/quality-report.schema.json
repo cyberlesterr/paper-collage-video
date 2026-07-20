@@ -1,14 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://local.paper-collage.dev/quality-report.schema.json",
-  "title": "Paper Collage Asset Quality Report",
+  "title": "Paper Collage Asset and Composite Quality Report",
   "type": "object",
-  "required": ["schemaVersion", "projectSlug", "updatedAt", "assets"],
+  "required": ["schemaVersion", "projectSlug", "updatedAt", "cueEvents", "assets", "composites"],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 1},
+    "schemaVersion": {"const": 2},
     "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "updatedAt": {"type": "string", "format": "date-time"},
+    "cueEvents": {"type": "array", "items": {"type": "object"}},
     "assets": {
       "type": "array",
       "items": {
@@ -17,9 +18,36 @@
         "properties": {
           "assetId": {"type": "string", "minLength": 1},
           "file": {"type": "string", "minLength": 1},
-          "kind": {"enum": ["background", "environment", "character", "character-sheet", "style-sample", "image"]},
+          "kind": {"enum": ["background", "environment", "character", "prop", "decorative", "character-sheet", "style-sample", "image"]},
           "sources": {"type": "array", "items": {"type": "string"}},
           "sha256": {"type": ["string", "null"]},
+          "requiredChecks": {"type": "array", "items": {"type": "string"}},
+          "technical": {"type": "object"},
+          "semanticChecks": {"type": "object"},
+          "status": {"enum": ["pending", "passed", "needs-revision"]},
+          "reviewer": {"type": ["string", "null"]},
+          "reviewedAt": {"type": ["string", "null"]},
+          "note": {"type": "string"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "composites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["compositeId", "sceneId", "pattern", "nodeId", "memberNodeIds", "memberHashes", "compositionHash", "fingerprint", "proofTimeIds", "proofFrames", "requiredChecks", "technical", "semanticChecks", "status", "reviewer", "reviewedAt", "note"],
+        "properties": {
+          "compositeId": {"type": "string", "minLength": 1},
+          "sceneId": {"type": "string", "minLength": 1},
+          "pattern": {"enum": ["supported-subject", "registered-environment", "cue"]},
+          "nodeId": {"type": "string", "minLength": 1},
+          "memberNodeIds": {"type": "array", "items": {"type": "string"}},
+          "memberHashes": {"type": "object", "additionalProperties": {"type": ["string", "null"]}},
+          "compositionHash": {"type": "string", "minLength": 1},
+          "fingerprint": {"type": "string", "minLength": 1},
+          "proofTimeIds": {"type": "array", "items": {"type": "string"}},
+          "proofFrames": {"type": "array", "items": {"type": "object"}},
           "requiredChecks": {"type": "array", "items": {"type": "string"}},
           "technical": {"type": "object"},
           "semanticChecks": {"type": "object"},

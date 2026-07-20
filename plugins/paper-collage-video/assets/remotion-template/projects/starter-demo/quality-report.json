@@ -1,15 +1,16 @@
 {
   "$schema": "../../schemas/quality-report.schema.json",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "projectSlug": "starter-demo",
   "updatedAt": "2026-01-01T00:00:00.000Z",
+  "cueEvents": [],
   "assets": [
     {
       "assetId": "runtime-35227d004842",
       "file": "public/projects/starter-demo/assets/plates/01-bg.png",
       "kind": "background",
       "sources": [
-        "scene:starter:background"
+        "scene:starter:node:background"
       ],
       "sha256": "8b281acc2007312e394832a74ece76229b8c049d48a46c82f4377409a44a0d57",
       "requiredChecks": [
@@ -40,7 +41,7 @@
       "file": "public/projects/starter-demo/assets/characters/alpha/01-traveler.png",
       "kind": "character",
       "sources": [
-        "scene:starter:layer:traveler"
+        "scene:starter:node:traveler"
       ],
       "sha256": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f",
       "requiredChecks": [
@@ -64,5 +65,6 @@
       "reviewedAt": "2026-01-01T00:00:00.000Z",
       "note": "Repository-owned technical fixture"
     }
-  ]
+  ],
+  "composites": []
 }

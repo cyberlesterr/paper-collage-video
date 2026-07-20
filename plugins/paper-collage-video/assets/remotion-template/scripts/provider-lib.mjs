@@ -10,6 +10,9 @@ export const PROVIDER_SCOPES = ['project', 'workspace'];
 const IMAGE_QUALITY_KINDS = [
   'background',
   'environment',
+  'character',
+  'prop',
+  'decorative',
   'character-sheet',
   'style-sample',
   'image',
@@ -50,6 +53,7 @@ export const createRequestFingerprint = ({request, providerId, model}) => {
     model: model ?? request.model ?? null,
     settings: request.settings ?? {},
     quality: request.quality ?? null,
+    compositionBinding: request.compositionBinding ?? null,
     providerId,
   };
   return createHash('sha256')
@@ -501,13 +505,16 @@ export const resolveWorkspacePath = (input, label = '路径') => {
 
 export const validateAssetRequest = (request) => {
   const errors = [];
-  if (request?.schemaVersion !== 1) errors.push('schemaVersion 必须为 1');
+  if (request?.schemaVersion !== 2) errors.push('schemaVersion 必须为 2');
   if (!SLUG_PATTERN.test(request?.projectSlug ?? '')) errors.push('projectSlug 格式无效');
   if (!SLUG_PATTERN.test(request?.assetId ?? '')) errors.push('assetId 格式无效');
   if (!PROVIDER_CAPABILITIES.includes(request?.capability)) errors.push('capability 必须是 text、image 或 voice');
   if (!request?.output || typeof request.output !== 'string') errors.push('output 不能为空');
   if (request?.capability === 'text' && !request.prompt) errors.push('text request 缺少 prompt');
   if (request?.capability === 'image' && !request.prompt) errors.push('image request 缺少 prompt');
+  if (request?.capability === 'image' && !isPlainObject(request.compositionBinding)) {
+    errors.push('image request 缺少 compositionBinding');
+  }
   if (request?.capability === 'voice' && !request.text) errors.push('voice request 缺少 text');
   if (request?.quality !== undefined) {
     if (request.capability !== 'image') {
@@ -529,6 +536,15 @@ export const validateAssetRequest = (request) => {
     ) {
       errors.push('quality.requiredChecks 含未知检查或为空');
     }
+  }
+  if (request?.compositionBinding !== undefined) {
+    if (request.capability !== 'image') errors.push('只有 image request 可以声明 compositionBinding');
+    const binding = request.compositionBinding;
+    if (!binding.sceneId || !binding.nodeId || !binding.outputRole) errors.push('compositionBinding 缺少 sceneId、nodeId 或 outputRole');
+    if (!['free', 'supported-subject', 'registered-environment'].includes(binding.pattern)) errors.push('compositionBinding.pattern 无效');
+    if (!Number.isInteger(binding.canvas?.width) || binding.canvas.width < 1 || !Number.isInteger(binding.canvas?.height) || binding.canvas.height < 1) errors.push('compositionBinding.canvas 无效');
+    if (!['provider-generation', 'provider-edit', 'alpha-extraction', 'crop', 'mask-application', 'manual-import'].includes(binding.derivation?.method)) errors.push('compositionBinding.derivation.method 无效');
+    if (['supported-subject', 'registered-environment'].includes(binding.pattern) && (!binding.registrationId || !binding.sourceMasterAssetId)) errors.push('耦合素材必须声明 registrationId 和 sourceMasterAssetId');
   }
   if (errors.length) throw new Error(`资产请求无效：${errors.join('；')}`);
   return request;
@@ -607,15 +623,15 @@ export const recordAssetProvenance = async ({
     ? await readJson(manifestFile)
     : {
         $schema: '../../schemas/assets-manifest.schema.json',
-        schemaVersion: 2,
+        schemaVersion: 3,
         projectSlug: request.projectSlug,
         assets: [],
       };
   if (manifest.projectSlug !== request.projectSlug || !Array.isArray(manifest.assets)) {
     throw new Error(`资产清单无效：${path.relative(ROOT, manifestFile)}`);
   }
-  if (manifest.schemaVersion !== 2) {
-    throw new Error('assets-manifest.json 必须使用 schemaVersion 2；请重新创建项目。');
+  if (manifest.schemaVersion !== 3) {
+    throw new Error('assets-manifest.json 必须使用 schemaVersion 3；请重新创建项目。');
   }
   const actualModel = model || request.model || provider.model || null;
   const record = {
@@ -637,11 +653,37 @@ export const recordAssetProvenance = async ({
     sizeBytes: stat.size,
     recordedAt: new Date().toISOString(),
     request: {...request},
+    compositionBinding: request.compositionBinding ?? null,
+    familyFingerprint: null,
   };
   manifest.assets = [
     ...manifest.assets.filter(({assetId}) => assetId !== request.assetId),
     record,
   ];
+  const familyKey = (asset) => {
+    const binding = asset.compositionBinding;
+    if (!binding) return null;
+    return [
+      binding.pattern,
+      binding.registrationId ?? asset.assetId,
+      binding.sourceMasterAssetId ?? asset.assetId,
+      binding.canvas?.width,
+      binding.canvas?.height,
+    ].join(':');
+  };
+  const familyKeys = new Set(manifest.assets.map(familyKey).filter(Boolean));
+  for (const key of familyKeys) {
+    const members = manifest.assets
+      .filter((asset) => familyKey(asset) === key)
+      .sort((left, right) => left.assetId.localeCompare(right.assetId));
+    const familyFingerprint = createHash('sha256')
+      .update(JSON.stringify(stableValue({
+        key,
+        members: members.map(({assetId, sha256: memberSha256, requestFingerprint, compositionBinding}) => ({assetId, sha256: memberSha256, requestFingerprint, compositionBinding})),
+      })))
+      .digest('hex');
+    for (const member of members) member.familyFingerprint = familyFingerprint;
+  }
   await writeJson(manifestFile, manifest);
   return {manifestFile, record};
 };

@@ -43,9 +43,10 @@ The storyboard is not another human gate. It is part of the existing combined co
 
 - Give the whole film one explicit arc and one shared visual/motion language.
 - Give each planned scene a narrative role, single message, blueprint, estimated duration, and at least three ordered beats.
+- Add `compositionPlan.patterns` plus named relationships. Use `supported-subject` for persistent contact (`inside`, `on`, `held-by`, `worn-by`), `registered-environment` for a shared shoreline/horizon/tabletop/wall edge, and `free` only when no persistent contact or semantic boundary exists.
 - Use normalized beat time (`at=0..1`) so rhythm survives narration resync.
 - Choose one of the bounded blueprints: `layered-reveal`, `map-journey`, `archive-stack`, `character-procession`, `discovery-wipe`, `transformation-tableau`, `chapter-tableau`, or `quiet-lockup`.
-- Define at least three proof moments per scene: an establishing state, an action/peak state, and a `final` state at or after `0.82`.
+- Define at least three proof moments per scene: an establishing state, an action/peak state, and a `final` state at or after `0.82`. Every proof needs a stable id and visible relationship assertions; describe what the pixels must prove, not merely what occurs.
 - Keep proof moments outside the scene's fade-in/fade-out interval so every sampled frame clearly proves the intended composition.
 - If a beat names an `audioCue`, production must attach a real sound asset to its matching cue.
 

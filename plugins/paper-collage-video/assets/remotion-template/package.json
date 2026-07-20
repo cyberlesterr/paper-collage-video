@@ -37,6 +37,7 @@
     "project:storyboard": "node scripts/project-storyboard.mjs",
     "project:confirm-concept": "node scripts/project-confirm-concept.mjs",
     "project:quality": "node scripts/project-quality.mjs",
+    "project:composition-proof": "node scripts/project-composition-proof.mjs",
     "project:resume": "node scripts/project-status.mjs --resume-json",
     "project:status": "node scripts/project-status.mjs",
     "project:handoff-check": "node scripts/project-handoff-check.mjs",
