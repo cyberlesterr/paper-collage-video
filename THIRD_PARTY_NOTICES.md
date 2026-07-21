@@ -4,7 +4,7 @@ Paper Collage Video 使用多个独立维护的第三方组件。本文件提供
 
 ## Remotion
 
-本项目固定使用 `remotion` 和 `@remotion/cli` `4.0.489`。Remotion 使用自己的特殊许可证，而不是 MIT、Apache-2.0 等常见开源许可证。
+本项目固定使用 `remotion` 和 `@remotion/cli` `4.0.490`。Remotion 使用自己的特殊许可证，而不是 MIT、Apache-2.0 等常见开源许可证。
 
 根据当前 Remotion 4 许可证，个人、非营利组织、员工不超过 3 人的营利组织以及非商业评估通常可以免费使用；不符合免费条件的营利组织需要购买 Company License。Remotion 还限制以销售、出租或再许可 Remotion 衍生产品为目的复制或修改 Remotion 本身。
 

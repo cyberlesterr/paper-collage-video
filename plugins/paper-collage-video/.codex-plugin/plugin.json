@@ -1,6 +1,6 @@
 {
   "name": "paper-collage-video",
-  "version": "0.8.0-dev.2",
+  "version": "0.8.0",
   "description": "Create editable paper-collage videos with approved rhythmic storyboards, semantic identity and mechanism contracts, layered keyframe motion, proof-time validation, and a self-contained Remotion workspace.",
   "author": {
     "name": "Paper Collage Video Contributors"
