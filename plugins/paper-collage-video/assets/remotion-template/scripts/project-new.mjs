@@ -32,12 +32,15 @@ try {
   const templateFiles = [
     'assets-manifest.json',
     'brief.md',
+    'generation-attempts.jsonl',
     'project.json',
     'production.json',
     'prompts.json',
     'providers.json',
     'quality-report.json',
     'review.md',
+    'semantic-contracts.json',
+    'storyboard.json',
   ];
   const publicDirectories = [
     'assets/style',
@@ -82,7 +85,7 @@ try {
   }
 
   console.log('✓ 项目骨架已创建');
-  console.log(`下一步：运行 provider:status -- ${slug} --json，检测并确认 text/image/voice provider。`);
+  console.log(`下一步：运行 project:plan，再编排 storyboard；随后一次确认概念、预算与 provider。`);
 } catch (error) {
   console.error(`project:new failed: ${error.message}`);
   process.exitCode = 1;

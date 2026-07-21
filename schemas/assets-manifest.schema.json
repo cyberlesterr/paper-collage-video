@@ -6,13 +6,13 @@
   "required": ["schemaVersion", "projectSlug", "assets"],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 2},
+    "schemaVersion": {"const": 3},
     "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "assets": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["assetId", "capability", "file", "provider", "adapter", "requestFingerprint", "reusedFrom", "sha256", "sizeBytes", "recordedAt", "request"],
+        "required": ["assetId", "capability", "file", "provider", "adapter", "requestFingerprint", "reusedFrom", "sha256", "sizeBytes", "recordedAt", "request", "compositionBinding", "familyFingerprint"],
         "properties": {
           "assetId": {"type": "string"},
           "capability": {"enum": ["text", "image", "voice"]},
@@ -22,12 +22,26 @@
           "tool": {"type": ["string", "null"]},
           "model": {"type": ["string", "null"]},
           "externalId": {"type": ["string", "null"]},
+          "attemptId": {"type": ["string", "null"]},
           "requestFingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
           "reusedFrom": {"type": ["string", "null"]},
           "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
           "sizeBytes": {"type": "integer", "minimum": 1},
+          "media": {
+            "type": ["object", "null"],
+            "properties": {
+              "width": {"type": "integer", "minimum": 1},
+              "height": {"type": "integer", "minimum": 1},
+              "format": {"type": ["string", "null"]},
+              "hasAlpha": {"type": "boolean"}
+            },
+            "additionalProperties": false
+          },
           "recordedAt": {"type": "string", "format": "date-time"},
-          "request": {"type": "object"}
+          "request": {"type": "object"},
+          "compositionBinding": {"type": ["object", "null"]},
+          "semanticBinding": {"type": ["object", "null"]},
+          "familyFingerprint": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"}
         },
         "additionalProperties": false
       }

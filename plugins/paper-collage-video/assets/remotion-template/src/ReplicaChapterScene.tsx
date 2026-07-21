@@ -11,549 +11,338 @@ import {
   useVideoConfig,
 } from 'remotion';
 import type {
-  CharacterLayer,
-  EnvironmentLayer,
+  CompositionAssetNode,
+  CompositionBoundary,
+  CompositionGroupNode,
+  CompositionNode,
+  CoordinateSpace,
   NormalizedProjectScene,
-  ProjectSound,
-  ProjectAudioEvent,
-  ProjectTheme,
   NormalizedSubtitleCue,
+  ProjectCue,
+  ProjectTheme,
 } from './project';
-import {roleMotion, type Role} from './roleMotion';
+import {resolveCueState, resolveIdleState, resolveMotionState} from './motion';
 
 const clamp = {
   extrapolateLeft: 'clamp',
   extrapolateRight: 'clamp',
 } as const;
 
-const backgroundStyle: CSSProperties = {
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
+const phaseFor = (id: string, seed: number) => {
+  let value = seed >>> 0;
+  for (const character of id) value = Math.imul(value ^ character.charCodeAt(0), 16777619);
+  return (value >>> 0) / 0xffffffff * Math.PI * 2;
 };
 
-const Character = ({
-  layer,
+const slotOrder = (node: CompositionNode) => {
+  if (node.kind !== 'asset') return node.z;
+  const fixed = {
+    'support-rear': -30,
+    'contact-shadow': -20,
+    subject: -10,
+    'support-front': 0,
+  } as Record<string, number>;
+  return fixed[node.slot ?? ''] ?? node.z;
+};
+
+const composeNodeTransform = ({
+  node,
+  parent,
+  progress,
+  frame,
+  fps,
+  cues,
+  durationSeconds,
+  seed,
+}: {
+  node: CompositionNode;
+  parent: CoordinateSpace;
+  progress: number;
+  frame: number;
+  fps: number;
+  cues: ProjectCue[];
+  durationSeconds: number;
+  seed: number;
+}) => {
+  const authored = resolveMotionState(node.motion.keyframes, progress);
+  const idle = resolveIdleState({
+    idle: node.motion.idle,
+    frame,
+    fps,
+    phase: phaseFor(node.id, seed),
+  });
+  const cue = resolveCueState({cues, targetId: node.id, progress, durationSeconds});
+  const transform = node.transform;
+  const width = transform.width * parent.width;
+  const height = transform.height === undefined ? undefined : transform.height * parent.height;
+  return {
+    left: transform.x * parent.width,
+    top: transform.y * parent.height,
+    width,
+    height,
+    opacity: (transform.opacity ?? 1) * authored.opacity * idle.opacity * cue.opacity,
+    css: `translate(${-transform.anchorX * 100}%, ${-transform.anchorY * 100}%) translate3d(${(authored.x + idle.x + cue.x) * parent.width}px, ${(authored.y + idle.y + cue.y) * parent.height}px, 0) scale(${(transform.scale ?? 1) * authored.scale * idle.scale * cue.scale}) rotate(${(transform.rotation ?? 0) + authored.rotation + idle.rotation + cue.rotation}deg)`,
+  };
+};
+
+const clipStyle = ({
+  node,
+  boundaries,
+}: {
+  node: CompositionAssetNode;
+  boundaries: CompositionBoundary[];
+}): CSSProperties => {
+  if (!node.clip) return {};
+  const boundary = boundaries.find(({id}) => id === node.clip?.boundaryId);
+  if (!boundary) return {};
+  const maskSrc = node.clip.side === 'upper' ? boundary.upperMaskSrc : boundary.lowerMaskSrc;
+  if (maskSrc) {
+    const url = `url(${staticFile(maskSrc)})`;
+    return {
+      maskImage: url,
+      WebkitMaskImage: url,
+      maskSize: '100% 100%',
+      WebkitMaskSize: '100% 100%',
+      maskRepeat: 'no-repeat',
+      WebkitMaskRepeat: 'no-repeat',
+    };
+  }
+  const y = boundary.normalizedY ?? 0.5;
+  return node.clip.side === 'upper'
+    ? {clipPath: `inset(0 0 ${(1 - y) * 100}% 0)`}
+    : {clipPath: `inset(${y * 100}% 0 0 0)`};
+};
+
+const AssetView = ({
+  node,
+  parent,
+  boundaries,
+  progress,
+  frame,
+  fps,
+  cues,
+  durationSeconds,
+  seed,
+  renderZ,
   paperEdge,
 }: {
-  layer: CharacterLayer;
+  node: CompositionAssetNode;
+  parent: CoordinateSpace;
+  boundaries: CompositionBoundary[];
+  progress: number;
+  frame: number;
+  fps: number;
+  cues: ProjectCue[];
+  durationSeconds: number;
+  seed: number;
+  renderZ: number;
   paperEdge: string;
 }) => {
-  const frame = useCurrentFrame();
-  const {fps, width, height} = useVideoConfig();
-  const landscape = width / height >= 1;
-  const layoutScale = Math.min(
-    width / (landscape ? 1920 : 1080),
-    height / (landscape ? 1080 : 1920),
-  );
-  const motion = roleMotion[layer.role];
-  const layerMotion = layer.motion;
-  const delay = Math.round(layer.delaySeconds * fps);
-  const entrance = spring({
-    fps,
-    frame: frame - delay,
-    config: {
-      damping: layer.role === 'primary' ? 14 : 18,
-      mass: layer.role === 'primary' ? 0.85 : 0.7,
-      stiffness: layer.role === 'primary' ? 105 : 120,
-    },
-    durationInFrames: Math.max(
-      1,
-      Math.round(layerMotion.enterDurationSeconds * fps),
-    ),
-  });
-  const direction = layer.enterFrom === 'left' ? -1 : 1;
-  const xOffset =
-    layer.enterFrom === 'bottom'
-      ? 0
-      : (1 - entrance) * motion.distance * direction;
-  const elapsed = Math.max(0, frame - delay);
-  const cycleFrames = Math.max(1, layerMotion.cycleSeconds * fps);
-  const wave = Math.sin(
-    (elapsed / cycleFrames) * Math.PI * 2 + (layerMotion.phase ?? layer.z * 0.7),
-  );
-  const intensity = layerMotion.intensity;
-  const idle = layerMotion.idle;
-  const idleX =
-    idle === 'grind'
-      ? wave * 11 * intensity * layoutScale
-      : idle === 'drift'
-        ? wave * 5 * intensity * layoutScale
-        : 0;
-  const idleY =
-    idle === 'float'
-      ? wave * (layer.role === 'primary' ? 2.2 : 1.4) * intensity * layoutScale
-      : idle === 'drift'
-        ? Math.cos((elapsed / cycleFrames) * Math.PI * 2) * 2.5 * intensity * layoutScale
-        : 0;
-  const idleScale = idle === 'breathe' ? 1 + wave * 0.008 * intensity : 1;
-  const idleRotation = idle === 'grind' ? wave * 0.55 * intensity : 0;
-  const yOffset = (1 - entrance) * motion.rise * layoutScale + idleY;
-  const scale =
-    (motion.startScale + (1 - motion.startScale) * entrance) * idleScale;
-  const cutoutFilter = `
-    drop-shadow(4px 0 ${paperEdge})
-    drop-shadow(-4px 0 ${paperEdge})
-    drop-shadow(0 4px ${paperEdge})
-    drop-shadow(0 18px 9px rgba(20,15,12,.32))
-  `;
-
+  const resolved = composeNodeTransform({node, parent, progress, frame, fps, cues, durationSeconds, seed});
+  const cutout = ['character', 'prop'].includes(node.assetRole) || node.slot?.startsWith('support');
   return (
     <div
+      data-composition-node={node.id}
+      data-composition-kind="asset"
       style={{
         position: 'absolute',
-        left: layer.x,
-        bottom: layer.bottom,
-        width: layer.width,
-        zIndex: layer.z,
-        opacity: entrance,
-        transform: `translate3d(${xOffset * layoutScale + idleX}px, ${yOffset}px, 0) scale(${scale}) rotate(${idleRotation}deg)`,
-        transformOrigin: '50% 100%',
-        filter: cutoutFilter,
+        left: resolved.left,
+        top: resolved.top,
+        width: resolved.width,
+        ...(resolved.height === undefined ? {} : {height: resolved.height}),
+        zIndex: renderZ,
+        opacity: resolved.opacity,
+        transform: resolved.css,
+        transformOrigin: `${node.transform.anchorX * 100}% ${node.transform.anchorY * 100}%`,
+        filter: cutout
+          ? `drop-shadow(3px 0 ${paperEdge}) drop-shadow(-3px 0 ${paperEdge}) drop-shadow(0 10px 7px rgba(20,15,12,.28))`
+          : undefined,
+        ...clipStyle({node, boundaries}),
       }}
     >
-      <Img alt="" src={staticFile(layer.src)} style={{display: 'block', width: '100%'}} />
+      <Img
+        alt=""
+        src={staticFile(node.src)}
+        style={{display: 'block', width: '100%', height: resolved.height === undefined ? 'auto' : '100%', objectFit: 'contain'}}
+      />
     </div>
   );
 };
 
-const Subtitle = ({
+const GroupView = ({
+  node,
+  parent,
+  progress,
+  frame,
+  fps,
   cues,
-  theme,
+  durationSeconds,
+  seed,
+  renderZ,
+  paperEdge,
 }: {
-  cues: NormalizedSubtitleCue[];
-  theme: ProjectTheme;
+  node: CompositionGroupNode;
+  parent: CoordinateSpace;
+  progress: number;
+  frame: number;
+  fps: number;
+  cues: ProjectCue[];
+  durationSeconds: number;
+  seed: number;
+  renderZ: number;
+  paperEdge: string;
 }) => {
+  const resolved = composeNodeTransform({node, parent, progress, frame, fps, cues, durationSeconds, seed});
+  const ratio = node.coordinateSpace.height / node.coordinateSpace.width;
+  const height = resolved.height ?? resolved.width * ratio;
+  return (
+    <div
+      data-composition-node={node.id}
+      data-composition-kind={node.pattern}
+      style={{
+        position: 'absolute',
+        left: resolved.left,
+        top: resolved.top,
+        width: resolved.width,
+        height,
+        zIndex: renderZ,
+        opacity: resolved.opacity,
+        transform: resolved.css,
+        transformOrigin: `${node.transform.anchorX * 100}% ${node.transform.anchorY * 100}%`,
+      }}
+    >
+      {[...node.children]
+        .sort((left, right) => slotOrder(left) - slotOrder(right))
+        .map((child) => (
+          <CompositionNodeView
+            key={child.id}
+            node={child}
+            parent={{width: resolved.width, height}}
+            boundaries={node.boundaries ?? []}
+            progress={progress}
+            frame={frame}
+            fps={fps}
+            cues={cues}
+            durationSeconds={durationSeconds}
+            seed={seed}
+            renderZ={node.pattern === 'supported-subject' ? slotOrder(child) : child.z}
+            paperEdge={paperEdge}
+          />
+        ))}
+    </div>
+  );
+};
+
+const CompositionNodeView = ({
+  node,
+  parent,
+  boundaries = [],
+  progress,
+  frame,
+  fps,
+  cues,
+  durationSeconds,
+  seed,
+  renderZ = node.z,
+  paperEdge,
+}: {
+  node: CompositionNode;
+  parent: CoordinateSpace;
+  boundaries?: CompositionBoundary[];
+  progress: number;
+  frame: number;
+  fps: number;
+  cues: ProjectCue[];
+  durationSeconds: number;
+  seed: number;
+  renderZ?: number;
+  paperEdge: string;
+}) =>
+  node.kind === 'group' ? (
+    <GroupView {...{node, parent, progress, frame, fps, cues, durationSeconds, seed, renderZ, paperEdge}} />
+  ) : (
+    <AssetView {...{node, parent, boundaries, progress, frame, fps, cues, durationSeconds, seed, renderZ, paperEdge}} />
+  );
+
+const Subtitle = ({cues, theme}: {cues: NormalizedSubtitleCue[]; theme: ProjectTheme}) => {
   const frame = useCurrentFrame();
   const {width, height} = useVideoConfig();
-  const landscape = width / height >= 1;
-  const layoutScale = Math.min(
-    width / (landscape ? 1920 : 1080),
-    height / (landscape ? 1080 : 1920),
-  );
+  const scale = Math.min(width / 1920, height / 1080);
   const cue = cues.find(({from, to}) => frame >= from && frame < to);
   if (!cue) return null;
-
-  const opacity = interpolate(
-    frame,
-    [cue.from, cue.from + 6, cue.to - 6, cue.to],
-    [0, 1, 1, 0],
-    clamp,
-  );
-
+  const opacity = interpolate(frame, [cue.from, cue.from + 6, cue.to - 6, cue.to], [0, 1, 1, 0], clamp);
   return (
-    <div
-      style={{
-        position: 'absolute',
-        zIndex: 100,
-        left: (landscape ? 210 : 72) * layoutScale,
-        right: (landscape ? 210 : 72) * layoutScale,
-        bottom: (landscape ? 58 : 140) * layoutScale,
-        textAlign: 'center',
-        opacity,
-        color: theme.subtitle,
-        fontFamily: theme.fontFile
-          ? 'PaperCollageProjectFont, serif'
-          : (theme.fontFamily ??
-            'STKaiti, KaiTi, "Noto Serif SC", serif'),
-        fontWeight: 700,
-        fontSize: 42 * layoutScale,
-        letterSpacing: 2 * layoutScale,
-        lineHeight: 1.35,
-        textShadow:
-          '0 3px 2px rgba(28,15,10,.9), 0 0 14px rgba(28,15,10,.78)',
-      }}
-    >
-      <span
-        style={{
-          display: 'inline-block',
-          padding: `${12 * layoutScale}px ${32 * layoutScale}px ${14 * layoutScale}px`,
-          background: theme.subtitleBackground,
-          border: '1px solid rgba(244, 222, 174, .42)',
-          boxShadow: '0 8px 24px rgba(40, 16, 10, .22)',
-        }}
-      >
-        {cue.text}
-      </span>
+    <div style={{position: 'absolute', zIndex: 100, left: 210 * scale, right: 210 * scale, bottom: 58 * scale, textAlign: 'center', opacity, color: theme.subtitle, fontFamily: theme.fontFile ? 'PaperCollageProjectFont, serif' : (theme.fontFamily ?? 'STKaiti, KaiTi, "Noto Serif SC", serif'), fontWeight: 700, fontSize: 42 * scale, letterSpacing: 2 * scale, lineHeight: 1.35, textShadow: '0 3px 2px rgba(28,15,10,.9), 0 0 14px rgba(28,15,10,.78)'}}>
+      <span style={{display: 'inline-block', padding: `${12 * scale}px ${32 * scale}px ${14 * scale}px`, background: theme.subtitleBackground, border: '1px solid rgba(244, 222, 174, .42)', boxShadow: '0 8px 24px rgba(40, 16, 10, .22)'}}>{cue.text}</span>
     </div>
   );
 };
 
-const ChapterLabel = ({
-  eyebrow,
-  label,
-  theme,
-}: Pick<NormalizedProjectScene, 'eyebrow' | 'label'> & {
-  theme: ProjectTheme;
-}) => {
+const ChapterLabel = ({eyebrow, label, theme}: Pick<NormalizedProjectScene, 'eyebrow' | 'label'> & {theme: ProjectTheme}) => {
   const frame = useCurrentFrame();
   const {fps, width, height} = useVideoConfig();
-  const landscape = width / height >= 1;
-  const layoutScale = Math.min(
-    width / (landscape ? 1920 : 1080),
-    height / (landscape ? 1080 : 1920),
-  );
-  const enter = spring({
-    frame,
-    fps,
-    config: {damping: 20, stiffness: 90},
-  });
-  const opacity = interpolate(
-    frame,
-    [0, Math.round(0.4 * fps), Math.round(3 * fps), Math.round(3.93 * fps)],
-    [0, 1, 1, 0],
-    clamp,
-  );
-
+  const scale = Math.min(width / 1920, height / 1080);
+  const enter = spring({frame, fps, config: {damping: 20, stiffness: 90}});
+  const opacity = interpolate(frame, [0, Math.round(0.4 * fps), Math.round(3 * fps), Math.round(3.93 * fps)], [0, 1, 1, 0], clamp);
   return (
-    <div
-      style={{
-        position: 'absolute',
-        zIndex: 70,
-        top: (landscape ? 72 : 104) * layoutScale,
-        left: (landscape ? 92 : 64) * layoutScale,
-        opacity,
-        transform: `translateX(${(1 - enter) * -42}px)`,
-        color: theme.ink,
-        fontFamily: theme.fontFile
-          ? 'PaperCollageProjectFont, serif'
-          : (theme.fontFamily ??
-            'STKaiti, KaiTi, "Noto Serif SC", serif'),
-      }}
-    >
-      <div
-        style={{
-          fontSize: 22 * layoutScale,
-          letterSpacing: 8 * layoutScale,
-          color: theme.accent,
-        }}
-      >
-        {eyebrow}
-      </div>
-      <div
-        style={{
-          marginTop: 10 * layoutScale,
-          fontSize: (landscape ? 51 : 44) * layoutScale,
-          fontWeight: 700,
-          letterSpacing: 7 * layoutScale,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          width: 270 * layoutScale * enter,
-          height: 4 * layoutScale,
-          marginTop: 13 * layoutScale,
-          background: `linear-gradient(90deg, ${theme.accent}, transparent)`,
-        }}
-      />
+    <div style={{position: 'absolute', zIndex: 70, top: 72 * scale, left: 92 * scale, opacity, transform: `translateX(${(1 - enter) * -42}px)`, color: theme.ink, fontFamily: theme.fontFile ? 'PaperCollageProjectFont, serif' : (theme.fontFamily ?? 'STKaiti, KaiTi, "Noto Serif SC", serif')}}>
+      <div style={{fontSize: 22 * scale, letterSpacing: 8 * scale, color: theme.accent}}>{eyebrow}</div>
+      <div style={{marginTop: 10 * scale, fontSize: 51 * scale, fontWeight: 700, letterSpacing: 7 * scale}}>{label}</div>
+      <div style={{width: 270 * scale * enter, height: 4 * scale, marginTop: 13 * scale, background: `linear-gradient(90deg, ${theme.accent}, transparent)`}} />
     </div>
   );
 };
 
-const ForegroundPaper = ({color}: {color: string}) => {
-  const frame = useCurrentFrame();
-  const {fps, width, height} = useVideoConfig();
-  const landscape = width / height >= 1;
-  const layoutScale = Math.min(
-    width / (landscape ? 1920 : 1080),
-    height / (landscape ? 1080 : 1920),
-  );
-  const drift = Math.sin(frame / Math.max(1, fps * 1.53)) * 5 * layoutScale;
-  return (
-    <>
-      <div
-        style={{
-          position: 'absolute',
-          zIndex: 9,
-          left: -70 * layoutScale + drift,
-          right: -70 * layoutScale - drift,
-          bottom: -45 * layoutScale,
-          height: 150 * layoutScale,
-          background: `linear-gradient(90deg, ${color}, color-mix(in srgb, ${color}, #d65a3d 36%) 44%, ${color})`,
-          clipPath:
-            'polygon(0 23%, 9% 10%, 18% 24%, 29% 7%, 42% 20%, 53% 4%, 64% 21%, 76% 8%, 89% 24%, 100% 10%, 100% 100%, 0 100%)',
-          opacity: 0.88,
-          filter: 'drop-shadow(0 -12px 12px rgba(48,23,18,.22))',
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          zIndex: 10,
-          right: 84 * layoutScale + drift * 1.5,
-          bottom: 88 * layoutScale,
-          width: 120 * layoutScale,
-          height: 42 * layoutScale,
-          background: 'rgba(231, 214, 171, .55)',
-          transform: 'rotate(-11deg)',
-          boxShadow: '0 5px 9px rgba(44,24,15,.16)',
-        }}
-      />
-    </>
-  );
-};
+const CueSounds = ({cues, durationInFrames}: {cues: ProjectCue[]; durationInFrames: number}) => (
+  <>
+    {cues.map((cue) => {
+      if (!cue.sound) return null;
+      const from = Math.min(durationInFrames - 1, Math.round(cue.at * durationInFrames));
+      return <Sequence key={`cue-sound-${cue.id}`} from={from} layout="none"><Audio src={staticFile(cue.sound.src)} volume={cue.sound.volume} /></Sequence>;
+    })}
+  </>
+);
 
-const EnvironmentCutout = ({
-  layer,
-  cameraX,
-  cameraY,
-  cameraZoom,
-}: {
-  layer: EnvironmentLayer;
-  cameraX: number;
-  cameraY: number;
-  cameraZoom: number;
-}) => {
-  const depthStrength = Math.max(-1, Math.min(1, layer.depth));
-  const parallax = 1 + depthStrength;
-  const style: CSSProperties = layer.width
-    ? {
-        position: 'absolute',
-        left: layer.x ?? 0,
-        top: layer.y ?? 0,
-        width: layer.width,
-      }
-    : {
-        position: 'absolute',
-        inset: 0,
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-      };
-  return (
-    <Img
-      alt=""
-      src={staticFile(layer.src)}
-      style={{
-        ...style,
-        zIndex: layer.z,
-        opacity: layer.opacity ?? 1,
-        transform: `translate3d(${cameraX * parallax}px, ${cameraY * parallax}px, 0) scale(${1 + (cameraZoom - 1) * (1 + depthStrength * 0.4)})`,
-        transformOrigin: '50% 54%',
-      }}
-    />
-  );
-};
-
-const RoleSounds = ({
-  layers,
-  roleSounds,
-}: {
-  layers: CharacterLayer[];
-  roleSounds: Partial<Record<Role, ProjectSound>>;
-}) => {
-  const {fps} = useVideoConfig();
-  return (
-    <>
-      {layers.map((layer) => {
-        const sound = roleSounds[layer.role];
-        if (!sound) return null;
-        const from = Math.round(layer.delaySeconds * fps);
-        return (
-          <Sequence key={`sound-${layer.id}`} from={from} layout="none">
-            <Audio src={staticFile(sound.src)} volume={sound.volume} />
-          </Sequence>
-        );
-      })}
-    </>
-  );
-};
-
-const AudioEvents = ({events}: {events: ProjectAudioEvent[]}) => {
-  const {fps} = useVideoConfig();
-  return (
-    <>
-      {events.map((event) => {
-        const from = Math.round(event.atSeconds * fps);
-        return (
-          <Sequence key={event.id} from={from} layout="none">
-            <Audio src={staticFile(event.src)} volume={event.volume} />
-          </Sequence>
-        );
-      })}
-    </>
-  );
-};
-
-const cameraDefaults = (
-  preset: NormalizedProjectScene['camera']['preset'],
-  intensity: number,
-) => {
+const cameraDefaults = (preset: NormalizedProjectScene['camera']['preset'], intensity: number) => {
   switch (preset) {
-    case 'pull':
-      return [
-        {at: 0, x: -4, y: 0, zoom: 1.03},
-        {at: 1, x: 5, y: 0, zoom: 1.01},
-      ];
-    case 'pan-left':
-      return [
-        {at: 0, x: 10 * intensity, y: 0, zoom: 1.018},
-        {at: 1, x: -10 * intensity, y: 0, zoom: 1.022},
-      ];
-    case 'pan-right':
-      return [
-        {at: 0, x: -10 * intensity, y: 0, zoom: 1.018},
-        {at: 1, x: 10 * intensity, y: 0, zoom: 1.022},
-      ];
-    case 'static':
-      return [
-        {at: 0, x: 0, y: 0, zoom: 1.01},
-        {at: 1, x: 0, y: 0, zoom: 1.01},
-      ];
-    case 'push':
-    default:
-      return [
-        {at: 0, x: -6 * intensity, y: 0, zoom: 1.01},
-        {at: 1, x: 9 * intensity, y: 0, zoom: 1.026},
-      ];
+    case 'pull': return [{at: 0, x: -4, y: 0, zoom: 1.03}, {at: 1, x: 5, y: 0, zoom: 1.01}];
+    case 'pan-left': return [{at: 0, x: 10 * intensity, y: 0, zoom: 1.018}, {at: 1, x: -10 * intensity, y: 0, zoom: 1.022}];
+    case 'pan-right': return [{at: 0, x: -10 * intensity, y: 0, zoom: 1.018}, {at: 1, x: 10 * intensity, y: 0, zoom: 1.022}];
+    case 'static': return [{at: 0, x: 0, y: 0, zoom: 1.01}, {at: 1, x: 0, y: 0, zoom: 1.01}];
+    default: return [{at: 0, x: -6 * intensity, y: 0, zoom: 1.01}, {at: 1, x: 9 * intensity, y: 0, zoom: 1.026}];
   }
 };
 
-const cameraValue = ({
-  frame,
-  durationInFrames,
-  keyframes,
-  property,
-  fallback,
-}: {
-  frame: number;
-  durationInFrames: number;
-  keyframes: Array<{at: number; x?: number; y?: number; zoom?: number}>;
-  property: 'x' | 'y' | 'zoom';
-  fallback: number;
-}) =>
-  interpolate(
-    frame,
-    keyframes.map(({at}) => at * durationInFrames),
-    keyframes.map((keyframe) => keyframe[property] ?? fallback),
-    clamp,
-  );
+const cameraValue = ({frame, durationInFrames, keyframes, property, fallback}: {frame: number; durationInFrames: number; keyframes: Array<{at: number; x?: number; y?: number; zoom?: number}>; property: 'x' | 'y' | 'zoom'; fallback: number}) =>
+  interpolate(frame, keyframes.map(({at}) => at * durationInFrames), keyframes.map((keyframe) => keyframe[property] ?? fallback), clamp);
 
-export const ReplicaChapterScene = ({
-  scene,
-  narrationVolume,
-  roleSounds,
-  theme,
-}: {
-  scene: NormalizedProjectScene;
-  narrationVolume: number;
-  roleSounds: Partial<Record<Role, ProjectSound>>;
-  theme: ProjectTheme;
-}) => {
+export const ReplicaChapterScene = ({scene, narrationVolume, theme}: {scene: NormalizedProjectScene; narrationVolume: number; theme: ProjectTheme}) => {
   const frame = useCurrentFrame();
-  const {fps, width, height} = useVideoConfig();
-  const landscape = width / height >= 1;
-  const layoutScale = Math.min(
-    width / (landscape ? 1920 : 1080),
-    height / (landscape ? 1080 : 1920),
-  );
-  const rawKeyframes =
-    scene.camera.keyframes && scene.camera.keyframes.length >= 2
-      ? [...scene.camera.keyframes].sort((left, right) => left.at - right.at)
-      : cameraDefaults(scene.camera.preset, scene.camera.intensity);
-  const keyframes = rawKeyframes.map((keyframe) => ({
-    ...keyframe,
-    x: (keyframe.x ?? 0) * layoutScale,
-    y: (keyframe.y ?? 0) * layoutScale,
-  }));
-  const cameraZoom = cameraValue({
-    frame,
-    durationInFrames: scene.durationInFrames,
-    keyframes,
-    property: 'zoom',
-    fallback: 1,
-  });
-  const cameraX = cameraValue({
-    frame,
-    durationInFrames: scene.durationInFrames,
-    keyframes,
-    property: 'x',
-    fallback: 0,
-  });
-  const cameraY = cameraValue({
-    frame,
-    durationInFrames: scene.durationInFrames,
-    keyframes,
-    property: 'y',
-    fallback: 0,
-  });
+  const {fps} = useVideoConfig();
+  const progress = Math.max(0, Math.min(1, frame / Math.max(1, scene.durationInFrames - 1)));
+  const durationSeconds = scene.durationInFrames / fps;
+  const sceneCue = resolveCueState({cues: scene.cues, targetId: 'scene', progress, durationSeconds});
+  const cameraFrames = scene.camera.keyframes && scene.camera.keyframes.length >= 2 ? [...scene.camera.keyframes].sort((a, b) => a.at - b.at) : cameraDefaults(scene.camera.preset, scene.camera.intensity);
+  const cameraZoom = cameraValue({frame, durationInFrames: scene.durationInFrames, keyframes: cameraFrames, property: 'zoom', fallback: 1});
+  const cameraX = cameraValue({frame, durationInFrames: scene.durationInFrames, keyframes: cameraFrames, property: 'x', fallback: 0});
+  const cameraY = cameraValue({frame, durationInFrames: scene.durationInFrames, keyframes: cameraFrames, property: 'y', fallback: 0});
   const fadeFrames = scene.transitionFrames;
-  const fadeIn =
-    fadeFrames === 0 ? 1 : interpolate(frame, [0, fadeFrames], [0, 1], clamp);
-  const fadeOut =
-    fadeFrames === 0
-      ? 1
-      : interpolate(
-          frame,
-          [scene.durationInFrames - fadeFrames, scene.durationInFrames],
-          [1, 0],
-          clamp,
-        );
-
+  const fadeIn = fadeFrames === 0 ? 1 : interpolate(frame, [0, fadeFrames], [0, 1], clamp);
+  const fadeOut = fadeFrames === 0 ? 1 : interpolate(frame, [scene.durationInFrames - fadeFrames, scene.durationInFrames], [1, 0], clamp);
   return (
-    <AbsoluteFill
-      style={{
-        overflow: 'hidden',
-        opacity: Math.min(fadeIn, fadeOut),
-        background: theme.sceneBackground,
-      }}
-    >
-      <AbsoluteFill
-        style={{
-          transform: `translate3d(${cameraX}px, ${cameraY}px, 0) scale(${cameraZoom})`,
-          transformOrigin: '50% 54%',
-        }}
-      >
-        <Img alt="" src={staticFile(scene.background)} style={backgroundStyle} />
+    <AbsoluteFill style={{overflow: 'hidden', opacity: Math.min(fadeIn, fadeOut), background: theme.sceneBackground}}>
+      <AbsoluteFill style={{transform: `translate3d(${sceneCue.x * scene.composition.coordinateSpace.width}px, ${sceneCue.y * scene.composition.coordinateSpace.height}px, 0) scale(${sceneCue.scale}) rotate(${sceneCue.rotation}deg)`, opacity: sceneCue.opacity, transformOrigin: '50% 54%'}}>
+        <AbsoluteFill style={{transform: `translate3d(${cameraX}px, ${cameraY}px, 0) scale(${cameraZoom})`, transformOrigin: '50% 54%'}}>
+          {[...scene.composition.nodes].sort((a, b) => a.z - b.z).map((node) => (
+            <CompositionNodeView key={node.id} node={node} parent={scene.composition.coordinateSpace} progress={progress} frame={frame} fps={fps} cues={scene.cues} durationSeconds={durationSeconds} seed={scene.motion.seed} paperEdge={theme.paperEdge} />
+          ))}
+        </AbsoluteFill>
+        <AbsoluteFill style={{opacity: 0.14, mixBlendMode: 'multiply', backgroundImage: `url(${staticFile(theme.texture)})`, backgroundSize: 'cover', zIndex: 60, pointerEvents: 'none'}} />
       </AbsoluteFill>
-      <AbsoluteFill
-        style={{
-          opacity: 0.14,
-          mixBlendMode: 'multiply',
-          backgroundImage: `url(${staticFile(theme.texture)})`,
-          backgroundSize: 'cover',
-          zIndex: 6,
-          pointerEvents: 'none',
-        }}
-      />
-      {scene.environmentLayers
-        .filter(({z}) => z < 4)
-        .map((layer) => (
-          <EnvironmentCutout
-            key={layer.id}
-            layer={layer}
-            cameraX={cameraX}
-            cameraY={cameraY}
-            cameraZoom={cameraZoom}
-          />
-        ))}
-      {scene.layers.map((layer) => (
-        <Character key={layer.id} layer={layer} paperEdge={theme.paperEdge} />
-      ))}
-      {scene.environmentLayers
-        .filter(({z}) => z >= 4)
-        .map((layer) => (
-          <EnvironmentCutout
-            key={layer.id}
-            layer={layer}
-            cameraX={cameraX}
-            cameraY={cameraY}
-            cameraZoom={cameraZoom}
-          />
-        ))}
-      <ForegroundPaper color={theme.foreground} />
       <ChapterLabel eyebrow={scene.eyebrow} label={scene.label} theme={theme} />
       <Subtitle cues={scene.subtitles} theme={theme} />
-      <Sequence from={scene.narrationStartFrame} layout="none">
-        <Audio
-          src={staticFile(scene.narration.src)}
-          volume={narrationVolume}
-        />
-      </Sequence>
-      <RoleSounds layers={scene.layers} roleSounds={roleSounds} />
-      <AudioEvents events={scene.audioEvents} />
+      <Sequence from={scene.narrationStartFrame} layout="none"><Audio src={staticFile(scene.narration.src)} volume={narrationVolume} /></Sequence>
+      <CueSounds cues={scene.cues} durationInFrames={scene.durationInFrames} />
     </AbsoluteFill>
   );
 };

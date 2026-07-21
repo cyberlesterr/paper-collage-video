@@ -1,38 +1,43 @@
-# Paper Collage Video v0.5.0
+# Paper Collage Video v0.8.0
 
-Second public preview of the configuration-driven paper-collage video pipeline
-and Codex Plugin.
+This release makes semantic correctness and composition relationships explicit
+parts of the editable Remotion production contract instead of leaving them to
+image-generation prompts.
 
 ## Highlights
 
 - Installable Codex Plugin that bootstraps an independent Remotion workspace.
-- A clean v2 project protocol with seconds-only timeline authoring and no v1
-  migration or compatibility branches.
-- Mandatory hash-bound technical and semantic image quality review.
-- Environment depth layers, camera keyframes, per-character narrative motion,
-  scene transitions, action audio, and project-local fonts.
-- Adaptive story planning when duration, scene count, both, or neither is given.
-- Configurable text, image, and fictional-voice providers with provenance
-  manifests and resumable work items.
-- Capability selection plus four explicit human approvals for concept,
-  style/voice, preview, and final publication; automatic stages remain
-  resumable.
-- Project validation, narration synchronization, subtitle alignment, LUFS and
-  true-peak reporting, CPU-aware rendering, and scene-aware contact sheets.
+- Rhythmic storyboards with authored scene blueprints, beats, cues, keyframes,
+  and proof times.
+- Composition Contract v4 with registered `supported-subject` and
+  `registered-environment` groups, shared canvases, source masters, relationship
+  proofs, and stale-review invalidation.
+- Reusable identity, topology, mechanism, and diagram contracts. Coexisting
+  characters require structural differences; working objects require complete
+  parts, connections, load paths, motion constraints, and reference evidence.
+- Schema-v3 image requests with semantic bindings that combine every applicable
+  contract instead of checking only one dominant risk.
+- An append-only image-generation attempt ledger with atomic budget reservation,
+  truthful rejected/abandoned accounting, exact reuse, and final-canvas size
+  validation.
+- Deterministic rejection of procedural SVG filters on diagram text, arrows,
+  icons, and borders.
+- Three default human decisions: concept/provider/budget, style/fictional voice,
+  and rendered preview. Local final delivery remains separate from publication.
 - A lightweight two-second fixture used only for installation smoke tests;
   production projects and media are not bundled into the Plugin package.
 
-## Complete Repository Demo
+## Compatibility
 
-The Release has one media attachment only:
-[Tie Chu Mo Zhen — 77.7-second 1080p final film](https://github.com/cyberlesterr/paper-collage-video/releases/download/v0.5.0/tie-chu-mo-zhen-final.mp4).
-It demonstrates the v2 quality gate, six-scene timeline, depth and narrative
-motion, subtitles, fictional narration, action sound effects, and delivery
-checks. Preview renders, motion proofs, contact sheets, and source assets are
-not attached.
+- New projects use project schema v4; v3 and earlier projects are intentionally
+  not migrated or silently downgraded.
+- Ledger-enabled projects require schema-v3 image requests.
+- Start a new Codex task after upgrading so the v0.8.0 Skill snapshot is loaded.
 
-The demo is repository-demo-only material rather than an MIT-licensed media
-asset. See `ASSET_LICENSES.md` before redistributing or reusing it.
+This release contains reusable source, the packaged Plugin, and technical test
+fixtures only. It does not publish production project media or add a new manual
+Release attachment. The older v0.5.0 repository demo remains available under
+the limited terms in `ASSET_LICENSES.md`.
 
 ## Install
 
@@ -51,11 +56,11 @@ diagnostics before production begins.
 
 - Node.js 20 or newer
 - FFmpeg and ffprobe
-- Python 3.11 or newer for chroma-key character-sheet processing
+- Python 3.11 or newer for image processing and proof generation
 - macOS and Ubuntu are validated; Windows support is currently best effort
 
 Image and voice generation require capabilities or provider accounts selected
-by the user. The project does not publish media automatically.
+by the user. The project does not publish generated media automatically.
 
 ## Licensing
 

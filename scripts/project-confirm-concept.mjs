@@ -15,6 +15,7 @@ import {
   syncReviewFromProduction,
   transitionProduction,
 } from './production-state.mjs';
+import {assertStoryboardReady} from './storyboard-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
@@ -64,6 +65,7 @@ try {
   }
   const {project} = await loadProject(slug);
   assertCreativePlanReady(project.plan, {slug});
+  await assertStoryboardReady(slug, project.plan);
   const at = new Date().toISOString();
   const confirmed = await writeProviderSelections({
     slug,

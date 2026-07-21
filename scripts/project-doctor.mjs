@@ -63,8 +63,13 @@ const packageFile = path.join(ROOT, 'package.json');
 const requiredWorkspaceScripts = [
   'project:new',
   'project:resume',
+  'project:semantic-contracts',
+  'project:composition-proof',
+  'project:quality',
   'project:preview',
   'project:render',
+  'provider:attempt',
+  'style:proof',
 ];
 let workspaceDetails = ROOT;
 let workspaceReady = false;

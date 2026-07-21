@@ -49,6 +49,7 @@ export const WORK_ITEM_STATUSES = [
 const ARTIFACT_KEYS = [
   'brief',
   'project',
+  'storyboard',
   'prompts',
   'review',
   'validationReport',
@@ -57,7 +58,7 @@ const ARTIFACT_KEYS = [
   'report',
   'contactSheet',
 ];
-const REQUIRED_ARTIFACT_KEYS = new Set(['brief', 'project', 'prompts', 'review']);
+const REQUIRED_ARTIFACT_KEYS = new Set(['brief', 'project', 'storyboard', 'prompts', 'review']);
 
 const APPROVAL_STATUSES = ['pending', 'approved', 'changes-requested'];
 const HUMAN_DECISION_ACTIONS = new Set([
@@ -73,10 +74,10 @@ const HUMAN_DECISION_ACTIONS = new Set([
 
 const nextActionByStage = {
   'capability-review':
-    '准备概念、制作档位与 provider 方案；请人一次确认后直接进入风格样张',
-  brief: '完善 brief.md，运行 project:plan 补全时长和幕数，再记录 brief-ready',
+    '准备概念、故事板、制作档位与 provider 方案；请人一次确认后直接进入风格样张',
+  brief: '完善 brief.md，运行 project:plan 并锁定 storyboard，再记录 brief-ready',
   'concept-review': '向人展示文案、分镜和素材清单；确认后记录 approve-concept',
-  'style-review': '展示一张风格样张和虚构音色；确认后记录 approve-style-voice',
+  'style-review': '展示风格样张、虚构音色及所需拓扑证据；确认且证明通过后记录 approve-style-voice',
   'asset-production': '生产素材与旁白、同步时长并通过校验；然后记录 assets-ready',
   preview: '运行 project:preview',
   'human-review': '等待人审预览；确认后记录 approve-preview，或记录 request-preview-revision',
@@ -90,25 +91,25 @@ const stageControlByStage = {
     mode: 'wait-human',
     gate: 'providers',
     requiredDecision:
-      '请一次确认概念、制作档位与 text/image/voice provider 方案，或给出修改意见。',
-    expectedArtifacts: ['brief', 'plan', 'providers'],
+      '请一次确认概念、故事板、制作档位与 text/image/voice provider 方案，或给出修改意见。',
+    expectedArtifacts: ['brief', 'plan', 'storyboard', 'providers'],
   },
   brief: {
     mode: 'auto-continue',
-    expectedArtifacts: ['brief', 'plan'],
-    nextCommand: (slug) => `npm run project:plan -- ${slug} <planning-options>`,
+    expectedArtifacts: ['brief', 'plan', 'storyboard'],
+    nextCommand: (slug) => `npm run project:storyboard -- ${slug} --input=<storyboard.json>`,
   },
   'concept-review': {
     mode: 'wait-human',
     gate: 'concept',
     requiredDecision: '请明确批准概念，或给出文案、分镜和事实修改意见。',
-    expectedArtifacts: ['brief'],
+    expectedArtifacts: ['brief', 'storyboard'],
   },
   'style-review': {
     mode: 'wait-human',
     gate: 'styleAndVoice',
-    requiredDecision: '请明确批准风格样张和虚构音色，或给出修改意见。',
-    expectedArtifacts: ['styleSample', 'voiceAudition'],
+    requiredDecision: '请明确批准风格样张、虚构音色和所需运动拓扑，或给出修改意见。',
+    expectedArtifacts: ['styleSample', 'voiceAudition', 'topologyProofWhenRequired'],
   },
   'asset-production': {
     mode: 'auto-continue',
@@ -215,7 +216,7 @@ export const assessHandoff = (state, options = {}) => {
   };
 };
 
-export const summarizeResumeState = (state, plan = null) => {
+export const summarizeResumeState = (state, plan = null, storyboard = null) => {
   const control = getStageControl(state);
   const remaining = (state.workItems ?? [])
     .filter(({status}) => status !== 'completed')
@@ -237,6 +238,7 @@ export const summarizeResumeState = (state, plan = null) => {
     slug: state.slug,
     stage: state.stage,
     productionProfile: plan?.productionProfile ?? null,
+    storyboard,
     control: {
       mode: control.mode,
       gate: control.gate,

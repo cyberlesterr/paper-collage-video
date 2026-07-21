@@ -4,6 +4,33 @@
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-07-21
+
+### Added
+
+- 必需的节奏故事板：逐幕蓝图、归一化故事节拍和证明时刻。
+- 人物/环境分层关键帧与按故事节拍绑定的视听 cue 运行时。
+- 直接从证明时刻生成的动作联系表，以及故事板到成片的漂移校验。
+- Composition Contract v4：递归组合树、`supported-subject`、`registered-environment`、共享坐标与源母版注册。
+- 人物身份、主体拓扑、真实机构和说明图四类语义生产契约，以及跨场景/原分辨率证据目标。
+- schema-v3 生图请求、追加式生成尝试账本、并发预算锁和最终画布尺寸校验。
+
+### Changed
+
+- 高风险素材不再只依靠提示词：必须绑定可验证的语义契约，多个风险合同会合并全部必需检查。
+- 组合证明会清理旧输出，并在素材、节点、cue、证明时刻或合同指纹变化后使旧审核自动失效。
+- 接触、遮挡和共享边界素材必须来自同一注册母版；不可靠抠图会退回刚性整图运动。
+- 项目协议直接升级为 v4；不提供 v3 及更早数据的自动迁移或回退。
+
+### Fixed
+
+- 同框身份契约要求结构化角色指纹差异和逐场景的不可同脸证据。
+- 机构契约要求完整零件连接、受力/传动路径、自由度、禁止形态和结构参考。
+- 说明图 SVG 确定性拒绝会污染文字、箭头和边框的程序化噪声滤镜。
+- 生图预算只计算真实 provider 生成/编辑尝试，确定性裁切、蒙版和 alpha 派生不重复计费。
+
+## [0.6.0] - 2026-07-20
+
 ### Added
 
 - `draft`、`balanced` 和 `full-depth` 制作档位，以及可验证的逐项目图片预算。
@@ -12,6 +39,7 @@
 
 ### Changed
 
+- 项目协议直接升级为 v3；不提供 v2 数据迁移、回退或兼容分支。
 - Skill 改为按当前阶段加载 reference，默认人工停顿从五次收敛为概念/provider、风格/音色、预览三次。
 - `project:assets-ready` 统一负责时长同步、字幕生成、质量门和项目校验，正式本地渲染成功后直接完成交付。
 - Provider 状态、质量状态和恢复状态支持紧凑输出，减少重复读取和长 JSON 回传。
@@ -67,6 +95,8 @@
 - The repository now keeps one complete showcase, `tie-chu-mo-zhen`; older
   production demos and the legacy one-shot composition were removed.
 
-[Unreleased]: https://github.com/cyberlesterr/paper-collage-video/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/cyberlesterr/paper-collage-video/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/cyberlesterr/paper-collage-video/compare/v0.6.0...v0.8.0
+[0.6.0]: https://github.com/cyberlesterr/paper-collage-video/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/cyberlesterr/paper-collage-video/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/cyberlesterr/paper-collage-video/releases/tag/v0.4.0

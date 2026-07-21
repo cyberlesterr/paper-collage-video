@@ -1,73 +1,155 @@
-import type {Role} from './roleMotion';
+export type SceneBlueprint =
+  | 'layered-reveal'
+  | 'map-journey'
+  | 'archive-stack'
+  | 'character-procession'
+  | 'discovery-wipe'
+  | 'transformation-tableau'
+  | 'chapter-tableau'
+  | 'quiet-lockup';
 
-export type EnterFrom = 'left' | 'right' | 'bottom';
-export type IdleMotionPreset = 'float' | 'breathe' | 'grind' | 'drift' | 'still';
+export type MotionEase = 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out' | 'hold';
 
-export type LayerMotion = {
-  idle: IdleMotionPreset;
-  intensity: number;
-  cycleSeconds: number;
-  phase?: number;
-  enterDurationSeconds: number;
-};
-
-export type CharacterLayer = {
-  id: string;
-  src: string;
-  role: Role;
-  x: number;
-  bottom: number;
-  width: number;
-  z: number;
-  delaySeconds: number;
-  enterFrom: EnterFrom;
-  motion: LayerMotion;
-};
-
-export type EnvironmentLayer = {
-  id: string;
-  src: string;
-  depth: number;
-  z: number;
-  x?: number;
-  y?: number;
-  width?: number;
-  opacity?: number;
-};
-
-export type SubtitleCue = {
-  fromSeconds: number;
-  toSeconds: number;
-  text: string;
-};
-
-export type NormalizedSubtitleCue = {
-  from: number;
-  to: number;
-  text: string;
-};
-
-export type CameraKeyframe = {
+export type MotionKeyframe = {
   at: number;
   x?: number;
   y?: number;
-  zoom?: number;
+  scale?: number;
+  rotation?: number;
+  opacity?: number;
+  ease?: MotionEase;
 };
 
+export type IdleMotion = {
+  preset: 'float' | 'breathe' | 'grind' | 'drift' | 'still';
+  intensity: number;
+  cycleSeconds: number;
+  phase?: number;
+};
+
+export type NodeMotion = {
+  keyframes: MotionKeyframe[];
+  idle?: IdleMotion;
+};
+
+export type NodeTransform = {
+  x: number;
+  y: number;
+  width: number;
+  height?: number;
+  anchorX: number;
+  anchorY: number;
+  scale?: number;
+  rotation?: number;
+  opacity?: number;
+};
+
+export type CoordinateSpace = {width: number; height: number};
+
+export type CompositionRegistration = {
+  id: string;
+  sourceMasterAssetId: string;
+  canvas: CoordinateSpace;
+  origin: 'top-left';
+};
+
+export type CompositionAssetNode = {
+  id: string;
+  kind: 'asset';
+  assetRole: 'background' | 'environment' | 'character' | 'prop' | 'decorative';
+  src: string;
+  z: number;
+  slot?: string;
+  registrationId?: string;
+  semanticCoverage?: string[];
+  depth?: number;
+  transform: NodeTransform;
+  motion: NodeMotion;
+  clip?: {boundaryId: string; side: 'upper' | 'lower'};
+};
+
+export type CompositionBoundary = {
+  id: string;
+  normalizedY?: number;
+  upperMaskSrc?: string;
+  lowerMaskSrc?: string;
+  upperSemantic: string;
+  lowerSemantic: string;
+};
+
+export type CompositionGroupNode = {
+  id: string;
+  kind: 'group';
+  pattern: 'free' | 'supported-subject' | 'registered-environment';
+  z: number;
+  coordinateSpace: CoordinateSpace;
+  transform: NodeTransform;
+  motion: NodeMotion;
+  registration?: CompositionRegistration;
+  support?: {
+    subjectId: string;
+    contactAnchor: {x: number; y: number};
+    contactZone: Array<[number, number]>;
+    occlusionZone: Array<[number, number]>;
+    detachProofTimeIds?: string[];
+  };
+  boundaries?: CompositionBoundary[];
+  children: CompositionNode[];
+};
+
+export type CompositionNode = CompositionAssetNode | CompositionGroupNode;
+
+export type SceneComposition = {
+  coordinateSpace: CoordinateSpace;
+  nodes: CompositionNode[];
+};
+
+export type SubtitleCue = {fromSeconds: number; toSeconds: number; text: string};
+export type NormalizedSubtitleCue = {from: number; to: number; text: string};
+
+export type CameraKeyframe = {at: number; x?: number; y?: number; zoom?: number};
 export type SceneCamera = {
   preset: 'push' | 'pull' | 'pan-left' | 'pan-right' | 'static';
   intensity: number;
   keyframes?: CameraKeyframe[];
 };
 
-export type SceneTransition = {
-  type: 'fade' | 'none';
+export type SceneTransition = {type: 'fade' | 'none'; durationSeconds: number};
+export type CueAction =
+  | 'reveal'
+  | 'pulse'
+  | 'stamp'
+  | 'shake'
+  | 'lift'
+  | 'settle'
+  | 'drop-impact'
+  | 'carve';
+
+export type ProjectCue = {
+  id: string;
+  beatId: string;
+  at: number;
   durationSeconds: number;
+  targetId: string;
+  action: CueAction;
+  intensity: number;
+  proofTimeId?: string;
+  sound?: ProjectSound;
 };
 
-export type ProjectAudioEvent = ProjectSound & {
+export type ProofTime = {
   id: string;
-  atSeconds: number;
+  at: number;
+  label: string;
+  kind: 'establish' | 'action' | 'peak' | 'final';
+  assertions: string[];
+};
+
+export type SceneMotion = {
+  blueprint: SceneBlueprint;
+  intensity: number;
+  seed: number;
+  proofTimes: ProofTime[];
 };
 
 export type ProjectTheme = {
@@ -84,11 +166,7 @@ export type ProjectTheme = {
   fontFile?: string;
 };
 
-export type ProjectSound = {
-  src: string;
-  volume: number;
-};
-
+export type ProjectSound = {src: string; volume: number};
 export type ProjectAudioMastering = {
   targetLufs: number;
   toleranceLufs: number;
@@ -100,8 +178,8 @@ export type ProjectScene = {
   label: string;
   eyebrow: string;
   tailSeconds: number;
-  background: string;
-  environmentLayers: EnvironmentLayer[];
+  motion: SceneMotion;
+  composition: SceneComposition;
   camera: SceneCamera;
   transition: SceneTransition;
   narration: {
@@ -111,14 +189,13 @@ export type ProjectScene = {
     durationSeconds: number;
     text: string;
   };
-  layers: CharacterLayer[];
   subtitles: SubtitleCue[];
-  audioEvents: ProjectAudioEvent[];
+  cues: ProjectCue[];
 };
 
 export type PaperCollageProject = {
   $schema?: string;
-  schemaVersion: 2;
+  schemaVersion: 4;
   slug: string;
   title: string;
   plan: {
@@ -126,10 +203,15 @@ export type PaperCollageProject = {
     slug: string;
     status: 'pending' | 'resolved';
     inputMode: 'none' | 'duration-only' | 'scenes-only' | 'both';
-    requested: {
-      durationSeconds: number | null;
-      sceneCount: number | null;
-    };
+    productionProfile?: 'draft' | 'balanced' | 'full-depth';
+    assetBudget?: {
+      backgrounds: number;
+      environmentLayers: number;
+      characterSheets: number;
+      styleSamples: number;
+      maxGeneratedImages: number;
+    } | null;
+    requested: {durationSeconds: number | null; sceneCount: number | null};
     resolved: null | {
       durationSeconds: number;
       sceneCount: number;
@@ -139,14 +221,8 @@ export type PaperCollageProject = {
     };
     updatedAt: string;
   };
-  video: {
-    width: number;
-    height: number;
-    fps: number;
-  };
-  quality: {
-    minimumAssetScale: number;
-  };
+  video: {width: number; height: number; fps: number};
+  quality: {minimumAssetScale: number};
   theme: ProjectTheme;
   voice: {
     mode: 'fictional' | 'clone';
@@ -157,11 +233,8 @@ export type PaperCollageProject = {
     settings?: Record<string, string | number | boolean>;
   };
   audio: {
-    narration: {
-      volume: number;
-    };
+    narration: {volume: number};
     music: ProjectSound | null;
-    sfx: Partial<Record<Role, ProjectSound>>;
     mastering: ProjectAudioMastering;
   };
   scenes: ProjectScene[];
@@ -180,17 +253,14 @@ export type NormalizedProject = Omit<PaperCollageProject, 'scenes'> & {
   scenes: NormalizedProjectScene[];
 };
 
-export const normalizeProject = (
-  project: PaperCollageProject,
-): NormalizedProject => {
+export const normalizeProject = (project: PaperCollageProject): NormalizedProject => {
   let cursor = 0;
   const {fps} = project.video;
   const scenes = project.scenes.map((scene, index) => {
     const narrationFrames = Math.ceil(scene.narration.durationSeconds * fps);
     const narrationStartFrame = Math.round(scene.narration.startSeconds * fps);
     const tailFrames = Math.ceil(scene.tailSeconds * fps);
-    const durationInFrames =
-      narrationStartFrame + narrationFrames + tailFrames;
+    const durationInFrames = narrationStartFrame + narrationFrames + tailFrames;
     const sceneTransitionFrames =
       scene.transition.type === 'none'
         ? 0

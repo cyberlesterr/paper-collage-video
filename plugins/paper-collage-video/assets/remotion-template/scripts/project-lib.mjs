@@ -9,6 +9,19 @@ import {
   assessCreativePlanTimeline,
   validateCreativePlan,
 } from './creative-plan-lib.mjs';
+import {
+  loadStoryboard,
+  STORY_BLUEPRINTS,
+  validateStoryboard,
+} from './storyboard-lib.mjs';
+import {
+  CUE_ACTIONS,
+  validateCompositionStructure,
+} from './composition-lib.mjs';
+import {
+  readGenerationAttemptEvents,
+  summarizeGenerationAttempts,
+} from './generation-attempt-lib.mjs';
 
 const execFileAsync = promisify(execFile);
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -21,12 +34,25 @@ export const resolveRenderConcurrency = (
   maximum = 8,
 ) => Math.max(1, Math.min(maximum, Math.floor(parallelism)));
 
+export const countProviderGeneratedImages = (assets = []) =>
+  assets.filter((asset) => {
+    if (asset.capability !== 'image') return false;
+    const derivationMethod =
+      asset.request?.compositionBinding?.derivation?.method ??
+      asset.compositionBinding?.derivation?.method ??
+      null;
+    return ['provider-generation', 'provider-edit'].includes(derivationMethod);
+  }).length;
+
 export const projectPaths = (slug) => ({
   slug,
   projectDirectory: path.join(ROOT, 'projects', slug),
   projectFile: path.join(ROOT, 'projects', slug, 'project.json'),
   productionFile: path.join(ROOT, 'projects', slug, 'production.json'),
+  storyboardFile: path.join(ROOT, 'projects', slug, 'storyboard.json'),
   reviewFile: path.join(ROOT, 'projects', slug, 'review.md'),
+  semanticContractsFile: path.join(ROOT, 'projects', slug, 'semantic-contracts.json'),
+  generationAttemptsFile: path.join(ROOT, 'projects', slug, 'generation-attempts.jsonl'),
   publicDirectory: path.join(ROOT, 'public', 'projects', slug),
   distDirectory: path.join(ROOT, 'dist', slug),
   validationReport: path.join(ROOT, 'dist', slug, 'validation-report.json'),
@@ -52,8 +78,8 @@ export const loadProject = async (slug) => {
   assertSlug(slug);
   const paths = projectPaths(slug);
   const project = await readJson(paths.projectFile);
-  if (project.schemaVersion !== 2) {
-    throw new Error('project.json 必须使用 schemaVersion 2；请重新创建项目。');
+  if (project.schemaVersion !== 4) {
+    throw new Error('project.json 必须使用 schemaVersion 4；旧项目不会自动迁移。');
   }
   return {paths, project};
 };
@@ -88,11 +114,20 @@ export const deriveTimeline = (project) => {
   return {durationInFrames: cursor, durationSeconds: cursor / fps, scenes};
 };
 
+export const proofOverlapsTransition = ({
+  at,
+  transitionFrames,
+  durationInFrames,
+}) => {
+  const transitionRatio = transitionFrames / Math.max(1, durationInFrames);
+  return at < transitionRatio || at > 1 - transitionRatio;
+};
+
 export const deriveContactSheetSamples = ({
   timeline,
   fps,
   durationSeconds,
-  maxPanels = 8,
+  maxPanels = 16,
 }) => {
   const scenes = timeline?.scenes ?? [];
   const panelLimit = Math.max(1, Math.floor(maxPanels));
@@ -103,29 +138,27 @@ export const deriveContactSheetSamples = ({
       sceneId: null,
     }));
   }
-  const selectedScenes =
-    scenes.length <= panelLimit
-      ? scenes
+  const proofs = scenes.flatMap((scene) =>
+    (scene.motion?.proofTimes ?? []).map((proof) => ({scene, proof})),
+  );
+  const selected =
+    proofs.length <= panelLimit
+      ? proofs
       : panelLimit === 1
-        ? [scenes[Math.floor(scenes.length / 2)]]
+        ? [proofs[Math.floor(proofs.length / 2)]]
         : Array.from({length: panelLimit}, (_, index) =>
-            scenes[
-              Math.round((index * (scenes.length - 1)) / (panelLimit - 1))
-            ],
+            proofs[Math.round((index * (proofs.length - 1)) / (panelLimit - 1))],
           );
-  const ratios = selectedScenes.length <= Math.floor(panelLimit / 2) ? [0.28, 0.72] : [0.5];
-  return selectedScenes.flatMap((scene) =>
-    ratios.map((ratio, ratioIndex) => {
-      const frame = scene.from + Math.max(0, scene.durationInFrames - 1) * ratio;
+  return selected.map(({scene, proof}) => {
+      const frame = scene.from + Math.max(0, scene.durationInFrames - 1) * proof.at;
       const time = Math.max(0, Math.min(durationSeconds - 0.04, frame / fps));
-      const position = ratios.length === 1 ? '中段' : ratioIndex === 0 ? '前段' : '后段';
       return {
         time,
-        label: `${scene.label || scene.id} · ${position}`,
+        label: `${scene.label || scene.id} · ${proof.label}`,
         sceneId: scene.id,
+        kind: proof.kind,
       };
-    }),
-  );
+    });
 };
 
 export const resolvePublicFile = (assetPath) => {
@@ -299,8 +332,8 @@ export const validateProject = async (project, options = {}) => {
   const add = (level, code, message, location) =>
     issues.push(makeIssue(level, code, message, location));
 
-  if (project.schemaVersion !== 2) {
-    add('error', 'schema-version', 'schemaVersion 必须为 2。', 'schemaVersion');
+  if (project.schemaVersion !== 4) {
+    add('error', 'schema-version', 'schemaVersion 必须为 4。', 'schemaVersion');
   }
   if (!SLUG_PATTERN.test(project.slug ?? '')) {
     add('error', 'slug', 'slug 格式无效。', 'slug');
@@ -318,10 +351,13 @@ export const validateProject = async (project, options = {}) => {
     add('error', 'video-fps', 'fps 必须为正数。', 'video.fps');
   }
   if (project.plan === undefined) {
-    add('error', 'plan-required', 'v2 项目必须包含 plan。', 'plan');
+    add('error', 'plan-required', 'v4 项目必须包含 plan。', 'plan');
   }
   if (!project.voice || typeof project.voice !== 'object') {
-    add('error', 'voice-required', 'v2 项目必须包含 voice。', 'voice');
+    add('error', 'voice-required', 'v4 项目必须包含 voice。', 'voice');
+  }
+  if (project.audio?.sfx !== undefined) {
+    add('error', 'unsupported-audio-sfx', 'v4 不支持 audio.sfx；请用逐节拍 cue.sound。', 'audio.sfx');
   }
   if (!isPositiveNumber(project.quality?.minimumAssetScale)) {
     add(
@@ -357,7 +393,7 @@ export const validateProject = async (project, options = {}) => {
     add(
       'error',
       'audio-mastering-required',
-      'audio.mastering 是 v2 项目的必填交付规格。',
+      'audio.mastering 是 v4 项目的必填交付规格。',
       'audio.mastering',
     );
   }
@@ -373,11 +409,29 @@ export const validateProject = async (project, options = {}) => {
     }
   }
 
+  let storyboard = options.storyboard ?? null;
+  if (!storyboard && SLUG_PATTERN.test(project.slug ?? '')) {
+    try {
+      storyboard = await loadStoryboard(project.slug);
+    } catch (error) {
+      add('error', 'storyboard-missing', `缺少或无法读取 storyboard.json：${error.message}`, 'storyboard');
+    }
+  }
+  if (storyboard) {
+    for (const issue of validateStoryboard(storyboard, {slug: project.slug, plan: project.plan})) {
+      add('error', issue.code, issue.message, `storyboard.${issue.location}`);
+    }
+    if (storyboard.status !== 'ready') {
+      add('error', 'storyboard-pending', 'storyboard.json 必须为 ready。', 'storyboard.status');
+    }
+  }
+
   const structuralErrors = issues.some(({level}) => level === 'error');
   const timeline = structuralErrors
     ? {durationInFrames: 0, durationSeconds: 0, scenes: []}
     : deriveTimeline(project);
   const sceneIds = new Set();
+  const storyboardScenes = new Map((storyboard?.scenes ?? []).map((scene) => [scene.id, scene]));
 
   if (project.plan?.status === 'resolved' && timeline.scenes.length > 0) {
     for (const issue of assessCreativePlanTimeline(project.plan, timeline)) {
@@ -391,6 +445,83 @@ export const validateProject = async (project, options = {}) => {
       add('error', 'scene-id', '镜头 id 缺失或重复。', `${sceneLocation}.id`);
     }
     sceneIds.add(scene.id);
+    const storyboardScene = storyboardScenes.get(scene.id);
+    if (!storyboardScene) {
+      add('error', 'storyboard-scene-missing', `storyboard 中没有镜头 ${scene.id}。`, sceneLocation);
+    }
+    if (!scene.motion || typeof scene.motion !== 'object') {
+      add('error', 'scene-motion-required', '每个镜头必须包含 motion 蓝图和证明时刻。', `${sceneLocation}.motion`);
+    } else {
+      if (!STORY_BLUEPRINTS.includes(scene.motion.blueprint)) {
+        add('error', 'scene-blueprint', `未知镜头蓝图：${scene.motion.blueprint}`, `${sceneLocation}.motion.blueprint`);
+      }
+      if (storyboardScene && scene.motion.blueprint !== storyboardScene.blueprint) {
+        add('error', 'scene-blueprint-drift', '项目镜头蓝图必须与已批准故事板一致。', `${sceneLocation}.motion.blueprint`);
+      }
+      if (!Number.isFinite(scene.motion.intensity) || scene.motion.intensity < 0 || scene.motion.intensity > 3) {
+        add('error', 'scene-motion-intensity', 'motion.intensity 必须位于 0..3。', `${sceneLocation}.motion.intensity`);
+      }
+      if (!Number.isInteger(scene.motion.seed)) {
+        add('error', 'scene-motion-seed', 'motion.seed 必须是整数。', `${sceneLocation}.motion.seed`);
+      }
+      const proofs = scene.motion.proofTimes;
+      if (!Array.isArray(proofs) || proofs.length < 3) {
+        add('error', 'scene-proof-times', '每个镜头至少需要 3 个证明时刻。', `${sceneLocation}.motion.proofTimes`);
+      }
+      let previousProof = -1;
+      let finalProof = false;
+      const proofIds = new Set();
+      for (const [proofIndex, proof] of (proofs ?? []).entries()) {
+        const proofLocation = `${sceneLocation}.motion.proofTimes[${proofIndex}]`;
+        if (!proof.id || proofIds.has(proof.id)) {
+          add('error', 'scene-proof-id', '证明时刻 id 缺失或重复。', `${proofLocation}.id`);
+        }
+        proofIds.add(proof.id);
+        if (!Number.isFinite(proof.at) || proof.at < 0 || proof.at > 1 || proof.at <= previousProof) {
+          add('error', 'scene-proof-time', '证明时刻 at 必须位于 0..1 且严格递增。', `${proofLocation}.at`);
+        }
+        previousProof = proof.at;
+        if (!['establish', 'action', 'peak', 'final'].includes(proof.kind)) {
+          add('error', 'scene-proof-kind', `未知证明类型：${proof.kind}`, `${proofLocation}.kind`);
+        }
+        if (!Array.isArray(proof.assertions) || proof.assertions.length === 0) {
+          add('error', 'scene-proof-assertions', '证明时刻必须包含可见关系断言。', `${proofLocation}.assertions`);
+        }
+        if (proof.kind === 'final' && proof.at >= 0.82) finalProof = true;
+        if (
+          scene.transition?.type === 'fade' &&
+          proofOverlapsTransition({
+            at: proof.at,
+            transitionFrames: scene.transitionFrames,
+            durationInFrames: scene.durationInFrames,
+          })
+        ) {
+          add(
+            'error',
+            'scene-proof-transition-overlap',
+            '证明时刻不能落在淡入/淡出遮挡区内。',
+            `${proofLocation}.at`,
+          );
+        }
+      }
+      if (!finalProof) add('error', 'scene-final-proof', '镜头必须在 0.82 之后包含 final 证明时刻。', `${sceneLocation}.motion.proofTimes`);
+      const proofDrift =
+        storyboardScene &&
+        (proofs?.length !== storyboardScene.proofTimes.length ||
+          proofs?.some((proof, index) => {
+            const approved = storyboardScene.proofTimes[index];
+            return (
+              proof.id !== approved.id ||
+              proof.at !== approved.at ||
+              proof.label !== approved.label ||
+              proof.kind !== approved.kind ||
+              JSON.stringify(proof.assertions) !== JSON.stringify(approved.assertions)
+            );
+          }));
+      if (proofDrift) {
+        add('error', 'scene-proof-drift', '项目证明时刻必须与已批准故事板完全一致。', `${sceneLocation}.motion.proofTimes`);
+      }
+    }
     if (scene.durationInFrames <= 0) {
       add('error', 'scene-duration', '镜头计算时长必须大于 0。', sceneLocation);
     }
@@ -412,44 +543,6 @@ export const validateProject = async (project, options = {}) => {
     }
     if (!Number.isFinite(scene.tailSeconds) || scene.tailSeconds < 0) {
       add('error', 'scene-tail', 'tailSeconds 必须是非负秒数。', `${sceneLocation}.tailSeconds`);
-    }
-
-    const backgroundLocation = `${sceneLocation}.background`;
-    try {
-      const backgroundFile = resolvePublicFile(scene.background);
-      if (!(await fileExists(backgroundFile))) {
-        add('error', 'background-missing', `缺少背景：${scene.background}`, backgroundLocation);
-      } else {
-        const inspection = await memoize(
-          backgroundInspectionCache,
-          backgroundFile,
-          () => inspectBackground(backgroundFile),
-        );
-        assets.push({kind: 'background', src: scene.background, ...inspection});
-        const sourceRatio = inspection.width / inspection.height;
-        const videoRatio = project.video.width / project.video.height;
-        if (Math.abs(sourceRatio - videoRatio) > 0.035) {
-          add(
-            'warning',
-            'background-aspect',
-            `背景宽高比 ${sourceRatio.toFixed(3)} 与视频 ${videoRatio.toFixed(3)} 差异较大。`,
-            backgroundLocation,
-          );
-        }
-        const minimumScale = project.quality.minimumAssetScale;
-        const minimumWidth = Math.round(project.video.width * minimumScale);
-        const minimumHeight = Math.round(project.video.height * minimumScale);
-        if (inspection.width < minimumWidth || inspection.height < minimumHeight) {
-          add(
-            'error',
-            'background-resolution',
-            `背景 ${inspection.width}x${inspection.height} 低于质量规格 ${minimumWidth}x${minimumHeight}。`,
-            backgroundLocation,
-          );
-        }
-      }
-    } catch (error) {
-      add('error', 'background-path', error.message, backgroundLocation);
     }
 
     const narrationLocation = `${sceneLocation}.narration`;
@@ -493,123 +586,116 @@ export const validateProject = async (project, options = {}) => {
       }
     }
 
-    const layerIds = new Set();
-    let primaryCount = 0;
-    for (const [layerIndex, layer] of (scene.layers ?? []).entries()) {
-      const layerLocation = `${sceneLocation}.layers[${layerIndex}]`;
-      if (!layer.id || layerIds.has(layer.id)) {
-        add('error', 'layer-id', '图层 id 缺失或重复。', `${layerLocation}.id`);
+    const compositionResult = validateCompositionStructure({
+      composition: scene.composition,
+      video: project.video,
+      proofTimes: scene.motion?.proofTimes ?? [],
+      location: `${sceneLocation}.composition`,
+    });
+    for (const issue of compositionResult.issues) {
+      add(issue.level, issue.code, issue.message, issue.location);
+    }
+
+    const actualPatterns = new Set(
+      compositionResult.groups.map(({node}) => node.pattern),
+    );
+    if (compositionResult.assets.some(({parent}) => parent === null)) {
+      actualPatterns.add('free');
+    }
+    for (const pattern of storyboardScene?.compositionPlan?.patterns ?? []) {
+      if (!actualPatterns.has(pattern)) {
+        add(
+          'error',
+          'composition-pattern-drift',
+          `故事板要求组合模式 ${pattern}，项目镜头没有实现。`,
+          `${sceneLocation}.composition`,
+        );
       }
-      layerIds.add(layer.id);
-      if (layer.role === 'primary') primaryCount += 1;
-      if (!['primary', 'secondary', 'tertiary'].includes(layer.role)) {
-        add('error', 'layer-role', `未知角色类型：${layer.role}`, `${layerLocation}.role`);
-      }
-      if (!['left', 'right', 'bottom'].includes(layer.enterFrom)) {
-        add('error', 'layer-enter', `未知入场方向：${layer.enterFrom}`, `${layerLocation}.enterFrom`);
-      }
-      if (!Number.isFinite(layer.delaySeconds) || layer.delaySeconds < 0) {
-        add('error', 'layer-delay', '人物 delaySeconds 必须是非负秒数。', `${layerLocation}.delaySeconds`);
-      }
-      if (!layer.motion) {
-        add('error', 'layer-motion-required', '每个人物图层必须显式配置 motion。', `${layerLocation}.motion`);
-      }
-      if (
-        layer.motion?.idle !== undefined &&
-        !['float', 'breathe', 'grind', 'drift', 'still'].includes(layer.motion.idle)
-      ) {
-        add('error', 'layer-motion', `未知 idle 动画：${layer.motion.idle}`, `${layerLocation}.motion.idle`);
-      }
-      if (
-        layer.motion &&
-        (!Number.isFinite(layer.motion.intensity) ||
-          layer.motion.intensity < 0 ||
-          !isPositiveNumber(layer.motion.cycleSeconds) ||
-          !isPositiveNumber(layer.motion.enterDurationSeconds))
-      ) {
-        add('error', 'layer-motion-values', 'motion 必须包含有效的 intensity、cycleSeconds 和 enterDurationSeconds。', `${layerLocation}.motion`);
-      }
-      if (!isPositiveNumber(layer.width)) {
-        add('error', 'layer-width', '人物宽度必须大于 0。', `${layerLocation}.width`);
-      }
-      if (layer.x + layer.width < 0 || layer.x > project.video.width) {
-        add('warning', 'layer-off-canvas', '人物完全位于画布之外。', layerLocation);
-      }
+    }
+
+    for (const {node, parent} of compositionResult.assets) {
+      const nodeLocation = `${sceneLocation}.composition.nodes#${node.id}`;
       try {
-        const layerFile = resolvePublicFile(layer.src);
-        if (!(await fileExists(layerFile))) {
-          add('error', 'layer-missing', `缺少人物素材：${layer.src}`, `${layerLocation}.src`);
-        } else {
-          const inspection = await memoize(
-            characterInspectionCache,
-            layerFile,
-            () => inspectCharacterPng(layerFile),
+        const assetFile = resolvePublicFile(node.src);
+        if (!(await fileExists(assetFile))) {
+          add('error', 'composition-asset-missing', `缺少组合素材：${node.src}`, `${nodeLocation}.src`);
+          continue;
+        }
+        const isCutout = ['character', 'prop'].includes(node.assetRole);
+        const inspection = await memoize(
+          isCutout ? characterInspectionCache : backgroundInspectionCache,
+          assetFile,
+          () => isCutout ? inspectCharacterPng(assetFile) : inspectBackground(assetFile),
+        );
+        assets.push({
+          kind: node.assetRole,
+          src: node.src,
+          sceneId: scene.id,
+          nodeId: node.id,
+          parentId: parent?.id ?? null,
+          registrationId: node.registrationId ?? null,
+          ...inspection,
+        });
+        if (isCutout && (!inspection.hasAlpha || inspection.transparentPixels === 0)) {
+          add('error', 'composition-asset-alpha', '人物或道具素材必须包含有效透明区域。', `${nodeLocation}.src`);
+        }
+        if (isCutout && inspection.keyEdgeRatio > 0.12) {
+          add(
+            'warning',
+            'composition-key-edge',
+            `可见半透明边缘中 ${(inspection.keyEdgeRatio * 100).toFixed(1)}% 疑似残留色键 ${inspection.keyColor ?? ''}。`,
+            `${nodeLocation}.src`,
           );
-          assets.push({kind: 'character', src: layer.src, ...inspection});
-          if (!inspection.hasAlpha || inspection.transparentPixels === 0) {
-            add('error', 'layer-alpha', '人物 PNG 没有有效透明区域。', `${layerLocation}.src`);
-          }
-          if (inspection.keyEdgeRatio > 0.12) {
+        }
+        if (parent?.registration) {
+          const {width, height} = parent.registration.canvas;
+          if (inspection.width !== width || inspection.height !== height) {
             add(
-              'warning',
-              'layer-key-edge',
-              `可见半透明边缘中 ${(inspection.keyEdgeRatio * 100).toFixed(1)}% 疑似残留色键 ${inspection.keyColor ?? ''}。`,
-              `${layerLocation}.src`,
+              'error',
+              'composition-registration-dimensions',
+              `注册成员必须与母版画布 ${width}x${height} 完全一致，当前为 ${inspection.width}x${inspection.height}。`,
+              `${nodeLocation}.src`,
+            );
+          }
+        } else if (['background', 'environment'].includes(node.assetRole)) {
+          const requiredWidth = project.video.width * project.quality.minimumAssetScale;
+          const requiredHeight = project.video.height * project.quality.minimumAssetScale;
+          if (inspection.width < requiredWidth || inspection.height < requiredHeight) {
+            add(
+              'error',
+              'composition-asset-scale',
+              `场景素材至少需要 ${Math.ceil(requiredWidth)}x${Math.ceil(requiredHeight)}，当前为 ${inspection.width}x${inspection.height}。`,
+              `${nodeLocation}.src`,
             );
           }
         }
       } catch (error) {
-        add('error', 'layer-inspect', error.message, `${layerLocation}.src`);
+        add('error', 'composition-asset-inspect', error.message, `${nodeLocation}.src`);
       }
-    }
-    if (primaryCount === 0) {
-      add('warning', 'primary-missing', '镜头没有 primary 主体。', `${sceneLocation}.layers`);
     }
 
-    if (!Array.isArray(scene.environmentLayers)) {
-      add('error', 'environment-layers-required', '每个镜头必须包含 environmentLayers 数组。', `${sceneLocation}.environmentLayers`);
-    }
-    const environmentIds = new Set();
-    for (const [environmentIndex, environment] of (
-      scene.environmentLayers ?? []
-    ).entries()) {
-      const environmentLocation = `${sceneLocation}.environmentLayers[${environmentIndex}]`;
-      if (!environment.id || environmentIds.has(environment.id)) {
-        add(
-          'error',
-          'environment-id',
-          '环境图层 id 缺失或重复。',
-          `${environmentLocation}.id`,
-        );
-      }
-      environmentIds.add(environment.id);
-      if (environment.depth < -1 || environment.depth > 1) {
-        add(
-          'error',
-          'environment-depth',
-          '环境图层 depth 必须位于 -1 到 1。',
-          `${environmentLocation}.depth`,
-        );
-      }
-      try {
-        const environmentFile = resolvePublicFile(environment.src);
-        if (!(await fileExists(environmentFile))) {
-          add(
-            'error',
-            'environment-missing',
-            `缺少环境图层：${environment.src}`,
-            `${environmentLocation}.src`,
-          );
-        } else {
-          const inspection = await memoize(
-            backgroundInspectionCache,
-            environmentFile,
-            () => inspectBackground(environmentFile),
-          );
-          assets.push({kind: 'environment', src: environment.src, ...inspection});
+    for (const {node} of compositionResult.groups) {
+      for (const boundary of node.boundaries ?? []) {
+        for (const [side, maskSrc] of [
+          ['upper', boundary.upperMaskSrc],
+          ['lower', boundary.lowerMaskSrc],
+        ]) {
+          if (!maskSrc) continue;
+          const maskLocation = `${sceneLocation}.composition.nodes#${node.id}.boundaries#${boundary.id}.${side}MaskSrc`;
+          try {
+            const maskFile = resolvePublicFile(maskSrc);
+            if (!(await fileExists(maskFile))) {
+              add('error', 'composition-boundary-mask-missing', `缺少边界 mask：${maskSrc}`, maskLocation);
+              continue;
+            }
+            const inspection = await memoize(backgroundInspectionCache, maskFile, () => inspectBackground(maskFile));
+            if (inspection.width !== node.registration?.canvas.width || inspection.height !== node.registration?.canvas.height) {
+              add('error', 'composition-boundary-mask-dimensions', '边界 mask 必须与注册母版画布完全一致。', maskLocation);
+            }
+          } catch (error) {
+            add('error', 'composition-boundary-mask-inspect', error.message, maskLocation);
+          }
         }
-      } catch (error) {
-        add('error', 'environment-inspect', error.message, `${environmentLocation}.src`);
       }
     }
 
@@ -627,25 +713,53 @@ export const validateProject = async (project, options = {}) => {
       }
     }
 
-    if (!Array.isArray(scene.audioEvents)) {
-      add('error', 'audio-events-required', '每个镜头必须包含 audioEvents 数组。', `${sceneLocation}.audioEvents`);
+    if (!Array.isArray(scene.cues) || scene.cues.length === 0) {
+      add('error', 'scene-cues-required', '每个镜头必须包含与故事节拍对应的 cues。', `${sceneLocation}.cues`);
     }
-    for (const [eventIndex, event] of (scene.audioEvents ?? []).entries()) {
-      const eventLocation = `${sceneLocation}.audioEvents[${eventIndex}]`;
-      if (!Number.isFinite(event.atSeconds) || event.atSeconds < 0) {
-        add('error', 'audio-event-time', '动作音效 atSeconds 必须是非负秒数。', `${eventLocation}.atSeconds`);
-      }
-      const fromFrame = Math.round(event.atSeconds * project.video.fps);
-      if (fromFrame >= scene.durationInFrames) {
-        add('warning', 'audio-event-overflow', '动作音效开始时间超过镜头结束。', eventLocation);
-      }
-      try {
-        if (!(await fileExists(resolvePublicFile(event.src)))) {
-          add('error', 'audio-event-missing', `缺少动作音效：${event.src}`, `${eventLocation}.src`);
+    if (scene.audioEvents !== undefined) {
+      add('error', 'unsupported-audio-events', 'v4 只允许 scene.cues 作为视听事件源。', `${sceneLocation}.audioEvents`);
+    }
+    const cueIds = new Set();
+    const cueBeatIds = new Set();
+    const validTargets = new Set(['scene', ...compositionResult.nodeIds]);
+    const proofTimesById = new Map((scene.motion?.proofTimes ?? []).map((proof) => [proof.id, proof]));
+    const storyboardBeats = new Map((storyboardScene?.beats ?? []).map((beat) => [beat.id, beat]));
+    for (const [cueIndex, cue] of (scene.cues ?? []).entries()) {
+      const cueLocation = `${sceneLocation}.cues[${cueIndex}]`;
+      if (!cue.id || cueIds.has(cue.id)) add('error', 'scene-cue-id', 'cue id 缺失或重复。', `${cueLocation}.id`);
+      cueIds.add(cue.id);
+      if (!cue.beatId || cueBeatIds.has(cue.beatId)) add('error', 'scene-cue-beat', '每个 cue 必须唯一对应一个 beatId。', `${cueLocation}.beatId`);
+      cueBeatIds.add(cue.beatId);
+      const beat = storyboardBeats.get(cue.beatId);
+      if (!beat) add('error', 'scene-cue-beat-missing', `故事板中没有节拍 ${cue.beatId}。`, `${cueLocation}.beatId`);
+      if (!Number.isFinite(cue.at) || cue.at < 0 || cue.at > 1) add('error', 'scene-cue-time', 'cue.at 必须位于 0..1。', `${cueLocation}.at`);
+      if (beat && Math.abs(cue.at - beat.at) > 0.035) add('error', 'scene-cue-drift', 'cue.at 必须与故事板节拍保持在 0.035 以内。', `${cueLocation}.at`);
+      if (!isPositiveNumber(cue.durationSeconds)) add('error', 'scene-cue-duration', 'cue.durationSeconds 必须大于 0。', `${cueLocation}.durationSeconds`);
+      if (!validTargets.has(cue.targetId)) add('error', 'scene-cue-target', `cue 目标不存在：${cue.targetId}`, `${cueLocation}.targetId`);
+      if (!CUE_ACTIONS.includes(cue.action)) add('error', 'scene-cue-action', `未知 cue action：${cue.action}`, `${cueLocation}.action`);
+      if (!Number.isFinite(cue.intensity) || cue.intensity < 0 || cue.intensity > 3) add('error', 'scene-cue-intensity', 'cue.intensity 必须位于 0..3。', `${cueLocation}.intensity`);
+      if (cue.proofTimeId) {
+        const proof = proofTimesById.get(cue.proofTimeId);
+        if (!proof) {
+          add('error', 'scene-cue-proof-missing', `cue 绑定的证明时刻不存在：${cue.proofTimeId}`, `${cueLocation}.proofTimeId`);
+        } else {
+          const cueWindowEnd = cue.at + cue.durationSeconds / Math.max(0.001, scene.durationInFrames / project.video.fps);
+          if (proof.at < cue.at - 0.01 || proof.at > cueWindowEnd + 0.01) {
+            add('error', 'scene-cue-proof-window', '绑定的证明时刻必须落在 cue 动作窗口内。', `${cueLocation}.proofTimeId`);
+          }
         }
-      } catch (error) {
-        add('error', 'audio-event-path', error.message, `${eventLocation}.src`);
       }
+      if (beat?.audioCue && !cue.sound) add('error', 'scene-cue-sound-required', `节拍要求声音 ${beat.audioCue}，对应 cue 必须配置 sound。`, `${cueLocation}.sound`);
+      if (cue.sound) {
+        try {
+          if (!(await fileExists(resolvePublicFile(cue.sound.src)))) add('error', 'scene-cue-sound-missing', `缺少 cue 音效：${cue.sound.src}`, `${cueLocation}.sound.src`);
+        } catch (error) {
+          add('error', 'scene-cue-sound-path', error.message, `${cueLocation}.sound.src`);
+        }
+      }
+    }
+    for (const beatId of storyboardBeats.keys()) {
+      if (!cueBeatIds.has(beatId)) add('error', 'scene-cue-coverage', `故事板节拍 ${beatId} 没有执行 cue。`, `${sceneLocation}.cues`);
     }
 
     let previousSubtitleEnd = -1;
@@ -692,7 +806,6 @@ export const validateProject = async (project, options = {}) => {
     project.theme?.texture,
     project.theme?.fontFile,
     project.audio?.music?.src,
-    ...Object.values(project.audio?.sfx ?? {}).map((sound) => sound?.src),
   ].filter(Boolean);
   for (const asset of sharedAssets) {
     try {
@@ -706,22 +819,39 @@ export const validateProject = async (project, options = {}) => {
 
   const generatedImageBudget = project.plan?.assetBudget?.maxGeneratedImages;
   if (Number.isInteger(generatedImageBudget) && generatedImageBudget > 0) {
+    const attempts = await readGenerationAttemptEvents(project.slug);
     const manifestFile = path.join(
       ROOT,
       'projects',
       project.slug,
       'assets-manifest.json',
     );
-    if (await fileExists(manifestFile)) {
+    if (attempts.exists) {
+      const usage = summarizeGenerationAttempts(attempts.events);
+      if (usage.reserved > 0) {
+        add(
+          'error',
+          'asset-budget-reservations-open',
+          `仍有 ${usage.reserved} 次生图额度处于 reserved；请登记结果或显式关闭尝试。`,
+          'generation-attempts.jsonl',
+        );
+      }
+      if (usage.used > generatedImageBudget) {
+        add(
+          'error',
+          'asset-budget-exceeded',
+          `${project.plan.productionProfile ?? 'balanced'} 档位预算最多 ${generatedImageBudget} 次计费生图，尝试账本已记录 ${usage.used} 次。`,
+          'plan.assetBudget.maxGeneratedImages',
+        );
+      }
+    } else if (await fileExists(manifestFile)) {
       const manifest = await readJson(manifestFile);
-      const generatedImages = (manifest.assets ?? []).filter(
-        ({capability}) => capability === 'image',
-      ).length;
+      const generatedImages = countProviderGeneratedImages(manifest.assets);
       if (generatedImages > generatedImageBudget) {
         add(
-          'warning',
+          'error',
           'asset-budget-exceeded',
-          `${project.plan.productionProfile ?? 'balanced'} 档位预算最多 ${generatedImageBudget} 张生成图，当前记录 ${generatedImages} 张；请复用素材或在概念审批时显式升级档位。`,
+          `${project.plan.productionProfile ?? 'balanced'} 档位预算最多 ${generatedImageBudget} 张生成图，旧版 manifest 已记录 ${generatedImages} 张；请复用素材或在概念审批时显式升级档位。`,
           'plan.assetBudget.maxGeneratedImages',
         );
       }

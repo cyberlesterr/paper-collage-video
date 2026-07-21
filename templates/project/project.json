@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/project.schema.json",
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "slug": "{{slug}}",
   "title": "{{title}}",
   "plan": {
@@ -51,7 +51,6 @@
       "volume": 1
     },
     "music": null,
-    "sfx": {},
     "mastering": {
       "targetLufs": -16,
       "toleranceLufs": 3,

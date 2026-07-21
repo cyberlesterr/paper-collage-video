@@ -33,6 +33,7 @@ try {
     status = await recordQualityReview({
           slug,
           assetId: valueFor('--asset'),
+          compositeId: valueFor('--composite'),
           reviewer: valueFor('--reviewer'),
           passedChecks: listFor('--pass'),
           failedChecks: listFor('--fail'),
@@ -63,6 +64,7 @@ try {
           pending: status.pending,
           failed: status.failed,
           changedAssets: status.changedAssets ?? [],
+          changedComposites: status.changedComposites ?? [],
           report: path.relative(ROOT, status.file),
         },
         null,
@@ -74,17 +76,17 @@ try {
     console.log(`  report: ${path.relative(ROOT, status.file)}`);
   }
   if (!quiet && !json) {
-    const visibleAssets = status.changedAssets?.length
-      ? status.report.assets.filter(({assetId}) =>
-          status.changedAssets.includes(assetId),
-        )
-      : status.report.assets.filter(({status: assetStatus}) => assetStatus !== 'passed');
-    for (const asset of visibleAssets) {
-      const pending = Object.entries(asset.semanticChecks)
+    const changedIds = status.changedIds ?? [];
+    const entries = [...status.report.assets, ...status.report.composites];
+    const visibleEntries = changedIds.length
+      ? entries.filter((entry) => changedIds.includes(entry.assetId ?? entry.compositeId))
+      : entries.filter(({status: entryStatus}) => entryStatus !== 'passed');
+    for (const entry of visibleEntries) {
+      const pending = Object.entries(entry.semanticChecks)
         .filter(([, checkStatus]) => checkStatus !== 'passed')
         .map(([check, checkStatus]) => `${check}:${checkStatus}`)
         .join(', ');
-      console.log(`  ${asset.status === 'passed' ? '✓' : '•'} ${asset.assetId}: ${asset.status}${pending ? ` (${pending})` : ''}`);
+      console.log(`  ${entry.status === 'passed' ? '✓' : '•'} ${entry.assetId ?? entry.compositeId}: ${entry.status}${pending ? ` (${pending})` : ''}`);
     }
   }
   if (action === 'status' && !status.ready) process.exitCode = 1;

@@ -1,6 +1,6 @@
 {
   "$schema": "../../schemas/assets-manifest.schema.json",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "projectSlug": "{{slug}}",
   "assets": []
 }

@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/composition.schema.json",
+  "title": "Paper Collage Composition Contract",
+  "$defs": {
+    "pattern": {
+      "enum": ["free", "supported-subject", "registered-environment"]
+    },
+    "cueAction": {
+      "enum": ["reveal", "pulse", "stamp", "shake", "lift", "settle", "drop-impact", "carve"]
+    },
+    "motionEase": {
+      "enum": ["linear", "ease-in", "ease-out", "ease-in-out", "hold"]
+    },
+    "motionKeyframe": {
+      "type": "object",
+      "required": ["at"],
+      "properties": {
+        "at": {"type": "number", "minimum": 0, "maximum": 1},
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "scale": {"type": "number", "exclusiveMinimum": 0},
+        "rotation": {"type": "number"},
+        "opacity": {"type": "number", "minimum": 0, "maximum": 1},
+        "ease": {"$ref": "#/$defs/motionEase"}
+      },
+      "additionalProperties": false
+    },
+    "nodeMotion": {
+      "type": "object",
+      "required": ["keyframes"],
+      "properties": {
+        "keyframes": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/motionKeyframe"}
+        },
+        "idle": {
+          "type": "object",
+          "required": ["preset", "intensity", "cycleSeconds"],
+          "properties": {
+            "preset": {"enum": ["float", "breathe", "grind", "drift", "still"]},
+            "intensity": {"type": "number", "minimum": 0, "maximum": 3},
+            "cycleSeconds": {"type": "number", "exclusiveMinimum": 0},
+            "phase": {"type": "number"}
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "transform": {
+      "type": "object",
+      "required": ["x", "y", "width", "anchorX", "anchorY"],
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "width": {"type": "number", "exclusiveMinimum": 0},
+        "height": {"type": "number", "exclusiveMinimum": 0},
+        "anchorX": {"type": "number", "minimum": 0, "maximum": 1},
+        "anchorY": {"type": "number", "minimum": 0, "maximum": 1},
+        "scale": {"type": "number", "exclusiveMinimum": 0},
+        "rotation": {"type": "number"},
+        "opacity": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "coordinateSpace": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "registration": {
+      "type": "object",
+      "required": ["id", "sourceMasterAssetId", "canvas", "origin"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "sourceMasterAssetId": {"type": "string", "minLength": 1},
+        "canvas": {"$ref": "#/$defs/coordinateSpace"},
+        "origin": {"const": "top-left"}
+      },
+      "additionalProperties": false
+    },
+    "clip": {
+      "type": "object",
+      "required": ["boundaryId", "side"],
+      "properties": {
+        "boundaryId": {"type": "string", "minLength": 1},
+        "side": {"enum": ["upper", "lower"]}
+      },
+      "additionalProperties": false
+    },
+    "assetNode": {
+      "type": "object",
+      "required": ["id", "kind", "assetRole", "src", "z", "transform", "motion"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"const": "asset"},
+        "assetRole": {"enum": ["background", "environment", "character", "prop", "decorative"]},
+        "src": {"type": "string", "minLength": 1},
+        "z": {"type": "integer"},
+        "slot": {"type": "string", "minLength": 1},
+        "registrationId": {"type": "string", "minLength": 1},
+        "semanticCoverage": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "depth": {"type": "number", "minimum": -1, "maximum": 1},
+        "transform": {"$ref": "#/$defs/transform"},
+        "motion": {"$ref": "#/$defs/nodeMotion"},
+        "clip": {"$ref": "#/$defs/clip"}
+      },
+      "additionalProperties": false
+    },
+    "point": {
+      "type": "array",
+      "prefixItems": [{"type": "number"}, {"type": "number"}],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "polygon": {
+      "type": "array",
+      "minItems": 3,
+      "items": {"$ref": "#/$defs/point"}
+    },
+    "support": {
+      "type": "object",
+      "required": ["subjectId", "contactAnchor", "contactZone", "occlusionZone"],
+      "properties": {
+        "subjectId": {"type": "string", "minLength": 1},
+        "contactAnchor": {
+          "type": "object",
+          "required": ["x", "y"],
+          "properties": {"x": {"type": "number"}, "y": {"type": "number"}},
+          "additionalProperties": false
+        },
+        "contactZone": {"$ref": "#/$defs/polygon"},
+        "occlusionZone": {"$ref": "#/$defs/polygon"},
+        "detachProofTimeIds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    },
+    "boundary": {
+      "type": "object",
+      "required": ["id", "upperSemantic", "lowerSemantic"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "normalizedY": {"type": "number", "minimum": 0, "maximum": 1},
+        "upperMaskSrc": {"type": "string", "minLength": 1},
+        "lowerMaskSrc": {"type": "string", "minLength": 1},
+        "upperSemantic": {"type": "string", "minLength": 1},
+        "lowerSemantic": {"type": "string", "minLength": 1}
+      },
+      "oneOf": [
+        {"required": ["normalizedY"]},
+        {"required": ["upperMaskSrc", "lowerMaskSrc"]}
+      ],
+      "additionalProperties": false
+    },
+    "groupNode": {
+      "type": "object",
+      "required": ["id", "kind", "pattern", "z", "coordinateSpace", "transform", "motion", "children"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"const": "group"},
+        "pattern": {"$ref": "#/$defs/pattern"},
+        "z": {"type": "integer"},
+        "coordinateSpace": {"$ref": "#/$defs/coordinateSpace"},
+        "transform": {"$ref": "#/$defs/transform"},
+        "motion": {"$ref": "#/$defs/nodeMotion"},
+        "registration": {"$ref": "#/$defs/registration"},
+        "support": {"$ref": "#/$defs/support"},
+        "boundaries": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/boundary"}},
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"oneOf": [{"$ref": "#/$defs/assetNode"}, {"$ref": "#/$defs/groupNode"}]}
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"pattern": {"const": "supported-subject"}}},
+          "then": {"required": ["registration", "support"]}
+        },
+        {
+          "if": {"properties": {"pattern": {"const": "registered-environment"}}},
+          "then": {"required": ["registration", "boundaries"]}
+        }
+      ],
+      "additionalProperties": false
+    },
+    "node": {
+      "oneOf": [{"$ref": "#/$defs/assetNode"}, {"$ref": "#/$defs/groupNode"}]
+    },
+    "composition": {
+      "type": "object",
+      "required": ["coordinateSpace", "nodes"],
+      "properties": {
+        "coordinateSpace": {"$ref": "#/$defs/coordinateSpace"},
+        "nodes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/node"}}
+      },
+      "additionalProperties": false
+    }
+  }
+}

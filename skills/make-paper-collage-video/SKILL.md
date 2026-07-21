@@ -1,6 +1,6 @@
 ---
 name: make-paper-collage-video
-description: Initialize, create, resume, revise, or productize editable Remotion paper-collage videos with adaptive story planning, configurable text/image/fictional-voice providers, layered assets, quality review, preview approval, and local final delivery. Use for paper-cutout, historical collage, layered illustration, parallax explainer, or an interrupted project that has production.json.
+description: Initialize, create, resume, revise, or productize editable Remotion paper-collage videos with rhythmic storyboards, semantic identity/mechanism/diagram contracts, registered composition groups, layered keyframe motion, audiovisual cues, proof-time validation, budgeted providers, dual-scope quality review, and local final delivery. Use for paper-cutout, historical collage, layered illustration, parallax explainer, functional-object diagrams, recurring-character stories, or an interrupted project that has production.json.
 ---
 
 # Make Paper Collage Video
@@ -24,9 +24,10 @@ Build an editable video while keeping the human in charge of concept, style/voic
 
 - Workspace creation or doctor failure: [references/setup.md](references/setup.md)
 - Provider discovery, confirmation, change, or output recording: [references/providers.md](references/providers.md)
-- Duration, scenes, or production-profile planning: [references/story-planning.md](references/story-planning.md)
+- Duration, scenes, rhythmic storyboard, or production-profile planning: [references/story-planning.md](references/story-planning.md)
 - Concept/style/preview decisions, rights, or external action: [references/approval-gates.md](references/approval-gates.md)
 - Image review, depth, motion, subtitles, or delivery tuning: [references/quality-motion.md](references/quality-motion.md)
+- Recurring identities, functional mechanisms, topology-sensitive subjects, or explanatory diagrams: [references/semantic-contracts.md](references/semantic-contracts.md)
 - Editing project/state files or diagnosing validation: [references/project-contract.md](references/project-contract.md)
 - Tool-only image generation, recovery, or an `auto-continue` blocker: [references/execution-control.md](references/execution-control.md)
 
@@ -47,12 +48,14 @@ At `capability-review`, use the current host model only to prepare a provisional
 1. Read `providers.md`, `story-planning.md`, and `approval-gates.md`.
 2. Run `provider:status -- <slug> --compact-json` once and inspect actual callable host tools.
 3. Fill `brief.md`. Run `project:plan` with resolved duration, scenes, narration estimate, rationale, and `--profile=draft|balanced|full-depth`.
-4. Present one compact decision containing:
-   - narration position, scene outline, facts, style, and reusable asset plan;
+4. Author one `storyboard.json` input with a whole-film arc, shared composition/motion language, and one scene record per planned scene. Every scene needs a named blueprint, at least three ordered beats, a `compositionPlan`, and at least three proof moments with visible assertions including a final state after `at=0.82`. Lock it with `project:storyboard`.
+5. Present one compact decision containing:
+   - narration position, scene outline, facts, style, reusable asset plan, and each scene's blueprint/beat rhythm;
    - requested versus inferred duration/scenes;
    - production profile and generated-image budget;
    - proposed text/image/voice providers, model/voice identity, and material cost.
-5. Ask once to approve the concept, budget, and all unresolved providers. On approval, write one selection JSON and run:
+   - identity-, topology-, mechanism-, and diagram-critical risks that will require reusable semantic contracts before generation.
+6. Ask once to approve the concept, storyboard, budget, and all unresolved providers. On approval, write one selection JSON and run:
 
    ```bash
    npm run project:confirm-concept -- <slug> --input=<selection.json>
@@ -64,13 +67,15 @@ If a custom provider or incompatible explicit duration/scenes cannot be resolved
 
 ## Style and Fictional Voice Gate
 
-At `style-review`, create one representative image and only enough fictional speech to judge the voice. Add a 3–5 second motion proof in the same gate only for a materially new motion language. Show provider/model, voice identity, sample artifacts, and known cost. After explicit approval, run:
+At `style-review`, create one representative image and only enough fictional speech to judge the voice. Add a 3–5 second proof in the same gate when motion is materially new or the project uses `supported-subject`/`registered-environment`; that proof must use a real v4 group and its registered derivatives, not a masked surrogate. For a coupled proof, run `style:proof`, inspect its full-resolution relationship crops, alpha masks, checkerboard isolates, tight crops, and motion-stress sheets, then record the required asset and composite semantic checks with those evidence files. Show provider/model, voice identity, sample artifacts, and known cost. After explicit approval, run:
+
+Before any style image call, classify its semantic risk. If it is not decorative, author and lock `semantic-contracts.json` as described in `semantic-contracts.md`; do not treat the prompt as the contract. Use schema-v3 image requests and reserve quota-consuming attempts before invoking a host image provider.
 
 ```bash
 npm run project:advance -- <slug> approve-style-voice --note="<explicit decision>"
 ```
 
-After revisions, remain at this gate.
+`approve-style-voice` refuses coupled projects whose style-proof fingerprint is missing/stale, whose evidence bundle is incomplete, or whose participating assets/composite have pending semantic checks. This strengthens the existing gate; it does not add another human wait. After revisions, remain at this gate.
 
 Never substitute a real-person clone. Treat cloning as a separate opt-in requiring licensed audio and transcript authorization.
 
@@ -79,20 +84,24 @@ Never substitute a real-person clone. Treat cloning as a separate opt-in requiri
 At `asset-production`:
 
 1. Group checkpoints by recoverable batch or location, not by every file. Keep provider provenance per asset.
-2. Create a request for every generated/imported output and try `provider:reuse` before paid or slow generation.
-3. Stay within the approved asset budget: reuse locations, character sheets, and depth layers; reserve independent rear/mid/foreground assets for scenes where parallax materially supports the beat.
-4. Prefer reliable transparent output; otherwise create complete high-chroma character sheets and process them with `assets:process-sheet`.
-5. Run `provider:record` after host/manual output or `provider:run` for command adapters.
-6. Run `project:quality prepare`. Inspect original-resolution images in small same-type batches and submit one `record-batch` JSON per reviewed batch. Do not pass a semantic check merely to unblock production.
-7. Generate/import one narration file per scene so revisions remain local. Populate the v2 timeline in seconds.
-8. Seal the production set with one command:
+2. Classify every image as `decorative`, `identity-critical`, `topology-critical`, `mechanism-critical`, or `diagram-critical`. Bind every critical request to a ready reusable semantic contract and its evidence targets. Keep recurring-character `generationFamily` separate from composition mask/source families.
+3. Route relationships before generation: persistent `inside`/`on`/`held-by`/`worn-by` contact uses `supported-subject`; a shared shoreline/horizon/edge uses `registered-environment`; only independent elements use `free`. If no pattern represents the approved meaning, extend the reusable contract before bulk generation.
+4. For every coupled group, generate or import one complete master, derive all registered members and masks from it, and record the same `registrationId` and `sourceMasterAssetId`. Never generate coupled members independently or repair the relationship with arbitrary z-index offsets.
+   - Do not use a coarse polygon matte for an articulated or internally open subject such as a person, animal, vehicle, chair, tree, rope, or bicycle. Use a capable segmentation/matting path or a carefully reviewed manual matte.
+   - If reliable extraction is unavailable, preserve the approved complete master as one rigid visual family and limit motion to whole-master/camera movement. Less local motion is preferable to a damaged silhouette.
+5. Create a schema-v3 request for every new image output and try `provider:reuse` before paid or slow generation. Before a host provider-generation/edit call, run `provider:attempt reserve`; pass its attempt id to `provider:record`. `provider:run` reserves automatically for command adapters. Close abandoned attempts explicitly; never erase the ledger.
+6. Stay within the approved attempt budget. Rejected, abandoned, and unused provider results still count when quota was consumed. Deterministic masks, crops, alpha extractions, and exact reuse do not consume another slot.
+7. Run `project:quality prepare`, inspect original-resolution files plus generated alpha/checkerboard/motion-stress/semantic-target evidence, and record asset reviews in batches with `evidenceFiles` for every evidence-required check. Do not pass a semantic check merely to unblock production. A hard-alpha `key-edge-clean` result proves only that no soft matte contamination was detected; it does not prove silhouette fidelity, identity distinctness, mechanism correctness, or subject completeness.
+8. Generate/import one narration file per scene so revisions remain local. Assemble `scene.composition` with local child transforms and authored `at=0..1` keyframes. Copy approved proof ids/times/assertions exactly. Map every storyboard beat to one `scene.cues[]` entry; bind critical visual/sound events to `proofTimeId`.
+9. Run `project:composition-proof`; it synchronizes real narration duration, replaces stale proof output, and renders relationship plus semantic-contract targets. Inspect real full frames, targeted crops, cross-scene comparisons, and debug frames. Run `project:quality prepare` again and record composite reviews using `compositeId`.
+10. Seal the production set with one command:
 
    ```bash
    npm run project:assets-ready -- <slug>
    ```
 
-   It synchronizes narration, derives subtitles, validates the project, enforces hash-bound quality, and advances to preview. Do not run separate sync/subtitles/validate commands first.
-9. Run `project:preview`. Continue autonomously until it reaches `human-review`.
+   It synchronizes narration, derives subtitles, validates v4 composition and cues, rejects stale proof fingerprints, enforces both asset and composite quality, and advances to preview. Do not run separate sync/subtitles/validate commands first.
+11. Run `project:preview`. Continue autonomously until it reaches `human-review`.
 
 If a confirmed provider becomes unavailable, preserve the stage and report the exact missing capability. Never invent artifacts or silently switch paid services.
 

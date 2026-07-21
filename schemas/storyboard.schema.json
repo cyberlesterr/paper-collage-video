@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/storyboard.schema.json",
+  "title": "Paper Collage Storyboard",
+  "type": "object",
+  "required": ["$schema", "schemaVersion", "slug", "status", "arc", "style", "scenes", "updatedAt"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "status": {"enum": ["pending", "ready"]},
+    "arc": {"type": "string"},
+    "style": {
+      "type": "object",
+      "required": ["visualThesis", "compositionRules", "motionLanguage", "layerStrategy"],
+      "properties": {
+        "visualThesis": {"type": "string"},
+        "compositionRules": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "motionLanguage": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "layerStrategy": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "scenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "narrativeRole", "message", "blueprint", "estimatedDurationSeconds", "compositionPlan", "beats", "proofTimes"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "title": {"type": "string", "minLength": 1},
+          "narrativeRole": {"type": "string", "minLength": 1},
+          "message": {"type": "string", "minLength": 1},
+          "blueprint": {"enum": ["layered-reveal", "map-journey", "archive-stack", "character-procession", "discovery-wipe", "transformation-tableau", "chapter-tableau", "quiet-lockup"]},
+          "estimatedDurationSeconds": {"type": "number", "exclusiveMinimum": 0},
+          "compositionPlan": {
+            "type": "object",
+            "required": ["patterns", "relationships"],
+            "properties": {
+              "patterns": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {"enum": ["free", "supported-subject", "registered-environment"]}
+              },
+              "relationships": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": ["id", "subject", "predicate", "object", "proof"],
+                  "properties": {
+                    "id": {"type": "string", "minLength": 1},
+                    "subject": {"type": "string", "minLength": 1},
+                    "predicate": {"enum": ["free", "inside", "on", "held-by", "worn-by", "above-boundary", "below-boundary"]},
+                    "object": {"type": "string", "minLength": 1},
+                    "proof": {"type": "string", "minLength": 1}
+                  },
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false
+          },
+          "beats": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "object",
+              "required": ["id", "at", "purpose", "visual", "motion", "audioCue"],
+              "properties": {
+                "id": {"type": "string", "minLength": 1},
+                "at": {"type": "number", "minimum": 0, "maximum": 1},
+                "purpose": {"type": "string", "minLength": 1},
+                "visual": {"type": "string", "minLength": 1},
+                "motion": {"type": "string", "minLength": 1},
+                "audioCue": {"oneOf": [{"type": "string", "minLength": 1}, {"type": "null"}]}
+              },
+              "additionalProperties": false
+            }
+          },
+          "proofTimes": {
+            "type": "array",
+            "minItems": 3,
+            "items": {
+              "type": "object",
+              "required": ["id", "at", "label", "kind", "assertions"],
+              "properties": {
+                "id": {"type": "string", "minLength": 1},
+                "at": {"type": "number", "minimum": 0, "maximum": 1},
+                "label": {"type": "string", "minLength": 1},
+                "kind": {"enum": ["establish", "action", "peak", "final"]},
+                "assertions": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "updatedAt": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": false
+}

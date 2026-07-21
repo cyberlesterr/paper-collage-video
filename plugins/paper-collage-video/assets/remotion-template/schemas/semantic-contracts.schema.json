@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/semantic-contracts.schema.json",
+  "title": "Paper Collage Semantic Production Contracts",
+  "type": "object",
+  "required": ["schemaVersion", "projectSlug", "status", "contracts"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "status": {"enum": ["draft", "ready"]},
+    "updatedAt": {"type": "string", "format": "date-time"},
+    "contracts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/contract"}
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "shot": {
+      "type": "object",
+      "required": ["sceneId", "proofTimeIds"],
+      "properties": {
+        "sceneId": {"type": "string", "minLength": 1},
+        "nodeId": {"type": "string", "minLength": 1},
+        "proofTimeIds": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    },
+    "evidenceTarget": {
+      "type": "object",
+      "required": ["id", "checks", "shots"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "checks": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string"}},
+        "shots": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/shot"}}
+      },
+      "additionalProperties": false
+    },
+    "fingerprint": {
+      "type": "object",
+      "properties": {
+        "faceOrFront": {"type": "string", "minLength": 1},
+        "bodyOrProportion": {"type": "string", "minLength": 1},
+        "headOrTop": {"type": "string", "minLength": 1},
+        "facialHairOrDetail": {"type": "string", "minLength": 1},
+        "palette": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "distinguishingFeatures": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    },
+    "contract": {
+      "type": "object",
+      "required": ["id", "kind", "title", "invariants", "evidenceTargets"],
+      "properties": {
+        "id": {"$ref": "#/$defs/id"},
+        "kind": {"enum": ["identity", "topology", "mechanism", "diagram"]},
+        "title": {"type": "string", "minLength": 1},
+        "invariants": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "evidenceTargets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidenceTarget"}},
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "fingerprint"],
+            "properties": {
+              "id": {"$ref": "#/$defs/id"},
+              "label": {"type": "string", "minLength": 1},
+              "fingerprint": {"$ref": "#/$defs/fingerprint"},
+              "referenceAssetIds": {"type": "array", "items": {"$ref": "#/$defs/id"}}
+            },
+            "additionalProperties": false
+          }
+        },
+        "coexistenceSets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["sceneId", "memberIds"],
+            "properties": {
+              "sceneId": {"type": "string", "minLength": 1},
+              "memberIds": {"type": "array", "minItems": 2, "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}
+            },
+            "additionalProperties": false
+          }
+        },
+        "parts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "label", "role"],
+            "properties": {
+              "id": {"$ref": "#/$defs/id"},
+              "label": {"type": "string", "minLength": 1},
+              "role": {"enum": ["fixed", "moving", "connector", "support", "load", "counterweight"]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "connections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to", "type"],
+            "properties": {
+              "from": {"$ref": "#/$defs/id"},
+              "to": {"$ref": "#/$defs/id"},
+              "type": {"enum": ["supports", "suspends", "pivots-at", "attaches-to", "contains", "contacts", "balances"]}
+            },
+            "additionalProperties": false
+          }
+        },
+        "loadPaths": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "sequence", "force"],
+            "properties": {
+              "id": {"$ref": "#/$defs/id"},
+              "sequence": {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/id"}},
+              "force": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        },
+        "degreesOfFreedom": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "forbiddenForms": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["label", "note"],
+            "properties": {
+              "label": {"type": "string", "minLength": 1},
+              "source": {"type": "string", "minLength": 1},
+              "assetId": {"$ref": "#/$defs/id"},
+              "note": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        },
+        "protectedLayers": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "forbiddenSvgFeatures": {"type": "array", "items": {"enum": ["feTurbulence", "feDisplacementMap", "feBlend"]}},
+        "finalCanvas": {
+          "type": "object",
+          "required": ["width", "height"],
+          "properties": {
+            "width": {"type": "integer", "minimum": 1},
+            "height": {"type": "integer", "minimum": 1}
+          },
+          "additionalProperties": false
+        },
+        "subjectIds": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+        "requiredVisibleParts": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "requiredNegativeSpaces": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -323,7 +323,20 @@ try {
       passed: quality.passed,
       pending: quality.pending,
       failed: quality.failed,
+      scopes: quality.scopes,
       file: path.relative(ROOT, quality.file),
+    },
+    cueEvents: quality.report.cueEvents ?? [],
+    compositeProof: {
+      total: quality.report.composites?.length ?? 0,
+      entries: (quality.report.composites ?? []).map(({compositeId, sceneId, pattern, fingerprint, proofFrames, status}) => ({
+        compositeId,
+        sceneId,
+        pattern,
+        fingerprint,
+        proofFrames,
+        status,
+      })),
     },
     technicalChecks,
     passed:

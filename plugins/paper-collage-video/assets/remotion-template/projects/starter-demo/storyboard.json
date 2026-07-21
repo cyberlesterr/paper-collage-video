@@ -1,0 +1,98 @@
+{
+  "$schema": "../../schemas/storyboard.schema.json",
+  "schemaVersion": 1,
+  "slug": "starter-demo",
+  "status": "ready",
+  "arc": "从空纸面建立分层空间，再让主体进入并稳定成标题画面。",
+  "style": {
+    "visualThesis": "以可见纸张深度和克制动作证明可编辑的拼贴空间。",
+    "compositionRules": [
+      "主体保持在字幕安全区上方",
+      "前中后景至少形成两个深度层次"
+    ],
+    "motionLanguage": [
+      "先建立空间，再触发主体，最后稳定锁定"
+    ],
+    "layerStrategy": "背景承载空间，透明主体承载动作，前景纸片负责压边。"
+  },
+  "scenes": [
+    {
+      "id": "starter",
+      "title": "纸片分层视频",
+      "narrativeRole": "开场与能力证明",
+      "message": "纸拼贴镜头由有节奏的分层运动构成。",
+      "blueprint": "layered-reveal",
+      "estimatedDurationSeconds": 2,
+      "beats": [
+        {
+          "id": "establish",
+          "at": 0,
+          "purpose": "建立空间",
+          "visual": "纸面与背景出现",
+          "motion": "场景淡入",
+          "audioCue": null
+        },
+        {
+          "id": "subject-arrives",
+          "at": 0.5,
+          "purpose": "交付主体",
+          "visual": "人物纸片进入中心",
+          "motion": "主体上提并轻微放大",
+          "audioCue": null
+        },
+        {
+          "id": "lockup",
+          "at": 0.9,
+          "purpose": "稳定结论",
+          "visual": "人物与标题形成锁定构图",
+          "motion": "主体回落稳定",
+          "audioCue": null
+        }
+      ],
+      "proofTimes": [
+        {
+          "id": "proof-establish",
+          "at": 0.08,
+          "label": "建立纸面空间",
+          "kind": "establish",
+          "assertions": [
+            "背景完整建立"
+          ]
+        },
+        {
+          "id": "proof-action",
+          "at": 0.5,
+          "label": "主体进入画面",
+          "kind": "peak",
+          "assertions": [
+            "主体位于画面中央"
+          ]
+        },
+        {
+          "id": "proof-final",
+          "at": 0.9,
+          "label": "标题与主体稳定",
+          "kind": "final",
+          "assertions": [
+            "主体与标题构图稳定"
+          ]
+        }
+      ],
+      "compositionPlan": {
+        "patterns": [
+          "free"
+        ],
+        "relationships": [
+          {
+            "id": "traveler-over-background",
+            "subject": "traveler",
+            "predicate": "free",
+            "object": "background",
+            "proof": "主体独立于背景运动且构图可读"
+          }
+        ]
+      }
+    }
+  ],
+  "updatedAt": "2026-01-01T00:00:00.000Z"
+}
