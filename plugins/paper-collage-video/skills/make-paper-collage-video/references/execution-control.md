@@ -30,6 +30,6 @@ Do not create `in-progress` and `completed` history entries for every small dete
 
 When collaboration workers are available, delegate bounded built-in image-generation units only. Keep the root workflow responsible for approvals, prompts, asset selection, state transitions, timeline work, and user updates.
 
-Before dispatching, tell the human that generation is running and no response is needed. After a worker returns, verify the workspace file and record its provider provenance/batch checkpoint. A worker result is not a human gate.
+Before dispatching, tell the human that generation is running and no response is needed. For schema-v3 provider-generation/edit requests, reserve an attempt before invoking the built-in image tool. After a worker returns, verify the workspace file and record it with the same attempt id. If the output is abandoned or generation fails, explicitly close the attempt with truthful quota consumption. A worker result is not a human gate.
 
 If workers are unavailable, prefer a pollable provider. If the only callable image surface forces the main turn to end and cannot resume, report that exact capability blocker before invoking it.

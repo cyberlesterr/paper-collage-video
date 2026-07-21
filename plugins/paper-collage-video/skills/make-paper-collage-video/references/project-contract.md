@@ -11,6 +11,8 @@ Read this only when creating/changing project files or diagnosing validation/sta
 | `storyboard.json` | Approved arc, beats, composition patterns, relationships, and proof assertions |
 | `project.json` | Resolved plan and v4 Remotion execution tree |
 | `requests/*.json` | Per-output generation/import request plus composition binding |
+| `semantic-contracts.json` | Reusable identity, topology, mechanism, diagram, and evidence-target invariants |
+| `generation-attempts.jsonl` | Append-only quota reservation and real provider-attempt outcomes |
 | `assets-manifest.json` | Provider provenance, source families, fingerprints, and hashes |
 | `quality-report.json` | Hash-bound asset and composite quality |
 | `review.md` | Generated approval summary plus natural-language revision history |
@@ -61,8 +63,8 @@ Derivation method is part of correctness. Complex silhouettes and negative space
 
 ## Validation and Failure Routing
 
-Run `project:composition-proof` after assembling real groups. It renders authored proof frames, focused relationship crops, debug copies, and the cue table through the production renderer. `project:assets-ready` rejects missing/stale proof fingerprints and pending/failed asset or composite quality.
+Run `project:composition-proof` after assembling real groups. It replaces the previous proof directory, then renders authored proof frames, focused relationship crops, semantic-contract targets, cross-scene comparisons, debug copies, and the cue table through the production renderer. `project:assets-ready` rejects missing/stale proof fingerprints, open generation reservations, over-budget attempts, and pending/failed asset or composite quality.
 
 Fix a wrong mask, crop, anchor, registration, or derivative without another human decision when the approved meaning and budget remain unchanged. Regenerate `style:proof` or `project:composition-proof` after the fix; member hashes invalidate prior evidence automatically. Return to concept only when the relationship meaning changes. Return to provider/budget approval only for a provider switch or budget increase. Never hide a contract failure with arbitrary z-index, pixel nudges, or a coarse polygon matte.
 
-Use repository scripts rather than reproducing ffprobe, FFmpeg, Remotion, extraction, proof, or report logic ad hoc. v3 is not migrated or executed.
+Use repository scripts rather than reproducing ffprobe, FFmpeg, Remotion, extraction, proof, attempt accounting, or report logic ad hoc. Composition project v3 is not migrated or executed; schema-v2 asset requests remain legacy-readable only in projects without a generation-attempt ledger.

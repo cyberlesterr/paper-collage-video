@@ -2,7 +2,19 @@ import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import sharp from 'sharp';
 import {ROOT, SLUG_PATTERN, fileExists, readJson, writeJson} from './project-lib.mjs';
+import {
+  SEMANTIC_RISK_CLASSES,
+  assertRequestSemanticContracts,
+  requiredChecksForSemanticBinding,
+} from './semantic-contract-lib.mjs';
+import {
+  assertReservedGenerationAttempt,
+  closeGenerationAttempt,
+  generationAttemptsPath,
+  isQuotaConsumingImageRequest,
+} from './generation-attempt-lib.mjs';
 
 export const PROVIDER_CAPABILITIES = ['text', 'image', 'voice'];
 export const PROVIDER_ADAPTERS = ['host', 'command', 'manual'];
@@ -15,6 +27,8 @@ const IMAGE_QUALITY_KINDS = [
   'decorative',
   'character-sheet',
   'style-sample',
+  'mechanism',
+  'diagram',
   'image',
 ];
 const IMAGE_QUALITY_CHECKS = [
@@ -25,12 +39,22 @@ const IMAGE_QUALITY_CHECKS = [
   'style-consistent',
   'subject-complete',
   'identity-consistent',
+  'identity-distinct-within-frame',
+  'identity-family-consistent',
+  'cross-scene-identity-continuity',
   'cell-separation',
   'background-uniform',
   'edge-clean',
   'silhouette-fidelity',
   'negative-space-clean',
   'background-leak-free',
+  'mechanism-complete',
+  'load-path-readable',
+  'physical-plausibility',
+  'reference-conformant',
+  'diagram-edge-clean',
+  'small-text-legible',
+  'no-procedural-noise-on-semantic-lines',
 ];
 const PROVIDER_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -57,6 +81,7 @@ export const createRequestFingerprint = ({request, providerId, model}) => {
     settings: request.settings ?? {},
     quality: request.quality ?? null,
     compositionBinding: request.compositionBinding ?? null,
+    semanticBinding: request.semanticBinding ?? null,
     providerId,
   };
   return createHash('sha256')
@@ -508,7 +533,7 @@ export const resolveWorkspacePath = (input, label = '路径') => {
 
 export const validateAssetRequest = (request) => {
   const errors = [];
-  if (request?.schemaVersion !== 2) errors.push('schemaVersion 必须为 2');
+  if (![2, 3].includes(request?.schemaVersion)) errors.push('schemaVersion 必须为 2 或 3');
   if (!SLUG_PATTERN.test(request?.projectSlug ?? '')) errors.push('projectSlug 格式无效');
   if (!SLUG_PATTERN.test(request?.assetId ?? '')) errors.push('assetId 格式无效');
   if (!PROVIDER_CAPABILITIES.includes(request?.capability)) errors.push('capability 必须是 text、image 或 voice');
@@ -517,6 +542,9 @@ export const validateAssetRequest = (request) => {
   if (request?.capability === 'image' && !request.prompt) errors.push('image request 缺少 prompt');
   if (request?.capability === 'image' && !isPlainObject(request.compositionBinding)) {
     errors.push('image request 缺少 compositionBinding');
+  }
+  if (request?.capability === 'image' && request.schemaVersion === 3 && !isPlainObject(request.semanticBinding)) {
+    errors.push('schema-v3 image request 缺少 semanticBinding');
   }
   if (request?.capability === 'voice' && !request.text) errors.push('voice request 缺少 text');
   if (request?.quality !== undefined) {
@@ -549,6 +577,37 @@ export const validateAssetRequest = (request) => {
     if (!['provider-generation', 'provider-edit', 'alpha-extraction', 'crop', 'mask-application', 'manual-import'].includes(binding.derivation?.method)) errors.push('compositionBinding.derivation.method 无效');
     if (['supported-subject', 'registered-environment'].includes(binding.pattern) && (!binding.registrationId || !binding.sourceMasterAssetId)) errors.push('耦合素材必须声明 registrationId 和 sourceMasterAssetId');
   }
+  if (request?.semanticBinding !== undefined) {
+    if (request.capability !== 'image') errors.push('只有 image request 可以声明 semanticBinding');
+    const binding = request.semanticBinding;
+    if (!SEMANTIC_RISK_CLASSES.includes(binding.riskClass)) errors.push('semanticBinding.riskClass 无效');
+    if (!Array.isArray(binding.contractIds)) errors.push('semanticBinding.contractIds 必须是数组');
+    if (binding.riskClass === 'decorative' && binding.contractIds?.length > 0) {
+      errors.push('decorative 图像不得绑定关键 semantic contract');
+    }
+    if (binding.riskClass !== 'decorative' && binding.contractIds?.length === 0) {
+      errors.push('高风险图像必须绑定至少一个 semantic contract');
+    }
+    if (binding.riskClass === 'identity-critical') {
+      if (!isPlainObject(binding.generationFamily)) {
+        errors.push('identity-critical 必须声明独立的 generationFamily');
+      } else if (
+        !binding.generationFamily.familyId ||
+        !Array.isArray(binding.generationFamily.memberIds) ||
+        binding.generationFamily.memberIds.length === 0 ||
+        !Array.isArray(binding.generationFamily.referenceAssetIds)
+      ) {
+        errors.push('generationFamily 必须声明 familyId、memberIds 和 referenceAssetIds');
+      }
+    }
+    const requiredSemanticChecks = requiredChecksForSemanticBinding(binding);
+    if (
+      request.quality?.requiredChecks &&
+      requiredSemanticChecks.some((check) => !request.quality.requiredChecks.includes(check))
+    ) {
+      errors.push('quality.requiredChecks 不得省略 riskClass 要求的语义检查');
+    }
+  }
   if (errors.length) throw new Error(`资产请求无效：${errors.join('；')}`);
   return request;
 };
@@ -556,6 +615,14 @@ export const validateAssetRequest = (request) => {
 export const loadAssetRequest = async (requestInput) => {
   const file = resolveWorkspacePath(requestInput, 'request 路径');
   const request = validateAssetRequest(await readJson(file));
+  if (
+    request.capability === 'image' &&
+    request.schemaVersion < 3 &&
+    await fileExists(generationAttemptsPath(request.projectSlug))
+  ) {
+    throw new Error('启用生成尝试账本的新项目必须使用 schema-v3 image request。');
+  }
+  await assertRequestSemanticContracts(request);
   const output = resolveWorkspacePath(request.output, 'output 路径');
   return {file, request, output};
 };
@@ -603,12 +670,27 @@ export const runProviderCommand = (command, commandArgs, options) =>
     });
   });
 
-export const verifyOutputFile = async (file) => {
+export const verifyOutputFile = async (file, request = null) => {
   const stat = await fs.stat(file).catch(() => null);
   if (!stat?.isFile() || stat.size < 1) {
     throw new Error(`provider 未生成有效输出：${path.relative(ROOT, file)}`);
   }
-  return stat;
+  let metadata = null;
+  if (request?.capability === 'image') {
+    metadata = await sharp(file).metadata().catch(() => null);
+    if (!metadata?.width || !metadata?.height) {
+      throw new Error(`provider 图像尺寸不可读：${path.relative(ROOT, file)}`);
+    }
+    if (request.schemaVersion >= 3) {
+      const expected = request.compositionBinding.canvas;
+      if (metadata.width !== expected.width || metadata.height !== expected.height) {
+        throw new Error(
+          `provider 图像尺寸 ${metadata.width}x${metadata.height} 与请求画布 ${expected.width}x${expected.height} 不一致。`,
+        );
+      }
+    }
+  }
+  return {stat, metadata};
 };
 
 export const recordAssetProvenance = async ({
@@ -618,75 +700,129 @@ export const recordAssetProvenance = async ({
   model = null,
   externalId = null,
   reusedFrom = null,
+  attemptId = null,
 }) => {
-  const stat = await verifyOutputFile(output);
-  const sha256 = createHash('sha256').update(await fs.readFile(output)).digest('hex');
+  const trackedAttempt =
+    request.schemaVersion >= 3 &&
+    isQuotaConsumingImageRequest(request) &&
+    !reusedFrom;
+  if (trackedAttempt) {
+    await assertReservedGenerationAttempt({request, provider, attemptId});
+  }
+  let stat;
+  let metadata;
+  let sha256;
+  try {
+    ({stat, metadata} = await verifyOutputFile(output, request));
+    sha256 = createHash('sha256').update(await fs.readFile(output)).digest('hex');
+  } catch (error) {
+    if (trackedAttempt) {
+      await closeGenerationAttempt({
+        slug: request.projectSlug,
+        attemptId,
+        status: 'rejected',
+        quotaConsumed: true,
+        output: path.relative(ROOT, output),
+        note: error.message,
+      });
+    }
+    throw error;
+  }
   const manifestFile = path.join(ROOT, 'projects', request.projectSlug, 'assets-manifest.json');
-  const manifest = (await fileExists(manifestFile))
-    ? await readJson(manifestFile)
-    : {
-        $schema: '../../schemas/assets-manifest.schema.json',
-        schemaVersion: 3,
-        projectSlug: request.projectSlug,
-        assets: [],
-      };
-  if (manifest.projectSlug !== request.projectSlug || !Array.isArray(manifest.assets)) {
-    throw new Error(`资产清单无效：${path.relative(ROOT, manifestFile)}`);
-  }
-  if (manifest.schemaVersion !== 3) {
-    throw new Error('assets-manifest.json 必须使用 schemaVersion 3；请重新创建项目。');
-  }
-  const actualModel = model || request.model || provider.model || null;
-  const record = {
-    assetId: request.assetId,
-    capability: request.capability,
-    file: path.relative(ROOT, output),
-    provider: provider.id,
-    adapter: provider.adapter,
-    tool: provider.tool ?? null,
-    model: actualModel,
-    externalId: externalId || null,
-    requestFingerprint: createRequestFingerprint({
-      request,
-      providerId: provider.id,
+  let record;
+  try {
+    const manifest = (await fileExists(manifestFile))
+      ? await readJson(manifestFile)
+      : {
+          $schema: '../../schemas/assets-manifest.schema.json',
+          schemaVersion: 3,
+          projectSlug: request.projectSlug,
+          assets: [],
+        };
+    if (manifest.projectSlug !== request.projectSlug || !Array.isArray(manifest.assets)) {
+      throw new Error(`资产清单无效：${path.relative(ROOT, manifestFile)}`);
+    }
+    if (manifest.schemaVersion !== 3) {
+      throw new Error('assets-manifest.json 必须使用 schemaVersion 3；请重新创建项目。');
+    }
+    const actualModel = model || request.model || provider.model || null;
+    record = {
+      assetId: request.assetId,
+      capability: request.capability,
+      file: path.relative(ROOT, output),
+      provider: provider.id,
+      adapter: provider.adapter,
+      tool: provider.tool ?? null,
       model: actualModel,
-    }),
-    reusedFrom,
-    sha256,
-    sizeBytes: stat.size,
-    recordedAt: new Date().toISOString(),
-    request: {...request},
-    compositionBinding: request.compositionBinding ?? null,
-    familyFingerprint: null,
-  };
-  manifest.assets = [
-    ...manifest.assets.filter(({assetId}) => assetId !== request.assetId),
-    record,
-  ];
-  const familyKey = (asset) => {
-    const binding = asset.compositionBinding;
-    if (!binding) return null;
-    return [
-      binding.pattern,
-      binding.registrationId ?? asset.assetId,
-      binding.sourceMasterAssetId ?? asset.assetId,
-      binding.canvas?.width,
-      binding.canvas?.height,
-    ].join(':');
-  };
-  const familyKeys = new Set(manifest.assets.map(familyKey).filter(Boolean));
-  for (const key of familyKeys) {
-    const members = manifest.assets
-      .filter((asset) => familyKey(asset) === key)
-      .sort((left, right) => left.assetId.localeCompare(right.assetId));
-    const familyFingerprint = createHash('sha256')
-      .update(JSON.stringify(stableValue({
-        key,
-        members: members.map(({assetId, sha256: memberSha256, requestFingerprint, compositionBinding}) => ({assetId, sha256: memberSha256, requestFingerprint, compositionBinding})),
-      })))
-      .digest('hex');
-    for (const member of members) member.familyFingerprint = familyFingerprint;
+      externalId: externalId || null,
+      attemptId,
+      requestFingerprint: createRequestFingerprint({
+        request,
+        providerId: provider.id,
+        model: actualModel,
+      }),
+      reusedFrom,
+      sha256,
+      sizeBytes: stat.size,
+      media: metadata ? {width: metadata.width, height: metadata.height, format: metadata.format ?? null, hasAlpha: metadata.hasAlpha ?? false} : null,
+      recordedAt: new Date().toISOString(),
+      request: {...request},
+      compositionBinding: request.compositionBinding ?? null,
+      semanticBinding: request.semanticBinding ?? null,
+      familyFingerprint: null,
+    };
+    manifest.assets = [
+      ...manifest.assets.filter(({assetId}) => assetId !== request.assetId),
+      record,
+    ];
+    const familyKey = (asset) => {
+      const binding = asset.compositionBinding;
+      if (!binding) return null;
+      return [
+        binding.pattern,
+        binding.registrationId ?? asset.assetId,
+        binding.sourceMasterAssetId ?? asset.assetId,
+        binding.canvas?.width,
+        binding.canvas?.height,
+      ].join(':');
+    };
+    const familyKeys = new Set(manifest.assets.map(familyKey).filter(Boolean));
+    for (const key of familyKeys) {
+      const members = manifest.assets
+        .filter((asset) => familyKey(asset) === key)
+        .sort((left, right) => left.assetId.localeCompare(right.assetId));
+      const familyFingerprint = createHash('sha256')
+        .update(JSON.stringify(stableValue({
+          key,
+          members: members.map(({assetId, sha256: memberSha256, requestFingerprint, compositionBinding}) => ({assetId, sha256: memberSha256, requestFingerprint, compositionBinding})),
+        })))
+        .digest('hex');
+      for (const member of members) member.familyFingerprint = familyFingerprint;
+    }
+    await writeJson(manifestFile, manifest);
+  } catch (error) {
+    if (trackedAttempt) {
+      await closeGenerationAttempt({
+        slug: request.projectSlug,
+        attemptId,
+        status: 'abandoned',
+        quotaConsumed: true,
+        output: path.relative(ROOT, output),
+        outputSha256: sha256,
+        note: `输出有效但溯源登记失败：${error.message}`,
+      });
+    }
+    throw error;
   }
-  await writeJson(manifestFile, manifest);
-  return {manifestFile, record};
+  if (trackedAttempt) {
+    await closeGenerationAttempt({
+      slug: request.projectSlug,
+      attemptId,
+      status: 'succeeded',
+      quotaConsumed: true,
+      output: path.relative(ROOT, output),
+      outputSha256: sha256,
+    });
+  }
+  return {manifestFile, record, attemptId};
 };

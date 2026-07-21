@@ -1,0 +1,8 @@
+{
+  "$schema": "../../schemas/semantic-contracts.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "{{slug}}",
+  "status": "draft",
+  "updatedAt": "{{createdAt}}",
+  "contracts": []
+}

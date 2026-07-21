@@ -18,14 +18,14 @@ Use `provider:select` only for an isolated change or fallback. A provider switch
 | `command` | User CLI/wrapper/private adapter | `provider:run` executes without a shell and records success |
 | `manual` | Authorized supplied or deterministic local asset | Copy/derive output, then `provider:record` |
 
-## Schema-v2 Request and Reuse
+## Schema-v3 Image Requests and Reuse
 
-Every image request requires `compositionBinding`. A free asset names its scene/node/role/canvas. A coupled asset also names the common registration and source master. Example derivative:
+Every new image request uses schema v3 and requires both `compositionBinding` and `semanticBinding`. A free asset names its scene/node/role/canvas. A coupled asset also names the common registration and source master. Critical content binds a ready project semantic contract. Schema v2 remains readable only for projects created before the generation-attempt ledger.
 
 ```json
 {
   "$schema": "../../../schemas/asset-request.schema.json",
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "projectSlug": "example",
   "assetId": "boat-front",
   "capability": "image",
@@ -40,7 +40,8 @@ Every image request requires `compositionBinding`. A free asset names its scene/
     "outputRole": "support-front",
     "canvas": {"width": 1600, "height": 900},
     "derivation": {"method": "alpha-extraction", "parentAssetId": "boat-master"}
-  }
+  },
+  "semanticBinding": {"riskClass": "topology-critical", "contractIds": ["boat-topology"]}
 }
 ```
 
@@ -55,8 +56,11 @@ Do not make independent text-to-image calls for registered members. Reuse requir
 
 ```bash
 npm run provider:reuse -- --request=projects/<slug>/requests/<asset>.json
+npm run provider:attempt -- reserve --request=projects/<slug>/requests/<asset>.json --provider=<id> --json
 npm run provider:run -- --request=projects/<slug>/requests/<asset>.json --provider=<id>
-npm run provider:record -- --request=projects/<slug>/requests/<asset>.json --provider=<id> --model=<model>
+npm run provider:record -- --request=projects/<slug>/requests/<asset>.json --provider=<id> --model=<model> --attempt-id=<attemptId>
 ```
 
-The manifest owns provider/model/job, request and family fingerprints, output hash, master/derivative binding, and request snapshot. Production scheduling stays in `production.json`.
+Try exact reuse before reserving an attempt. `provider:run` reserves automatically; a host tool call must use the explicit reserve command first. If a host result is abandoned instead of recorded, close it with `provider:attempt close` and state whether quota was consumed. Never delete or rewrite `generation-attempts.jsonl`.
+
+The manifest owns accepted asset provenance. The append-only attempt ledger owns real generation usage, including rejected and abandoned results. Production scheduling stays in `production.json`.

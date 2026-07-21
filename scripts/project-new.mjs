@@ -32,12 +32,14 @@ try {
   const templateFiles = [
     'assets-manifest.json',
     'brief.md',
+    'generation-attempts.jsonl',
     'project.json',
     'production.json',
     'prompts.json',
     'providers.json',
     'quality-report.json',
     'review.md',
+    'semantic-contracts.json',
     'storyboard.json',
   ];
   const publicDirectories = [

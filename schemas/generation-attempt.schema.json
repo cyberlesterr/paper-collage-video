@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/generation-attempt.schema.json",
+  "title": "Paper Collage Append-only Generation Attempt Event",
+  "type": "object",
+  "required": ["schemaVersion", "attemptId", "event", "status", "projectSlug", "assetId", "provider", "requestFingerprint", "quotaConsumed", "at"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "attemptId": {"type": "string", "pattern": "^img-[a-f0-9-]+$"},
+    "event": {"enum": ["reserved", "closed"]},
+    "status": {"enum": ["reserved", "succeeded", "rejected", "abandoned", "failed-before-generation"]},
+    "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "assetId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "provider": {"type": "string", "minLength": 1},
+    "model": {"type": ["string", "null"]},
+    "requestFingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "quotaConsumed": {"type": "boolean"},
+    "output": {"type": ["string", "null"]},
+    "outputSha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "note": {"type": "string"},
+    "at": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": false
+}

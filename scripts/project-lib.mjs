@@ -18,6 +18,10 @@ import {
   CUE_ACTIONS,
   validateCompositionStructure,
 } from './composition-lib.mjs';
+import {
+  readGenerationAttemptEvents,
+  summarizeGenerationAttempts,
+} from './generation-attempt-lib.mjs';
 
 const execFileAsync = promisify(execFile);
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -47,6 +51,8 @@ export const projectPaths = (slug) => ({
   productionFile: path.join(ROOT, 'projects', slug, 'production.json'),
   storyboardFile: path.join(ROOT, 'projects', slug, 'storyboard.json'),
   reviewFile: path.join(ROOT, 'projects', slug, 'review.md'),
+  semanticContractsFile: path.join(ROOT, 'projects', slug, 'semantic-contracts.json'),
+  generationAttemptsFile: path.join(ROOT, 'projects', slug, 'generation-attempts.jsonl'),
   publicDirectory: path.join(ROOT, 'public', 'projects', slug),
   distDirectory: path.join(ROOT, 'dist', slug),
   validationReport: path.join(ROOT, 'dist', slug, 'validation-report.json'),
@@ -813,20 +819,39 @@ export const validateProject = async (project, options = {}) => {
 
   const generatedImageBudget = project.plan?.assetBudget?.maxGeneratedImages;
   if (Number.isInteger(generatedImageBudget) && generatedImageBudget > 0) {
+    const attempts = await readGenerationAttemptEvents(project.slug);
     const manifestFile = path.join(
       ROOT,
       'projects',
       project.slug,
       'assets-manifest.json',
     );
-    if (await fileExists(manifestFile)) {
+    if (attempts.exists) {
+      const usage = summarizeGenerationAttempts(attempts.events);
+      if (usage.reserved > 0) {
+        add(
+          'error',
+          'asset-budget-reservations-open',
+          `仍有 ${usage.reserved} 次生图额度处于 reserved；请登记结果或显式关闭尝试。`,
+          'generation-attempts.jsonl',
+        );
+      }
+      if (usage.used > generatedImageBudget) {
+        add(
+          'error',
+          'asset-budget-exceeded',
+          `${project.plan.productionProfile ?? 'balanced'} 档位预算最多 ${generatedImageBudget} 次计费生图，尝试账本已记录 ${usage.used} 次。`,
+          'plan.assetBudget.maxGeneratedImages',
+        );
+      }
+    } else if (await fileExists(manifestFile)) {
       const manifest = await readJson(manifestFile);
       const generatedImages = countProviderGeneratedImages(manifest.assets);
       if (generatedImages > generatedImageBudget) {
         add(
-          'warning',
+          'error',
           'asset-budget-exceeded',
-          `${project.plan.productionProfile ?? 'balanced'} 档位预算最多 ${generatedImageBudget} 张生成图，当前记录 ${generatedImages} 张；请复用素材或在概念审批时显式升级档位。`,
+          `${project.plan.productionProfile ?? 'balanced'} 档位预算最多 ${generatedImageBudget} 张生成图，旧版 manifest 已记录 ${generatedImages} 张；请复用素材或在概念审批时显式升级档位。`,
           'plan.assetBudget.maxGeneratedImages',
         );
       }

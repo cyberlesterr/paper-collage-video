@@ -20,6 +20,11 @@ import {
   resolvePublicFile,
   writeJson,
 } from './project-lib.mjs';
+import {
+  loadSemanticContracts,
+  requiredChecksForSemanticBinding,
+  validateSemanticEvidenceTargets,
+} from './semantic-contract-lib.mjs';
 
 export const ASSET_QUALITY_CHECKS = [
   'no-text',
@@ -29,12 +34,22 @@ export const ASSET_QUALITY_CHECKS = [
   'style-consistent',
   'subject-complete',
   'identity-consistent',
+  'identity-distinct-within-frame',
+  'identity-family-consistent',
+  'cross-scene-identity-continuity',
   'cell-separation',
   'background-uniform',
   'edge-clean',
   'silhouette-fidelity',
   'negative-space-clean',
   'background-leak-free',
+  'mechanism-complete',
+  'load-path-readable',
+  'physical-plausibility',
+  'reference-conformant',
+  'diagram-edge-clean',
+  'small-text-legible',
+  'no-procedural-noise-on-semantic-lines',
 ];
 
 export const COMPOSITE_QUALITY_CHECKS = [
@@ -68,6 +83,8 @@ const QUALITY_PROFILES = {
   decorative: ['no-watermark', 'subject-complete', 'style-consistent'],
   'character-sheet': ['no-text', 'no-watermark', 'subject-complete', 'identity-consistent', 'cell-separation', 'background-uniform', 'style-consistent'],
   'style-sample': ['no-text', 'no-watermark', 'subject-complete', 'style-consistent'],
+  mechanism: ['no-watermark', 'subject-complete', 'edge-clean', 'mechanism-complete', 'load-path-readable', 'physical-plausibility', 'reference-conformant', 'style-consistent'],
+  diagram: ['subject-complete', 'diagram-edge-clean', 'small-text-legible', 'no-procedural-noise-on-semantic-lines', 'style-consistent'],
   image: ['no-watermark', 'subject-complete', 'style-consistent'],
 };
 
@@ -81,7 +98,20 @@ const qualityReportPath = (slug) => path.join(ROOT, 'projects', slug, 'quality-r
 export const compositionProofReportPath = (slug) => path.join(ROOT, 'dist', slug, 'composition-proof', 'report.json');
 
 const TOPOLOGY_ASSET_CHECKS = ['silhouette-fidelity', 'negative-space-clean', 'background-leak-free'];
-const EVIDENCE_REQUIRED_CHECKS = new Set([...TOPOLOGY_ASSET_CHECKS, 'motion-isolation-clean']);
+const EVIDENCE_REQUIRED_CHECKS = new Set([
+  ...TOPOLOGY_ASSET_CHECKS,
+  'motion-isolation-clean',
+  'identity-distinct-within-frame',
+  'identity-family-consistent',
+  'cross-scene-identity-continuity',
+  'mechanism-complete',
+  'load-path-readable',
+  'physical-plausibility',
+  'reference-conformant',
+  'diagram-edge-clean',
+  'small-text-legible',
+  'no-procedural-noise-on-semantic-lines',
+]);
 
 const hashFile = async (file) => createHash('sha256').update(await fs.readFile(file)).digest('hex');
 const runtimeAssetId = (file) => `runtime-${createHash('sha256').update(file).digest('hex').slice(0, 12)}`;
@@ -106,19 +136,27 @@ const readManifest = async (project) => {
   return (await fileExists(file)) ? readJson(file) : {schemaVersion: 3, projectSlug: project.slug, assets: []};
 };
 
-const collectQualityAssets = async (project, manifest) => {
+const collectQualityAssets = async (project, manifest, semanticContracts) => {
   const byFile = new Map();
-  const add = ({assetId, file, kind, source, requiredChecks}) => {
+  const add = ({assetId, file, kind, source, requiredChecks, semanticBinding = null}) => {
     const relativeFile = path.relative(ROOT, file);
     const existing = byFile.get(relativeFile);
     if (existing) {
       existing.sources = [...new Set([...existing.sources, source])];
-      if (['background', 'environment', 'character', 'prop'].includes(kind)) existing.kind = kind;
+      if (['background', 'environment', 'character', 'prop', 'mechanism', 'diagram'].includes(kind)) existing.kind = kind;
       if (requiredChecks?.length) existing.requiredChecks = [...new Set([...(existing.requiredChecks ?? []), ...requiredChecks])];
       if (assetId) existing.assetId = assetId;
+      if (semanticBinding) existing.semanticBinding = semanticBinding;
       return;
     }
-    byFile.set(relativeFile, {assetId: assetId || runtimeAssetId(relativeFile), file: relativeFile, kind, sources: [source], ...(requiredChecks?.length ? {requiredChecks} : {})});
+    byFile.set(relativeFile, {
+      assetId: assetId || runtimeAssetId(relativeFile),
+      file: relativeFile,
+      kind,
+      sources: [source],
+      semanticBinding,
+      ...(requiredChecks?.length ? {requiredChecks} : {}),
+    });
   };
 
   for (const scene of project.scenes ?? []) {
@@ -139,7 +177,19 @@ const collectQualityAssets = async (project, manifest) => {
 
   for (const record of manifest.assets ?? []) {
     if (record.capability !== 'image') continue;
-    add({assetId: record.assetId, file: assertWorkspaceFile(record.file), kind: inferManifestKind(record), source: `manifest:${record.assetId}`, requiredChecks: record.request?.quality?.requiredChecks});
+    const semanticBinding = record.semanticBinding ?? record.request?.semanticBinding ?? null;
+    const boundContracts = (semanticBinding?.contractIds ?? [])
+      .map((id) => semanticContracts.contracts.get(id))
+      .filter(Boolean);
+    const semanticChecks = requiredChecksForSemanticBinding(semanticBinding, boundContracts);
+    add({
+      assetId: record.assetId,
+      file: assertWorkspaceFile(record.file),
+      kind: inferManifestKind(record),
+      source: `manifest:${record.assetId}`,
+      requiredChecks: [...new Set([...(record.request?.quality?.requiredChecks ?? []), ...semanticChecks])],
+      semanticBinding,
+    });
   }
 
   const usedIds = new Set();
@@ -147,7 +197,11 @@ const collectQualityAssets = async (project, manifest) => {
     let assetId = asset.assetId;
     if (usedIds.has(assetId)) assetId = `${assetId}-${runtimeAssetId(asset.file).slice(-6)}`;
     usedIds.add(assetId);
-    return {...asset, assetId};
+    const semanticContractFingerprints = Object.fromEntries(
+      (asset.semanticBinding?.contractIds ?? [])
+        .map((id) => [id, semanticContracts.fingerprints.get(id) ?? null]),
+    );
+    return {...asset, assetId, semanticContractFingerprints};
   });
 };
 
@@ -172,6 +226,18 @@ const inspectTechnicalQuality = async ({asset, project}) => {
       {id: 'alpha-present', passed: inspection.hasAlpha && inspection.transparentPixels > 0, actual: inspection.hasAlpha},
       {id: 'key-edge-clean', passed: inspection.keyEdgeRatio <= 0.12, expected: '<= 0.12', actual: inspection.keyEdgeRatio},
     );
+  }
+  if (asset.semanticBinding?.riskClass === 'diagram-critical' && path.extname(file).toLowerCase() === '.svg') {
+    const svg = await fs.readFile(file, 'utf8');
+    for (const feature of ['feTurbulence', 'feDisplacementMap', 'feBlend']) {
+      const present = new RegExp(`<${feature}\\b`, 'i').test(svg);
+      checks.push({
+        id: `diagram-filter-${feature}`,
+        passed: !present,
+        expected: 'absent',
+        actual: present ? 'present' : 'absent',
+      });
+    }
   }
   return {passed: checks.every(({passed}) => passed), checks};
 };
@@ -253,6 +319,67 @@ export const collectCompositeQualityTargets = async (project, {manifest = null} 
         requiredChecks: COMPOSITE_PROFILES.cue,
         cue,
       });
+    }
+  }
+  const semanticContracts = await loadSemanticContracts(project.slug);
+  if (semanticContracts.document?.status === 'ready' && semanticContracts.issues.length === 0) {
+    const targetIssues = validateSemanticEvidenceTargets(semanticContracts.document, project);
+    if (targetIssues.length) throw new Error(targetIssues.join('\n'));
+    const sceneById = new Map((project.scenes ?? []).map((scene) => [scene.id, scene]));
+    for (const contract of semanticContracts.document.contracts) {
+      for (const evidenceTarget of contract.evidenceTargets) {
+        const proofShots = evidenceTarget.shots.map((shot) => ({
+          sceneId: shot.sceneId,
+          nodeId: shot.nodeId ?? 'scene',
+          proofTimeIds: shot.proofTimeIds,
+        }));
+        const sources = [];
+        const memberNodeIds = [];
+        const sceneEvidence = [];
+        for (const shot of proofShots) {
+          const scene = sceneById.get(shot.sceneId);
+          if (!scene) throw new Error(`${contract.id}/${evidenceTarget.id} 引用了未知场景 ${shot.sceneId}。`);
+          const targetNode = shot.nodeId === 'scene' ? null : findNode(scene, shot.nodeId);
+          if (shot.nodeId !== 'scene' && !targetNode) {
+            throw new Error(`${contract.id}/${evidenceTarget.id} 引用了未知节点 ${shot.nodeId}。`);
+          }
+          const nodes = targetNode
+            ? (targetNode.kind === 'asset' ? [targetNode] : descendants(targetNode).filter(({kind}) => kind === 'asset'))
+            : collectCompositionAssets(scene.composition).map(({node}) => node);
+          sources.push(...nodes.map(({src}) => src));
+          memberNodeIds.push(...nodes.map(({id}) => id));
+          sceneEvidence.push({
+            sceneId: scene.id,
+            nodeId: shot.nodeId,
+            proofTimes: (scene.motion?.proofTimes ?? []).filter(({id}) => shot.proofTimeIds.includes(id)),
+            camera: scene.camera,
+            cues: scene.cues,
+          });
+        }
+        const memberHashes = await hashReferencedFiles(sources);
+        const fingerprint = hashCompositionValue({
+          contract,
+          evidenceTarget,
+          contractFingerprint: semanticContracts.fingerprints.get(contract.id),
+          sceneEvidence,
+          memberHashes,
+        });
+        targets.push({
+          compositeId: `semantic:${contract.id}:${evidenceTarget.id}`,
+          sceneId: proofShots[0].sceneId,
+          pattern: 'semantic-contract',
+          nodeId: proofShots[0].nodeId,
+          memberNodeIds: [...new Set(memberNodeIds)],
+          memberHashes,
+          compositionHash: hashCompositionValue({contract, evidenceTarget}),
+          fingerprint,
+          proofTimeIds: [...new Set(proofShots.flatMap(({proofTimeIds}) => proofTimeIds))],
+          proofShots,
+          requiredChecks: evidenceTarget.checks,
+          contractId: contract.id,
+          contractKind: contract.kind,
+        });
+      }
     }
   }
   return targets;
@@ -376,18 +503,27 @@ export const prepareQualityReport = async (slug, {write = true} = {}) => {
   const file = qualityReportPath(slug);
   const existing = (await fileExists(file)) ? await readJson(file) : null;
   const manifest = await readManifest(project);
+  const semanticContracts = await loadSemanticContracts(slug);
+  if (semanticContracts.issues.length) {
+    throw new Error(
+      semanticContracts.issues.map(({location, message}) => `${location}: ${message}`).join('\n'),
+    );
+  }
   const previousAssets = new Map((existing?.assets ?? []).map((entry) => [entry.assetId, entry]));
   const previousComposites = new Map((existing?.composites ?? []).map((entry) => [entry.compositeId, entry]));
-  const assets = await collectQualityAssets(project, manifest);
+  const assets = await collectQualityAssets(project, manifest, semanticContracts);
   const inspectedAssets = await Promise.all(assets.map(async (asset) => {
     const absoluteFile = assertWorkspaceFile(asset.file);
     const sha256 = (await fileExists(absoluteFile)) ? await hashFile(absoluteFile) : null;
     const requiredChecks = [...new Set(asset.requiredChecks?.length ? asset.requiredChecks : QUALITY_PROFILES[asset.kind] ?? QUALITY_PROFILES.image)];
     const unknownChecks = requiredChecks.filter((check) => !ASSET_QUALITY_CHECKS.includes(check));
     if (unknownChecks.length) throw new Error(`${asset.assetId} 含未知资产质量检查：${unknownChecks.join(', ')}`);
-    const review = await preservedReview({previous: previousAssets.get(asset.assetId), fingerprint: sha256, requiredChecks});
+    const fingerprint = asset.semanticBinding
+      ? hashCompositionValue({sha256, semanticBinding: asset.semanticBinding, semanticContractFingerprints: asset.semanticContractFingerprints})
+      : sha256;
+    const review = await preservedReview({previous: previousAssets.get(asset.assetId), fingerprint, requiredChecks});
     const technical = await inspectTechnicalQuality({asset, project});
-    return {...asset, sha256, requiredChecks, technical, ...review, status: entryStatus({technical, semanticChecks: review.semanticChecks})};
+    return {...asset, sha256, fingerprint, requiredChecks, technical, ...review, status: entryStatus({technical, semanticChecks: review.semanticChecks})};
   }));
 
   const proofFile = compositionProofReportPath(slug);
@@ -454,7 +590,7 @@ export const recordQualityReviews = async ({slug, reviews}) => {
       evidenceFiles.push({file: path.relative(ROOT, absoluteFile), sha256: await hashFile(absoluteFile)});
     }
     if (passedChecks.some((check) => EVIDENCE_REQUIRED_CHECKS.has(check)) && evidenceFiles.length === 0) {
-      throw new Error(`${reviewId} 的拓扑质量检查必须提供 evidenceFiles。`);
+      throw new Error(`${reviewId} 的证据型质量检查必须提供 evidenceFiles。`);
     }
     normalized.push({entry, reviewId, reviewer: review.reviewer.trim(), passedChecks, failedChecks, note: (review.note ?? '').trim(), evidenceFiles});
   }

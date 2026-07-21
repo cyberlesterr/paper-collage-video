@@ -18,7 +18,7 @@ try {
   const providerId = valueFor('--provider') ?? 'auto';
   if (!requestInput) {
     throw new Error(
-      '用法：provider:record -- --request=<request.json> [--provider=<id>] [--model=<model>] [--external-id=<id>]',
+      '用法：provider:record -- --request=<request.json> [--provider=<id>] [--model=<model>] [--external-id=<id>] [--attempt-id=<id>]',
     );
   }
   const loadedRequest = await loadAssetRequest(requestInput);
@@ -36,6 +36,7 @@ try {
     provider,
     model: valueFor('--model'),
     externalId: valueFor('--external-id'),
+    attemptId: valueFor('--attempt-id'),
   });
   console.log(`✓ 已登记资产：${recorded.record.file}`);
   console.log(`✓ 资产溯源：${path.relative(ROOT, recorded.manifestFile)}`);

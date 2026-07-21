@@ -79,6 +79,7 @@ try {
   const frameDirectory = path.join(outputDirectory, 'frames');
   const cropDirectory = path.join(outputDirectory, 'crops');
   const debugDirectory = path.join(outputDirectory, 'debug');
+  await fs.rm(outputDirectory, {recursive: true, force: true});
   await fs.mkdir(frameDirectory, {recursive: true});
   await fs.mkdir(cropDirectory, {recursive: true});
   await fs.mkdir(debugDirectory, {recursive: true});
@@ -108,28 +109,37 @@ try {
   const targets = await collectCompositeQualityTargets(project);
   const composites = [];
   for (const target of targets) {
-    const scene = sceneById.get(target.sceneId);
     const proofFrames = [];
-    for (const proofTimeId of target.proofTimeIds) {
-      const renderedProof = rendered.get(`${target.sceneId}:${proofTimeId}`);
-      if (!renderedProof) continue;
-      const bounds = findTargetBounds({scene, nodeId: target.nodeId, video: project.video});
-      const safeId = target.compositeId.replace(/[^a-z0-9-]+/gi, '-').toLowerCase();
-      const cropFile = path.join(cropDirectory, `${safeId}-${proofTimeId}.png`);
-      const debugFile = path.join(debugDirectory, `${safeId}-${proofTimeId}.png`);
-      await sharp(renderedProof.file).extract(bounds).png().toFile(cropFile);
-      await sharp(renderedProof.file)
-        .composite([{input: debugOverlay({width: project.video.width, height: project.video.height, bounds, label: `${target.compositeId} · ${proofTimeId}`})}])
-        .png()
-        .toFile(debugFile);
-      proofFrames.push({
-        proofTimeId,
-        absoluteFrame: renderedProof.absoluteFrame,
-        fullFrame: path.relative(ROOT, renderedProof.file),
-        crop: path.relative(ROOT, cropFile),
-        debugFrame: path.relative(ROOT, debugFile),
-        bounds,
-      });
+    const proofShots = target.proofShots ?? [{
+      sceneId: target.sceneId,
+      nodeId: target.nodeId,
+      proofTimeIds: target.proofTimeIds,
+    }];
+    for (const shot of proofShots) {
+      const scene = sceneById.get(shot.sceneId);
+      if (!scene) continue;
+      for (const proofTimeId of shot.proofTimeIds) {
+        const renderedProof = rendered.get(`${shot.sceneId}:${proofTimeId}`);
+        if (!renderedProof) continue;
+        const bounds = findTargetBounds({scene, nodeId: shot.nodeId, video: project.video});
+        const safeId = target.compositeId.replace(/[^a-z0-9-]+/gi, '-').toLowerCase();
+        const cropFile = path.join(cropDirectory, `${safeId}-${shot.sceneId}-${proofTimeId}.png`);
+        const debugFile = path.join(debugDirectory, `${safeId}-${shot.sceneId}-${proofTimeId}.png`);
+        await sharp(renderedProof.file).extract(bounds).png().toFile(cropFile);
+        await sharp(renderedProof.file)
+          .composite([{input: debugOverlay({width: project.video.width, height: project.video.height, bounds, label: `${target.compositeId} · ${shot.sceneId} · ${proofTimeId}`})}])
+          .png()
+          .toFile(debugFile);
+        proofFrames.push({
+          sceneId: shot.sceneId,
+          proofTimeId,
+          absoluteFrame: renderedProof.absoluteFrame,
+          fullFrame: path.relative(ROOT, renderedProof.file),
+          crop: path.relative(ROOT, cropFile),
+          debugFrame: path.relative(ROOT, debugFile),
+          bounds,
+        });
+      }
     }
     composites.push({
       compositeId: target.compositeId,

@@ -6,7 +6,7 @@
   "required": ["schemaVersion", "projectSlug", "assetId", "capability", "output"],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 2},
+    "schemaVersion": {"enum": [2, 3]},
     "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "assetId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "capability": {"enum": ["text", "image", "voice"]},
@@ -53,15 +53,52 @@
       ],
       "additionalProperties": false
     },
+    "semanticBinding": {
+      "type": "object",
+      "required": ["riskClass", "contractIds"],
+      "properties": {
+        "riskClass": {"enum": ["decorative", "identity-critical", "topology-critical", "mechanism-critical", "diagram-critical"]},
+        "contractIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}
+        },
+        "generationFamily": {
+          "type": "object",
+          "required": ["familyId", "memberIds", "referenceAssetIds"],
+          "properties": {
+            "familyId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+            "memberIds": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}},
+            "referenceAssetIds": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}}
+          },
+          "additionalProperties": false
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"riskClass": {"const": "decorative"}}},
+          "then": {"properties": {"contractIds": {"maxItems": 0}}}
+        },
+        {
+          "if": {"properties": {"riskClass": {"const": "identity-critical"}}},
+          "then": {"required": ["generationFamily"], "properties": {"contractIds": {"minItems": 1}}}
+        },
+        {
+          "if": {"properties": {"riskClass": {"enum": ["topology-critical", "mechanism-critical", "diagram-critical"]}}},
+          "then": {"properties": {"contractIds": {"minItems": 1}}}
+        }
+      ],
+      "additionalProperties": false
+    },
     "quality": {
       "type": "object",
       "properties": {
-        "kind": {"enum": ["background", "environment", "character", "prop", "decorative", "character-sheet", "style-sample", "image"]},
+        "kind": {"enum": ["background", "environment", "character", "prop", "decorative", "character-sheet", "style-sample", "mechanism", "diagram", "image"]},
         "requiredChecks": {
           "type": "array",
           "minItems": 1,
           "uniqueItems": true,
-          "items": {"enum": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent", "subject-complete", "identity-consistent", "cell-separation", "background-uniform", "edge-clean", "silhouette-fidelity", "negative-space-clean", "background-leak-free"]}
+          "items": {"enum": ["no-text", "no-watermark", "no-people", "safe-area-clear", "style-consistent", "subject-complete", "identity-consistent", "identity-distinct-within-frame", "identity-family-consistent", "cross-scene-identity-continuity", "cell-separation", "background-uniform", "edge-clean", "silhouette-fidelity", "negative-space-clean", "background-leak-free", "mechanism-complete", "load-path-readable", "physical-plausibility", "reference-conformant", "diagram-edge-clean", "small-text-legible", "no-procedural-noise-on-semantic-lines"]}
         }
       },
       "additionalProperties": false
@@ -71,6 +108,7 @@
   "allOf": [
     {"if": {"properties": {"capability": {"const": "text"}}}, "then": {"required": ["prompt"]}},
     {"if": {"properties": {"capability": {"const": "image"}}}, "then": {"required": ["prompt", "compositionBinding"]}},
+    {"if": {"properties": {"capability": {"const": "image"}, "schemaVersion": {"const": 3}}, "then": {"required": ["semanticBinding"]}},
     {"if": {"properties": {"capability": {"const": "voice"}}}, "then": {"required": ["text"]}}
   ]
 }

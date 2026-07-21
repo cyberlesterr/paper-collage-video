@@ -74,8 +74,10 @@ test('packaged runtime is lightweight and independent from production projects',
   assert.equal(packageJson.scripts['provider:status'], 'node scripts/provider-status.mjs');
   assert.equal(packageJson.scripts['provider:select'], 'node scripts/provider-select.mjs');
   assert.equal(packageJson.scripts['provider:reuse'], 'node scripts/provider-reuse.mjs');
+  assert.equal(packageJson.scripts['provider:attempt'], 'node scripts/provider-attempt.mjs');
   assert.equal(packageJson.scripts['project:plan'], 'node scripts/project-plan.mjs');
   assert.equal(packageJson.scripts['project:storyboard'], 'node scripts/project-storyboard.mjs');
+  assert.equal(packageJson.scripts['project:semantic-contracts'], 'node scripts/project-semantic-contracts.mjs');
   assert.equal(
     packageJson.scripts['project:confirm-concept'],
     'node scripts/project-confirm-concept.mjs',
@@ -119,6 +121,9 @@ test('packaged runtime is lightweight and independent from production projects',
   for (const relative of [
     'scripts/production-state.mjs',
     'scripts/provider-lib.mjs',
+    'scripts/generation-attempt-lib.mjs',
+    'scripts/semantic-contract-lib.mjs',
+    'scripts/provider-attempt.mjs',
     'scripts/provider-reuse.mjs',
     'scripts/provider-select.mjs',
     'scripts/python-runtime.mjs',
@@ -129,6 +134,7 @@ test('packaged runtime is lightweight and independent from production projects',
     'scripts/creative-plan-lib.mjs',
     'scripts/composition-lib.mjs',
     'scripts/project-composition-proof.mjs',
+    'scripts/project-semantic-contracts.mjs',
     'scripts/project-plan.mjs',
     'scripts/project-storyboard.mjs',
     'scripts/storyboard-lib.mjs',
@@ -140,10 +146,14 @@ test('packaged runtime is lightweight and independent from production projects',
     'src/ReplicaChapterScene.tsx',
     'src/project.ts',
     'schemas/project.schema.json',
+    'schemas/semantic-contracts.schema.json',
+    'schemas/generation-attempt.schema.json',
     'schemas/storyboard.schema.json',
     'schemas/providers.schema.json',
     'schemas/quality-report.schema.json',
     'templates/project/production.json',
+    'templates/project/semantic-contracts.json',
+    'templates/project/generation-attempts.jsonl',
     'templates/project/storyboard.json',
     'templates/project/quality-report.json',
     'providers.json',

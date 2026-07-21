@@ -19,7 +19,7 @@ Draft minimum coherent beats and estimate spoken duration before resolving the p
 - `balanced` (default): backgrounds per scene, shared character sheets, and independent depth assets for a few hero locations.
 - `full-depth`: maximum parallax and pose variety; use only when the human accepts the larger asset/cost budget.
 
-`project:plan` derives a generated-image ceiling from the profile and scene count. Count the style sample, unique generated backgrounds, environment layers, and character sheets. Reused files and deterministic alpha extractions do not consume new generation budget.
+`project:plan` derives a provider-generation attempt ceiling from the profile and scene count. Count the style sample, unique generated backgrounds, environment layers, character sheets, rejected results, and abandoned results when quota was consumed. Exact reuse and deterministic alpha extractions do not consume a new attempt.
 
 ```bash
 npm run project:plan -- <slug> \

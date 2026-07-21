@@ -6,9 +6,17 @@ Read this before style sampling, bulk images, v4 composition authoring, proof re
 
 `quality-report.json` v2 contains `assets` and `composites`. A passing file does not prove that a person is inside a boat or trees remain above water. Both scopes must pass.
 
-Run `project:quality <slug> prepare` after files exist. Inspect original-resolution assets in small same-type batches and record their required semantic checks. SHA-256 changes invalidate only affected file reviews.
+Run `project:quality <slug> prepare` after files exist. Inspect original-resolution assets in small same-type batches and record their required semantic checks. SHA-256 changes invalidate affected file reviews; changing a bound semantic contract or generation family also invalidates them.
 
 Registered members add topology-sensitive asset checks: `silhouette-fidelity`, `negative-space-clean`, and `background-leak-free`. A `supported-subject` composite also requires `motion-isolation-clean`. Passing any of those checks requires `evidenceFiles` from the current proof bundle. `key-edge-clean` only detects matte/color contamination; hard 0/255 alpha can pass that check while still deleting a limb or carrying background pixels.
+
+Semantic risk adds evidence-backed checks:
+
+- identity: `identity-family-consistent`, `identity-distinct-within-frame`, `cross-scene-identity-continuity`;
+- mechanism: `mechanism-complete`, `load-path-readable`, `physical-plausibility`, `reference-conformant`;
+- diagram: `diagram-edge-clean`, `small-text-legible`, `no-procedural-noise-on-semantic-lines`.
+
+The runtime deterministically rejects `feTurbulence`, `feDisplacementMap`, and `feBlend` in diagram-critical SVG files. Raster diagrams and physical correctness still require original-resolution semantic evidence.
 
 For style-gate coupled topology, run:
 
@@ -62,6 +70,8 @@ Inspect full proof frames, relationship crops, and debug frames. Record composit
 }
 ```
 
+Semantic targets use ids such as `semantic:recurring-cast:cast-comparison`. When a target spans scenes, inspect every generated crop together before passing continuity. When a mechanism target is reviewed, explicitly compare its crop with the declared parts, connections, load paths, degrees of freedom, forbidden forms, and reference evidence.
+
 ```bash
 npm run project:quality -- <slug> record-batch --input=<reviews.json> --quiet
 ```
@@ -74,6 +84,7 @@ Replacing or editing a recorded evidence file also invalidates its review. At th
 - `supported-subject`: support contact, readable inside/on relation, visible front occlusion, shared carrier motion, identity continuity, and clean subject isolation under relative motion.
 - `registered-environment`: registration alignment, boundary respected, no duplicated semantic band, readable depth, readable final composition.
 - bound cue: visual event visible, sound event bound when required, proof time bound, final state preserved.
+- semantic contract: every requested check is visible in its exact target shots; cross-scene checks compare all bound scenes rather than one attractive frame.
 
 Deterministic checks already block missing slots, mismatched canvases, duplicate carrier motion, off-zone contacts, absent front alpha, incomplete upper/lower clips, duplicate semantic coverage, invalid targets, missing required sounds, out-of-window proofs, stale style fingerprints, and missing topology evidence. They do not infer whether every semantic part is intact; that remains evidence-backed semantic review.
 
