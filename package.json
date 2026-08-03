@@ -93,7 +93,7 @@
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
-    "@remotion/cli": "4.0.499",
+    "@remotion/cli": "4.0.502",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "remotion": "4.0.499"
