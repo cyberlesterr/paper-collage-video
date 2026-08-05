@@ -244,13 +244,28 @@
             "single-background",
             "rigid-master",
             "registered-layer-sheet",
-            "context-preserving-layer-edits"
+            "context-preserving-layer-edits",
+            "canonical-frame-with-content-sheet"
           ]
         },
+        "stateFamilyId": {"type": "string", "minLength": 1},
         "providerCalls": {"type": "integer", "minimum": 1},
         "localDerivatives": {"type": "integer", "minimum": 0},
         "avoidedCalls": {"type": "integer", "minimum": 0}
       },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "strategy": {"const": "canonical-frame-with-content-sheet"}
+            }
+          },
+          "then": {"required": ["stateFamilyId"]},
+          "else": {
+            "not": {"required": ["stateFamilyId"]}
+          }
+        }
+      ],
       "additionalProperties": false
     },
     "scene": {

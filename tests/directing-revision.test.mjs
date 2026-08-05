@@ -7,6 +7,7 @@ import {
   storyboardConceptFingerprint,
 } from '../scripts/directing-revision-lib.mjs';
 import {compileStoryboardDirecting} from '../scripts/storyboard-lib.mjs';
+import {buildProviderRootPlan} from '../scripts/provider-root-plan-lib.mjs';
 import {
   directingRevisionAuthoring,
   directingRevisionPlan,
@@ -201,6 +202,10 @@ test('human-authorized semantic revision records changed meaning and recalculate
       optionFingerprint: 'b'.repeat(64),
       expectedProviderImageCalls: 1,
       proposedImageAttemptLimit: 1,
+      providerRootPlan: buildProviderRootPlan({
+        id: 'draft',
+        scenes: [],
+      }),
       selectedAt: '2026-07-23T00:00:00.000Z',
     },
     profilePromise: {

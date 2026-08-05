@@ -43,6 +43,7 @@ import {
   validateCanonicalContainerIntent,
 } from './container-source-plan-lib.mjs';
 import {assertWorldTopologyBinding} from './world-topology-proof-lib.mjs';
+import {assertScenarioRootRequest} from './provider-root-plan-lib.mjs';
 
 export const PROVIDER_CAPABILITIES = ['text', 'image', 'voice'];
 export const PROVIDER_ADAPTERS = ['host', 'command', 'manual'];
@@ -150,6 +151,7 @@ export const createRequestFingerprint = ({request, providerId, model}) => {
     outputSurface: request.outputSurface ?? null,
     providerSource: request.providerSource ?? null,
     worldTopologyBinding: request.worldTopologyBinding ?? null,
+    scenarioRootBinding: request.scenarioRootBinding ?? null,
     providerId,
   };
   return createHash('sha256')
@@ -715,6 +717,21 @@ export const validateAssetRequest = (request) => {
   }
   if (request?.capability === 'image' && !isPlainObject(request.semanticBinding)) {
     errors.push('schema-v8 image request 缺少 semanticBinding');
+  }
+  if (request?.scenarioRootBinding !== undefined) {
+    const binding = request.scenarioRootBinding;
+    if (
+      request.capability !== 'image' ||
+      !isPlainObject(binding) ||
+      binding.schemaVersion !== 1 ||
+      !/^[a-f0-9]{64}$/.test(binding.planFingerprint ?? '') ||
+      typeof binding.rootId !== 'string' ||
+      !binding.rootId
+    ) {
+      errors.push(
+        'scenarioRootBinding 只能用于 image request，且必须声明 schemaVersion、planFingerprint 和 rootId',
+      );
+    }
   }
   if (request?.providerSource !== undefined) {
     const source = request.providerSource;
@@ -1528,6 +1545,10 @@ export const loadAssetRequest = async (requestInput) => {
     if (!project.styleProfile) {
       throw new Error('image request 只能在项目确认 executable styleProfile 后执行');
     }
+    assertScenarioRootRequest({
+      request,
+      scenarioBinding: project.plan?.scenarioBinding ?? null,
+    });
     const expectedStyleBinding = styleProfileBinding(project.styleProfile);
     if (
       JSON.stringify(stableValue(request.styleProfileBinding)) !==

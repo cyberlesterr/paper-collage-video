@@ -10,6 +10,7 @@ import {
   assertIntakeConfirmed,
   intakeDecisionFingerprint,
 } from './intake-lib.mjs';
+import {buildProviderRootPlan} from './provider-root-plan-lib.mjs';
 
 export const STORY_SCOPE_BY_PROFILE = {
   draft: 'concise',
@@ -60,6 +61,8 @@ const SOURCE_PACKAGE_COSTS = {
     avoidedCalls: 0,
   },
 };
+const CANONICAL_CONTAINER_SOURCE_STRATEGY =
+  'canonical-frame-with-content-sheet';
 
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const isPositive = (value) =>
@@ -145,6 +148,19 @@ const collectStateFamilies = (scenes) => {
       families.set(family.id, current);
     }
   }
+  return families;
+};
+
+const collectProviderStateFamilies = (scenes) => {
+  const families = collectStateFamilies(scenes);
+  const sourceOwnedFamilyIds = new Set(
+    scenes.flatMap((scene) =>
+      (scene.sourcePackages ?? [])
+        .map(({stateFamilyId}) => stateFamilyId)
+        .filter(Boolean),
+    ),
+  );
+  for (const familyId of sourceOwnedFamilyIds) families.delete(familyId);
   return families;
 };
 
@@ -292,15 +308,32 @@ const compileSemanticActionCoverage = ({option, semanticActions}) => {
 };
 
 const compileProviderEstimate = (option, assetBudget) => {
-  const families = collectStateFamilies(option.scenes);
+  const allFamilies = collectStateFamilies(option.scenes);
+  const families = collectProviderStateFamilies(option.scenes);
   const sourcePackages = option.scenes.flatMap(
     ({sourcePackages}) => sourcePackages ?? [],
   );
   for (const source of sourcePackages) {
-    const expected = SOURCE_PACKAGE_COSTS[source.strategy];
+    let expected = SOURCE_PACKAGE_COSTS[source.strategy];
+    if (source.strategy === CANONICAL_CONTAINER_SOURCE_STRATEGY) {
+      const family = allFamilies.get(source.stateFamilyId);
+      if (!family) {
+        throw new Error(
+          `${option.id}.${source.id}.stateFamilyId 必须绑定当前 scenario 中真实规划的状态家族。`,
+        );
+      }
+      expected = {
+        providerCalls: 3,
+        localDerivatives: family.states.size + 1,
+        avoidedCalls: Math.max(1, family.states.size - 1),
+      };
+    }
     if (!expected) {
       throw new Error(
-        `${option.id}.${source.id}.strategy 必须是 ${Object.keys(SOURCE_PACKAGE_COSTS).join('、')}。`,
+        `${option.id}.${source.id}.strategy 必须是 ${[
+          ...Object.keys(SOURCE_PACKAGE_COSTS),
+          CANONICAL_CONTAINER_SOURCE_STRATEGY,
+        ].join('、')}。`,
       );
     }
     for (const key of ['providerCalls', 'localDerivatives', 'avoidedCalls']) {
@@ -562,6 +595,7 @@ export const assertPlanningScenariosReady = (
 export const scenarioDecisionFor = (scenarios, optionId) => {
   const option = scenarios.options.find(({id}) => id === optionId);
   if (!option) throw new Error(`未知 scenario：${optionId}。`);
+  const providerRootPlan = buildProviderRootPlan(option);
   return {
     scenarioSetFingerprint: scenarios.fingerprint,
     optionId: option.id,
@@ -570,6 +604,7 @@ export const scenarioDecisionFor = (scenarios, optionId) => {
     durationSeconds: option.durationSeconds,
     sceneCount: option.sceneCount,
     expectedProviderImageCalls: option.providerEstimate.expectedImageCalls,
+    providerRootPlanFingerprint: providerRootPlan.fingerprint,
     proposedImageAttemptLimit:
       option.providerEstimate.proposedImageAttemptLimit,
     profileHardCeiling: option.providerEstimate.hardCeiling,
@@ -588,12 +623,20 @@ export const assertStoryboardMatchesScenario = (
   option,
   directingSummary,
 ) => {
-  const scenarioFamilies = collectStateFamilies(option.scenes);
+  const scenarioFamilies = collectProviderStateFamilies(option.scenes);
   const compiledFamilies = new Map(
     (directingSummary?.poseSheetPlans ?? []).map((family) => [
       family.poseFamilyId,
       family,
     ]),
+  );
+  const compiledCanonicalFamilies = new Map(
+    (directingSummary?.generationBudget?.sourcePackagePlans ?? [])
+      .filter(({pattern}) => pattern === 'canonical-container')
+      .map((plan) => [
+        plan.familyId,
+        {stateIds: (plan.states ?? []).map(({id}) => id)},
+      ]),
   );
   if (
     scenarioFamilies.size !== compiledFamilies.size ||
@@ -613,7 +656,9 @@ export const assertStoryboardMatchesScenario = (
   }
   for (const coverage of option.semanticActionCoverage ?? []) {
     if (coverage.execution !== 'registered-state') continue;
-    const family = compiledFamilies.get(coverage.stateRef.poseFamilyId);
+    const family =
+      compiledFamilies.get(coverage.stateRef.poseFamilyId) ??
+      compiledCanonicalFamilies.get(coverage.stateRef.poseFamilyId);
     if (!family?.stateIds?.includes(coverage.stateRef.stateId)) {
       throw new Error(
         `storyboard 未执行批准的关键动作 ${coverage.actionId}：缺少 ${coverage.stateRef.poseFamilyId}/${coverage.stateRef.stateId}。`,
@@ -652,9 +697,15 @@ export const assertStoryboardMatchesScenario = (
   }
   const structuralCalls =
     (directingSummary?.generationBudget?.expectedProviderImageCalls ?? 0);
-  if (structuralCalls + 1 > option.providerEstimate.expectedImageCalls) {
+  const singleBackgroundCalls = [...scenarioSources.values()]
+    .filter(({strategy}) => strategy === 'single-background')
+    .reduce((total, source) => total + source.providerCalls, 0);
+  const completeExpectedCalls =
+    structuralCalls + singleBackgroundCalls + 1;
+  if (completeExpectedCalls !== option.providerEstimate.expectedImageCalls) {
     throw new Error(
-      `storyboard 结构化素材加风格样张需要 ${structuralCalls + 1} 次图片调用，超过批准 scenario 的 ${option.providerEstimate.expectedImageCalls} 次。`,
+      `storyboard 结构化素材、single-background 与风格样张合计必须精确为 ` +
+        `${option.providerEstimate.expectedImageCalls} 次图片调用，当前为 ${completeExpectedCalls} 次。`,
     );
   }
   return {
@@ -683,8 +734,18 @@ export const buildCreativePlanFromScenario = ({
     rationale: option.rationale,
     at,
   });
-  const families = collectStateFamilies(option.scenes);
+  const families = collectProviderStateFamilies(option.scenes);
   const fulfillment = summarizeScenarioFulfillment(option);
+  const providerRootPlan = buildProviderRootPlan(option);
+  if (
+    providerRootPlan.roots.length !==
+    option.providerEstimate.expectedImageCalls
+  ) {
+    throw new Error(
+      `scenario provider 根资产计划为 ${providerRootPlan.roots.length} 个，` +
+        `但预计调用为 ${option.providerEstimate.expectedImageCalls} 次。`,
+    );
+  }
   const scenarioMotionBudget = {
     maxPoseSheetCalls: Math.max(
       base.motionBudget.maxPoseSheetCalls,
@@ -715,6 +776,7 @@ export const buildCreativePlanFromScenario = ({
       expectedProviderImageCalls: option.providerEstimate.expectedImageCalls,
       proposedImageAttemptLimit:
         option.providerEstimate.proposedImageAttemptLimit,
+      providerRootPlan,
       selectedAt: at,
     },
     profilePromise: option.profilePromise,

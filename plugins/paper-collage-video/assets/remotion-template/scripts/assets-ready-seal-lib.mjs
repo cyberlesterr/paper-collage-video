@@ -20,6 +20,7 @@ const stableValidation = (report) => ({
   project: report.project,
   plan: report.plan,
   providerBudget: report.providerBudget,
+  providerRealization: report.providerRealization,
   passed: report.passed,
   summary: report.summary,
   timeline: report.timeline,

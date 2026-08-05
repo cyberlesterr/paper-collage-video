@@ -88,6 +88,7 @@ export const RUNTIME_EXPLICIT_INPUTS = [
   'scripts/observed-key-plane-lib.mjs',
   'scripts/provider-attempt.mjs',
   'scripts/provider-lib.mjs',
+  'scripts/provider-root-plan-lib.mjs',
   'scripts/provider-recover-rejected-source.mjs',
   'scripts/project-composition-proof.mjs',
   'scripts/project-world-topology-proof.mjs',
@@ -417,3 +418,31 @@ export const createRuntimeBuildManifest = async ({root = RUNTIME_ROOT} = {}) => 
 
 export const createRuntimeBuildFingerprint = async (options) =>
   (await createRuntimeBuildManifest(options)).fingerprint;
+
+export const assertRuntimeBuildManifestCurrent = async ({
+  root = RUNTIME_ROOT,
+} = {}) => {
+  const file = path.join(root, 'runtime-build.json');
+  let recorded;
+  try {
+    recorded = JSON.parse(await fs.readFile(file, 'utf8'));
+  } catch (error) {
+    throw new Error(`无法读取 runtime-build.json：${error.message}`);
+  }
+  const current = await createRuntimeBuildManifest({root});
+  if (JSON.stringify(recorded) !== JSON.stringify(current)) {
+    const changedFiles = new Set([
+      ...Object.keys(recorded?.files ?? {}),
+      ...Object.keys(current.files),
+    ]);
+    const drift = [...changedFiles]
+      .filter((relative) => recorded?.files?.[relative] !== current.files[relative])
+      .slice(0, 8);
+    throw new Error(
+      `runtime-build.json 与当前可执行文件不一致` +
+        `${drift.length ? `：${drift.join(', ')}` : ''}；` +
+        '请从已同步的插件重新 bootstrap 工作区，或在源仓库完成正式 plugin:sync。',
+    );
+  }
+  return current;
+};

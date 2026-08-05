@@ -59,6 +59,11 @@ import {
 import {validateProductionContracts} from './world-trajectory-lib.mjs';
 import {validateSpatialContracts} from './spatial-contract-lib.mjs';
 import {validateEncounterExecution} from './encounter-contract-lib.mjs';
+import {
+  assessProviderRootRealization,
+  buildProviderRootPlan,
+} from './provider-root-plan-lib.mjs';
+import {assertPlanningScenariosReady} from './planning-scenario-lib.mjs';
 
 const execFileAsync = promisify(execFile);
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
@@ -642,6 +647,50 @@ export const validateProject = async (project, options = {}) => {
     }
     if (project.plan?.status !== 'resolved') {
       add('error', 'plan-pending', '创作规格尚未补全；请先运行 project:plan。', 'plan');
+    }
+    if (project.plan?.scenarioBinding) {
+      const planningScenariosFile = path.join(
+        ROOT,
+        'projects',
+        project.slug,
+        'planning-scenarios.json',
+      );
+      try {
+        const scenarios = assertPlanningScenariosReady(
+          await readJson(planningScenariosFile),
+          {slug: project.slug, intake: project.intake},
+        );
+        const option = scenarios.options.find(
+          ({id}) => id === project.plan.scenarioBinding.optionId,
+        );
+        const expectedRootPlan = option
+          ? buildProviderRootPlan(option)
+          : null;
+        if (
+          scenarios.fingerprint !==
+            project.plan.scenarioBinding.scenarioSetFingerprint ||
+          option?.fingerprint !==
+            project.plan.scenarioBinding.optionFingerprint ||
+          option?.providerEstimate?.expectedImageCalls !==
+            project.plan.scenarioBinding.expectedProviderImageCalls ||
+          JSON.stringify(expectedRootPlan) !==
+            JSON.stringify(project.plan.scenarioBinding.providerRootPlan)
+        ) {
+          add(
+            'error',
+            'scenario-provider-root-plan-drift',
+            'scenarioBinding/providerRootPlan 必须与当前批准 planning-scenarios 选项完全一致。',
+            'plan.scenarioBinding.providerRootPlan',
+          );
+        }
+      } catch (error) {
+        add(
+          'error',
+          'planning-scenarios-invalid',
+          `无法验证 scenario provider 根资产计划：${error.message}`,
+          'planning-scenarios.json',
+        );
+      }
     }
   }
 
@@ -1564,6 +1613,20 @@ export const validateProject = async (project, options = {}) => {
     used: usage.used,
     reserved: usage.reserved,
   };
+  const providerRealization = project.plan?.scenarioBinding
+    ? assessProviderRootRealization({
+        scenarioBinding: project.plan.scenarioBinding,
+        manifest: manifest ?? {assets: []},
+      })
+    : null;
+  for (const message of providerRealization?.issues ?? []) {
+    add(
+      'error',
+      'provider-root-realization-incomplete',
+      message,
+      'plan.scenarioBinding.providerRootPlan',
+    );
+  }
   if (usage.reserved > 0) {
     add(
       'error',
@@ -1635,6 +1698,7 @@ export const validateProject = async (project, options = {}) => {
     project: {slug: project.slug, title: project.title},
     plan: project.plan ?? null,
     providerBudget,
+    providerRealization,
     passed: errors === 0,
     summary: {errors, warnings, assetCount: assets.length},
     timeline,

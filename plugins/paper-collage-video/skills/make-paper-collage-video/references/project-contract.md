@@ -12,8 +12,8 @@ Read this only when creating/changing project files or diagnosing validation/sta
 | `storyboard.json` | Approved schema-v12 motion direction, beat performance roles/treatments, editorial authoring, scene boundaries, layer source packages, and compiler-owned motion/edit/directing/proof plans and fingerprints |
 | `motion-language-card.json` | Human-readable whole-film action grammar, pacing, scene phrases, final holds, exceptions, and approval/execution fingerprints |
 | `motion-approval.json` | Attributable style/voice-gate approval binding the human note, Style Profile, motion fingerprints, and style proof |
-| `project.json` | Frozen executable Style Profile, compiled motion contract, materialized theme, Creative Plan v4 ceilings/cap/source-package decision, and v12 Remotion execution tree |
-| `requests/*.json` | Per-output generation/import request plus exact style/composition binding |
+| `project.json` | Frozen executable Style Profile, compiled motion contract, materialized theme, Creative Plan v4 ceilings/cap/source-package decision, exact provider-root plan, and v12 Remotion execution tree |
+| `requests/*.json` | Per-output generation/import request plus exact style/composition/provider-root binding |
 | `semantic-contracts.json` | Reusable identity, topology, mechanism, diagram, and evidence-target invariants |
 | `generation-attempts.jsonl` | Append-only quota reservation and real provider-attempt outcomes |
 | `assets-manifest.json` | Provider provenance, source families, fingerprints, hashes, and active/superseded/rejected/recovery-source lifecycle |
@@ -147,6 +147,23 @@ hand-authored provider/local/avoided count that disagrees with these contracts.
 A low-resolution registered sheet is not made acceptable merely because its
 members preserve a complete canvas; viewport-filling members must also retain
 sufficient provider-native pixels at their maximum display scale.
+
+Every scenario-bound plan compiles one fingerprinted `providerRootPlan`. It has
+exactly one root for the story-specific style sample, every
+`single-background`, every role/call of each structured source package, and
+every provider pose sheet not owned by a canonical container. Its root count
+must equal `expectedProviderImageCalls`; an estimate without that exact
+inventory is not executable approval.
+
+Every scenario-bound `provider-generation` or `provider-edit` image request
+binds exactly one current root through `scenarioRootBinding`. The request must
+also match that root's scene, source package/role, or pose family. A
+`manual-import`, local SVG/Canvas drawing, deterministic derivative, unrelated
+provider output, or stale plan binding cannot fulfill a root. At
+`project:assets-ready`, every root must resolve exactly once to an active
+provider record or a formally registered rejected-output `recovery-source`.
+Missing, duplicate, manually substituted, unknown, or stale roots are hard
+errors and are included in the assets-ready seal.
 
 For a scenario-bound plan, the generic scene-count motion budget is only the
 minimum baseline. `project:plan` may raise `maxPoseSheetCalls`,
@@ -480,8 +497,11 @@ hidden pixels are complete. It never treats a cache entry as current without
 matching source/config/registered-derivation/render-size/runtime fingerprints
 and existing evidence files. `--force` disables frame, composite, and
 asset-evidence reuse and records that decision in the report.
-`project:assets-ready` rejects missing/stale proof fingerprints, open generation
-reservations, missing or exceeded human-approved attempt caps, pending/failed asset or composite quality,
+`project:assets-ready` first recomputes the checked-in `runtime-build.json` and
+rejects any locally drifted schema, validator, quality, or rendering surface.
+It rejects missing/stale proof fingerprints, open generation reservations,
+missing or exceeded human-approved attempt caps, incomplete provider-root
+realization, pending/failed asset or composite quality,
 and audio without either a passing preflight or a fingerprinted, explicitly
 accepted calibration decision. It then writes `assets-ready-seal.json`. Low-level
 `project:advance ... assets-ready` and both render modes only accept a current

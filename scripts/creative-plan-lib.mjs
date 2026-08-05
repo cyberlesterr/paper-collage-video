@@ -1,4 +1,5 @@
 import {TIMING_CONTINUITY_THRESHOLDS} from './timeline-continuity-lib.mjs';
+import {validateProviderRootPlan} from './provider-root-plan-lib.mjs';
 
 export const CREATIVE_PLAN_MODES = [
   'none',
@@ -628,6 +629,25 @@ export const validateCreativePlan = (plan, {slug = null} = {}) => {
         'plan-scenario-expected-calls',
         'scenarioBinding.expectedProviderImageCalls 必须是正整数。',
         'plan.scenarioBinding.expectedProviderImageCalls',
+      );
+    }
+    const rootPlanErrors = validateProviderRootPlan(binding.providerRootPlan);
+    for (const message of rootPlanErrors) {
+      add(
+        'plan-scenario-provider-root-plan',
+        `scenarioBinding.providerRootPlan ${message}。`,
+        'plan.scenarioBinding.providerRootPlan',
+      );
+    }
+    if (
+      Array.isArray(binding.providerRootPlan?.roots) &&
+      binding.providerRootPlan.roots.length !==
+        binding.expectedProviderImageCalls
+    ) {
+      add(
+        'plan-scenario-provider-root-count',
+        'providerRootPlan 根资产数量必须与 expectedProviderImageCalls 精确一致。',
+        'plan.scenarioBinding.providerRootPlan.roots',
       );
     }
     if (

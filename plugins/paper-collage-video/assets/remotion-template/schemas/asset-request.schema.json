@@ -53,6 +53,19 @@
       },
       "additionalProperties": false
     },
+    "scenarioRootBinding": {
+      "type": "object",
+      "required": ["schemaVersion", "planFingerprint", "rootId"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "planFingerprint": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "rootId": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
     "prompt": {"type": "string"},
     "styleProfileBinding": {
       "$ref": "https://local.paper-collage.dev/style-profile.schema.json#/$defs/binding"

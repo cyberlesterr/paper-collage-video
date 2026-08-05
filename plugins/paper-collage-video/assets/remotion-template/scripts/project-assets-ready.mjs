@@ -16,6 +16,7 @@ import {
   resolveAssetsReadyMode,
 } from './production-state.mjs';
 import {assertMotionApprovalCurrent} from './motion-approval-lib.mjs';
+import {assertRuntimeBuildManifestCurrent} from './runtime-build-lib.mjs';
 
 const [slug, ...args] = process.argv.slice(2);
 
@@ -39,6 +40,7 @@ try {
   }
   const {state} = await loadProduction(slug);
   const mode = resolveAssetsReadyMode(state.stage);
+  await assertRuntimeBuildManifestCurrent();
   await assertMotionApprovalCurrent(slug);
   await run('project-sync.mjs', [slug]);
   await run('project-subtitles.mjs', [slug]);

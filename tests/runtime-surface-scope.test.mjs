@@ -19,6 +19,7 @@ import {
   createSceneProofFingerprint,
 } from '../scripts/render-cache-lib.mjs';
 import {
+  assertRuntimeBuildManifestCurrent,
   createRuntimeBuildManifest,
   createRuntimeSurfaceFingerprint,
   discoverRuntimeInputClosure,
@@ -31,6 +32,37 @@ import {collectParallaxDepths} from '../src/parallax.mjs';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const sha256File = async (file) =>
   createHash('sha256').update(await fs.readFile(file)).digest('hex');
+
+test('assets-ready runtime identity rejects a locally drifted executable', async () => {
+  const directory = await fs.mkdtemp(
+    path.join(os.tmpdir(), 'paper-collage-runtime-integrity-'),
+  );
+  try {
+    for (const relative of RUNTIME_BUILD_INPUTS) {
+      const target = path.join(directory, relative);
+      await fs.mkdir(path.dirname(target), {recursive: true});
+      await fs.copyFile(path.join(ROOT, relative), target);
+    }
+    const manifest = await createRuntimeBuildManifest({root: directory});
+    await fs.writeFile(
+      path.join(directory, 'runtime-build.json'),
+      `${JSON.stringify(manifest, null, 2)}\n`,
+    );
+    await assert.doesNotReject(
+      assertRuntimeBuildManifestCurrent({root: directory}),
+    );
+    await fs.appendFile(
+      path.join(directory, 'scripts', 'quality-lib.mjs'),
+      '\n// unauthorized local quality relaxation\n',
+    );
+    await assert.rejects(
+      assertRuntimeBuildManifestCurrent({root: directory}),
+      /runtime-build\.json 与当前可执行文件不一致.*quality-lib\.mjs/,
+    );
+  } finally {
+    await fs.rm(directory, {recursive: true, force: true});
+  }
+});
 
 test('runtime build inputs discover every current style card from the catalog', async () => {
   const catalog = JSON.parse(

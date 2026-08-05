@@ -6,9 +6,14 @@
 
 ### Changed
 
+- 将开发版本推进到 `0.19.1-dev.2`；scenario 现在把完整图片调用估算编译为逐项 `providerRootPlan`，每个真实 provider 请求必须绑定风格样张、单背景、source-package 角色或姿态母版中的一个批准根。
 - 将开发版本推进到 `0.19.1-dev.1`，并同步升级 Remotion/CLI `4.0.505`、React/React DOM `19.2.8` 及对应类型包。
 - 更新 `@emnapi/runtime` 锁文件到 `1.11.3`，并将 GitHub Actions 的 Python 设置动作升级到 `actions/setup-python@v7`。
 - 重新生成 source、packaged plugin、starter proof 与 runtime fingerprint，确保依赖变化不会绕过可执行身份和发行包漂移检查。
+
+### Fixed
+
+- 阻止 `full-depth` 项目用少量 provider 图加大量 `manual-import`/本地 SVG 满足结构和质量计数后提前进入 human review；`assets-ready` 现在要求完整根资产逐项兑现，并拒绝本地漂移但仍沿用旧 `runtime-build.json` 的工作区。
 
 ## [0.19.0] - 2026-08-04
 

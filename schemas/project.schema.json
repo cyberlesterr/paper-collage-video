@@ -265,6 +265,55 @@
       },
       "additionalProperties": false
     },
+    "providerRoot": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "role",
+        "sceneId",
+        "sourcePackageId",
+        "sourceStrategy",
+        "poseFamilyId"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"enum": ["style-proof", "source-package", "pose-sheet"]},
+        "role": {"type": "string", "minLength": 1},
+        "sceneId": {"type": ["string", "null"]},
+        "sourcePackageId": {"type": ["string", "null"]},
+        "sourceStrategy": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "enum": [
+                "single-background",
+                "rigid-master",
+                "registered-layer-sheet",
+                "context-preserving-layer-edits",
+                "canonical-frame-with-content-sheet"
+              ]
+            }
+          ]
+        },
+        "poseFamilyId": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "providerRootPlan": {
+      "type": "object",
+      "required": ["schemaVersion", "roots", "fingerprint"],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "roots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/providerRoot"}
+        },
+        "fingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+      },
+      "additionalProperties": false
+    },
     "plan": {
       "type": "object",
       "required": ["schemaVersion", "slug", "status", "inputMode", "productionProfile", "assetBudget", "motionBudget", "approvedImageBudget", "requested", "resolved", "updatedAt"],
@@ -285,6 +334,7 @@
             "optionFingerprint",
             "expectedProviderImageCalls",
             "proposedImageAttemptLimit",
+            "providerRootPlan",
             "selectedAt"
           ],
           "properties": {
@@ -293,6 +343,7 @@
             "optionFingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
             "expectedProviderImageCalls": {"type": "integer", "minimum": 1},
             "proposedImageAttemptLimit": {"type": "integer", "minimum": 1},
+            "providerRootPlan": {"$ref": "#/$defs/providerRootPlan"},
             "selectedAt": {"type": "string", "format": "date-time"}
           },
           "additionalProperties": false

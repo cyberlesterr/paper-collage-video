@@ -493,6 +493,8 @@ test('three scenarios bind story scope, exact calls, caps, and quality floors be
       durationSeconds: 54,
       sceneCount: 6,
       expectedProviderImageCalls: 10,
+      providerRootPlanFingerprint:
+        plan.scenarioBinding.providerRootPlan.fingerprint,
       proposedImageAttemptLimit: 12,
       profileHardCeiling: 38,
     },
@@ -509,7 +511,12 @@ test('three scenarios bind story scope, exact calls, caps, and quality floors be
       stateIds: family.states,
     })),
     generationBudget: {
-      expectedProviderImageCalls: 5,
+      expectedProviderImageCalls:
+        balancedFamilies.length +
+        balancedSources.reduce(
+          (total, source) => total + source.providerCalls,
+          0,
+        ),
       sourcePackagePlans: balancedSources.map((source) => ({
         id: source.id,
         sourceStrategy: source.strategy,
@@ -524,7 +531,7 @@ test('three scenarios bind story scope, exact calls, caps, and quality floors be
     {
       poseFamilyCount: 3,
       sourcePackageCount: 3,
-      structuralProviderImageCalls: 5,
+      structuralProviderImageCalls: 6,
     },
   );
   assert.throws(
@@ -599,7 +606,7 @@ test('a selected one-take scenario raises motion capacity to its exact approved 
           minAmbientScenes: 1,
         },
         providerEstimate: {
-          expectedImageCalls: 10,
+          expectedImageCalls: 7,
           proposedImageAttemptLimit: 11,
         },
         scenes: [
@@ -645,7 +652,8 @@ test('a selected one-take scenario raises motion capacity to its exact approved 
   });
   assert.deepEqual(validateCreativePlan(plan, {slug: 'one-take-journey'}), []);
   assert.equal(plan.assetBudget.maxGeneratedImages, 14);
-  assert.equal(plan.scenarioBinding.expectedProviderImageCalls, 10);
+  assert.equal(plan.scenarioBinding.expectedProviderImageCalls, 7);
+  assert.equal(plan.scenarioBinding.providerRootPlan.roots.length, 7);
 });
 
 test('scenario rejects a key semantic action that is counted but not visibly executed', async () => {

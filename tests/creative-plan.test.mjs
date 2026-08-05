@@ -15,6 +15,7 @@ import {
   summarizeProductionProfiles,
   validateCreativePlan,
 } from '../scripts/creative-plan-lib.mjs';
+import {buildProviderRootPlan} from '../scripts/provider-root-plan-lib.mjs';
 
 const at = '2026-07-17T00:00:00.000Z';
 const make = (overrides) =>
@@ -218,6 +219,22 @@ test('human-approved image budget increases remain bounded and auditable', () =>
       optionFingerprint: 'b'.repeat(64),
       expectedProviderImageCalls: 5,
       proposedImageAttemptLimit: 12,
+      providerRootPlan: buildProviderRootPlan({
+        id: 'full-depth',
+        scenes: [
+          {
+            id: 'scene-01',
+            stateFamilies: [],
+            sourcePackages: [
+              {
+                id: 'depth-package',
+                strategy: 'context-preserving-layer-edits',
+                providerCalls: 4,
+              },
+            ],
+          },
+        ],
+      }),
       selectedAt: at,
     },
     storyScope: 'expanded',
