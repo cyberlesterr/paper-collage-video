@@ -264,6 +264,141 @@
       },
       "additionalProperties": false
     },
+    "occlusion": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "sceneId",
+        "subjectNodeId",
+        "foregroundNodeId",
+        "relation",
+        "proofTimeIds",
+        "minimumAlphaOverlap",
+        "rationale"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"const": "occlusion"},
+        "sceneId": {"type": "string", "minLength": 1},
+        "subjectNodeId": {"type": "string", "minLength": 1},
+        "foregroundNodeId": {"type": "string", "minLength": 1},
+        "relation": {"enum": ["in-front-of-subject", "behind-subject"]},
+        "proofTimeIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "minimumAlphaOverlap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rationale": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "actionPhase": {
+      "type": "object",
+      "required": ["phase", "proofTimeId", "nodeId"],
+      "properties": {
+        "phase": {
+          "enum": [
+            "establish",
+            "anticipate",
+            "action",
+            "peak",
+            "follow-through",
+            "settle"
+          ]
+        },
+        "proofTimeId": {"type": "string", "minLength": 1},
+        "nodeId": {"type": "string", "minLength": 1},
+        "stateId": {"type": "string", "minLength": 1},
+        "direction": {"enum": ["left", "right"]},
+        "minimumTravel": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 2
+        },
+        "rationale": {"type": "string"}
+      },
+      "additionalProperties": false
+    },
+    "actionActor": {
+      "type": "object",
+      "required": ["nodeId", "contractId"],
+      "properties": {
+        "nodeId": {"type": "string", "minLength": 1},
+        "contractId": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "actionSequence": {
+      "type": "object",
+      "required": [
+        "id",
+        "kind",
+        "sceneId",
+        "narrationCueId",
+        "narrationToleranceSeconds",
+        "phases",
+        "actors"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"const": "action-sequence"},
+        "sceneId": {"type": "string", "minLength": 1},
+        "narrationCueId": {"type": "string", "minLength": 1},
+        "narrationToleranceSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5
+        },
+        "phases": {
+          "type": "array",
+          "minItems": 4,
+          "items": {"$ref": "#/$defs/actionPhase"}
+        },
+        "actors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/actionActor"}
+        }
+      },
+      "allOf": [
+        {
+          "properties": {
+            "phases": {
+              "contains": {"properties": {"phase": {"const": "establish"}}}
+            }
+          }
+        },
+        {
+          "properties": {
+            "phases": {
+              "contains": {"properties": {"phase": {"const": "action"}}}
+            }
+          }
+        },
+        {
+          "properties": {
+            "phases": {
+              "contains": {"properties": {"phase": {"const": "peak"}}}
+            }
+          }
+        },
+        {
+          "properties": {
+            "phases": {
+              "contains": {"properties": {"phase": {"const": "settle"}}}
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
     "pathLocomotion": {
       "type": "object",
       "required": [
@@ -370,7 +505,9 @@
         {"$ref": "#/$defs/continuity"},
         {"$ref": "#/$defs/gait"},
         {"$ref": "#/$defs/travelFacing"},
-        {"$ref": "#/$defs/pathLocomotion"}
+        {"$ref": "#/$defs/pathLocomotion"},
+        {"$ref": "#/$defs/occlusion"},
+        {"$ref": "#/$defs/actionSequence"}
       ]
     }
   }

@@ -24,6 +24,7 @@ import type {
   CompositionTypographyNode,
   CompositionWorldStripNode,
   CoordinateSpace,
+  EditorialSubtitlePlacement,
   EditorialSystem,
   NormalizedProjectScene,
   ProjectEvent,
@@ -1064,6 +1065,12 @@ export const ReplicaChapterScene = ({scene, narrationVolume, theme, editorial}: 
   );
   const profile = editorial.responsiveProfiles.find(({id}) => id === editorial.activeProfile);
   const zones = profile?.exclusionZones ?? [];
+  const sceneDirecting = editorial.sceneDirecting?.find(
+    (entry) => (entry as {sceneId?: string}).sceneId === scene.id,
+  );
+  const subtitlePlacement = (sceneDirecting as {
+    subtitlePlacement?: EditorialSubtitlePlacement;
+  } | undefined)?.subtitlePlacement;
   return (
     <AbsoluteFill style={{overflow: 'hidden', visibility: boundary.incomingVisible ? 'visible' : 'hidden', clipPath: boundary.incomingClipPath, transform: boundary.incomingTransform, transformOrigin: boundary.incomingTransformOrigin, background: theme.canvas, willChange: 'transform, clip-path'}}>
       <AbsoluteFill style={{background: scene.appearance?.background ?? theme.sceneBackground}} />
@@ -1076,7 +1083,7 @@ export const ReplicaChapterScene = ({scene, narrationVolume, theme, editorial}: 
         {surfaceTexture.visible && theme.surface.texture ? <AbsoluteFill style={{opacity: surfaceTexture.opacity, mixBlendMode: surfaceTexture.blendMode, backgroundImage: `url(${staticFile(theme.surface.texture.src)})`, backgroundSize: 'cover', zIndex: 60, pointerEvents: 'none'}} /> : null}
       </AbsoluteFill>
       {scene.appearance?.chapter?.visible === false ? null : <ChapterLabel eyebrow={scene.eyebrow} label={scene.label} theme={theme} variant={scene.appearance?.chapter?.variant} />}
-      <SubtitleOverlay cues={scene.subtitles} theme={theme} appearance={scene.appearance?.subtitles} safeArea={profile?.safeArea} />
+      <SubtitleOverlay cues={scene.subtitles} theme={theme} appearance={scene.appearance?.subtitles} safeArea={profile?.safeArea} placement={subtitlePlacement} />
       <Sequence from={scene.narrationStartFrame} layout="none"><Audio src={staticFile(scene.narration.src)} volume={narrationVolume} /></Sequence>
       <EventSounds events={scene.events} durationInFrames={scene.durationInFrames} />
     </AbsoluteFill>

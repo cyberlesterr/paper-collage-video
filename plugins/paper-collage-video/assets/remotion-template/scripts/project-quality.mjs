@@ -19,7 +19,7 @@ import {
 
 const args = process.argv.slice(2);
 const usage =
-  '用法：project:quality -- <slug> <prepare|status|scaffold|contact-sheet|record|record-batch> [--scope=all|style] [--input=<reviews.json>] [--output=<path>] [--reviewer=<id>] [--quiet] [--json]；也兼容 <action> <slug>。';
+  '用法：project:quality -- <slug> <prepare|status|scaffold|contact-sheet|record|record-batch> [--scope=all|style] [--input=<reviews.json>] [--output=<path>] [--reviewer=<id>] [--all] [--quiet] [--json]；也兼容 <action> <slug>。';
 if (args.includes('--help') || args.includes('-h')) {
   console.log(usage);
   process.exit(0);
@@ -187,7 +187,7 @@ try {
     const payload = JSON.parse(await fs.readFile(file, 'utf8'));
     if (Array.isArray(payload)) {
       throw new Error(
-        'record-batch 必须使用 project:quality scaffold 生成的 schemaVersion 3 对象，不能提交未绑定报告指纹和证据哈希的裸数组。',
+        'record-batch 必须使用 project:quality scaffold 生成的 schemaVersion 4 对象，不能提交未绑定报告指纹和证据哈希的裸数组。',
       );
     }
     await assertQualityReviewScaffoldCurrent({slug, scaffold: payload});

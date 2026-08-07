@@ -34,6 +34,7 @@
     "assets:derive-looping-strip": "node scripts/derive-looping-strip.mjs",
     "assets:normalize-provider-source": "node scripts/normalize-provider-source.mjs",
     "proof:registered-family": "node scripts/prove-registered-family.mjs",
+    "proof:registered-geometry": "node scripts/prove-registered-geometry.mjs",
     "proof:canonical-container": "node scripts/prove-canonical-container.mjs",
     "proof:alpha-bands": "node scripts/prove-alpha-bands.mjs",
     "provider:status": "node scripts/provider-status.mjs",

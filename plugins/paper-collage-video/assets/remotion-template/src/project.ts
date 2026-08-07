@@ -446,6 +446,27 @@ export type EditorialTransitionPlan = EditorialAdvancedTransition & {
   proofFrameIds: string[];
 };
 
+export type EditorialSubtitlePlacement = {
+  anchor:
+    | 'bottom'
+    | 'bottom-left'
+    | 'bottom-right'
+    | 'top'
+    | 'top-left'
+    | 'top-right'
+    | 'center';
+  safeArea: {x: number; y: number; width: number; height: number};
+  exclusionZones?: Array<{
+    id: string;
+    role: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    padding?: number;
+  }>;
+};
+
 export type EditorialSystem = {
   timebase: {fps: number; rounding: 'nearest' | 'floor' | 'ceil'};
   wordTimingPolicy: 'require' | 'phrase-fallback' | 'block';
@@ -1228,6 +1249,40 @@ export type SpatialContract =
         rationale: string;
       };
       requireCameraFollow: boolean;
+    }
+  | {
+      id: string;
+      kind: 'occlusion';
+      sceneId: string;
+      subjectNodeId: string;
+      foregroundNodeId: string;
+      relation: 'in-front-of-subject' | 'behind-subject';
+      proofTimeIds: string[];
+      minimumAlphaOverlap: number;
+      rationale: string;
+    }
+  | {
+      id: string;
+      kind: 'action-sequence';
+      sceneId: string;
+      narrationCueId: string;
+      narrationToleranceSeconds: number;
+      phases: Array<{
+        phase:
+          | 'establish'
+          | 'anticipate'
+          | 'action'
+          | 'peak'
+          | 'follow-through'
+          | 'settle';
+        proofTimeId: string;
+        nodeId: string;
+        stateId?: string;
+        direction?: 'left' | 'right';
+        minimumTravel?: number;
+        rationale?: string;
+      }>;
+      actors: Array<{nodeId: string; contractId: string}>;
     };
 
 export type PaperCollageProject = {

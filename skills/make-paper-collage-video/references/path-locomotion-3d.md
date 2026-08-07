@@ -130,6 +130,19 @@ The deterministic evaluator samples every frame and proves:
 - exact path/camera/world binding;
 - a camera viewport that stays inside the declared world.
 
+Temporal evidence is mandatory, not optional: the evaluator must observe the
+contracted state ids actually rotating (not a frozen pose), signed path
+displacement, heading/velocity consistency, and no backward or jitter-only
+segments. Metadata or static endpoint crops alone fail. The same evidence is
+packaged as a fingerprint-bound temporal motion strip consumed by the
+whole-film motion review, so a stale strip cannot be reviewed as current.
+
+For any left/right `travel-facing` contract, the rendered transform (rotation
+and any horizontal mirror) must agree with the expected facing, the velocity
+direction must agree with that facing, and the registered state family must
+pass alpha-tight silhouette-facing consistency. A state whose metadata says
+`right` while its pixels face `left` fails before human review.
+
 For a velocity-driven `pathViewBinding`, do not hand-author
 `proofTime.stateAssertions` that freeze a planar/toward/away state at a story
 beat: sibling paths can legitimately have different depth velocities at the

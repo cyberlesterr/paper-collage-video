@@ -185,6 +185,29 @@
         "sceneId": {"type": "string", "minLength": 1},
         "compositionProfile": {"type": "string", "minLength": 1},
         "typographyProfile": {"type": "string", "minLength": 1},
+        "subtitlePlacement": {
+          "type": "object",
+          "required": ["anchor", "safeArea"],
+          "properties": {
+            "anchor": {
+              "enum": [
+                "bottom",
+                "bottom-left",
+                "bottom-right",
+                "top",
+                "top-left",
+                "top-right",
+                "center"
+              ]
+            },
+            "safeArea": {"$ref": "#/$defs/normalizedRectangle"},
+            "exclusionZones": {
+              "type": "array",
+              "items": {"$ref": "#/$defs/exclusionZone"}
+            }
+          },
+          "additionalProperties": false
+        },
         "subjectFraming": {
           "type": "object",
           "required": ["mode", "focusPoint"],

@@ -15,7 +15,7 @@ import {
   storyboardAuthoringFromCompiled,
   storyboardConceptFingerprint,
 } from './directing-revision-lib.mjs';
-import {validateProject} from './project-lib.mjs';
+import {ROOT, validateProject} from './project-lib.mjs';
 import {
   collectCompositeQualityTargets,
 } from './quality-lib.mjs';
@@ -39,12 +39,36 @@ import {
   writeJson,
 } from './phase2-proof-lib.mjs';
 import {prepareRegisteredFamilyProof} from './asset-hardening-proof-lib.mjs';
+import {
+  DEFAULT_REGISTERED_GEOMETRY_LIMITS,
+  computeRegisteredGeometryProof,
+} from './registered-geometry-lib.mjs';
 import {FIXTURE_STYLE_PROFILE} from '../fixtures/motion-contract-fixture.mjs';
 
 const inputsDirectory = path.join(PHASE2_PROOF_DIR, 'inputs');
 const reportsDirectory = path.join(PHASE2_PROOF_DIR, 'reports');
 
 const registeredFamily = await prepareRegisteredFamilyProof();
+const registeredGeometry = await computeRegisteredGeometryProof({
+  familyId: registeredFamily.records[0].registeredFamilyBinding.familyId,
+  registrationId:
+    registeredFamily.records[0].registeredFamilyBinding.registrationId,
+  familyFingerprint:
+    registeredFamily.records[0].registeredFamilyBinding.familyFingerprint,
+  canvas: registeredFamily.records[0].registeredFamilyBinding.canvas,
+  states: registeredFamily.records.map((record, index) => ({
+    stateId:
+      record.registeredFamilyBinding?.slot ??
+      record.registeredFamilyBinding?.role ??
+      `member-${index + 1}`,
+    file: path.join(ROOT, record.file),
+    declaredFacing: 'neutral',
+    expectedPlacement:
+      record.registeredFamilyBinding?.derivation?.placement ?? null,
+  })),
+  limits: DEFAULT_REGISTERED_GEOMETRY_LIMITS,
+  mode: 'placement',
+});
 const media = await preparePhase2Media();
 const storyboard = compilePhase2Storyboard({media});
 const storyboardIssues = validateStoryboard(storyboard, {
@@ -88,6 +112,10 @@ await writeJson(path.join(inputsDirectory, 'storyboard.json'), storyboard);
 await writeJson(
   path.join(inputsDirectory, 'assets-manifest.json'),
   registeredFamily.manifest,
+);
+await writeJson(
+  path.join(inputsDirectory, 'registered-geometry-proof.json'),
+  registeredGeometry,
 );
 await writeJson(
   path.join(inputsDirectory, 'storyboard-authoring.json'),

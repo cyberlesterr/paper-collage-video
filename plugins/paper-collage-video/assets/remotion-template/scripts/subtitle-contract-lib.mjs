@@ -8,6 +8,7 @@ import {
   normalizeSubtitleSafeArea,
   resolveSubtitleFadeFrames,
   resolveSubtitleLayout,
+  resolveSubtitleScenePlacement,
   resolveSubtitleTypography,
 } from '../src/subtitleSurface.mjs';
 
@@ -96,6 +97,19 @@ export const createSubtitleContract = async (project) => {
       theme: project.theme,
       scale: renderScale,
     });
+    const sceneDirecting = (project.editorial?.sceneDirecting ?? []).find(
+      (entry) => entry.sceneId === scene.id,
+    );
+    const scenePlacement = sceneDirecting?.subtitlePlacement ?? null;
+    const sceneLayout = resolveSubtitleScenePlacement({
+      placement: scenePlacement,
+      safeArea,
+      maxWidth: scene.appearance?.subtitles?.maxWidth,
+      width: project.video.width,
+      height: project.video.height,
+    });
+    const placementConflicts = sceneLayout.conflicts ?? [];
+    const placementPassed = placementConflicts.length === 0;
     const cueText = compactText(cues.map(({text}) => text).join(''));
     const narrationText = compactText(scene.narration?.text);
     const narrationTextPresent = narrationText.length > 0;
@@ -149,6 +163,15 @@ export const createSubtitleContract = async (project) => {
         phraseSpacingPresent: cues.some(({text}) => /\s/u.test(text)),
         passed: longestCueCharacters <= maximumCharactersPerCue,
       },
+      placement: {
+        anchor: sceneLayout.anchor,
+        safeArea: sceneLayout.safeArea,
+        exclusionZones: (sceneLayout.exclusionZones ?? []).map(
+          ({id, role}) => ({id, role}),
+        ),
+        conflicts: placementConflicts,
+        passed: placementPassed,
+      },
       cues,
       passed,
     };
@@ -194,6 +217,16 @@ export const createSubtitleContract = async (project) => {
         safeArea,
         maxWidth: layout.maxWidth,
       },
+    },
+    {
+      id: 'subtitle-scene-placement',
+      passed: requiredScenes.every(({placement}) => placement.passed),
+      expected: 'every narrated scene resolves subtitles without unresolved exclusion conflicts',
+      actual: requiredScenes.map(({sceneId, placement}) => ({
+        sceneId,
+        anchor: placement.anchor,
+        conflicts: placement.conflicts,
+      })),
     },
     {
       id: 'subtitle-font-source',

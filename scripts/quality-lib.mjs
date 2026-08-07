@@ -53,6 +53,11 @@ import {
   assertRegisteredFamilyGroupMembers,
 } from './registered-family-lib.mjs';
 import {
+  DEFAULT_REGISTERED_GEOMETRY_LIMITS,
+  assertRegisteredGeometryCurrent,
+  computeRegisteredGeometryProof,
+} from './registered-geometry-lib.mjs';
+import {
   inspectCanonicalContainerGroupMembers,
 } from './canonical-container-lib.mjs';
 import {inspectStateAnchorRegistration} from './state-sheet-lib.mjs';
@@ -328,6 +333,13 @@ const TOPOLOGY_ASSET_CHECKS = ['silhouette-fidelity', 'negative-space-clean', 'b
 const EVIDENCE_REQUIRED_CHECKS = new Set([
   ...TOPOLOGY_ASSET_CHECKS,
   'motion-isolation-clean',
+  'motion-grammar-consistent',
+  'pacing-cadence-consistent',
+  'camera-strategy-consistent',
+  'transition-strategy-consistent',
+  'ambient-strategy-consistent',
+  'sync-anchors-current',
+  'style-profile-consistent',
   'identity-distinct-within-frame',
   'identity-family-consistent',
   'cross-scene-identity-continuity',
@@ -340,6 +352,22 @@ const EVIDENCE_REQUIRED_CHECKS = new Set([
   'small-text-legible',
   'no-procedural-noise-on-semantic-lines',
 ]);
+
+const TEMPORAL_EVIDENCE_PATTERNS = new Set([
+  'motion-contract',
+  'style-target',
+  'state-sequence',
+  'spatial-contract',
+  'looping-environment',
+  'parallax-rig',
+  'motif-field',
+  'canonical-container',
+  'editorial-transition',
+]);
+
+export const requiresTemporalEvidence = (target) =>
+  TEMPORAL_EVIDENCE_PATTERNS.has(target.pattern) &&
+  target.reviewScope !== 'derivation-only';
 
 const hashFile = async (file) => createHash('sha256').update(await fs.readFile(file)).digest('hex');
 const runtimeAssetId = (file) => `runtime-${createHash('sha256').update(file).digest('hex').slice(0, 12)}`;
@@ -1826,6 +1854,54 @@ export const stateSequenceRegistrationStatus = ({
 export const expectedRegisteredFamilyAlphaEvidenceCount = (target) =>
   (target.familyRecords ?? []).filter(Boolean).length;
 
+export const buildRegisteredGeometryProofForTarget = async ({
+  target,
+  root,
+}) => {
+  const states = [];
+  let binding = null;
+  if (target.pattern === 'state-sequence') {
+    const records = (target.registeredFamilyRecords ?? []).filter(Boolean);
+    binding = records[0]?.registeredFamilyBinding ?? null;
+    if (binding && (target.sequence?.states ?? []).length >= 2) {
+      for (const state of target.sequence.states) {
+        states.push({
+          stateId: state.id,
+          file: path.join(root, 'public', state.src),
+          declaredFacing: state.facing ?? 'neutral',
+        });
+      }
+    }
+  } else {
+    const records = (target.familyRecords ?? []).filter(Boolean);
+    binding = records[0]?.registeredFamilyBinding ?? null;
+    for (const record of records) {
+      const familyBinding = record.registeredFamilyBinding;
+      if (!familyBinding) continue;
+      states.push({
+        stateId:
+          familyBinding.slot ??
+          familyBinding.role ??
+          record.assetId,
+        file: path.resolve(root, record.file),
+        declaredFacing: 'neutral',
+        expectedPlacement:
+          familyBinding.derivation?.placement ?? null,
+      });
+    }
+  }
+  if (!binding || states.length < 2) return null;
+  return computeRegisteredGeometryProof({
+    familyId: binding.familyId,
+    registrationId: binding.registrationId,
+    familyFingerprint: binding.familyFingerprint,
+    canvas: binding.canvas,
+    states,
+    limits: DEFAULT_REGISTERED_GEOMETRY_LIMITS,
+    mode: binding.pattern === 'state-sequence' ? 'reference' : 'placement',
+  });
+};
+
 export const inspectCompositeTechnical = async ({target, proofReport}) => {
   if (target.reviewScope === 'derivation-only') {
     const registeredFamily = assertRegisteredFamilyGroupMembers({
@@ -1877,6 +1953,91 @@ export const inspectCompositeTechnical = async ({target, proofReport}) => {
     {id: 'proof-current', passed: proofEntry?.fingerprint === target.fingerprint, expected: target.fingerprint, actual: proofEntry?.fingerprint ?? null},
     {id: 'proof-artifacts-present', passed: artifactsPresent, actual: proofFrames.length},
   ];
+  const temporalRequired = requiresTemporalEvidence(target);
+  const temporalEvidence = proofEntry?.temporalEvidence ?? null;
+  const temporalFilesCurrent =
+    temporalEvidence &&
+    (
+      await Promise.all(
+        [
+          {file: temporalEvidence.file, sha256: temporalEvidence.sha256},
+          ...(temporalEvidence.frames ?? []).map(({file, sha256}) => ({
+            file,
+            sha256,
+          })),
+        ].map(async ({file, sha256}) => {
+          try {
+            const absoluteFile = assertWorkspaceFile(file);
+            return (
+              (await fileExists(absoluteFile)) &&
+              (await hashFile(absoluteFile)) === sha256
+            );
+          } catch {
+            return false;
+          }
+        }),
+      )
+    ).every(Boolean);
+  const distinctFrameHashes = new Set(
+    (temporalEvidence?.frames ?? []).map(({sha256}) => sha256),
+  );
+  const temporalMotionPresent =
+    (temporalEvidence?.frames?.length ?? 0) >= 3 &&
+    distinctFrameHashes.size >= 2;
+  if (temporalRequired) {
+    checks.push(
+      {
+        id: 'temporal-evidence-current',
+        passed: Boolean(temporalFilesCurrent),
+        expected: 'current temporal evidence strip bound by fingerprint',
+        actual: temporalEvidence
+          ? {
+              file: temporalEvidence.file,
+              frames: (temporalEvidence.frames ?? []).length,
+              current: temporalFilesCurrent,
+            }
+          : null,
+      },
+      {
+        id: 'temporal-evidence-motion',
+        passed: temporalMotionPresent,
+        expected: 'at least three sampled frames with observable change',
+        actual: {
+          frames: (temporalEvidence?.frames ?? []).length,
+          distinctFrameHashes: distinctFrameHashes.size,
+        },
+      },
+    );
+  }
+  if (
+    ['supported-subject', 'registered-depth-stack', 'state-sequence'].includes(
+      target.pattern,
+    )
+  ) {
+    const geometryRecords =
+      target.pattern === 'state-sequence'
+        ? (target.registeredFamilyRecords ?? []).filter(Boolean)
+        : (target.familyRecords ?? []).filter(Boolean);
+    const familyBinding =
+      geometryRecords.find(
+        (record) => record?.registeredFamilyBinding,
+      )?.registeredFamilyBinding ?? null;
+    const geometryCurrent = await assertRegisteredGeometryCurrent({
+      familyBinding,
+      proof: proofEntry?.registeredGeometryProof ?? null,
+      records: geometryRecords,
+    });
+    checks.push({
+      id: 'registered-geometry-current',
+      passed: !familyBinding || geometryCurrent.passed,
+      expected:
+        'when a registered family is bound, alpha-tight centroid/baseline/aspect/scale/proportion drift stays within limits and facing is consistent',
+      actual: {
+        hasBinding: Boolean(familyBinding),
+        issues: geometryCurrent.issues,
+      },
+    });
+  }
   if (target.pattern === 'supported-subject') {
     const front = target.group.children.find(({kind, slot}) => kind === 'asset' && slot === 'support-front');
     const alphaCoverage = front ? await alphaCoverageInPolygon(front.src, target.group.support?.occlusionZone) : 0;
@@ -2575,7 +2736,12 @@ export const inspectCompositeTechnical = async ({target, proofReport}) => {
       actual: target.responsive.scenes.map(({sceneId, densityUsed}) => ({sceneId, densityUsed})),
     });
   }
-  return {passed: checks.every(({passed}) => passed), checks, proofFrames};
+  return {
+    passed: checks.every(({passed}) => passed),
+    checks,
+    proofFrames,
+    temporalEvidence,
+  };
 };
 
 const entryStatus = ({technical, semanticChecks}) => {
@@ -2601,6 +2767,7 @@ export const qualityReviewTargetFingerprint = (entry) =>
     technical: entry.technical ?? null,
     proofFrames: entry.proofFrames ?? [],
     evidenceFiles: entry.evidenceFiles ?? [],
+    temporalEvidence: entry.temporalEvidence ?? null,
   });
 
 export const refreshQualityReviewSurfaceFingerprint = (report) => {
@@ -2741,6 +2908,7 @@ export const prepareQualityReport = async (
       fingerprint: target.fingerprint,
       proofTimeIds: target.proofTimeIds,
       proofFrames: technical.proofFrames,
+      temporalEvidence: technical.temporalEvidence ?? null,
       reviewScope: target.reviewScope,
       requiredChecks: target.requiredChecks,
       technical: {passed: technical.passed, checks: technical.checks},
@@ -2865,6 +3033,14 @@ export const recordQualityReviews = async ({
     }
     if (passedChecks.some((check) => EVIDENCE_REQUIRED_CHECKS.has(check)) && evidenceFiles.length === 0) {
       throw new Error(`${reviewId} 的证据型质量检查必须提供 evidenceFiles。`);
+    }
+    if (
+      requiresTemporalEvidence(entry) &&
+      !entry.temporalEvidence
+    ) {
+      throw new Error(
+        `${reviewId} 需要当前 temporal evidence 才能记录质量结果；先重新运行 project:composition-proof 或 project:style-proof。`,
+      );
     }
     normalized.push({entry, reviewId, reviewer: review.reviewer.trim(), passedChecks, failedChecks, note: (review.note ?? '').trim(), evidenceFiles});
   }
@@ -3022,6 +3198,11 @@ export const createQualityReviewScaffold = async ({
         `${composite.compositeId} 缺少与当前组合指纹一致的视觉证明；先重新运行 project:composition-proof 或 project:style-proof，不能复用旧帧。`,
       );
     }
+    if (requiresTemporalEvidence(composite) && !composite.temporalEvidence) {
+      throw new Error(
+        `${composite.compositeId} 是需要动态证据的组合目标，但缺少当前 temporal evidence；先重新运行 project:composition-proof 或 project:style-proof。`,
+      );
+    }
     const files = [
       ...(proof?.proofFrames ?? []).flatMap(proofEvidenceFiles),
       ...layerStackProofEvidenceFiles(proof?.layerStackProof),
@@ -3072,15 +3253,48 @@ export const createQualityReviewScaffold = async ({
   for (const entry of entries) {
     const assetId = entry.assetId ?? null;
     const compositeId = entry.compositeId ?? null;
+    const proof = compositeId
+      ? currentProofCompositeFor(currentProofReports, entry)
+      : null;
+    const evidenceClasses = compositeId
+      ? [
+          ...new Set([
+            ...((proof?.proofFrames ?? []).some(({fullFrame}) => fullFrame)
+              ? ['full']
+              : []),
+            ...((proof?.proofFrames ?? []).some(({crop}) => crop)
+              ? ['crop']
+              : []),
+            ...((proof?.proofFrames ?? []).some(({debugFrame}) => debugFrame)
+              ? ['debug']
+              : []),
+            ...(entry.temporalEvidence ? ['temporal'] : []),
+          ]),
+        ]
+      : [];
     const evidenceFiles = await evidenceRecordsFor(
       assetId
         ? [...new Set([...evidenceForAsset(entry), ...(entry.recoveryEvidenceFiles ?? [])])]
-        : evidenceForComposite(entry),
+        : [
+            ...evidenceForComposite(entry),
+            ...(entry.temporalEvidence
+              ? [
+                  entry.temporalEvidence.file,
+                  ...(entry.temporalEvidence.frames ?? []).map(
+                    ({file}) => file,
+                  ),
+                ]
+              : []),
+          ],
     );
     entry.evidenceFiles = evidenceFiles;
     reviews.push({
       ...(assetId ? {assetId} : {compositeId}),
       reviewer,
+      ...(compositeId ? {evidenceClasses} : {}),
+      ...(compositeId
+        ? {temporalEvidence: entry.temporalEvidence ?? null}
+        : {}),
       requiredChecks: entry.requiredChecks,
       pendingChecks: Object.entries(entry.semanticChecks)
         .filter(([, checkStatus]) => checkStatus !== 'passed')
@@ -3101,7 +3315,7 @@ export const createQualityReviewScaffold = async ({
   }
   return {
     $schema: '../../schemas/quality-review-scaffold.schema.json',
-    schemaVersion: 3,
+    schemaVersion: 4,
     projectSlug,
     reviewScope,
     generatedAt: new Date().toISOString(),
@@ -3168,8 +3382,8 @@ export const assertQualityReviewScaffoldCurrent = async ({
   scaffold,
   status = null,
 }) => {
-  if (scaffold?.schemaVersion !== 3 || scaffold?.projectSlug !== slug) {
-    throw new Error(`质量审核 scaffold 必须是 ${slug} 的 schemaVersion 3 文件。`);
+  if (scaffold?.schemaVersion !== 4 || scaffold?.projectSlug !== slug) {
+    throw new Error(`质量审核 scaffold 必须是 ${slug} 的 schemaVersion 4 文件。`);
   }
   if (!scaffold?.sourceReport?.fingerprint) {
     throw new Error('质量审核 scaffold 缺少 sourceReport.fingerprint。');
@@ -3205,6 +3419,37 @@ export const assertQualityReviewScaffoldCurrent = async ({
     if (!(await evidenceFilesAreCurrent(review.evidenceFiles))) {
       throw new Error(`${reviewId} 的质量证据文件已缺失或内容变化；请重新生成 scaffold。`);
     }
+    const temporalCurrent = await Promise.all(
+      [
+        {file: review.temporalEvidence?.file, sha256: review.temporalEvidence?.sha256},
+        ...(review.temporalEvidence?.frames ?? []).map(({file, sha256}) => ({
+          file,
+          sha256,
+        })),
+      ].filter(({file}) => Boolean(file)).map(async ({file, sha256}) => {
+        try {
+          const absoluteFile = assertWorkspaceFile(file);
+          return (
+            (await fileExists(absoluteFile)) &&
+            (await hashFile(absoluteFile)) === sha256
+          );
+        } catch {
+          return false;
+        }
+      }),
+    );
+    if (
+      review.compositeId &&
+      requiresTemporalEvidence(entry) &&
+      (
+        !review.temporalEvidence ||
+        !temporalCurrent.every(Boolean)
+      )
+    ) {
+      throw new Error(
+        `${review.compositeId} 的动态证据缺失或已变化；请重新运行 project:composition-proof 后重新生成 scaffold。`,
+      );
+    }
   }
   return prepared;
 };
@@ -3216,11 +3461,18 @@ const escapeSvgText = (value) =>
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
 
-const qualityReviewPanel = async ({review, index}) => {
+export const qualityReviewPanel = async ({review, index}) => {
+  const temporalEvidence = review.temporalEvidence ?? null;
+  const preferred = temporalEvidence?.file
+    ? [{file: temporalEvidence.file}]
+    : [];
+  const seen = new Set();
   const imageEvidence = [];
-  for (const evidence of review.evidenceFiles ?? []) {
+  for (const evidence of [...preferred, ...(review.evidenceFiles ?? [])]) {
     try {
       const file = assertWorkspaceFile(evidence.file);
+      if (seen.has(file)) continue;
+      seen.add(file);
       if (!(await fileExists(file))) continue;
       const metadata = await sharp(file).metadata();
       if (metadata.width && metadata.height) {
@@ -3262,13 +3514,15 @@ const qualityReviewPanel = async ({review, index}) => {
         font-family="Arial, PingFang SC, sans-serif">${escapeSvgText(`${index + 1}. ${id}`)}</text>
       <text x="12" y="45" fill="#d9c6aa" font-size="12"
         font-family="Arial, PingFang SC, sans-serif">${escapeSvgText(
-          `${(review.pendingChecks ?? []).length} pending · ${selected?.relativeFile ?? 'no image evidence'}`,
+          `${(review.pendingChecks ?? []).length} pending · ${temporalEvidence ? 'temporal' : 'static'} · ${selected?.relativeFile ?? 'no image evidence'}`,
         )}</text>
     </svg>
   `);
   return {
     id,
     targetFingerprint: review.targetFingerprint,
+    temporalEvidence: Boolean(temporalEvidence),
+    selectedFile: selected?.relativeFile ?? null,
     evidence: imageEvidence.map(({file: _file, ...evidence}) => evidence),
     panel: await sharp({
       create: {

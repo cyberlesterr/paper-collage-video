@@ -26,6 +26,9 @@ ASSET_HARDENING_INPUT_DIRECTORY = (
 CANONICAL_CONTAINER_FIXTURE_DIRECTORY = (
     ROOT / "fixtures" / "canonical-container"
 )
+REGISTERED_GEOMETRY_INPUT_DIRECTORY = (
+    ROOT / "dist" / "vox-phase2-proof" / "inputs"
+)
 
 
 def load_json(file: Path) -> dict:
@@ -186,6 +189,14 @@ try:
         / "canonical-container-binding.json",
         "canonical-container-binding.schema.json",
     )
+    registered_geometry_input = (
+        REGISTERED_GEOMETRY_INPUT_DIRECTORY / "registered-geometry-proof.json"
+    )
+    if registered_geometry_input.exists():
+        validate(
+            registered_geometry_input,
+            "registered-geometry-proof.schema.json",
+        )
     validate_ref(
         CANONICAL_CONTAINER_FIXTURE_DIRECTORY
         / "canonical-container-intent.json",

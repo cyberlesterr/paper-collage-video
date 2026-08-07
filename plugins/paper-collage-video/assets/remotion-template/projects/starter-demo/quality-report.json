@@ -402,7 +402,7 @@
         "projects/starter-demo/assets/plates/01-bg.png": "8b281acc2007312e394832a74ece76229b8c049d48a46c82f4377409a44a0d57"
       },
       "compositionHash": "9f99e72cb300cc5e8bd58ca115ca06115e677ced2261303824342466747f7c01",
-      "fingerprint": "e02fbb87d62b711552c0ca6824065b62fd1414c94746862c9ce6515a1d988644",
+      "fingerprint": "083c19dfef655d27812735cf65b3a49e263fe252027dd522b6e798542de35eab",
       "proofTimeIds": [
         "proof-establish"
       ],
@@ -423,6 +423,7 @@
           }
         }
       ],
+      "temporalEvidence": null,
       "reviewScope": "runtime-visible",
       "requiredChecks": [
         "visual-event-visible",
@@ -436,8 +437,8 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "e02fbb87d62b711552c0ca6824065b62fd1414c94746862c9ce6515a1d988644",
-            "actual": "e02fbb87d62b711552c0ca6824065b62fd1414c94746862c9ce6515a1d988644"
+            "expected": "083c19dfef655d27812735cf65b3a49e263fe252027dd522b6e798542de35eab",
+            "actual": "083c19dfef655d27812735cf65b3a49e263fe252027dd522b6e798542de35eab"
           },
           {
             "id": "proof-artifacts-present",
@@ -468,7 +469,7 @@
       "evidenceFiles": [
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-establish.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "60282f59e9a385b641277fd065fdcc61bfe8b39d4f48a66571914b24c3c17b30"
         }
       ],
       "status": "passed"
@@ -485,7 +486,7 @@
         "projects/starter-demo/assets/characters/alpha/01-traveler.png": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f"
       },
       "compositionHash": "33ca0da49ad6545fd8c4c140d191c3b619c876ab40e435a6514496d94f6000cb",
-      "fingerprint": "1c8310b837d76cd875fe19244a5f37394382ca93a7d849cfdba07b70fccb25ec",
+      "fingerprint": "b84da2108e0aebf25ff72c9eae03654b15225e2c6e176a7af35465f4cf23c9ba",
       "proofTimeIds": [
         "proof-action"
       ],
@@ -506,6 +507,7 @@
           }
         }
       ],
+      "temporalEvidence": null,
       "reviewScope": "runtime-visible",
       "requiredChecks": [
         "visual-event-visible",
@@ -519,8 +521,8 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "1c8310b837d76cd875fe19244a5f37394382ca93a7d849cfdba07b70fccb25ec",
-            "actual": "1c8310b837d76cd875fe19244a5f37394382ca93a7d849cfdba07b70fccb25ec"
+            "expected": "b84da2108e0aebf25ff72c9eae03654b15225e2c6e176a7af35465f4cf23c9ba",
+            "actual": "b84da2108e0aebf25ff72c9eae03654b15225e2c6e176a7af35465f4cf23c9ba"
           },
           {
             "id": "proof-artifacts-present",
@@ -551,7 +553,7 @@
       "evidenceFiles": [
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-action.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "8c34871308eebcb27095ce8ec6ede8adfa61e2fca7759e8baa172d6f8660a56f"
         }
       ],
       "status": "passed"
@@ -568,7 +570,7 @@
         "projects/starter-demo/assets/characters/alpha/01-traveler.png": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f"
       },
       "compositionHash": "e0b2febd866012364c55f448cee0cca01ad63359e1ffe7776b238f7996a82e39",
-      "fingerprint": "a650cdba9758699f1bc7a9ec096632d21f272923866cc5d959f570fe4bada6e6",
+      "fingerprint": "e0aaeb23482299ffa30eadd01ae38bcfb27f6126992911059ce875dd43a14431",
       "proofTimeIds": [
         "proof-final"
       ],
@@ -589,6 +591,7 @@
           }
         }
       ],
+      "temporalEvidence": null,
       "reviewScope": "runtime-visible",
       "requiredChecks": [
         "visual-event-visible",
@@ -602,8 +605,8 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "a650cdba9758699f1bc7a9ec096632d21f272923866cc5d959f570fe4bada6e6",
-            "actual": "a650cdba9758699f1bc7a9ec096632d21f272923866cc5d959f570fe4bada6e6"
+            "expected": "e0aaeb23482299ffa30eadd01ae38bcfb27f6126992911059ce875dd43a14431",
+            "actual": "e0aaeb23482299ffa30eadd01ae38bcfb27f6126992911059ce875dd43a14431"
           },
           {
             "id": "proof-artifacts-present",
@@ -634,7 +637,7 @@
       "evidenceFiles": [
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-final.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "a572a21facbfcacafef3280ba6f9f3b78a873047c6d9c199849981ce206a1b39"
         }
       ],
       "status": "passed"
@@ -653,7 +656,7 @@
         "projects/starter-demo/assets/plates/01-bg.png": "8b281acc2007312e394832a74ece76229b8c049d48a46c82f4377409a44a0d57"
       },
       "compositionHash": "e06069badae5aca97615b854159703f808db6ebab186121be251114657dc1ab0",
-      "fingerprint": "bb203783eaf946530819473ae9e105eb3515c8d64030ba57aa84338450007733",
+      "fingerprint": "e85ea873e90afd8ff2bb3ceb18f3c4429c24f5de9bf3f85780ef7c8f366c7b53",
       "proofTimeIds": [
         "proof-establish",
         "proof-action",
@@ -706,6 +709,27 @@
           }
         }
       ],
+      "temporalEvidence": {
+        "file": "dist/starter-demo/composition-proof/temporal/style-profile-childrens-picture-book-paper-motion-strip.jpg",
+        "sha256": "e3436eb1e51b094557bd0e607f7edd27a77134b9834a1b697cc450cf8b99403d",
+        "frames": [
+          {
+            "at": 0.08,
+            "file": "dist/starter-demo/composition-proof/frames/proof-establish.svg",
+            "sha256": "60282f59e9a385b641277fd065fdcc61bfe8b39d4f48a66571914b24c3c17b30"
+          },
+          {
+            "at": 0.62,
+            "file": "dist/starter-demo/composition-proof/frames/proof-action.svg",
+            "sha256": "8c34871308eebcb27095ce8ec6ede8adfa61e2fca7759e8baa172d6f8660a56f"
+          },
+          {
+            "at": 0.9,
+            "file": "dist/starter-demo/composition-proof/frames/proof-final.svg",
+            "sha256": "a572a21facbfcacafef3280ba6f9f3b78a873047c6d9c199849981ce206a1b39"
+          }
+        ]
+      },
       "reviewScope": "runtime-visible",
       "requiredChecks": [
         "style-profile-consistent"
@@ -716,13 +740,32 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "bb203783eaf946530819473ae9e105eb3515c8d64030ba57aa84338450007733",
-            "actual": "bb203783eaf946530819473ae9e105eb3515c8d64030ba57aa84338450007733"
+            "expected": "e85ea873e90afd8ff2bb3ceb18f3c4429c24f5de9bf3f85780ef7c8f366c7b53",
+            "actual": "e85ea873e90afd8ff2bb3ceb18f3c4429c24f5de9bf3f85780ef7c8f366c7b53"
           },
           {
             "id": "proof-artifacts-present",
             "passed": true,
             "actual": 3
+          },
+          {
+            "id": "temporal-evidence-current",
+            "passed": true,
+            "expected": "current temporal evidence strip bound by fingerprint",
+            "actual": {
+              "file": "dist/starter-demo/composition-proof/temporal/style-profile-childrens-picture-book-paper-motion-strip.jpg",
+              "frames": 3,
+              "current": true
+            }
+          },
+          {
+            "id": "temporal-evidence-motion",
+            "passed": true,
+            "expected": "at least three sampled frames with observable change",
+            "actual": {
+              "frames": 3,
+              "distinctFrameHashes": 3
+            }
           }
         ]
       },
@@ -735,15 +778,15 @@
       "evidenceFiles": [
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-establish.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "60282f59e9a385b641277fd065fdcc61bfe8b39d4f48a66571914b24c3c17b30"
         },
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-action.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "8c34871308eebcb27095ce8ec6ede8adfa61e2fca7759e8baa172d6f8660a56f"
         },
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-final.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "a572a21facbfcacafef3280ba6f9f3b78a873047c6d9c199849981ce206a1b39"
         }
       ],
       "status": "passed"
@@ -759,7 +802,7 @@
         "projects/starter-demo/assets/plates/01-bg.png": "8b281acc2007312e394832a74ece76229b8c049d48a46c82f4377409a44a0d57"
       },
       "compositionHash": "5d49509e53bca73ce5e6e021bfd5f6963e497b332c87aa1351f218df4daaf690",
-      "fingerprint": "106114d7e48fc9dbe6c8d0b75d6d7196eda79feb9ed818b6910b2b543a29843f",
+      "fingerprint": "d9b7c8322290254cb9f94ef4fc8d7181d4adfc94c59d8fce3ec9bcc11644330a",
       "proofTimeIds": [
         "proof-establish",
         "proof-action",
@@ -812,6 +855,27 @@
           }
         }
       ],
+      "temporalEvidence": {
+        "file": "dist/starter-demo/composition-proof/temporal/motion-contract-whole-film-motion-strip.jpg",
+        "sha256": "e3436eb1e51b094557bd0e607f7edd27a77134b9834a1b697cc450cf8b99403d",
+        "frames": [
+          {
+            "at": 0.08,
+            "file": "dist/starter-demo/composition-proof/frames/proof-establish.svg",
+            "sha256": "60282f59e9a385b641277fd065fdcc61bfe8b39d4f48a66571914b24c3c17b30"
+          },
+          {
+            "at": 0.62,
+            "file": "dist/starter-demo/composition-proof/frames/proof-action.svg",
+            "sha256": "8c34871308eebcb27095ce8ec6ede8adfa61e2fca7759e8baa172d6f8660a56f"
+          },
+          {
+            "at": 0.9,
+            "file": "dist/starter-demo/composition-proof/frames/proof-final.svg",
+            "sha256": "a572a21facbfcacafef3280ba6f9f3b78a873047c6d9c199849981ce206a1b39"
+          }
+        ]
+      },
       "reviewScope": "runtime-visible",
       "requiredChecks": [
         "motion-grammar-consistent",
@@ -827,13 +891,32 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "106114d7e48fc9dbe6c8d0b75d6d7196eda79feb9ed818b6910b2b543a29843f",
-            "actual": "106114d7e48fc9dbe6c8d0b75d6d7196eda79feb9ed818b6910b2b543a29843f"
+            "expected": "d9b7c8322290254cb9f94ef4fc8d7181d4adfc94c59d8fce3ec9bcc11644330a",
+            "actual": "d9b7c8322290254cb9f94ef4fc8d7181d4adfc94c59d8fce3ec9bcc11644330a"
           },
           {
             "id": "proof-artifacts-present",
             "passed": true,
             "actual": 3
+          },
+          {
+            "id": "temporal-evidence-current",
+            "passed": true,
+            "expected": "current temporal evidence strip bound by fingerprint",
+            "actual": {
+              "file": "dist/starter-demo/composition-proof/temporal/motion-contract-whole-film-motion-strip.jpg",
+              "frames": 3,
+              "current": true
+            }
+          },
+          {
+            "id": "temporal-evidence-motion",
+            "passed": true,
+            "expected": "at least three sampled frames with observable change",
+            "actual": {
+              "frames": 3,
+              "distinctFrameHashes": 3
+            }
           }
         ]
       },
@@ -851,19 +934,19 @@
       "evidenceFiles": [
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-establish.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "60282f59e9a385b641277fd065fdcc61bfe8b39d4f48a66571914b24c3c17b30"
         },
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-action.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "8c34871308eebcb27095ce8ec6ede8adfa61e2fca7759e8baa172d6f8660a56f"
         },
         {
           "file": "dist/starter-demo/composition-proof/frames/proof-final.svg",
-          "sha256": "0cb23f171e9062bb4c781507b28dbd53d069323ca272cb536d6d4b14e13cbc73"
+          "sha256": "a572a21facbfcacafef3280ba6f9f3b78a873047c6d9c199849981ce206a1b39"
         }
       ],
       "status": "passed"
     }
   ],
-  "reviewSurfaceFingerprint": "1b7565ba9db924a7b12c987781c7b59ff232487ef11b9cf116b713adadcddc45"
+  "reviewSurfaceFingerprint": "426735d6dd2e3582f497587519fa53b93aee5e95c5db77a47c453be8be214c2a"
 }

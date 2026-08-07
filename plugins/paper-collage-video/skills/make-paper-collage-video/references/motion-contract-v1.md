@@ -80,3 +80,10 @@ together and pass the six contract checks only with current evidence:
 One attractive style sample is not whole-film motion proof. The final quality
 target binds the exact contract, runtime surface, scenes, events, transitions,
 editorial fingerprint, and participating asset hashes.
+
+The whole-film target is temporal-bound: it must carry a current
+fingerprint-bound motion strip sampled across the film's proof moments, and
+the schema-v4 scaffold refuses to generate, render, or record a review when
+that strip is missing or stale. Multi-actor narration additionally requires
+every active actor to own a trajectory/occlusion contract covering the
+narration window; a single endpoint crop can never stand in for those checks.

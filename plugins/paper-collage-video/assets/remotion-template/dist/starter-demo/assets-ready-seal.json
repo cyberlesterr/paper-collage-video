@@ -2,20 +2,20 @@
   "schemaVersion": 1,
   "projectSlug": "starter-demo",
   "generatedAt": "2026-01-01T00:00:00.000Z",
-  "fingerprint": "987678ce9266cb0c83f13eea1c79fab66953a5566b7d45ef6679328e8900fe1d",
+  "fingerprint": "081483e626cc3359ea56e2c65bb32584d6b34637719a963ca896e469f3014ec1",
   "basis": {
     "projectSlug": "starter-demo",
-    "visualFingerprint": "33fe019052430df7bdb8be58c25d6c82311b54b955af89d6259aefcef291cd9e",
-    "audioFingerprint": "cdff719fd3f6501c3109d7c0b8bb6165a47af6572266be7a2c36efb7305e3d3b",
+    "visualFingerprint": "fb6de92db53fd18c663fcf0e395d559ca87385cb1744989472760d2b1651ab88",
+    "audioFingerprint": "9bf4f1c7620fffc487b7151dff465633b98ccc6c2ed54732537a2eede6f3fafa",
     "storyboardFingerprint": "8ebcc6c57f07a2a0bad8a1452a562f847ad3b2fc903be534f2ede3c02d1d1239",
     "validationFingerprint": "60dd0ae10e19b57cbd7901ef268fe01e03895280d585b872631db39e6a362e1a",
-    "qualityFingerprint": "ed3767e7871d3df810d848284441d035ee0df07eee7ec2e7ec8fe6140ef5039b",
-    "subtitleFingerprint": "6b196c02d311c1ac0f7d728263db0259cd1724adade7cc1a61d7ee09cddff52c",
+    "qualityFingerprint": "5e7d02681f11171c0fa296c3b9503bc23573e7d9af4d144cf8127f291e37ec50",
+    "subtitleFingerprint": "229599e98afbb2185ce420d58b6374985377b04e125a196915c52e2a7280fa71",
     "subtitleContract": {
       "schemaVersion": 1,
       "contract": "subtitle-surface-v1",
       "passed": true,
-      "fingerprint": "6b196c02d311c1ac0f7d728263db0259cd1724adade7cc1a61d7ee09cddff52c",
+      "fingerprint": "229599e98afbb2185ce420d58b6374985377b04e125a196915c52e2a7280fa71",
       "summary": {
         "totalScenes": 1,
         "requiredScenes": 1,
@@ -84,6 +84,18 @@
             "phraseSpacingPresent": false,
             "passed": true
           },
+          "placement": {
+            "anchor": "bottom",
+            "safeArea": {
+              "x": 0.06,
+              "y": 0.06,
+              "width": 0.88,
+              "height": 0.88
+            },
+            "exclusionZones": [],
+            "conflicts": [],
+            "passed": true
+          },
           "cues": [
             {
               "from": 0,
@@ -139,6 +151,18 @@
             },
             "maxWidth": 0.78
           }
+        },
+        {
+          "id": "subtitle-scene-placement",
+          "passed": true,
+          "expected": "every narrated scene resolves subtitles without unresolved exclusion conflicts",
+          "actual": [
+            {
+              "sceneId": "starter",
+              "anchor": "bottom",
+              "conflicts": []
+            }
+          ]
         },
         {
           "id": "subtitle-font-source",

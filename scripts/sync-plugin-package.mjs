@@ -3,6 +3,7 @@ import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath, pathToFileURL} from 'node:url';
+import sharp from 'sharp';
 import {createProductionMetrics} from './production-metrics-lib.mjs';
 import {compileStoryboardDirecting} from './motion-treatment-lib.mjs';
 import {createRuntimeBuildManifest} from './runtime-build-lib.mjs';
@@ -128,6 +129,8 @@ for (const entry of [
   'scripts/derive-looping-strip.mjs',
   'scripts/normalize-provider-source.mjs',
   'scripts/registered-family-lib.mjs',
+  'scripts/registered-geometry-lib.mjs',
+  'scripts/prove-registered-geometry.mjs',
   'scripts/semantic-slices-lib.mjs',
   'scripts/canonical-container-lib.mjs',
   'scripts/process-state-sheet.mjs',
@@ -264,6 +267,8 @@ for (const entry of [
   'tests/directing-revision.test.mjs',
   'tests/motion-contract.test.mjs',
   'tests/quality-motion-runtime.test.mjs',
+  'tests/occlusion-action-facing.test.mjs',
+  'tests/registered-geometry-temporal-subtitle.test.mjs',
   'tests/runtime-surface-scope.test.mjs',
   'tests/storyboard-motion.test.mjs',
   'tests/looping-world.test.mjs',
@@ -318,6 +323,7 @@ const workspacePackage = {
     'assets:derive-looping-strip': rootPackage.scripts['assets:derive-looping-strip'],
     'assets:normalize-provider-source': rootPackage.scripts['assets:normalize-provider-source'],
     'proof:registered-family': rootPackage.scripts['proof:registered-family'],
+    'proof:registered-geometry': rootPackage.scripts['proof:registered-geometry'],
     'proof:canonical-container': rootPackage.scripts['proof:canonical-container'],
     'proof:alpha-bands': rootPackage.scripts['proof:alpha-bands'],
     'provider:status': rootPackage.scripts['provider:status'],
@@ -859,21 +865,23 @@ const [backgroundData, travelerData] = await Promise.all([
   fs.readFile(backgroundFile),
   fs.readFile(travelerFile),
 ]);
-const starterProofSvg = [
+const starterProofSvg = (offsetPx = 0) => [
   '<svg xmlns="http://www.w3.org/2000/svg"',
   ` width="${project.video.width}"`,
   ` height="${project.video.height}"`,
   ` viewBox="0 0 ${project.video.width} ${project.video.height}">`,
+  `<g transform="translate(${offsetPx} 0)">`,
   `<image href="data:image/png;base64,${backgroundData.toString('base64')}"`,
   ` width="${project.video.width}" height="${project.video.height}"/>`,
   `<image href="data:image/png;base64,${travelerData.toString('base64')}"`,
   ` width="${project.video.width}" height="${project.video.height}"/>`,
+  '</g>',
   '</svg>\n',
 ].join('');
 const starterProofFiles = new Map();
-for (const proof of project.scenes[0].motion.proofTimes) {
+for (const [index, proof] of project.scenes[0].motion.proofTimes.entries()) {
   const file = path.join(starterProofFrameDirectory, `${proof.id}.svg`);
-  await fs.writeFile(file, starterProofSvg, 'utf8');
+  await fs.writeFile(file, starterProofSvg(index * 120), 'utf8');
   starterProofFiles.set(proof.id, path.relative(RUNTIME_ROOT, file));
 }
 
@@ -914,6 +922,68 @@ const starterProofFramesForTarget = (target) =>
       },
     };
   });
+const starterTemporalEvidenceForTarget = async (target) => {
+  const frames = [];
+  for (const proofTimeId of target.proofTimeIds) {
+    const proof = project.scenes[0].motion.proofTimes.find(
+      ({id}) => id === proofTimeId,
+    );
+    const file = starterProofFiles.get(proofTimeId);
+    if (!file) continue;
+    frames.push({
+      at: proof?.at ?? null,
+      file,
+      sha256: await hashFile(path.join(RUNTIME_ROOT, file)),
+    });
+  }
+  if (frames.length < 3) return null;
+  const safeId = target.compositeId
+    .replace(/[^a-z0-9-]+/gi, '-')
+    .toLowerCase();
+  const stripFile = path.join(
+    starterProofDirectory,
+    'temporal',
+    `${safeId}-motion-strip.jpg`,
+  );
+  await fs.mkdir(path.dirname(stripFile), {recursive: true});
+  const panels = await Promise.all(
+    frames.slice(0, 8).map(async ({at, file}, index) => {
+      const image = await sharp(path.join(RUNTIME_ROOT, file))
+        .resize(360, 203, {fit: 'cover'})
+        .jpeg()
+        .toBuffer();
+      const label = Buffer.from(
+        `<svg width="360" height="40" xmlns="http://www.w3.org/2000/svg">` +
+          `<rect width="100%" height="100%" fill="#1c1714"/>` +
+          `<text x="12" y="27" fill="#f6ead2" font-size="17" font-family="Arial, PingFang SC, sans-serif">${String(at ?? index).replace(/[<>&]/g, '')}</text></svg>`,
+      );
+      return {image, label};
+    }),
+  );
+  const stripWidth = panels.length * 360;
+  const stripHeight = 243;
+  await sharp({
+    create: {
+      width: stripWidth,
+      height: stripHeight,
+      channels: 3,
+      background: '#100d0b',
+    },
+  })
+    .composite(
+      panels.flatMap(({image, label}, index) => [
+        {input: label, left: index * 360, top: 0},
+        {input: image, left: index * 360, top: 40},
+      ]),
+    )
+    .jpeg({quality: 90})
+    .toFile(stripFile);
+  return {
+    file: path.relative(RUNTIME_ROOT, stripFile),
+    sha256: await hashFile(stripFile),
+    frames,
+  };
+};
 await writeJson(path.join(starterProofDirectory, 'report.json'), {
   schemaVersion: 2,
   projectSlug: 'starter-demo',
@@ -927,13 +997,14 @@ await writeJson(path.join(starterProofDirectory, 'report.json'), {
     fingerprint: `bundled-${proof.id}`,
     file: starterProofFiles.get(proof.id),
   })),
-  composites: starterTargets.map((target) => ({
+  composites: await Promise.all(starterTargets.map(async (target) => ({
     compositeId: target.compositeId,
     sceneId: target.sceneId,
     pattern: target.pattern,
     fingerprint: target.fingerprint,
     proofFrames: starterProofFramesForTarget(target),
-  })),
+    temporalEvidence: await starterTemporalEvidenceForTarget(target),
+  }))),
   assetEvidence: [],
   cache: {
     frames: {reused: 0, rendered: 3},

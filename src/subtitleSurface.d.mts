@@ -29,6 +29,59 @@ export function resolveSubtitleLayout(options: {
   maxWidth: number;
 };
 
+export type SubtitleExclusionZone = {
+  id: string;
+  role: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  padding?: number;
+};
+
+export function rectanglesOverlap(
+  left: {left: number; top: number; width: number; height: number},
+  right: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  },
+  padding?: number,
+): boolean;
+
+export function resolveSubtitleScenePlacement(options: {
+  placement?: {
+    anchor?: string;
+    safeArea?: Partial<SubtitleSafeArea> | null;
+    exclusionZones?: SubtitleExclusionZone[];
+  } | null;
+  safeArea?: Partial<SubtitleSafeArea> | null;
+  maxWidth?: number;
+  width: number;
+  height: number;
+}): {
+  contract: 'scene-subtitle-placement-v1';
+  safeArea: SubtitleSafeArea;
+  anchor: string;
+  leftPercent: number;
+  rightPercent: number;
+  bottomPixels: number;
+  topPixels: number;
+  maxWidth: number;
+  box: {left: number; top: number; width: number; height: number};
+  exclusionZones: Array<{
+    id: string;
+    role: string;
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+    padding: number;
+  }>;
+  conflicts: Array<{zoneId: string; role: string}>;
+};
+
 export function resolveSubtitleTypography(options: {
   appearance?: {
     variant?: 'boxed' | 'plain' | 'hidden';

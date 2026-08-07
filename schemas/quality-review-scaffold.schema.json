@@ -15,7 +15,7 @@
   ],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 3},
+    "schemaVersion": {"const": 4},
     "projectSlug": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -61,6 +61,41 @@
         "compositeId": {"type": "string", "minLength": 1},
         "targetFingerprint": {"$ref": "#/$defs/fingerprint"},
         "reviewer": {"type": "string", "minLength": 1},
+        "evidenceClasses": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["full", "crop", "debug", "temporal"]
+          }
+        },
+        "temporalEvidence": {
+          "oneOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "required": ["file", "sha256", "frames"],
+              "properties": {
+                "file": {"type": "string", "minLength": 1},
+                "sha256": {"$ref": "#/$defs/fingerprint"},
+                "frames": {
+                  "type": "array",
+                  "minItems": 3,
+                  "items": {
+                    "type": "object",
+                    "required": ["at", "file", "sha256"],
+                    "properties": {
+                      "at": {"type": "number", "minimum": 0, "maximum": 1},
+                      "file": {"type": "string", "minLength": 1},
+                      "sha256": {"$ref": "#/$defs/fingerprint"}
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
         "requiredChecks": {
           "type": "array",
           "items": {"type": "string", "minLength": 1},

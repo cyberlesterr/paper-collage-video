@@ -107,6 +107,32 @@ test('source and packaged skills document publish approval as a post-completion 
   }
 });
 
+test('packaged runtime carries the registered-geometry proof script and new regression tests', () => {
+  const sourcePackage = readJson(path.join(ROOT, 'package.json'));
+  const runtimePackage = readJson(path.join(RUNTIME_ROOT, 'package.json'));
+  assert.equal(
+    sourcePackage.scripts['proof:registered-geometry'],
+    'node scripts/prove-registered-geometry.mjs',
+  );
+  assert.equal(
+    runtimePackage.scripts['proof:registered-geometry'],
+    sourcePackage.scripts['proof:registered-geometry'],
+    'plugin:sync must copy the proof:registered-geometry script into the packaged workspace',
+  );
+  for (const relative of [
+    'tests/occlusion-action-facing.test.mjs',
+    'tests/registered-geometry-temporal-subtitle.test.mjs',
+  ]) {
+    const source = fs.readFileSync(path.join(ROOT, relative), 'utf8');
+    const packaged = fs.readFileSync(
+      path.join(RUNTIME_ROOT, relative),
+      'utf8',
+    );
+    assert.equal(packaged, source, relative);
+    assert.ok(source.length > 0, relative);
+  }
+});
+
 test('repository and packaged locks exclude the vulnerable fast-uri range', () => {
   assertPatchedFastUri(path.join(ROOT, 'package-lock.json'));
   assertPatchedFastUri(path.join(RUNTIME_ROOT, 'package-lock.json'));

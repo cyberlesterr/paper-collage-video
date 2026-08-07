@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/registered-geometry-proof.schema.json",
+  "title": "Registered Family Geometry Proof v1",
+  "description": "Alpha-tight/sourceRect geometry checks for registered pose-family and layer members: centroid, baseline, proportion/aspect/scale drift, and silhouette-facing consistency.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "familyId",
+    "registrationId",
+    "familyFingerprint",
+    "canvas",
+    "referenceStateId",
+    "limits",
+    "states",
+    "passed",
+    "fingerprint"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "familyId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "registrationId": {"type": "string", "minLength": 1},
+    "familyFingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "canvas": {
+      "type": "object",
+      "required": ["width", "height"],
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1}
+      },
+      "additionalProperties": false
+    },
+    "referenceStateId": {"type": "string", "minLength": 1},
+    "limits": {
+      "type": "object",
+      "required": [
+        "maxCentroidDelta",
+        "maxBaselineDelta",
+        "maxAspectRatioDelta",
+        "maxScaleDrift",
+        "maxProportionDelta"
+      ],
+      "properties": {
+        "maxCentroidDelta": {"type": "number", "minimum": 0, "maximum": 1},
+        "maxBaselineDelta": {"type": "number", "minimum": 0, "maximum": 1},
+        "maxAspectRatioDelta": {"type": "number", "minimum": 0, "maximum": 1},
+        "maxScaleDrift": {"type": "number", "minimum": 0, "maximum": 1},
+        "maxProportionDelta": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "states": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "stateId",
+          "file",
+          "sha256",
+          "declaredFacing",
+          "geometry",
+          "drift",
+          "passed",
+          "issues"
+        ],
+        "properties": {
+          "stateId": {"type": "string", "minLength": 1},
+          "file": {"type": "string", "minLength": 1},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "declaredFacing": {
+            "enum": ["left", "right", "front", "back", "neutral"]
+          },
+          "geometry": {
+            "type": "object",
+            "required": [
+              "alphaTight",
+              "width",
+              "height",
+              "centroid",
+              "baselineY",
+              "aspectRatio",
+              "proportion",
+              "silhouetteDirection",
+              "silhouetteBias"
+            ],
+            "properties": {
+              "alphaTight": {
+                "type": "object",
+                "required": ["left", "top", "right", "bottom"],
+                "properties": {
+                  "left": {"type": "number", "minimum": 0},
+                  "top": {"type": "number", "minimum": 0},
+                  "right": {"type": "number", "minimum": 0},
+                  "bottom": {"type": "number", "minimum": 0}
+                },
+                "additionalProperties": false
+              },
+              "width": {"type": "number", "exclusiveMinimum": 0},
+              "height": {"type": "number", "exclusiveMinimum": 0},
+              "centroid": {
+                "type": "object",
+                "required": ["x", "y"],
+                "properties": {
+                  "x": {"type": "number"},
+                  "y": {"type": "number"}
+                },
+                "additionalProperties": false
+              },
+              "baselineY": {"type": "number", "minimum": 0},
+              "aspectRatio": {"type": "number", "exclusiveMinimum": 0},
+              "proportion": {"type": "number", "minimum": 0, "maximum": 1},
+              "area": {"type": "integer", "minimum": 0},
+              "empty": {"type": "boolean"},
+              "silhouetteDirection": {
+                "enum": ["left", "right", "neutral"]
+              },
+              "silhouetteBias": {"type": "number"}
+            },
+            "additionalProperties": false
+          },
+          "drift": {
+            "type": "object",
+            "required": [
+              "centroidDelta",
+              "baselineDelta",
+              "aspectRatioDelta",
+              "scaleDrift",
+              "proportionDelta",
+              "facingConsistent"
+            ],
+            "properties": {
+              "centroidDelta": {"type": "number", "minimum": 0},
+              "baselineDelta": {"type": "number", "minimum": 0},
+              "aspectRatioDelta": {"type": "number", "minimum": 0},
+              "scaleDrift": {"type": "number", "minimum": 0},
+              "proportionDelta": {"type": "number", "minimum": 0},
+              "facingConsistent": {"type": "boolean"}
+            },
+            "additionalProperties": false
+          },
+          "passed": {"type": "boolean"},
+          "issues": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "passed": {"type": "boolean"},
+    "fingerprint": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  },
+  "additionalProperties": false
+}

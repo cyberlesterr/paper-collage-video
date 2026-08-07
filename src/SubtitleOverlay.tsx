@@ -4,6 +4,7 @@ import {
   useVideoConfig,
 } from 'remotion';
 import type {
+  EditorialSubtitlePlacement,
   EditorialSystem,
   NormalizedSubtitleCue,
   ProjectTheme,
@@ -12,6 +13,7 @@ import type {
 import {
   resolveSubtitleFadeFrames,
   resolveSubtitleLayout,
+  resolveSubtitleScenePlacement,
   resolveSubtitleTypography,
 } from './subtitleSurface.mjs';
 
@@ -25,11 +27,13 @@ export const SubtitleOverlay = ({
   theme,
   appearance,
   safeArea,
+  placement,
 }: {
   cues: NormalizedSubtitleCue[];
   theme: ProjectTheme;
   appearance?: SceneAppearance['subtitles'];
   safeArea?: EditorialSystem['responsiveProfiles'][number]['safeArea'];
+  placement?: EditorialSubtitlePlacement;
 }) => {
   const frame = useCurrentFrame();
   const {width, height} = useVideoConfig();
@@ -51,19 +55,29 @@ export const SubtitleOverlay = ({
     width,
     height,
   });
+  const sceneLayout = resolveSubtitleScenePlacement({
+    placement,
+    safeArea,
+    maxWidth: appearance?.maxWidth,
+    width,
+    height,
+  });
   const typography = resolveSubtitleTypography({
     appearance,
     theme,
     scale,
   });
+  const activeLayout = placement ? sceneLayout : layout;
   return (
     <div
       style={{
         position: 'absolute',
         zIndex: 100,
-        left: `${layout.leftPercent}%`,
-        right: `${layout.rightPercent}%`,
-        bottom: layout.bottomPixels,
+        left: `${activeLayout.leftPercent}%`,
+        right: `${activeLayout.rightPercent}%`,
+        ...(placement && sceneLayout.anchor !== 'bottom'
+          ? {top: sceneLayout.topPixels}
+          : {bottom: activeLayout.bottomPixels}),
         textAlign: 'center',
         opacity,
         color: appearance?.color ?? theme.subtitle,

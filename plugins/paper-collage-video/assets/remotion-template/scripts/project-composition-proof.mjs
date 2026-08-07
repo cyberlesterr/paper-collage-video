@@ -31,6 +31,7 @@ import {
 import {
   collectCompositeQualityTargets,
   compositionProofReportPath,
+  buildRegisteredGeometryProofForTarget,
 } from './quality-lib.mjs';
 import {
   createCompositionProofProject,
@@ -689,6 +690,9 @@ try {
             : {}),
           sceneId: shot.sceneId,
           proofTimeId,
+          at: scene.motion?.proofTimes?.find(
+            ({id}) => id === proofTimeId,
+          )?.at ?? null,
           absoluteFrame: renderedProof.absoluteFrame,
           frameFingerprint: renderedProof.fingerprint,
           fullFrame: path.relative(ROOT, renderedProof.file),
@@ -804,12 +808,99 @@ try {
         );
       }
     }
+    let temporalEvidence = null;
+    if (proofFrames.length >= 3) {
+      const temporalDirectory = path.join(evidenceDirectory, 'temporal');
+      await fs.mkdir(temporalDirectory, {recursive: true});
+      const safeId = target.compositeId
+        .replace(/[^a-z0-9-]+/gi, '-')
+        .toLowerCase();
+      const frames = await Promise.all(
+        proofFrames.map(async (frame) => ({
+          at: Number.isFinite(frame.at) ? frame.at : null,
+          file: frame.fullFrame,
+          sha256: await hashFile(path.resolve(ROOT, frame.fullFrame)),
+        })),
+      );
+      const stripFile = path.join(
+        temporalDirectory,
+        `${safeId}-motion-strip.jpg`,
+      );
+      const panels = await Promise.all(
+        frames.slice(0, 8).map(async ({at, file}, index) => {
+          const image = await sharp(path.resolve(ROOT, file))
+            .resize(360, 203, {fit: 'cover'})
+            .jpeg()
+            .toBuffer();
+          const label = Buffer.from(
+            `<svg width="360" height="40" xmlns="http://www.w3.org/2000/svg">` +
+              `<rect width="100%" height="100%" fill="#1c1714"/>` +
+              `<text x="12" y="27" fill="#f6ead2" font-size="17" font-family="Arial, PingFang SC, sans-serif">${String(at ?? index).replace(/[<>&]/g, '')}</text></svg>`,
+          );
+          return {image, label};
+        }),
+      );
+      const stripWidth = panels.length * 360;
+      const stripHeight = 243;
+      const compositeInputs = panels.flatMap(
+        ({image, label}, index) => [
+          {input: label, left: index * 360, top: 0},
+          {input: image, left: index * 360, top: 40},
+        ],
+      );
+      await sharp({
+        create: {
+          width: stripWidth,
+          height: stripHeight,
+          channels: 3,
+          background: '#100d0b',
+        },
+      })
+        .composite(compositeInputs)
+        .jpeg({quality: 90})
+        .toFile(stripFile);
+      temporalEvidence = {
+        file: path.relative(ROOT, stripFile),
+        sha256: await hashFile(stripFile),
+        frames,
+      };
+      await writeJson(
+        path.join(temporalDirectory, `${safeId}-motion-strip.json`),
+        temporalEvidence,
+      );
+    }
+    let registeredGeometryProof = null;
+    if (
+      ['supported-subject', 'registered-depth-stack', 'state-sequence'].includes(
+        target.pattern,
+      )
+    ) {
+      registeredGeometryProof = await buildRegisteredGeometryProofForTarget({
+        target,
+        root: ROOT,
+      });
+      if (
+        registeredGeometryProof &&
+        !registeredGeometryProof.passed
+      ) {
+        throw new Error(
+          `registered family ${target.compositeId} 的 alpha-tight 几何校验未通过：` +
+            registeredGeometryProof.states
+              .flatMap(({stateId, issues}) =>
+                issues.map((issue) => `${stateId}: ${issue}`),
+              )
+              .join('；'),
+        );
+      }
+    }
     composites.push({
       compositeId: target.compositeId,
       sceneId: target.sceneId,
       pattern: target.pattern,
       fingerprint: target.fingerprint,
       proofFrames,
+      temporalEvidence,
+      registeredGeometryProof,
       layerStackProof,
       loopingWorldProof,
       canonicalContainerProof,

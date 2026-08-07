@@ -107,3 +107,134 @@ export const resolveSubtitleLayout = ({
     maxWidth: boundedMaxWidth,
   };
 };
+
+const normalizedZoneRect = (zone) => ({
+  left: Number(zone?.x ?? 0),
+  top: Number(zone?.y ?? 0),
+  right: Number(zone?.x ?? 0) + Number(zone?.width ?? 0),
+  bottom: Number(zone?.y ?? 0) + Number(zone?.height ?? 0),
+});
+
+const normalizeRect = (rect) => ({
+  left: Number(rect?.left ?? 0),
+  top: Number(rect?.top ?? 0),
+  right: Number(rect?.right ?? (rect?.left ?? 0) + (rect?.width ?? 0)),
+  bottom: Number(rect?.bottom ?? (rect?.top ?? 0) + (rect?.height ?? 0)),
+});
+
+export const rectanglesOverlap = (left, right, padding = 0) => {
+  const a = normalizeRect(left);
+  const b = normalizeRect(right);
+  return (
+    a.left - padding < b.right + padding &&
+    a.right + padding > b.left - padding &&
+    a.top - padding < b.bottom + padding &&
+    a.bottom + padding > b.top - padding
+  );
+};
+
+export const resolveSubtitleScenePlacement = ({
+  placement = null,
+  safeArea,
+  maxWidth = 0.78,
+  width,
+  height,
+}) => {
+  const fallbackSafeArea = normalizeSubtitleSafeArea(safeArea);
+  const sceneSafeArea = placement?.safeArea
+    ? normalizeSubtitleSafeArea(placement.safeArea)
+    : fallbackSafeArea;
+  const anchor = placement?.anchor ?? 'bottom';
+  const topAnchored = ['top', 'top-left', 'top-right'].includes(anchor);
+  const exclusionZones = (placement?.exclusionZones ?? [])
+    .filter(
+      (zone) =>
+        zone &&
+        zone.role !== 'subtitle' &&
+        Number(zone?.width) > 0 &&
+        Number(zone?.height) > 0,
+    )
+    .map((zone) => ({
+      id: zone.id,
+      role: zone.role,
+      padding: Number(zone?.padding ?? 0),
+      ...normalizedZoneRect(zone),
+    }));
+  const boundedMaxWidth = Math.min(
+    sceneSafeArea.width,
+    Math.max(0.1, finiteOr(maxWidth, 0.78)),
+  );
+  const scale = Math.min(width / 1920, height / 1080);
+  const lineHeight = 42 * scale * 1.35;
+  const paddingY = 12 * scale;
+  const boxHeightNorm = Math.min(1, (lineHeight + paddingY * 2) / height);
+  const centeredX = (1 - boundedMaxWidth) / 2;
+  const leftPercent = Math.max(sceneSafeArea.x, centeredX) * 100;
+  const rightPercent =
+    Math.max(1 - sceneSafeArea.x - sceneSafeArea.width, centeredX) * 100;
+  const baseY = () =>
+    topAnchored
+      ? sceneSafeArea.y
+      : anchor === 'center'
+        ? (1 - boxHeightNorm) / 2
+        : sceneSafeArea.y + sceneSafeArea.height - boxHeightNorm;
+  let box = {
+    left: Math.max(sceneSafeArea.x, centeredX),
+    top: baseY(),
+    width: boundedMaxWidth,
+    height: boxHeightNorm,
+  };
+  const conflicts = [];
+  let progress = true;
+  while (progress) {
+    const overlapping = exclusionZones.filter((zone) =>
+      rectanglesOverlap(box, zone, zone.padding),
+    );
+    if (overlapping.length === 0) break;
+    progress = false;
+    const zone = overlapping[0];
+    if (topAnchored) {
+      const candidate = {
+        ...box,
+        top: zone.bottom + 0.01,
+      };
+      if (
+        candidate.top + box.height <= sceneSafeArea.y + sceneSafeArea.height &&
+        candidate.top > box.top
+      ) {
+        box = candidate;
+        progress = true;
+      }
+    } else {
+      const candidate = {
+        ...box,
+        top: zone.top - box.height - 0.01,
+      };
+      if (
+        candidate.top >= sceneSafeArea.y &&
+        candidate.top < box.top
+      ) {
+        box = candidate;
+        progress = true;
+      }
+    }
+    if (!progress) {
+      conflicts.push({zoneId: zone.id, role: zone.role});
+      break;
+    }
+  }
+  const safeBottom = (1 - box.top - box.height) * height;
+  return {
+    contract: 'scene-subtitle-placement-v1',
+    safeArea: sceneSafeArea,
+    anchor,
+    leftPercent,
+    rightPercent,
+    bottomPixels: Math.max(0, safeBottom) + 12 * scale,
+    topPixels: box.top * height,
+    maxWidth: boundedMaxWidth,
+    box,
+    exclusionZones,
+    conflicts,
+  };
+};

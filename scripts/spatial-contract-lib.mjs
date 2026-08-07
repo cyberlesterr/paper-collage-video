@@ -1407,11 +1407,19 @@ const inspectTravelFacing = (project, contract) => {
       y: entry.height * 0.5,
     });
     const state = resolveSequenceState({node: entry.node, progress});
+    const rotationDegrees =
+      Math.atan2(entry.localMatrix[1], entry.localMatrix[0]) * 180 / Math.PI;
+    const flipped =
+      entry.localMatrix[0] * entry.localMatrix[3] -
+        entry.localMatrix[1] * entry.localMatrix[2] < 0;
     samples.push({
       frame,
       progress,
       x: center.x / project.video.width,
       y: center.y / project.video.height,
+      rotationDegrees,
+      flipped,
+      headingDegrees: rotationDegrees + (flipped ? 180 : 0),
       stateId: state?.id ?? null,
       facing: state?.facing ?? null,
     });
@@ -1431,6 +1439,49 @@ const inspectTravelFacing = (project, contract) => {
       ]),
     ).values(),
   ];
+  const facingAxisDegrees =
+    contract.expectedFacing === 'right'
+      ? 0
+      : contract.expectedFacing === 'left'
+        ? 180
+        : null;
+  const angularDistance = (left, right) => {
+    const delta = Math.abs(((left - right + 540) % 360) - 180);
+    return delta;
+  };
+  const renderFacingPassed =
+    facingAxisDegrees === null ||
+    (
+      samples.length > 0 &&
+      samples.every(
+        ({headingDegrees}) =>
+          angularDistance(headingDegrees, facingAxisDegrees) <= 90,
+      )
+    );
+  const velocitySamples = [];
+  for (let index = 1; index < samples.length; index += 1) {
+    const previous = samples[index - 1];
+    const current = samples[index];
+    const speed = Math.hypot(
+      current.x - previous.x,
+      current.y - previous.y,
+    );
+    if (speed > 0.001) {
+      velocitySamples.push({
+        angle: Math.atan2(
+          current.y - previous.y,
+          current.x - previous.x,
+        ) * 180 / Math.PI,
+        speed,
+      });
+    }
+  }
+  const headingVelocityPassed =
+    facingAxisDegrees === null ||
+    velocitySamples.length === 0 ||
+    velocitySamples.every(({angle}) =>
+      angularDistance(angle, facingAxisDegrees) <= 60,
+    );
   checks.push(
     {
       id: 'travel-facing-samples-resolve',
@@ -1469,6 +1520,31 @@ const inspectTravelFacing = (project, contract) => {
       },
       actual: observedStates,
     },
+    {
+      id: 'travel-facing-render-facing',
+      passed: renderFacingPassed,
+      expected: {
+        facing: contract.expectedFacing,
+        toleranceDegrees: 90,
+      },
+      actual: samples.map(({headingDegrees, flipped, facing}) => ({
+        headingDegrees,
+        flipped,
+        stateFacing: facing,
+      })),
+    },
+    {
+      id: 'travel-facing-velocity-heading',
+      passed: headingVelocityPassed,
+      expected: {
+        facing: contract.expectedFacing,
+        toleranceDegrees: 60,
+      },
+      actual: velocitySamples.map(({angle, speed}) => ({
+        velocityAngle: angle,
+        speed,
+      })),
+    },
   );
   const endpoints = [
     {proofTimeId: from.id, sample: samples[0]},
@@ -1498,6 +1574,416 @@ const inspectTravelFacing = (project, contract) => {
       observedFacing: sample?.facing ?? null,
       netTravel,
     })),
+  };
+};
+
+const inspectOcclusion = async (
+  project,
+  contract,
+  {includeAlpha = false} = {},
+) => {
+  const timeline = deriveSceneTimeline(project);
+  const scene = timeline.scenes.find(({id}) => id === contract.sceneId);
+  const checks = [];
+  if (!scene) {
+    return {
+      passed: false,
+      checks: [{
+        id: 'occlusion-scene-exists',
+        passed: false,
+        expected: contract.sceneId,
+        actual: null,
+      }],
+      measurements: [],
+    };
+  }
+  const prepared = prepareSceneResolution({scene, video: project.video});
+  const measurements = [];
+  for (const proofTimeId of contract.proofTimeIds) {
+    const proof = proofFor(scene, proofTimeId);
+    if (!proof) {
+      checks.push({
+        id: `occlusion-proof:${proofTimeId}`,
+        passed: false,
+        expected: proofTimeId,
+        actual: null,
+      });
+      continue;
+    }
+    const resolved = resolveSceneNodes({
+      scene,
+      video: project.video,
+      progress: proof.at,
+      prepared,
+    });
+    const subject = resolved.entries.get(contract.subjectNodeId);
+    const foreground = resolved.entries.get(contract.foregroundNodeId);
+    if (!subject || !foreground) {
+      checks.push({
+        id: `occlusion-nodes:${proofTimeId}`,
+        passed: false,
+        expected: [contract.subjectNodeId, contract.foregroundNodeId],
+        actual: [subject?.node.id ?? null, foreground?.node.id ?? null],
+      });
+      continue;
+    }
+    const paintDelta = comparePaintOrder(foreground, subject);
+    const desiredSign =
+      contract.relation === 'in-front-of-subject' ? 1 : -1;
+    const paintPassed = paintDelta === 0
+      ? contract.relation === 'behind-subject'
+      : Math.sign(paintDelta) === desiredSign;
+    const subjectBounds = includeAlpha
+      ? await visibleBoundsFor(subject, proof.at)
+      : subject.bounds;
+    const foregroundBounds = includeAlpha
+      ? await visibleBoundsFor(foreground, proof.at)
+      : foreground.bounds;
+    const intersection = rectangleIntersection(
+      subjectBounds,
+      foregroundBounds,
+    );
+    const subjectArea =
+      (subjectBounds.right - subjectBounds.left) *
+      (subjectBounds.bottom - subjectBounds.top);
+    const overlapRatio =
+      subjectArea > 0 ? intersection.area / subjectArea : 0;
+    const overlapPassed = contract.relation === 'in-front-of-subject'
+      ? overlapRatio + 1e-9 >= contract.minimumAlphaOverlap
+      : overlapRatio <= Math.min(contract.minimumAlphaOverlap, 0.02);
+    checks.push(
+      {
+        id: `occlusion-paint-order:${proofTimeId}`,
+        passed: paintPassed,
+        expected: {
+          relation: contract.relation,
+          foregroundPaintIndexAboveSubject:
+            contract.relation === 'in-front-of-subject',
+        },
+        actual: {
+          paintDelta,
+          subjectZ: subject.node.z,
+          foregroundZ: foreground.node.z,
+          subjectStackingContext:
+            subject.renderPath?.at(-1)?.node?.stackingContext ?? null,
+        },
+      },
+      {
+        id: `occlusion-alpha-overlap:${proofTimeId}`,
+        passed: overlapPassed,
+        expected: {
+          relation: contract.relation,
+          minimumAlphaOverlap: contract.minimumAlphaOverlap,
+          mode: includeAlpha ? 'alpha-tight' : 'bounds',
+        },
+        actual: {overlapRatio},
+      },
+      {
+        id: `occlusion-subject-not-lifted:${proofTimeId}`,
+        passed:
+          contract.relation === 'behind-subject' ||
+          paintPassed,
+        expected: contract.relation === 'in-front-of-subject'
+          ? 'subject stacking stays below the foreground layer'
+          : 'foreground stacking stays below the subject',
+        actual: {
+          subjectZ: subject.node.z,
+          foregroundZ: foreground.node.z,
+          paintDelta,
+        },
+      },
+    );
+    measurements.push({
+      sceneId: scene.id,
+      proofTimeId,
+      subjectNodeId: contract.subjectNodeId,
+      foregroundNodeId: contract.foregroundNodeId,
+      paintDelta,
+      overlapRatio,
+      subjectZ: subject.node.z,
+      foregroundZ: foreground.node.z,
+    });
+  }
+  return {
+    passed: checks.length > 0 && checks.every(({passed}) => passed),
+    checks,
+    measurements,
+  };
+};
+
+const contractWindowAt = (contract) => {
+  if (['gait', 'travel-facing', 'path-locomotion'].includes(contract.kind)) {
+    return {from: contract.fromProofTimeId, through: contract.throughProofTimeId};
+  }
+  if (contract.kind === 'occlusion') {
+    const times = contract.proofTimeIds ?? [];
+    return {from: times[0] ?? null, through: times.at(-1) ?? null};
+  }
+  if (contract.kind === 'action-sequence') {
+    const times = (contract.phases ?? []).map(({proofTimeId}) => proofTimeId);
+    return {from: times[0] ?? null, through: times.at(-1) ?? null};
+  }
+  return {from: null, through: null};
+};
+
+const inspectActionSequence = (project, contract) => {
+  const timeline = deriveSceneTimeline(project);
+  const scene = timeline.scenes.find(({id}) => id === contract.sceneId);
+  const checks = [];
+  if (!scene) {
+    return {
+      passed: false,
+      checks: [{
+        id: 'action-sequence-scene-exists',
+        passed: false,
+        expected: contract.sceneId,
+        actual: null,
+      }],
+      measurements: [],
+    };
+  }
+  const fps = project.video.fps;
+  const phases = contract.phases.map((phase) => ({
+    ...phase,
+    proof: proofFor(scene, phase.proofTimeId),
+  }));
+  const missingProofs = phases.filter(({proof}) => !proof);
+  if (missingProofs.length > 0) {
+    checks.push({
+      id: 'action-sequence-proofs-resolve',
+      passed: false,
+      expected: contract.phases.map(({proofTimeId}) => proofTimeId),
+      actual: missingProofs.map(({proofTimeId}) => proofTimeId),
+    });
+    return {passed: false, checks, measurements: []};
+  }
+  const ordered = phases.every(
+    (phase, index) =>
+      index === 0 || phase.proof.at > phases[index - 1].proof.at,
+  );
+  const durationSeconds = scene.durationInFrames / fps;
+  const narrationFrom = Number(scene.narration?.startSeconds ?? 0);
+  const narrationTo =
+    narrationFrom + Number(scene.narration?.durationSeconds ?? 0);
+  const narrationPresent = Number(scene.narration?.durationSeconds ?? 0) > 0;
+  const cue = (project.editorial?.cues ?? []).find(
+    ({id}) => id === contract.narrationCueId,
+  );
+  const cueExists =
+    Boolean(cue) &&
+    cue.sceneId === contract.sceneId &&
+    cue.kind.startsWith('narration');
+  const phaseSeconds = (phase) =>
+    phase.proof.at * durationSeconds;
+  const actionPhase = phases.find(({phase}) => phase === 'action') ??
+    phases.find(({phase}) => phase === 'peak');
+  const cueTimingPassed =
+    !cueExists ||
+    !actionPhase ||
+    Math.abs(
+      phaseSeconds(actionPhase) -
+        (narrationFrom + Number(cue.atSeconds ?? 0)),
+    ) <= contract.narrationToleranceSeconds + 1e-9;
+  checks.push(
+    {
+      id: 'action-sequence-ordered',
+      passed: ordered,
+      expected: 'strictly increasing proof times across phases',
+      actual: phases.map(({phase, proof}) => ({
+        phase,
+        at: proof.at,
+      })),
+    },
+    {
+      id: 'action-sequence-narration-window',
+      passed:
+        !narrationPresent ||
+        phases.every((phase) => {
+          const at = phaseSeconds(phase);
+          return (
+            at >= narrationFrom - contract.narrationToleranceSeconds - 1e-9 &&
+            at <= narrationTo + contract.narrationToleranceSeconds + 1e-9
+          );
+        }),
+      expected: {
+        narrationWindowSeconds: [narrationFrom, narrationTo],
+        toleranceSeconds: contract.narrationToleranceSeconds,
+      },
+      actual: phases.map(({phase, proofTimeId}) => ({
+        phase,
+        proofTimeId,
+        seconds: phaseSeconds({proof: {at: proofFor(scene, proofTimeId).at}}),
+      })),
+    },
+    {
+      id: 'action-sequence-cue-exists',
+      passed: cueExists,
+      expected: {
+        narrationCueId: contract.narrationCueId,
+        sceneId: contract.sceneId,
+      },
+      actual: cue ? {id: cue.id, sceneId: cue.sceneId, kind: cue.kind} : null,
+    },
+    {
+      id: 'action-sequence-cue-timing',
+      passed: cueTimingPassed,
+      expected: {
+        actionPhaseWithinToleranceSeconds:
+          contract.narrationToleranceSeconds,
+      },
+      actual: {
+        cueAtSeconds: cue?.atSeconds ?? null,
+        actionPhaseSeconds: actionPhase
+          ? phaseSeconds(actionPhase)
+          : null,
+      },
+    },
+  );
+  const prepared = prepareSceneResolution({scene, video: project.video});
+  const measurements = [];
+  let previous = null;
+  for (const phase of phases) {
+    const entry = resolvePreparedNodeAt({
+      prepared,
+      nodeId: phase.nodeId,
+      progress: phase.proof.at,
+    });
+    const statePassed =
+      !phase.stateId ||
+      (
+        entry?.node.kind === 'state-sequence' &&
+        resolveSequenceState({
+          node: entry.node,
+          progress: phase.proof.at,
+          pathDepthVelocity: entry.pathMotion?.depthVelocity ?? 0,
+        })?.id === phase.stateId
+      );
+    let travelPassed = true;
+    let travel = null;
+    if (phase.direction && phase.minimumTravel !== undefined && previous) {
+      const center = entry
+        ? applyMatrix(entry.localMatrix, {
+            x: entry.width * 0.5,
+            y: entry.height * 0.5,
+          })
+        : null;
+      if (center && previous.center) {
+        const dx = (center.x - previous.center.x) / project.video.width;
+        const signed =
+          (phase.direction === 'right' ? 1 : -1) * dx;
+        travelPassed =
+          signed + 1e-9 >= phase.minimumTravel;
+        travel = {signedDeltaX: signed, minimumTravel: phase.minimumTravel};
+      }
+    }
+    checks.push(
+      {
+        id: `action-phase-resolves:${phase.phase}`,
+        passed: Boolean(entry),
+        expected: phase.nodeId,
+        actual: entry?.node.id ?? null,
+      },
+      {
+        id: `action-phase-state:${phase.phase}`,
+        passed: statePassed,
+        expected: phase.stateId ?? 'no-state-assertion',
+        actual: entry?.node.kind === 'state-sequence'
+          ? resolveSequenceState({
+              node: entry.node,
+              progress: phase.proof.at,
+              pathDepthVelocity: entry.pathMotion?.depthVelocity ?? 0,
+            })?.id ?? null
+          : null,
+      },
+      ...(phase.direction
+        ? [{
+            id: `action-phase-travel:${phase.phase}`,
+            passed: travelPassed,
+            expected: {
+              direction: phase.direction,
+              minimumTravel: phase.minimumTravel,
+            },
+            actual: travel ?? 'missing-previous-phase',
+          }]
+        : []),
+    );
+    const center = entry
+      ? applyMatrix(entry.localMatrix, {
+          x: entry.width * 0.5,
+          y: entry.height * 0.5,
+        })
+      : null;
+    measurements.push({
+      sceneId: scene.id,
+      phase: phase.phase,
+      proofTimeId: phase.proofTimeId,
+      nodeId: phase.nodeId,
+      center: center
+        ? {
+            x: center.x / project.video.width,
+            y: center.y / project.video.height,
+          }
+        : null,
+    });
+    previous = {phase, center};
+  }
+  const contractsByScene = (project.spatialContracts ?? []).filter(
+    ({id, sceneId}) =>
+      sceneId === contract.sceneId && id !== contract.id,
+  );
+  const actorPassed = contract.actors.map((actor) => {
+    const bound = contractsByScene.find(
+      ({id}) => id === actor.contractId,
+    );
+    const boundNodeMatches =
+      bound &&
+      (
+        bound.nodeId === actor.nodeId ||
+        (
+          bound.kind === 'occlusion' &&
+          bound.subjectNodeId === actor.nodeId
+        ) ||
+        (
+          bound.kind === 'action-sequence' &&
+          bound.actors?.some(({nodeId}) => nodeId === actor.nodeId)
+        )
+      );
+    const window = bound ? contractWindowAt(bound) : null;
+    const fromProof = window?.from
+      ? proofFor(scene, window.from)
+      : null;
+    const throughProof = window?.through
+      ? proofFor(scene, window.through)
+      : null;
+    const firstPhase = phases[0].proof;
+    const lastPhase = phases.at(-1).proof;
+    const windowOverlaps =
+      Boolean(fromProof && throughProof) &&
+      fromProof.at <= lastPhase.at &&
+      throughProof.at >= firstPhase.at;
+    return {
+      nodeId: actor.nodeId,
+      contractId: actor.contractId,
+      passed: Boolean(boundNodeMatches && windowOverlaps),
+      issues: [
+        ...(boundNodeMatches ? [] : ['actor 未绑定同幕同节点轨迹/遮挡契约']),
+        ...(windowOverlaps ? [] : ['绑定契约窗口未覆盖动作窗口']),
+      ],
+    };
+  });
+  checks.push({
+    id: 'action-actor-trajectory',
+    passed: actorPassed.every(({passed}) => passed),
+    expected: contract.actors.map(({nodeId, contractId}) => ({
+      nodeId,
+      contractId,
+    })),
+    actual: actorPassed,
+  });
+  return {
+    passed: checks.length > 0 && checks.every(({passed}) => passed),
+    checks,
+    measurements,
   };
 };
 
@@ -1619,11 +2105,15 @@ const inspectPathLocomotion = (project, contract) => {
       path: entry.pathMotion,
       z: entry.pathMotion.z,
       projectionScale: entry.pathMotion.projectionScale,
+      flipped:
+        entry.localMatrix[0] * entry.localMatrix[3] -
+          entry.localMatrix[1] * entry.localMatrix[2] < 0,
       renderedHeadingDegrees:
         Math.atan2(entry.localMatrix[1], entry.localMatrix[0]) *
           180 / Math.PI +
         initial.node.motion.path.orientation.forwardAngleDegrees,
       stateId: state?.id ?? null,
+      distance: entry.pathMotion?.distance ?? null,
     });
   }
   const movingSegments = [];
@@ -1639,10 +2129,13 @@ const inspectPathLocomotion = (project, contract) => {
       Math.max(1, Math.min(project.video.width, project.video.height));
     if (length <= 1e-7) continue;
     const headingDegrees = right.path.headingDegrees;
+    const movementAngleDegrees =
+      Math.atan2(pixelDy, pixelDx) * 180 / Math.PI;
     movingSegments.push({
       frame: right.frame,
       length,
       headingDegrees,
+      movementAngleDegrees,
       renderedHeadingDegrees: right.renderedHeadingDegrees,
       headingErrorDegrees: angleDifferenceDegrees(
         headingDegrees,
@@ -1690,6 +2183,27 @@ const inspectPathLocomotion = (project, contract) => {
     ) * project.video.fps,
   );
   const maximumTurnRate = Math.max(0, ...turnRates);
+  const distanceMonotonic = samples.every(
+    (sample, index) =>
+      index === 0 ||
+      sample.distance === null ||
+      samples[index - 1].distance === null ||
+      sample.distance >= samples[index - 1].distance - 1e-6,
+  );
+  const span =
+    samples.length >= 2
+      ? Math.hypot(
+          (Math.max(...samples.map(({x}) => x)) -
+            Math.min(...samples.map(({x}) => x))) *
+            project.video.width,
+          (Math.max(...samples.map(({y}) => y)) -
+            Math.min(...samples.map(({y}) => y))) *
+            project.video.height,
+        ) /
+        Math.max(1, Math.min(project.video.width, project.video.height))
+      : 0;
+  const noJitter = span > 1e-9 && totalTravel >= 0.2 * span;
+  const flippedSamples = samples.filter(({flipped}) => flipped);
   const safeBand = contract.screenSafeBand ?? null;
   const safeBandValid = !safeBand || (
     safeBand.minX < safeBand.maxX &&
@@ -1800,6 +2314,29 @@ const inspectPathLocomotion = (project, contract) => {
         maximumTurnDegreesPerSecond: contract.maximumTurnDegreesPerSecond,
       },
       actual: {maximumTurnDegreesPerSecond: maximumTurnRate},
+    },
+    {
+      id: 'path-locomotion-no-backtrack',
+      passed:
+        distanceMonotonic,
+      expected: 'resolved arc-length path distance is never decreasing',
+      actual: {
+        monotonic: distanceMonotonic,
+      },
+    },
+    {
+      id: 'path-locomotion-no-jitter',
+      passed: noJitter,
+      expected: 'total travel spans a meaningful path extent instead of oscillating around one point',
+      actual: {totalTravel, span, ratio: span > 1e-9 ? totalTravel / span : 0},
+    },
+    {
+      id: 'path-locomotion-flip-consistent',
+      passed: flippedSamples.length === 0,
+      expected: 'path rendering never mirrors the registered state artwork',
+      actual: {
+        flippedFrames: flippedSamples.map(({frame}) => frame),
+      },
     },
     ...(safeBand
       ? [{
@@ -2003,12 +2540,26 @@ export const inspectSpatialContract = async (
   if (contract.kind === 'path-locomotion') {
     return inspectPathLocomotion(executableProject, contract);
   }
+  if (contract.kind === 'occlusion') {
+    return inspectOcclusion(executableProject, contract, options);
+  }
+  if (contract.kind === 'action-sequence') {
+    return inspectActionSequence(executableProject, contract);
+  }
   return {
     passed: false,
     checks: [{
       id: 'spatial-contract-kind',
       passed: false,
-      expected: ['grounding', 'continuity', 'gait', 'travel-facing', 'path-locomotion'],
+      expected: [
+        'grounding',
+        'continuity',
+        'gait',
+        'travel-facing',
+        'path-locomotion',
+        'occlusion',
+        'action-sequence',
+      ],
       actual: contract.kind ?? null,
     }],
     measurements: [],
@@ -2017,17 +2568,18 @@ export const inspectSpatialContract = async (
 
 export const validateSpatialContracts = async (project) => {
   const issues = [];
-  if (project.spatialContracts === undefined) return issues;
-  if (!Array.isArray(project.spatialContracts)) {
-    return [{
+  if (project.spatialContracts !== undefined &&
+      !Array.isArray(project.spatialContracts)) {
+    issues.push({
       level: 'error',
       code: 'spatial-contracts-type',
       message: 'spatialContracts 必须为数组。',
       location: 'spatialContracts',
-    }];
+    });
+    return issues;
   }
   const ids = new Set();
-  for (const [index, contract] of project.spatialContracts.entries()) {
+  for (const [index, contract] of (project.spatialContracts ?? []).entries()) {
     const location = `spatialContracts[${index}]`;
     if (
       typeof contract?.id !== 'string' ||
@@ -2051,6 +2603,96 @@ export const validateSpatialContracts = async (project) => {
         message: `空间契约 ${contract.id} 未通过 ${check.id}：期望 ${JSON.stringify(check.expected)}，实际 ${JSON.stringify(check.actual)}。`,
         location,
       });
+    }
+  }
+  issues.push(...validateMultiActorNarrationSpatialCoverage(project));
+  return issues;
+};
+
+const collectMotionActorNodes = (scene) => {
+  const nodes = [];
+  const visit = (list) => {
+    for (const node of list ?? []) {
+      if (
+        node?.kind === 'state-sequence' ||
+        node?.motion?.path
+      ) {
+        nodes.push(node);
+      }
+      if (node?.kind === 'group') visit(node.children);
+    }
+  };
+  visit(scene.composition?.nodes);
+  return nodes;
+};
+
+export const validateMultiActorNarrationSpatialCoverage = (project) => {
+  const issues = [];
+  const contracts = project.spatialContracts ?? [];
+  const timeline = deriveSceneTimeline(project);
+  for (const scene of project.scenes ?? []) {
+    const narration = scene.narration;
+    if (
+      !narration ||
+      !(Number(narration.durationSeconds ?? 0) > 0)
+    ) {
+      continue;
+    }
+    const narrationFrom = Number(narration.startSeconds ?? 0);
+    const narrationTo =
+      narrationFrom + Number(narration.durationSeconds ?? 0);
+    const timelineScene = timeline.scenes.find(
+      ({id}) => id === scene.id,
+    );
+    if (!timelineScene) continue;
+    const durationSeconds =
+      timelineScene.durationInFrames / project.video.fps;
+    const actors = collectMotionActorNodes(scene).filter((node) => {
+      const activeFrom = node.playback?.activeFrom ?? 0;
+      const activeUntil = node.playback?.activeUntil ?? 1;
+      return (
+        activeFrom * durationSeconds <= narrationTo &&
+        activeUntil * durationSeconds >= narrationFrom
+      );
+    });
+    if (actors.length < 2) continue;
+    for (const node of actors) {
+      const covered = contracts.some((contract) => {
+        if (contract.sceneId !== scene.id) return false;
+        const nodeMatches =
+          ['gait', 'travel-facing', 'path-locomotion'].includes(contract.kind)
+            ? contract.nodeId === node.id
+            : contract.kind === 'occlusion'
+              ? contract.subjectNodeId === node.id
+              : contract.kind === 'action-sequence'
+                ? contract.actors?.some(
+                    ({nodeId}) => nodeId === node.id,
+                  )
+                : false;
+        if (!nodeMatches) return false;
+        const window = contractWindowAt(contract);
+        const from = window?.from
+          ? proofFor(scene, window.from)
+          : null;
+        const through = window?.through
+          ? proofFor(scene, window.through)
+          : null;
+        if (!from || !through) return false;
+        return (
+          from.at * durationSeconds <= narrationTo &&
+          through.at * durationSeconds >= narrationFrom
+        );
+      });
+      if (!covered) {
+        issues.push({
+          level: 'error',
+          code: 'narration-multi-actor-trajectory',
+          message:
+            `镜头 ${scene.id} 的旁白窗口内活跃多个动作演员，` +
+            `节点 ${node.id} 缺少覆盖旁白窗口的轨迹/朝向/路径/动作契约。`,
+          location: `scenes[${project.scenes.indexOf(scene)}]`,
+        });
+      }
     }
   }
   return issues;
@@ -2097,7 +2739,9 @@ export const validateStoryboardSpatialContracts = (storyboard) => {
       contract.kind === 'grounding' ||
       contract.kind === 'gait' ||
       contract.kind === 'travel-facing' ||
-      contract.kind === 'path-locomotion'
+      contract.kind === 'path-locomotion' ||
+      contract.kind === 'occlusion' ||
+      contract.kind === 'action-sequence'
     ) {
       const scene = sceneById.get(contract.sceneId)?.scene;
       if (!scene) {
@@ -2119,6 +2763,10 @@ export const validateStoryboardSpatialContracts = (storyboard) => {
               ...(contract.turnProofTimeIds ?? []),
               contract.throughProofTimeId,
             ]
+          : contract.kind === 'occlusion'
+            ? contract.proofTimeIds
+            : contract.kind === 'action-sequence'
+              ? (contract.phases ?? []).map(({proofTimeId}) => proofTimeId)
           : [contract.fromProofTimeId, contract.throughProofTimeId];
       for (const proofTimeId of referenced ?? []) {
         if (!proofIds.has(proofTimeId)) {
@@ -2127,6 +2775,36 @@ export const validateStoryboardSpatialContracts = (storyboard) => {
             message: `空间契约 ${contract.id} 引用了未知证明时刻 ${proofTimeId}。`,
             location,
           });
+        }
+      }
+      if (contract.kind === 'action-sequence') {
+        for (const actor of contract.actors ?? []) {
+          const bound = contracts.find(
+            (candidate) => candidate.id === actor.contractId,
+          );
+          const boundMatchesNode =
+            bound &&
+            (
+              bound.sceneId === contract.sceneId &&
+              (
+                bound.nodeId === actor.nodeId ||
+                (
+                  bound.kind === 'occlusion' &&
+                  bound.subjectNodeId === actor.nodeId
+                ) ||
+                (
+                  bound.kind === 'action-sequence' &&
+                  bound.actors?.some(({nodeId}) => nodeId === actor.nodeId)
+                )
+              )
+            );
+          if (!boundMatchesNode) {
+            issues.push({
+              code: 'storyboard-action-actor-trajectory',
+              message: `多阶段动作契约 ${contract.id} 的演员 ${actor.nodeId} 必须绑定同一镜头的轨迹/遮挡契约 ${actor.contractId}。`,
+              location,
+            });
+          }
         }
       }
       if (contract.kind === 'travel-facing') {
@@ -2219,6 +2897,23 @@ export const validateStoryboardSpatialContracts = (storyboard) => {
             });
           }
         }
+      }
+    }
+    if (contract.kind === 'grounding' && contract.frontOcclusion) {
+      const occlusionContract = contracts.find(
+        (candidate) =>
+          candidate.kind === 'occlusion' &&
+          candidate.sceneId === contract.sceneId &&
+          candidate.subjectNodeId === contract.subjectNodeId &&
+          candidate.foregroundNodeId === contract.frontOcclusion.nodeId &&
+          candidate.relation === contract.frontOcclusion.relation,
+      );
+      if (!occlusionContract) {
+        issues.push({
+          code: 'storyboard-grounding-front-occlusion-contract',
+          message: `接地契约 ${contract.id} 声明了前景遮挡 ${contract.frontOcclusion.nodeId}，必须同时声明匹配的 occlusion 空间契约，禁止仅靠声明通过。`,
+          location: `spatialContracts[${index}].frontOcclusion`,
+        });
       }
     }
     if (contract.kind === 'continuity') {
@@ -2335,6 +3030,12 @@ export const summarizeSpatialContracts = (project) => ({
       .length ?? 0,
   pathLocomotion:
     project.spatialContracts?.filter(({kind}) => kind === 'path-locomotion')
+      .length ?? 0,
+  occlusion:
+    project.spatialContracts?.filter(({kind}) => kind === 'occlusion').length ??
+    0,
+  actionSequence:
+    project.spatialContracts?.filter(({kind}) => kind === 'action-sequence')
       .length ?? 0,
 });
 

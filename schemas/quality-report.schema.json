@@ -165,7 +165,35 @@
           "reviewer": {"type": ["string", "null"]},
           "reviewedAt": {"type": ["string", "null"]},
           "note": {"type": "string"},
-          "evidenceFiles": {"$ref": "#/$defs/evidenceFiles"}
+          "evidenceFiles": {"$ref": "#/$defs/evidenceFiles"},
+          "temporalEvidence": {
+            "oneOf": [
+              {"type": "null"},
+              {
+                "type": "object",
+                "required": ["file", "sha256", "frames"],
+                "properties": {
+                  "file": {"type": "string", "minLength": 1},
+                  "sha256": {"type": "string", "minLength": 64, "maxLength": 64},
+                  "frames": {
+                    "type": "array",
+                    "minItems": 3,
+                    "items": {
+                      "type": "object",
+                      "required": ["at", "file", "sha256"],
+                      "properties": {
+                        "at": {"type": "number", "minimum": 0, "maximum": 1},
+                        "file": {"type": "string", "minLength": 1},
+                        "sha256": {"type": "string", "minLength": 64, "maxLength": 64}
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
         },
         "additionalProperties": false
       }

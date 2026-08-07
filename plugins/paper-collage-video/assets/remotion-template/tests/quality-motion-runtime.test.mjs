@@ -8,6 +8,7 @@ import {createRequestFingerprint} from '../scripts/provider-lib.mjs';
 import {
   assertQualityReviewScaffoldCurrent,
   assertQualityReady,
+  buildRegisteredGeometryProofForTarget,
   buildQualityReviewScaffold,
   collectCompositeQualityTargets,
   compositionProofReportPath,
@@ -262,7 +263,7 @@ test('quality scaffold binds pending checks to current proof hashes without pre-
     compositionProof,
   });
   assert.equal(scaffold.reviews.length, 2);
-  assert.equal(scaffold.schemaVersion, 3);
+  assert.equal(scaffold.schemaVersion, 4);
   assert.match(scaffold.sourceReport.fingerprint, /^[a-f0-9]{64}$/);
   assert.ok(
     scaffold.reviews.every(({targetFingerprint}) =>
@@ -856,7 +857,7 @@ test('required asset quality resets on hashes and batch reviews write atomically
 
     const built = await buildQualityReviewScaffold({slug, reviewer: 'test-vision'});
     assert.ok(built.scaffold.reviews.every(({evidenceFiles}) => evidenceFiles.length > 0));
-    assert.equal(built.scaffold.schemaVersion, 3);
+    assert.equal(built.scaffold.schemaVersion, 4);
     assert.equal(
       built.scaffold.sourceReport.fingerprint,
       built.status.report.reviewSurfaceFingerprint,
@@ -1065,6 +1066,8 @@ test('asset approval cannot bypass a pending or stale supported-subject composit
       }))), null, 2)}\n`, 'utf8');
 
     const [target] = await collectCompositeQualityTargets(project);
+    const registeredGeometryProof =
+      await buildRegisteredGeometryProofForTarget({target, root: ROOT});
     const proofFile = compositionProofReportPath(slug);
     const frame = path.join(path.dirname(proofFile), 'frame.png');
     const crop = path.join(path.dirname(proofFile), 'crop.png');
@@ -1077,6 +1080,7 @@ test('asset approval cannot bypass a pending or stale supported-subject composit
       composites: [{
         compositeId: target.compositeId,
         fingerprint: target.fingerprint,
+        registeredGeometryProof,
         proofFrames: [{proofTimeId: 'final', fullFrame: path.relative(ROOT, frame), crop: path.relative(ROOT, crop)}],
       }],
       assetEvidence: ['boat-rear', 'traveler', 'boat-front'].map((nodeId) => ({

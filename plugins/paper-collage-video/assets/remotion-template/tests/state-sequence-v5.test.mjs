@@ -907,10 +907,41 @@ test('state-sequence quality requires current anchors, facing, and identity refe
         sha256: identitySha256,
       })),
     };
+    const temporalFrames = await Promise.all(
+      ['t0', 't1', 't2'].map(async (name, index) => {
+        const file = path.join(directory, `frame-${name}.png`);
+        await sharp({
+          create: {
+            width: 24,
+            height: 24,
+            channels: 4,
+            background: index % 2 === 0 ? '#3b7d42ff' : '#7d3b42ff',
+          },
+        }).png().toFile(file);
+        return {
+          at: index / 2,
+          file: path.relative(ROOT, file),
+          sha256: createHash('sha256')
+            .update(await fs.readFile(file))
+            .digest('hex'),
+        };
+      }),
+    );
+    const stripFile = path.join(directory, 'motion-strip.jpg');
+    await sharp({
+      create: {width: 24 * 3, height: 24, channels: 3, background: '#100d0b'},
+    }).jpeg().toFile(stripFile);
     const proofReport = {
       composites: [{
         compositeId: target.compositeId,
         fingerprint: target.fingerprint,
+        temporalEvidence: {
+          file: path.relative(ROOT, stripFile),
+          sha256: createHash('sha256')
+            .update(await fs.readFile(stripFile))
+            .digest('hex'),
+          frames: temporalFrames,
+        },
         proofFrames: target.proofTimeIds.map((proofTimeId) => ({
           proofTimeId,
           fullFrame: relativeEvidence,

@@ -30,7 +30,7 @@
       "compositeId": "event:starter:establish",
       "sceneId": "starter",
       "pattern": "event",
-      "fingerprint": "e02fbb87d62b711552c0ca6824065b62fd1414c94746862c9ce6515a1d988644",
+      "fingerprint": "083c19dfef655d27812735cf65b3a49e263fe252027dd522b6e798542de35eab",
       "proofFrames": [
         {
           "sceneId": "starter",
@@ -47,13 +47,14 @@
             "height": 1080
           }
         }
-      ]
+      ],
+      "temporalEvidence": null
     },
     {
       "compositeId": "event:starter:subject-arrives",
       "sceneId": "starter",
       "pattern": "event",
-      "fingerprint": "1c8310b837d76cd875fe19244a5f37394382ca93a7d849cfdba07b70fccb25ec",
+      "fingerprint": "b84da2108e0aebf25ff72c9eae03654b15225e2c6e176a7af35465f4cf23c9ba",
       "proofFrames": [
         {
           "sceneId": "starter",
@@ -70,13 +71,14 @@
             "height": 1080
           }
         }
-      ]
+      ],
+      "temporalEvidence": null
     },
     {
       "compositeId": "event:starter:lockup",
       "sceneId": "starter",
       "pattern": "event",
-      "fingerprint": "a650cdba9758699f1bc7a9ec096632d21f272923866cc5d959f570fe4bada6e6",
+      "fingerprint": "e0aaeb23482299ffa30eadd01ae38bcfb27f6126992911059ce875dd43a14431",
       "proofFrames": [
         {
           "sceneId": "starter",
@@ -93,13 +95,14 @@
             "height": 1080
           }
         }
-      ]
+      ],
+      "temporalEvidence": null
     },
     {
       "compositeId": "style-profile:childrens-picture-book-paper",
       "sceneId": "starter",
       "pattern": "style-target",
-      "fingerprint": "bb203783eaf946530819473ae9e105eb3515c8d64030ba57aa84338450007733",
+      "fingerprint": "e85ea873e90afd8ff2bb3ceb18f3c4429c24f5de9bf3f85780ef7c8f366c7b53",
       "proofFrames": [
         {
           "sceneId": "starter",
@@ -146,13 +149,34 @@
             "height": 1080
           }
         }
-      ]
+      ],
+      "temporalEvidence": {
+        "file": "dist/starter-demo/composition-proof/temporal/style-profile-childrens-picture-book-paper-motion-strip.jpg",
+        "sha256": "e3436eb1e51b094557bd0e607f7edd27a77134b9834a1b697cc450cf8b99403d",
+        "frames": [
+          {
+            "at": 0.08,
+            "file": "dist/starter-demo/composition-proof/frames/proof-establish.svg",
+            "sha256": "60282f59e9a385b641277fd065fdcc61bfe8b39d4f48a66571914b24c3c17b30"
+          },
+          {
+            "at": 0.62,
+            "file": "dist/starter-demo/composition-proof/frames/proof-action.svg",
+            "sha256": "8c34871308eebcb27095ce8ec6ede8adfa61e2fca7759e8baa172d6f8660a56f"
+          },
+          {
+            "at": 0.9,
+            "file": "dist/starter-demo/composition-proof/frames/proof-final.svg",
+            "sha256": "a572a21facbfcacafef3280ba6f9f3b78a873047c6d9c199849981ce206a1b39"
+          }
+        ]
+      }
     },
     {
       "compositeId": "motion-contract:whole-film",
       "sceneId": "starter",
       "pattern": "motion-contract",
-      "fingerprint": "106114d7e48fc9dbe6c8d0b75d6d7196eda79feb9ed818b6910b2b543a29843f",
+      "fingerprint": "d9b7c8322290254cb9f94ef4fc8d7181d4adfc94c59d8fce3ec9bcc11644330a",
       "proofFrames": [
         {
           "sceneId": "starter",
@@ -199,7 +223,28 @@
             "height": 1080
           }
         }
-      ]
+      ],
+      "temporalEvidence": {
+        "file": "dist/starter-demo/composition-proof/temporal/motion-contract-whole-film-motion-strip.jpg",
+        "sha256": "e3436eb1e51b094557bd0e607f7edd27a77134b9834a1b697cc450cf8b99403d",
+        "frames": [
+          {
+            "at": 0.08,
+            "file": "dist/starter-demo/composition-proof/frames/proof-establish.svg",
+            "sha256": "60282f59e9a385b641277fd065fdcc61bfe8b39d4f48a66571914b24c3c17b30"
+          },
+          {
+            "at": 0.62,
+            "file": "dist/starter-demo/composition-proof/frames/proof-action.svg",
+            "sha256": "8c34871308eebcb27095ce8ec6ede8adfa61e2fca7759e8baa172d6f8660a56f"
+          },
+          {
+            "at": 0.9,
+            "file": "dist/starter-demo/composition-proof/frames/proof-final.svg",
+            "sha256": "a572a21facbfcacafef3280ba6f9f3b78a873047c6d9c199849981ce206a1b39"
+          }
+        ]
+      }
     }
   ],
   "assetEvidence": [],
