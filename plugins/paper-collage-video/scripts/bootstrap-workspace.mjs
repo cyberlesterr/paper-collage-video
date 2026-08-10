@@ -29,6 +29,15 @@ const exists = async (file) => {
   }
 };
 
+const canonicalPath = async (value) => {
+  const resolved = path.resolve(value);
+  try {
+    return await fs.realpath(resolved);
+  } catch {
+    return resolved;
+  }
+};
+
 const isPlainObject = (value) =>
   value !== null && typeof value === 'object' && !Array.isArray(value);
 
@@ -256,6 +265,9 @@ try {
     throw new Error(`工作区标记无效，拒绝覆盖：${marker}`);
   }
   if (statusJson) {
+    const canonicalTarget = await canonicalPath(target);
+    const canonicalCwd = await canonicalPath(process.cwd());
+    const targetMatchesCwd = canonicalTarget === canonicalCwd;
     const templateRuntime = JSON.parse(
       await fs.readFile(path.join(TEMPLATE_ROOT, 'runtime-build.json'), 'utf8'),
     );
@@ -343,6 +355,12 @@ try {
           schemaVersion: 1,
           target,
           compatible,
+          productionSessionCompatible: compatible && targetMatchesCwd,
+          session: {
+            cwd: canonicalCwd,
+            target: canonicalTarget,
+            targetMatchesCwd,
+          },
           identity,
           commands,
           runtimeInspectionError,

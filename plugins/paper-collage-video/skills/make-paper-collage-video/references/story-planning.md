@@ -15,9 +15,21 @@ Draft minimum coherent beats and estimate spoken duration before resolving the p
 
 ## Run Intake Before Cost Planning
 
-For a title-only request, run `project:intake -- <slug> --json` immediately
-after `project:new`. Show every returned local style-card image before the Ask
-Question UI, then collect:
+For a title-only request, run the following immediately after `project:new`,
+using the plugin root from the Skill path actually loaded into the task:
+
+```bash
+npm run project:intake -- <slug> --json \
+  --presentation-root=<plugin-root>/assets/remotion-template
+```
+
+The command verifies that the workspace and loaded-plugin catalogs have the same
+complete fingerprint. It returns a runtime path plus a separately authorized
+presentation path for each card. Show every returned `presentationPath` before
+the Ask Question UI; never show `runtimePath`, copy the files, remove extended
+attributes, or fall back to a different cache. If one cannot actually be
+displayed, stop at intake and report the host media/workspace scope failure.
+Then collect:
 
 - `16:9` (1920×1080) or `9:16` (1080×1920);
 - one of the current catalog entries, identified by its returned id and label;

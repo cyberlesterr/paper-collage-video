@@ -28,6 +28,7 @@ import {
 import {
   loadStyleCatalog,
   materializeStyleProfile,
+  styleCatalogDecision,
 } from '../scripts/style-catalog-lib.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -322,6 +323,54 @@ test('built-in style catalog is dynamic and contains fingerprinted cards for one
       'style-profile-conformant',
     ),
   );
+});
+
+test('intake separates runtime cards from hash-equivalent presentation cards and rejects drift', async () => {
+  const presentationCatalog = await loadStyleCatalog({root: ROOT});
+  const directory = await fs.mkdtemp(
+    path.join(os.tmpdir(), 'paper-collage-style-presentation-'),
+  );
+  try {
+    const runtimeDirectory = path.join(
+      directory,
+      'public',
+      'style-catalog',
+    );
+    await fs.cp(
+      path.join(ROOT, 'public', 'style-catalog'),
+      runtimeDirectory,
+      {recursive: true},
+    );
+    const runtimeCatalog = await loadStyleCatalog({root: directory});
+    const decision = styleCatalogDecision(runtimeCatalog, {
+      presentationCatalog,
+    });
+    assert.equal(
+      decision.fingerprint,
+      decision.presentationFingerprint,
+    );
+    assert.equal(decision.styles.length, runtimeCatalog.styles.length);
+    for (const style of decision.styles) {
+      assert.ok(style.runtimePath.startsWith(directory));
+      assert.ok(style.presentationPath.startsWith(ROOT));
+      assert.notEqual(style.runtimePath, style.presentationPath);
+      assert.match(style.imageSha256, /^[a-f0-9]{64}$/);
+    }
+
+    await fs.appendFile(
+      path.join(runtimeDirectory, runtimeCatalog.styles[0].image.split('/').at(-1)),
+      'runtime-drift',
+    );
+    const driftedRuntimeCatalog = await loadStyleCatalog({root: directory});
+    assert.throws(
+      () => styleCatalogDecision(driftedRuntimeCatalog, {
+        presentationCatalog,
+      }),
+      /展示风格目录与工作区风格目录的完整指纹不一致/,
+    );
+  } finally {
+    await fs.rm(directory, {recursive: true, force: true});
+  }
 });
 
 test('a new valid catalog profile becomes selectable without changing a style id enum', async () => {

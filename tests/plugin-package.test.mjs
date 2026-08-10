@@ -641,6 +641,25 @@ test('bootstrap creates an isolated resumable workspace and is idempotent', asyn
       statusReport.identity.packagedRuntimeBuild,
     );
     assert.ok(Object.values(statusReport.commands).every(Boolean));
+    assert.equal(statusReport.session.targetMatchesCwd, false);
+    assert.equal(statusReport.productionSessionCompatible, false);
+
+    const productionStatus = spawnSync(
+      process.execPath,
+      [bootstrap, `--target=${target}`, '--status-json'],
+      {cwd: target, encoding: 'utf8'},
+    );
+    assert.equal(productionStatus.status, 0, productionStatus.stderr);
+    const productionStatusReport = JSON.parse(productionStatus.stdout);
+    assert.equal(productionStatusReport.compatible, true);
+    assert.equal(
+      productionStatusReport.session.targetMatchesCwd,
+      true,
+    );
+    assert.equal(
+      productionStatusReport.productionSessionCompatible,
+      true,
+    );
 
     const second = spawnSync(
       process.execPath,

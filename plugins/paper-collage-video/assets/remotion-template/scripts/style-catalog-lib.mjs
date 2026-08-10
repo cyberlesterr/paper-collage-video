@@ -163,7 +163,13 @@ export const validateStyleProfileSnapshot = (profile) => {
 };
 
 export const loadStyleCatalog = async ({root = DEFAULT_ROOT} = {}) => {
-  const catalogFile = path.join(root, 'public', 'style-catalog', 'catalog.json');
+  const resolvedRoot = path.resolve(root);
+  const catalogFile = path.join(
+    resolvedRoot,
+    'public',
+    'style-catalog',
+    'catalog.json',
+  );
   const catalog = JSON.parse(await fs.readFile(catalogFile, 'utf8'));
   if (catalog.schemaVersion !== 3) {
     throw new Error('style catalog schemaVersion 必须为 3。');
@@ -180,7 +186,7 @@ export const loadStyleCatalog = async ({root = DEFAULT_ROOT} = {}) => {
   }
   const images = {};
   for (const style of catalog.styles) {
-    const absolutePath = path.join(root, 'public', style.image);
+    const absolutePath = path.join(resolvedRoot, 'public', style.image);
     const source = await fs.readFile(absolutePath);
     const imageSha256 = sha256(source);
     images[style.image] = imageSha256;
@@ -210,38 +216,72 @@ export const loadStyleCatalog = async ({root = DEFAULT_ROOT} = {}) => {
       images,
     }),
   );
-  return {...catalog, fingerprint, catalogFile};
+  return {
+    ...catalog,
+    fingerprint,
+    catalogFile,
+    root: resolvedRoot,
+    images,
+  };
 };
 
-export const styleCatalogDecision = (catalog) => ({
-  version: catalog.version,
-  fingerprint: catalog.fingerprint,
-  styles: catalog.styles.map(({
-    id,
-    label,
-    summary,
-    image,
-    absolutePath,
-    profileFingerprint,
-    profile,
-  }) => ({
-    id,
-    label,
-    summary,
-    image,
-    absolutePath,
-    profileFingerprint,
-    productionSummary: {
-      promptDirectives: profile.generation.promptDirectives,
-      compositionPrinciples: profile.generation.compositionPrinciples,
-      pacing: profile.motion.pacing,
-      requiredChecks: [
-        ...profile.quality.requiredAssetChecks,
-        ...profile.quality.requiredCompositeChecks,
-      ],
-    },
-  })),
-});
+export const styleCatalogDecision = (
+  catalog,
+  {presentationCatalog = catalog} = {},
+) => {
+  if (presentationCatalog.fingerprint !== catalog.fingerprint) {
+    throw new Error(
+      '展示风格目录与工作区风格目录的完整指纹不一致；拒绝展示可能过期或错误的风格卡。',
+    );
+  }
+  const presentationStyles = new Map(
+    presentationCatalog.styles.map((style) => [style.id, style]),
+  );
+  return {
+    version: catalog.version,
+    fingerprint: catalog.fingerprint,
+    presentationFingerprint: presentationCatalog.fingerprint,
+    styles: catalog.styles.map(({
+      id,
+      label,
+      summary,
+      image,
+      absolutePath,
+      profileFingerprint,
+      profile,
+    }) => {
+      const presentationStyle = presentationStyles.get(id);
+      if (!presentationStyle || presentationStyle.image !== image) {
+        throw new Error(
+          `展示风格目录缺少与工作区一致的风格卡：${id}。`,
+        );
+      }
+      const imageSha256 = catalog.images?.[image];
+      if (!FINGERPRINT_PATTERN.test(imageSha256 ?? '')) {
+        throw new Error(`工作区风格卡缺少内容指纹：${id}。`);
+      }
+      return {
+        id,
+        label,
+        summary,
+        image,
+        imageSha256,
+        runtimePath: absolutePath,
+        presentationPath: presentationStyle.absolutePath,
+        profileFingerprint,
+        productionSummary: {
+          promptDirectives: profile.generation.promptDirectives,
+          compositionPrinciples: profile.generation.compositionPrinciples,
+          pacing: profile.motion.pacing,
+          requiredChecks: [
+            ...profile.quality.requiredAssetChecks,
+            ...profile.quality.requiredCompositeChecks,
+          ],
+        },
+      };
+    }),
+  };
+};
 
 export const materializeStyleProfile = (catalog, styleId) => {
   const style = catalog.styles.find(({id}) => id === styleId);

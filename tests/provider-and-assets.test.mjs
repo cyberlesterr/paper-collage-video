@@ -840,6 +840,46 @@ test('new projects require a locked storyboard before concept approval', async (
     assert.notEqual(blockedAdvance.status, 0);
     assert.match(blockedAdvance.stderr, /尚未获得用户确认/);
 
+    const intakeWithoutPresentationRoot = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-intake.mjs'),
+        slug,
+        '--json',
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.notEqual(intakeWithoutPresentationRoot.status, 0);
+    assert.match(
+      intakeWithoutPresentationRoot.stderr,
+      /展示 intake 风格卡必须提供 --presentation-root/,
+    );
+
+    const intakeGate = spawnSync(
+      process.execPath,
+      [
+        path.join(ROOT, 'scripts', 'project-intake.mjs'),
+        slug,
+        '--json',
+        `--presentation-root=${ROOT}`,
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(intakeGate.status, 0, intakeGate.stderr);
+    const intakeGatePayload = JSON.parse(intakeGate.stdout);
+    assert.equal(intakeGatePayload.presentation.ready, true);
+    assert.equal(
+      intakeGatePayload.presentation.catalogFingerprint,
+      intakeGatePayload.presentation.presentationFingerprint,
+    );
+    for (const style of intakeGatePayload.questions.find(
+      ({id}) => id === 'visualStylePreset',
+    ).options) {
+      assert.match(style.imageSha256, /^[a-f0-9]{64}$/);
+      assert.ok(style.runtimePath.endsWith(style.image));
+      assert.ok(style.presentationPath.endsWith(style.image));
+    }
+
     const intakeResult = spawnSync(
       process.execPath,
       [

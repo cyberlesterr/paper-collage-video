@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "packageVersion": "0.20.0-dev.3",
-  "fingerprint": "6620780b9298f7afdc42ae45e3493308682ed44426b27862d99c2ccb566b33d4",
+  "packageVersion": "0.20.0-dev.4",
+  "fingerprint": "fdc9e4edd320e74da27630bed2fd64e6121056ddcd3ef9ead2b038194bbbf4e1",
   "surfaces": {
-    "final-visual": "993e2aaa3bfdebb53c5d0e7724b38efb5a9bb00eb03158ba3fcca80338f0d0d4",
-    "composition-proof": "64a07133d930208ad1d3fe00d130214528679b693588d5c96d718b4609d94a71",
+    "final-visual": "3dfc169d62ea41d4224fcfabf5f939319c301829895af1c85faf556028f3001a",
+    "composition-proof": "1d44740a45d2667e9c49953a6146907809044234e5be49edcdafdf223832c71d",
     "audio-delivery": "a65085951a607e569fe44320a95108afb2b1cff3e720ecfdbb51c20ac413d63a"
   },
   "files": {
@@ -18,7 +18,7 @@
     "fixtures/path-locomotion-fixture.mjs": "75e5bfa9fc4869d408c2141aea273ee7331928e97e13742bb944065a479bf39b",
     "fixtures/phase2-proof-fixture.mjs": "37b5dd6931193a9ea5d70a34fa6a0435d79fd7629fe08322bdd1ae0430f3eb51",
     "fixtures/starter-demo/project.json": "9c62a0ed1cb53abcc53fb75f913f655f9136c4d7424d68c1cd4ee68a06135a55",
-    "package.json": "70d64fed10e7cdf5c19b1ec9d19909d15b8ab5e58e5c0f0d0ab1842f57b28781",
+    "package.json": "807e6b31a763750336334f27336ab59a79610ce90cf3bc005f5ca2e0d767127b",
     "providers.json": "6d26d5651c18495ca705f849f16a2d15909bc0c5e67e96be7c6c86881a067ca1",
     "providers.local.example.json": "2491c98d70b4b14af67448b91ccb83fc090b4562efdbe0eeb0299ae6d23bc165",
     "public/style-catalog/american-superhero-comic.png": "a1018320518f3d8c8d167bcf310f7f152d06145f92691cec10d5ac96986500cb",
@@ -128,7 +128,7 @@
     "scripts/project-failures.mjs": "99c9c15d7e026be457349c9a1e48b2f36056f444ef01868c36e69bbe55574444",
     "scripts/project-handoff-check.mjs": "a353fcc444e8329672b00be2082a810dfc7b5044db678526620beb77d5582ac9",
     "scripts/project-increase-image-budget.mjs": "4d55948044aef49053e71ca250393dbc3f67feeab3271b92bf97b50dbad691c0",
-    "scripts/project-intake.mjs": "37e3cb90255b24b8e1951c43c8e8b11a844c764bd4bba6231168b7fff5d5bd7e",
+    "scripts/project-intake.mjs": "9c423ddbfbbfa2fdfb160fccb7305644cafbcaa90b236587fe4ae39431f7a70d",
     "scripts/project-lib.mjs": "9f4af9a32746bd0208e4ac51dfeb575f13a9693aa6a6fac390367e8882d42ee8",
     "scripts/project-metrics-run.mjs": "805ff14ab9b16a6b55c5d4af8c80223e762b7a815c1e651ae2bd2d02942bffcb",
     "scripts/project-metrics.mjs": "a95712e0714a80b6a8a0ad4edbc0d352a851e40bad37c58b1c669676dad5af22",
@@ -191,7 +191,7 @@
     "scripts/state-sequence-lib.mjs": "f428a04a3fbf6a176e1742da05363dcc36d5f217c0cc17cbe2ab22a9a018f5e1",
     "scripts/state-sheet-lib.mjs": "d5a3a170138b0fb34fd4dbead5cd2a9d9297dd82dcec3b9fde8bdf3a33f27751",
     "scripts/storyboard-lib.mjs": "17f7e21d8d49768860bf2a14140f87f96861e6c08f1032bb7f81ac2afa668945",
-    "scripts/style-catalog-lib.mjs": "582ac391476ba1bf2cc30730fb69c5035671a1e0a7b1b399ba19c9ba4b60fc13",
+    "scripts/style-catalog-lib.mjs": "7e4b7332d99bc524985d56ea583bb00af6334d78588c50b3a7addfcfaf52ca0e",
     "scripts/style-motion-proof.mjs": "354b4be5458c63791ce3de72db730f91748593d808f611711a6fff03063efb25",
     "scripts/style-proof-lib.mjs": "5b6a91765ac8f7a7a8a56f3e270a081aeca19398cc12f0cca2958c08527fabec",
     "scripts/subtitle-contract-lib.mjs": "c6ed6fe02e9796387cdb5caa6fa05985d18ffe635e664140eea4cbd17a24b418",

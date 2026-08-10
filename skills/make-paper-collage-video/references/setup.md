@@ -46,14 +46,20 @@ For an existing workspace, inspect identity without writing:
 
 ```bash
 node <plugin-root>/scripts/bootstrap-workspace.mjs \
-  --target=<absolute-writable-workspace> --status-json
+  --target=<cwd> --status-json
 ```
 
 The JSON reports loaded Skill/installed plugin version, workspace marker and
 package versions, declared and recomputed runtime fingerprints, required
-commands, the exact upgrade command, and preserved user scopes. Run it once per
-session/environment identity; do not repeat it after it passes unless one of
-those inputs changes.
+commands, canonical process cwd/target identity, the exact upgrade command, and
+preserved user scopes. Production requires both `compatible=true` and
+`productionSessionCompatible=true`. If runtime identity is compatible but
+`session.targetMatchesCwd=false`, the plugin is not stale: the Codex task was
+started with the wrong primary local workspace. Stop and start a new task from
+the target; do not upgrade, copy managed runtime files, change extended
+attributes, or continue through a separately authorized shell path. Run status
+once per session/environment identity; do not repeat it after it passes unless
+one of those inputs changes.
 
 If the target already has a workspace marker from another plugin version, the
 bootstrap stops instead of silently reusing stale runtime code. Upgrade the
