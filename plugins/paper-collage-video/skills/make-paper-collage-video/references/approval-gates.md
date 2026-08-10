@@ -8,7 +8,7 @@ Require explicit decisions for:
 
 1. Initial intake: `16:9|9:16`, one style from the current built-in catalog, and text-only parallax preference.
 2. Combined scenario, story scope, duration/scenes, production profile, exact budget cap, facts, and provider plan.
-3. Story-specific visual sample, fictional voice, whole-film action-language card, and 3–5 second motion/topology proof.
+3. Story-specific visual sample, fictional voice, whole-film action-language card, and the same-source visual blueprint: full low-resolution animatic, every scene's start/middle/end, and short clips for motion-bearing scenes.
 4. Rendered preview and requested creative changes.
 
 The first intake never authorizes provider spend. The combined second decision may authorize both providers and concept when the request clearly names both. Preserve the human's wording. If approval is ambiguous, ask one concise question.
@@ -35,29 +35,36 @@ invalidates all dependent style/proof/render evidence.
 
 - Before combined scenario/concept approval, use only the current host model for the common story and three scenarios; do not invoke an unconfirmed external/paid provider. Built-in style cards are versioned local text-to-image PNG assets and consume no provider calls when shown during intake.
 - Before style approval, classify and contract any identity-, topology-,
-  mechanism-, or diagram-critical sample, then create at most one representative
-  source package, a short fictional-voice audition, and one 3–5 second proof
-  when motion is new or coupled topology is present. A topology or
-  limited-animation proof uses the actual v12 group/state sequence and renderer.
-  A `registered-depth-stack` uses its compiled layer-complete source package and
-  family-aware proof: neutral reconstruction, reference comparison,
-  checkerboard exploded members, and both extremes of the 16:9, 9:16, and 1:1
-  reveal envelopes. Standard alpha/tight/motion evidence remains required where
-  applicable. Coupled approval cannot advance while that evidence is missing,
-  stale, or semantically pending.
-- The style/voice gate also owns motion-language approval. Show
-  `motion-language-card.json` with the sample and proof. It must expose the
+  mechanism-, or diagram-critical sample, then create exactly one
+  story-specific style sample and a short fictional-voice audition. Author the
+  complete final execution tree before bulk production and run
+  `project:visual-blueprint`: the actual renderer keeps real sources already
+  present and uses deterministic labeled proxies for missing ones. It must cover
+  the full film, every scene's start/middle/end, and motion-bearing clips.
+  Geometry, layer order, facing, state playback, displacement, camera, timing,
+  and transitions are therefore decided before the expensive asset pass.
+- The human owns every visual judgment on this surface. Machine checks may
+  confirm artifact readability, coverage, hashes, and freshness only. Show the
+  style sample, animatic, contact sheet, clips, voice audition, and motion card
+  together and record one approval or one revision response.
+- The style/voice gate also owns motion-language and visual-blueprint approval.
+  Show `motion-language-card.json` with the sample and blueprint. It must expose the
   whole-film grammar, pacing, camera/transition/ambient strategy, per-scene
   performance roles and proof anchors, final holds, exceptions, and
   `approvalFingerprint`. `approve-style-voice` writes the attributable human
-  note and current Style Profile/motion/style-proof bindings to
-  `motion-approval.json`. This is not a fourth gate.
+  note and current Style Profile/motion/visual-blueprint bindings to
+  `motion-approval.json` and `visual-blueprint-approval.json`. This is not a
+  fourth gate.
 - A directing-only timing or treatment refinement may keep that approval only
   when `approvalFingerprint` is unchanged; its exact execution fingerprint
   still invalidates stale proof, quality, and render artifacts. Changing motion
   grammar, performance roles, proof bindings, transition intent, locked-static
   exception, or Style Profile returns to this gate.
 - After style approval, produce autonomously within the approved asset budget.
+  Every non-style-sample provider request requires the current blueprint
+  approval. Production assets may replace proxy sources without invalidating
+  the contract; any geometry, z-order, facing, playback, timing, camera, or
+  transition change requires a refreshed blueprint and human decision.
 - A later image-budget increase requires one explicit exact total cap. Record it
   with `project:increase-image-budget`; the command preserves the original
   scenario proposal, appends the old/new cap plus used/reserved state and human

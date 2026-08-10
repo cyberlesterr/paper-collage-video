@@ -7,7 +7,7 @@
   "updatedAt": "2026-01-01T00:00:00.000Z",
   "measurementNotes": {
     "commandWallClock": "Measures the wrapped local command from process start to exit.",
-    "reviewSessionWindow": "Measures from quality scaffold completion to successful batch recording; it includes model/tool orchestration and pauses, not provider-only inference time.",
+    "reviewSessionWindow": "Measures from quality scaffold completion to the recorded human decision; it includes evidence presentation and the human wait, not model inference time.",
     "providerAttemptWindow": "Measures from generation-attempt reservation to closure; it includes provider work and surrounding orchestration.",
     "tokenTelemetry": "Unavailable unless the host or provider reports it; this file does not estimate token usage.",
     "categoryOverlap": "Category durations are independently unioned and may overlap; measuredUnionMs de-duplicates all overlaps."

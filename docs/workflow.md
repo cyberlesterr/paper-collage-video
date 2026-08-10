@@ -9,7 +9,7 @@
 → 画幅 + 三选一视觉风格 + 视差偏好（一次轻量选择）
 → 共同故事骨架 + 三档故事/制作/成本方案
 → 方案 + 概念 + 节奏故事板 + 精确预算 + provider（一次确认）
-→ 故事专属风格样张 + 虚构音色 + 3–5 秒运动证明（一次确认）
+→ 故事专属风格样张 + 虚构音色 + 同源全片低清蓝图 + 每幕关键帧/动态片段（一次确认）
 → 自动批量生产、质检和预览
 → 预览批准或修改（一次确认）
 → 正式渲染并完成本地交付
@@ -83,7 +83,17 @@ intake 确认后，Codex 只用宿主模型生成一个共同故事骨架和三�
 
 ## 3. 风格与虚构音色确认
 
-只生成编译器多维 `styleProofPlan` 所需的最少源包家族和足够判断的短试听。样张生图前先把人物身份、复杂拓扑、功能机构和说明图分类并锁定通用语义契约；宿主生图预留真实尝试额度。需要透明运动层的 registered 2×2 sheet 使用逐格 surface：reference/rear 保持不透明，subject/front 在宿主模型原生 alpha 不可靠时使用已声明且不与主体冲突的纯色色键。provider-native 原图原样登记，分隔线裁除、色键、缩放和 key metadata 由正式 registered-family 派生器完成并计为三个本地 derivative。`project:style-proof` 覆盖最高语义风险类别、每种具体耦合关系和状态序列，并允许同一源包证明多种风险；它渲染 3–5 秒真实 v12 组合 proof，绑定完整目标清单、计划指纹和动作契约双指纹。schema-v7 样式报告对包括 `free` 在内的所有选中目标生成非空结构化 composite。现有 style/voice gate 同时展示 `motion-language-card.json`，并把人的决定归因写入 `motion-approval.json`，不增加第四个人工等待节点。普通耦合证明包含逐成员 alpha、棋盘格、紧裁和 motion stress；`registered-depth-stack` 改用家族级 neutral reconstruction、reference comparison、exploded checkerboard，以及三个实际画幅各自正负 reveal-envelope 极值。`approve-style-voice` 会拒绝空、缺失、过期或仍待审核的证明。人批准且证明通过后进入批量生产；真人声音克隆需要单独的授权与合法参考材料。
+正式批量生图前只允许创建一张故事专属风格样张和足够判断的虚构声音短试听。样张生图前先把人物身份、复杂拓扑、功能机构和说明图分类并锁定通用语义契约；宿主生图预留真实尝试额度。
+
+Codex 此时必须先把已批准 storyboard 完整物化为最终 schema-v12 执行树：每一幕、时长、构图、层级、变换、角色朝向、状态序列播放区间、位移路径、镜头和转场都已经存在，只缺正式素材。然后运行：
+
+```bash
+npm run project:visual-blueprint -- <slug>
+```
+
+该命令使用最终 `Paper-Collage` renderer 和同一份 `project.json`；已有真实素材继续使用，缺失素材由带角色/层级/朝向标签的确定性代理图替代。一次输出全片低清 animatic、每幕开头/中间/结尾联系表和所有动态幕的短片。系统把故事样张、完整 animatic、关键帧、动态片段、试听和 `motion-language-card.json` 一起交给用户。用户一次判断构图、前后层级、预期遮挡、朝向与运动方向、逐帧循环和位移协调、镜头、节奏与整体方向；机器只确认文件、覆盖、编码、哈希和新鲜度，不判断画面好坏。
+
+`approve-style-voice` 把这一次人的原话同时写入 `visual-blueprint-approval.json` 和 `motion-approval.json`。批准前，除唯一风格样张外的 provider 图片请求全部阻断；批准后才开始正式素材生产。替换代理素材不会使蓝图失效，改变几何、层级、朝向、播放、时序、镜头、转场或 runtime 会强制重新生成并交给用户。真人声音克隆仍需要单独授权与合法参考材料。
 
 ## 4. 批量生产与质量门
 
@@ -100,7 +110,9 @@ polygon mask 裁切所有状态，并量化 fill、rim gap、bottom coverage、r
 唯一 `container-surface` 权威消费者。终态指标不达标、额外 waterline、内容
 状态重画瓶体或独立状态重生都会被拒绝。
 
-组装后先运行 `project:composition-proof`。它使用移除字幕的专用输入，只重渲染项目、资产或 `composition-proof` runtime surface 指纹变化的证明帧/目标，因此字幕实现独立变化不会清空资产和组合审核；普通耦合素材生成 alpha、棋盘格、紧裁和运动压力证据，depth stack 生成 neutral/reference/exploded 和三画幅 reveal-envelope 极值证据。仅用于注册技术来源的顶层耦合组声明 `renderParticipation=derivation-only`，不进入画面、导演档位或人工构图审核，只接受确定性的完整性、provenance 和派生检查。需要让外部人物处于注册后景与前景之间时，顶层可见 depth stack 使用 `stackingContext=scene`，组本身保持 identity，由三个成员的唯一 `z` 与空间契约共同证明遮挡次序。报告也写入已验证的世界与轨迹契约摘要。显式 `--force` 会禁用所有证明缓存并写入报告。随后用 `project:quality scaffold` 生成待填写审核批次，检查真实全帧、关系裁切、跨场景人物比较、机构受力链和说明图原分辨率裁切，再用 `record-batch` 记录真实判断。脚手架不会预先通过任何检查。说明图 SVG 的程序噪声滤镜由运行时确定性拒绝。这个内部证据步骤不增加第四个人工门。
+组装后先运行 `project:composition-proof`。它使用移除字幕的专用输入，只重渲染项目、资产或 `composition-proof` runtime surface 指纹变化的证明帧/目标，因此字幕实现独立变化不会清空资产和组合审核；普通耦合素材生成 alpha、棋盘格、紧裁和运动压力证据，depth stack 生成 neutral/reference/exploded 和三画幅 reveal-envelope 极值证据。仅用于注册技术来源的顶层耦合组声明 `renderParticipation=derivation-only`，不进入画面、导演档位或人工构图审核，只接受确定性的完整性、provenance 和派生检查。需要让外部人物处于注册后景与前景之间时，顶层可见 depth stack 使用 `stackingContext=scene`，组本身保持 identity，由三个成员的唯一 `z` 与空间契约共同证明遮挡次序。报告也写入已验证的世界与轨迹契约摘要。显式 `--force` 只可用于此前成功证明后的有意完整重渲染，不能绕过一次失败后的无变化重试阻断。
+
+随后用 `project:quality scaffold` 和 `contact-sheet` 生成当前审核面并直接展示给用户。接缝、穿模、遮挡观感、素材破损、身份与风格连续性、朝向、循环节奏、景深和整体构图都由用户判断；AI/自动筛查只能准备证据，不能写入通过或失败。用户整体批准时使用 `accept-human --reviewer=human:<id> --note="<用户原话>"` 一次记录所有 pending 项；用户指出问题时只记录明确否决项并立即修改。脚手架不会预先通过任何检查。说明图 SVG 的程序噪声滤镜由运行时确定性拒绝。
 
 素材完成后只运行：
 
@@ -134,15 +146,24 @@ npm run project:resume -- <slug>
 
 不再同时运行 full status 和 `project:handoff-check`。只有诊断异常状态时才读取完整历史。
 
+生产命令、provider 图片尝试和蓝图人工退回会写入
+`failure-circuit.jsonl`。第一次失败后，同一输入禁止原样重跑，
+`--force` 也不能绕过；改变真实输入后只再给一次机会，同类失败第二次立即熔断。
+此时运行 `project:failures -- <slug> summary` 向用户报告风险，只有带用户决定的
+`resolve --circuit=<id> --note="<用户决定>"` 才能继续。改变输入后的成功会自动
+清掉一次普通命令失败，但不会覆盖已经打开的熔断。
+
 ## 状态与来源边界
 
 - `brief.md`：人的意图、事实、风格、格式和权利边界；
 - `project.json.intake` / `project.json.styleProfile`：画幅、内置视觉风格与视差偏好，以及冻结后的生成指令、动效偏好、渲染主题、质量门禁、参考图和风格指纹；
 - `planning-scenarios.json`：共同故事骨架、三档详细方案、预计调用、建议 cap、hard ceiling 和质量承诺；
 - `production.json`：阶段、审批、粗粒度批次、产物、事件历史；
+- `dist/<slug>/visual-blueprint/index.json` / `visual-blueprint-approval.json`：全片同源蓝图、每幕关键帧/动态片段与人工批准指纹；
 - `storyboard.json`：已批准的 v12 全片动作方向、节拍角色/treatments、source package、edit points 与三画幅/高级切换导演计划，以及编译生成的动作契约、调用预算、风险排名和证明指纹；
 - `project.json.plan`：Creative Plan v4 scenario 指纹、story scope、profile ceiling、质量下限和人批图片 attempt 上限；
 - `requests/*.json` / `assets-manifest.json`：schema-v8 逐素材输入、可执行风格绑定、layer package/组合绑定与注册源家族；
+- `failure-circuit.jsonl`：追加式失败、输入指纹、同类熔断与人工解除记录；
 - `quality-report.json`：逐文件和组合关系的技术/语义质量与指纹；
 - `review.md`：自动审批摘要与自然语言修改历史。
 

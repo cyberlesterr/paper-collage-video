@@ -2,5 +2,44 @@
   "$schema": "../../schemas/assets-manifest.schema.json",
   "schemaVersion": 4,
   "projectSlug": "starter-demo",
-  "assets": []
+  "assets": [
+    {
+      "recordId": "79af2b4274c94ddb646f7f0dcff2907f0f1e49bfdfb6d4249fbb8df9e493d57a",
+      "assetId": "starter-style-sample",
+      "capability": "image",
+      "file": "public/projects/starter-demo/assets/characters/alpha/01-traveler.png",
+      "provider": "fixture",
+      "adapter": "manual",
+      "requestFingerprint": "80300899b9942024f412a190ed417f7418e37659a1b5b4f2e291c4acb171cbfa",
+      "reusedFrom": null,
+      "sha256": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f",
+      "sizeBytes": 80871,
+      "media": {
+        "width": 1920,
+        "height": 1080,
+        "format": "png",
+        "hasAlpha": true
+      },
+      "recordedAt": "2026-01-01T00:00:00.000Z",
+      "request": {
+        "quality": {
+          "kind": "style-sample",
+          "requiredChecks": [
+            "no-text",
+            "no-watermark",
+            "subject-complete",
+            "style-consistent"
+          ]
+        }
+      },
+      "compositionBinding": null,
+      "familyFingerprint": null,
+      "lifecycle": {
+        "status": "active",
+        "changedAt": "2026-01-01T00:00:00.000Z",
+        "reason": "Bundled story-specific style fixture",
+        "supersededBy": null
+      }
+    }
+  ]
 }

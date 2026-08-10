@@ -1,0 +1,334 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-10T00:11:09.276Z",
+  "project": {
+    "slug": "starter-demo",
+    "title": "Paper Collage Starter"
+  },
+  "plan": {
+    "schemaVersion": 4,
+    "slug": "starter-demo",
+    "status": "resolved",
+    "inputMode": "both",
+    "productionProfile": "draft",
+    "assetBudget": {
+      "backgrounds": 1,
+      "environmentLayers": 1,
+      "characterSheets": 1,
+      "styleSamples": 1,
+      "baseImageAttempts": 4,
+      "layerPackageAttemptReserve": 2,
+      "maxGeneratedImages": 6
+    },
+    "motionBudget": {
+      "maxPoseSheetCalls": 1,
+      "maxStatesPerSheet": 4,
+      "maxContinuousTargets": 2
+    },
+    "approvedImageBudget": {
+      "imageAttemptLimit": 1,
+      "expectedProviderImageCalls": 0,
+      "profileHardCeiling": 6,
+      "approvedAt": "2026-01-01T00:00:00.000Z"
+    },
+    "requested": {
+      "durationSeconds": 1.2,
+      "sceneCount": 1
+    },
+    "resolved": {
+      "durationSeconds": 1.2,
+      "sceneCount": 1,
+      "estimatedNarrationSeconds": 1,
+      "rationale": "Bundled technical fixture",
+      "resolvedAt": "2026-01-01T00:00:00.000Z"
+    },
+    "updatedAt": "2026-01-01T00:00:00.000Z"
+  },
+  "providerBudget": {
+    "profileHardCeiling": 6,
+    "approvedImageAttemptLimit": 1,
+    "expectedProviderImageCalls": 0,
+    "used": 0,
+    "reserved": 0
+  },
+  "providerRealization": null,
+  "passed": true,
+  "summary": {
+    "errors": 0,
+    "warnings": 0,
+    "assetCount": 3
+  },
+  "timeline": {
+    "durationInFrames": 36,
+    "durationSeconds": 1.2,
+    "scenes": [
+      {
+        "id": "starter",
+        "label": "纸片分层视频",
+        "eyebrow": "STARTER",
+        "tailSeconds": 0.2,
+        "motion": {
+          "blueprint": "layered-reveal",
+          "intensity": 0.7,
+          "seed": 17,
+          "proofTimes": [
+            {
+              "id": "proof-establish",
+              "at": 0.08,
+              "label": "建立纸面空间",
+              "kind": "establish",
+              "assertions": [
+                "背景完整建立"
+              ],
+              "stateAssertions": []
+            },
+            {
+              "id": "proof-action",
+              "at": 0.62,
+              "label": "主体进入画面",
+              "kind": "peak",
+              "assertions": [
+                "主体位于画面中央"
+              ],
+              "stateAssertions": []
+            },
+            {
+              "id": "proof-final",
+              "at": 0.9,
+              "label": "标题与主体稳定",
+              "kind": "final",
+              "assertions": [
+                "主体与标题构图稳定"
+              ],
+              "stateAssertions": []
+            }
+          ]
+        },
+        "composition": {
+          "coordinateSpace": {
+            "width": 1920,
+            "height": 1080
+          },
+          "nodes": [
+            {
+              "id": "background",
+              "kind": "asset",
+              "assetRole": "background",
+              "src": "projects/starter-demo/assets/plates/01-bg.png",
+              "z": 0,
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "width": 1,
+                "height": 1,
+                "anchorX": 0,
+                "anchorY": 0
+              },
+              "motion": {
+                "keyframes": [
+                  {
+                    "at": 0,
+                    "scale": 1
+                  },
+                  {
+                    "at": 1,
+                    "scale": 1.015,
+                    "ease": "ease-in-out"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "traveler",
+              "kind": "asset",
+              "assetRole": "character",
+              "src": "projects/starter-demo/assets/characters/alpha/01-traveler.png",
+              "z": 4,
+              "visibility": {
+                "initial": "hidden"
+              },
+              "transform": {
+                "x": 0,
+                "y": 0,
+                "width": 1,
+                "height": 1,
+                "anchorX": 0,
+                "anchorY": 0
+              },
+              "motion": {
+                "idle": {
+                  "preset": "breathe",
+                  "intensity": 0.5,
+                  "cycleSeconds": 2.8
+                },
+                "keyframes": [
+                  {
+                    "at": 0,
+                    "offsetX": -0.01,
+                    "opacity": 0.72,
+                    "ease": "ease-out"
+                  },
+                  {
+                    "at": 0.5,
+                    "offsetX": 0.003,
+                    "scale": 1.03,
+                    "opacity": 1,
+                    "ease": "ease-in-out"
+                  },
+                  {
+                    "at": 1,
+                    "offsetX": 0,
+                    "scale": 1,
+                    "opacity": 1,
+                    "ease": "ease-out"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "camera": {
+          "preset": "push",
+          "intensity": 0.6
+        },
+        "narration": {
+          "src": "projects/starter-demo/audio/narration/01-test-tone.wav",
+          "startSeconds": 0,
+          "durationSeconds": 1,
+          "text": "纸片分层视频"
+        },
+        "subtitles": [
+          {
+            "fromSeconds": 0,
+            "toSeconds": 1,
+            "text": "纸片分层视频"
+          }
+        ],
+        "events": [
+          {
+            "id": "establish",
+            "beatId": "establish",
+            "proofTimeId": "proof-establish",
+            "at": 0,
+            "targetId": "background",
+            "visual": {
+              "kind": "emphasis",
+              "action": "pulse",
+              "durationSeconds": 0.35,
+              "intensity": 0.35
+            }
+          },
+          {
+            "id": "subject-arrives",
+            "beatId": "subject-arrives",
+            "proofTimeId": "proof-action",
+            "at": 0.5,
+            "targetId": "traveler",
+            "visual": {
+              "kind": "visibility",
+              "action": "show",
+              "transition": "fade-rise",
+              "durationSeconds": 0.5
+            }
+          },
+          {
+            "id": "lockup",
+            "beatId": "lockup",
+            "proofTimeId": "proof-final",
+            "at": 0.9,
+            "targetId": "traveler",
+            "visual": {
+              "kind": "emphasis",
+              "action": "settle",
+              "durationSeconds": 0.1,
+              "intensity": 0.55
+            }
+          }
+        ],
+        "from": 0,
+        "durationInFrames": 36,
+        "narrationFrames": 30,
+        "narrationStartFrame": 0,
+        "enterTransitionFrames": 1,
+        "exitTransitionFrames": 0,
+        "enterTransition": null
+      }
+    ],
+    "transitions": []
+  },
+  "assets": [
+    {
+      "kind": "narration",
+      "src": "projects/starter-demo/audio/narration/01-test-tone.wav",
+      "durationSeconds": 1
+    },
+    {
+      "kind": "background",
+      "src": "projects/starter-demo/assets/plates/01-bg.png",
+      "sceneId": "starter",
+      "nodeId": "background",
+      "parentId": null,
+      "registrationId": null,
+      "alphaBandInspection": null,
+      "width": 1920,
+      "height": 1080,
+      "format": "png",
+      "hasAlpha": true
+    },
+    {
+      "kind": "character",
+      "src": "projects/starter-demo/assets/characters/alpha/01-traveler.png",
+      "sceneId": "starter",
+      "nodeId": "traveler",
+      "parentId": null,
+      "registrationId": null,
+      "alphaBandInspection": {
+        "schemaVersion": 1,
+        "thresholds": {
+          "lowAlphaMinimum": 4,
+          "lowAlphaMaximum": 96,
+          "minimumRunPixels": 24,
+          "minimumRunRatio": 0.42,
+          "warningRunRatio": 0.75,
+          "maximumBandThicknessRatio": 0.025,
+          "boundaryToleranceRatio": 0.012,
+          "rectangleMinimumSeparationRatio": 0.08
+        },
+        "derivationRegions": [],
+        "sourceSize": {
+          "width": 1920,
+          "height": 1080
+        },
+        "renderSize": null,
+        "passed": true,
+        "severity": "info",
+        "scales": [
+          {
+            "label": "original",
+            "width": 1920,
+            "height": 1080,
+            "passed": true,
+            "severity": "info",
+            "diagnostics": [],
+            "failures": []
+          }
+        ],
+        "failures": [],
+        "failureMessage": null
+      },
+      "width": 1920,
+      "height": 1080,
+      "format": "png",
+      "hasAlpha": true,
+      "transparentPixels": 1930214,
+      "partialPixels": 19125,
+      "visiblePixels": 143386,
+      "keyColor": null,
+      "keyColorSource": null,
+      "keyEdgePixels": 0,
+      "keyEdgeRatio": 0
+    }
+  ],
+  "issues": [],
+  "options": {}
+}

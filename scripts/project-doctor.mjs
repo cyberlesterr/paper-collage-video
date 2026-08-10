@@ -68,6 +68,8 @@ const requiredWorkspaceScripts = [
   'project:composition-proof',
   'project:budget',
   'project:quality',
+  'project:visual-blueprint',
+  'project:failures',
   'project:audio-preflight',
   'project:audio-calibration',
   'project:stitch-narration',

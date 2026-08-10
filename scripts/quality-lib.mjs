@@ -201,6 +201,8 @@ export const QUALITY_CHECKS = [
   ...COMPOSITE_QUALITY_CHECKS,
 ];
 
+export const HUMAN_VISUAL_REVIEWER_PATTERN = /^human:[a-z0-9._-]+$/i;
+
 const QUALITY_PROFILES = {
   background: ['no-text', 'no-watermark', 'no-people', 'safe-area-clear', 'style-consistent'],
   environment: ['no-text', 'no-watermark', 'subject-complete', 'style-consistent'],
@@ -3004,6 +3006,20 @@ export const recordQualityReviews = async ({
     if (!review.reviewer?.trim()) throw new Error(`${reviewId} 的质量记录必须提供 reviewer。`);
     const passedChecks = review.passedChecks ?? [];
     const failedChecks = review.failedChecks ?? [];
+    if (
+      (passedChecks.length > 0 || failedChecks.length > 0) &&
+      !HUMAN_VISUAL_REVIEWER_PATTERN.test(review.reviewer.trim())
+    ) {
+      throw new Error(
+        `${reviewId} 的视觉质量判断必须来自 human:<id>；AI/自动筛查只能生成证据，不能记录画面通过或失败。`,
+      );
+    }
+    if (
+      (passedChecks.length > 0 || failedChecks.length > 0) &&
+      !String(review.note ?? '').trim()
+    ) {
+      throw new Error(`${reviewId} 的人工视觉决定必须记录具体 note。`);
+    }
     for (const check of [...passedChecks, ...failedChecks]) {
       if (!QUALITY_CHECKS.includes(check)) throw new Error(`未知质量检查：${check}`);
       if (!entry.requiredChecks.includes(check)) throw new Error(`${reviewId} 不需要质量检查 ${check}。`);
@@ -3327,14 +3343,14 @@ export const createQualityReviewScaffold = async ({
         refreshQualityReviewSurfaceFingerprint(status.report),
     },
     instructions:
-      'Inspect every evidence file. Move each pending check into passedChecks or failedChecks and write a concrete note; never pass a check only to unblock production.',
+      '把当前联系表和证据展示给用户，不要由 AI 或自动筛查替用户判断。用户一次明确批准后，可将该审核面的 pendingChecks 全部记入 passedChecks；若用户指出问题，只记录其明确否决项并立即进入修改。reviewer 必须是 human:<id>，note 必须保留用户原话。',
     reviews,
   };
 };
 
 export const buildQualityReviewScaffold = async ({
   slug,
-  reviewer = 'host-vision',
+  reviewer = 'human:pending',
   includePassed = false,
   reviewScope = 'all',
 }) => {
@@ -3614,6 +3630,63 @@ export const createQualityReviewContactSheets = async ({
   const indexFile = path.join(directory, 'index.json');
   await writeJson(indexFile, index);
   return {file: indexFile, index};
+};
+
+export const assertQualityReviewContactSheetsCurrent = async ({
+  slug,
+  scaffold,
+  indexFile = path.join(
+    ROOT,
+    'dist',
+    slug,
+    'quality-review-contact-sheets',
+    'index.json',
+  ),
+}) => {
+  await assertQualityReviewScaffoldCurrent({slug, scaffold});
+  const file = assertWorkspaceFile(indexFile);
+  if (!(await fileExists(file))) {
+    throw new Error(
+      '当前质量联系表不存在；先对当前 scaffold 运行 contact-sheet 并展示给用户。',
+    );
+  }
+  const index = await readJson(file);
+  if (
+    index.schemaVersion !== 1 ||
+    index.projectSlug !== slug ||
+    index.sourceReport?.fingerprint !==
+      scaffold.sourceReport?.fingerprint ||
+    index.scaffoldFingerprint !== hashCompositionValue(scaffold) ||
+    !Array.isArray(index.pages) ||
+    index.pages.length === 0
+  ) {
+    throw new Error(
+      '质量联系表已过期或不属于当前 scaffold；请重新生成并展示给用户。',
+    );
+  }
+  const expectedReviewIds = (scaffold.reviews ?? [])
+    .map((review) => review.assetId ?? review.compositeId)
+    .sort();
+  const indexedReviewIds = (index.pages ?? [])
+    .flatMap(({reviewIds = []}) => reviewIds)
+    .sort();
+  if (
+    JSON.stringify(expectedReviewIds) !==
+    JSON.stringify(indexedReviewIds)
+  ) {
+    throw new Error('质量联系表没有完整覆盖当前审核对象；请重新生成。');
+  }
+  for (const page of index.pages) {
+    const pageFile = assertWorkspaceFile(page.file);
+    if (
+      !(await fileExists(pageFile)) ||
+      !/^[a-f0-9]{64}$/.test(page.sha256 ?? '') ||
+      (await hashFile(pageFile)) !== page.sha256
+    ) {
+      throw new Error(`质量联系表页面已变化：${page.file}`);
+    }
+  }
+  return {file, index};
 };
 
 export const formatQualityStatus = (status) => `${status.ready ? '✓' : '✗'} quality: ${status.passed}/${status.total} passed, ${status.pending} pending, ${status.failed} failed (assets ${status.scopes.assets.passed}/${status.scopes.assets.total}, composites ${status.scopes.composites.passed}/${status.scopes.composites.total})`;

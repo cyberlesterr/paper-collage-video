@@ -859,6 +859,41 @@ test('manual attempt closure requires truthful quota semantics', async () => {
     assert.equal(retried.reused, true);
     assert.equal((await readGenerationAttemptEvents(slug)).events.length, 2);
     await assert.rejects(
+      () =>
+        reserveGenerationAttempt({
+          request,
+          provider: {id: 'provider'},
+        }),
+      /禁止原样重跑/,
+    );
+    const changedRequest = {
+      ...request,
+      prompt: 'Changed after the first diagnosed failure',
+    };
+    const changedAttempt = await reserveGenerationAttempt({
+      request: changedRequest,
+      provider: {id: 'provider'},
+    });
+    const repeatedFailure = await closeGenerationAttempt({
+      slug,
+      attemptId: changedAttempt.event.attemptId,
+      status: 'failed-before-generation',
+      quotaConsumed: false,
+      note: 'provider still did not start',
+    });
+    assert.equal(repeatedFailure.failureCircuit.circuit.open, true);
+    await assert.rejects(
+      () =>
+        reserveGenerationAttempt({
+          request: {
+            ...changedRequest,
+            prompt: 'A third prompt must not bypass the open circuit',
+          },
+          provider: {id: 'provider'},
+        }),
+      /流程熔断已打开/,
+    );
+    await assert.rejects(
       () => closeGenerationAttempt({
         slug,
         attemptId: reserved.event.attemptId,

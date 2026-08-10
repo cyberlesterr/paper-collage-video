@@ -32,6 +32,7 @@ try {
   const templateFiles = [
     'assets-manifest.json',
     'brief.md',
+    'failure-circuit.jsonl',
     'generation-attempts.jsonl',
     'planning-scenarios.json',
     'project.json',

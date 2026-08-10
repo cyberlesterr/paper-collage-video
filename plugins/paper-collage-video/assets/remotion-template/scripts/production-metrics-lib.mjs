@@ -109,7 +109,7 @@ export const createProductionMetrics = ({slug, createdAt, collectionStartedAt = 
     commandWallClock:
       'Measures the wrapped local command from process start to exit.',
     reviewSessionWindow:
-      'Measures from quality scaffold completion to successful batch recording; it includes model/tool orchestration and pauses, not provider-only inference time.',
+      'Measures from quality scaffold completion to the recorded human decision; it includes evidence presentation and the human wait, not model inference time.',
     providerAttemptWindow:
       'Measures from generation-attempt reservation to closure; it includes provider work and surrounding orchestration.',
     tokenTelemetry:

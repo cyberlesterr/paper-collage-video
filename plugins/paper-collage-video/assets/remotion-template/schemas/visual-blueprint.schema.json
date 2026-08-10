@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/visual-blueprint.schema.json",
+  "title": "Same-source visual blueprint review surface",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "projectSlug",
+    "generatedAt",
+    "status",
+    "reviewMode",
+    "source",
+    "visualContractFingerprint",
+    "runtimeBuildFingerprint",
+    "renderProfile",
+    "sourceCoverage",
+    "styleReference",
+    "artifacts",
+    "artifactHashes",
+    "scenes",
+    "machineChecks",
+    "decisionBoundary"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "projectSlug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "generatedAt": {"type": "string", "format": "date-time"},
+    "status": {"const": "awaiting-human"},
+    "reviewMode": {"const": "single-human-visual-decision"},
+    "source": {
+      "type": "object",
+      "required": ["project", "storyboard", "contract"],
+      "properties": {
+        "project": {"type": "string", "minLength": 1},
+        "storyboard": {"type": "string", "minLength": 1},
+        "contract": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "visualContractFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "runtimeBuildFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "renderProfile": {
+      "type": "object",
+      "required": [
+        "width",
+        "height",
+        "fps",
+        "sourceRenderer",
+        "proxyPolicy"
+      ],
+      "properties": {
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1},
+        "fps": {"type": "number", "exclusiveMinimum": 0},
+        "sourceRenderer": {"const": "Paper-Collage"},
+        "proxyPolicy": {
+          "const": "keep-current-real-source-else-deterministic-proxy"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sourceCoverage": {
+      "type": "object",
+      "required": ["actual", "proxy", "total", "actualRatio"],
+      "properties": {
+        "actual": {"type": "integer", "minimum": 0},
+        "proxy": {"type": "integer", "minimum": 0},
+        "total": {"type": "integer", "minimum": 0},
+        "actualRatio": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "styleReference": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["assetId", "file", "sha256"],
+          "properties": {
+            "assetId": {"type": "string", "minLength": 1},
+            "file": {"type": "string", "minLength": 1},
+            "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "artifacts": {
+      "type": "object",
+      "required": ["animatic", "contactSheet", "styleFrame"],
+      "properties": {
+        "animatic": {"type": "string", "minLength": 1},
+        "contactSheet": {"type": "string", "minLength": 1},
+        "styleFrame": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "artifactHashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "sceneId",
+          "label",
+          "durationSeconds",
+          "keyframes",
+          "motionClip",
+          "userDecisionScope"
+        ],
+        "properties": {
+          "sceneId": {"type": "string", "minLength": 1},
+          "label": {"type": "string"},
+          "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
+          "keyframes": {
+            "type": "object",
+            "required": ["start", "middle", "end"],
+            "properties": {
+              "start": {"type": "string", "minLength": 1},
+              "middle": {"type": "string", "minLength": 1},
+              "end": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          },
+          "motionClip": {
+            "oneOf": [
+              {"type": "string", "minLength": 1},
+              {"type": "null"}
+            ]
+          },
+          "userDecisionScope": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1}
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "machineChecks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "passed"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "passed": {"const": true}
+        },
+        "additionalProperties": false
+      }
+    },
+    "decisionBoundary": {
+      "type": "object",
+      "required": ["machine", "human", "finalPreview"],
+      "properties": {
+        "machine": {"type": "string", "minLength": 1},
+        "human": {"type": "string", "minLength": 1},
+        "finalPreview": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

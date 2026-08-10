@@ -11,11 +11,14 @@ Read this only when creating/changing project files or diagnosing validation/sta
 | `production-metrics.json` | Versioned wall-clock segments and observation-window summaries for production monitoring |
 | `storyboard.json` | Approved schema-v12 motion direction, beat performance roles/treatments, editorial authoring, scene boundaries, layer source packages, and compiler-owned motion/edit/directing/proof plans and fingerprints |
 | `motion-language-card.json` | Human-readable whole-film action grammar, pacing, scene phrases, final holds, exceptions, and approval/execution fingerprints |
-| `motion-approval.json` | Attributable style/voice-gate approval binding the human note, Style Profile, motion fingerprints, and style proof |
+| `dist/<slug>/visual-blueprint/index.json` | Same-source low-resolution full-film animatic, every-scene keyframes, motion clips, source coverage, and exact geometry/timing/runtime fingerprint |
+| `visual-blueprint-approval.json` | Attributable human approval of the current visual blueprint |
+| `motion-approval.json` | Attributable style/voice-gate approval binding the human note, Style Profile, motion fingerprints, and visual blueprint |
 | `project.json` | Frozen executable Style Profile, compiled motion contract, materialized theme, Creative Plan v4 ceilings/cap/source-package decision, exact provider-root plan, and v12 Remotion execution tree |
 | `requests/*.json` | Per-output generation/import request plus exact style/composition/provider-root binding |
 | `semantic-contracts.json` | Reusable identity, topology, mechanism, diagram, and evidence-target invariants |
 | `generation-attempts.jsonl` | Append-only quota reservation and real provider-attempt outcomes |
+| `failure-circuit.jsonl` | Append-only command/provider/human-review failures and explicit circuit resolutions |
 | `assets-manifest.json` | Provider provenance, source families, fingerprints, hashes, and active/superseded/rejected/recovery-source lifecycle |
 | `world-topology-proof.json` | Provider-free current-world structure proof required before any looping-environment image attempt |
 | `quality-report.json` | Hash-bound current asset/composite quality plus non-current asset history |
@@ -24,20 +27,23 @@ Read this only when creating/changing project files or diagnosing validation/sta
 
 Never ask the human to edit machine JSON. Paths in `project.json` are relative to `public/`; production artifacts are relative to the workspace root. A confirmed project must carry `intake.schemaVersion=2` plus a complete `styleProfile` snapshot whose catalog/profile fingerprints still match the current built-in catalog. Pending intake must keep `styleProfile=null`.
 
-`production-metrics.json` records wrapped command time, quality-review sessions, and image-attempt windows. Its `summary.aiReview.percentOfObservation` is the comparison field for AI-review share. Review sessions include host-model inspection, tool orchestration, and any pause before `record-batch`; image attempts likewise include the full reserve-to-close window. The runtime does not estimate provider-only inference time or tokens when the host does not expose them. `summary.unattributedMs` is deliberately unlabeled because it can contain human waits, agent work, or uninstrumented operations. A lazily created file for an older project reports partial coverage.
+`production-metrics.json` records wrapped command time, human quality-review sessions, and image-attempt windows. Current visual decisions appear under `summary.byCategory["human-review"]`; the legacy `summary.aiReview` field remains an explicit measurement of any automated review work and should normally stay zero for visual pass/fail. Review sessions include evidence presentation and the wait until the human decision; image attempts likewise include the full reserve-to-close window. The runtime does not estimate provider-only inference time or tokens when the host does not expose them. `summary.unattributedMs` is deliberately unlabeled because it can contain human waits, agent work, or uninstrumented operations. A lazily created file for an older project reports partial coverage.
 
 ## Normal State Path
 
 | Stage | Successful action | Next |
 |---|---|---|
 | `capability-review` | `project:intake`, `project:scenarios`, then `project:confirm-concept` | `style-review` after intake and combined scenario/profile/budget/provider approval |
-| `style-review` | `approve-style-voice` | `asset-production` |
+| `style-review` | one style sample + `project:visual-blueprint`, then `approve-style-voice` | `asset-production` |
 | `asset-production` | `project:assets-ready` | `preview` |
 | `preview` | successful `project:preview` | `human-review` |
 | `human-review` | `approve-preview` | `final-render` |
 | `final-render` | successful `project:render` | `complete` |
 
-The combined confirmation is the normal path. Composition proof is machine evidence inside the existing style or asset stage, not a fourth human gate.
+The combined confirmation is the normal path. The visual blueprint is the
+single existing style/voice decision surface, not a new stage. Composition and
+technical proofs remain machine evidence inside asset production, not another
+human gate.
 
 `complete` is the only local terminal stage. After a human separately authorizes
 a named external destination/action, `approve-publish` records that exact
@@ -72,23 +78,21 @@ report, and contact-sheet artifact. A `locked-static` scene may lower only the
 three motion-scene floors recorded in `profilePromiseRevision`; state-family,
 layer, call, and semantic-action promises remain fixed.
 
-`approve-style-voice` requires a current schema-v7
-`style-motion-proof.json` with `scope=style`, bound to the compiler-owned
-multidimensional `styleProofPlan`, both motion-contract fingerprints, and its complete target list. The
-plan covers the highest semantic-risk classes, every concrete coupled
-relationship, and state-sequence behavior while minimizing distinct source
-families. Every selected target, including `free`, must have at least one
-structured composite with current full-resolution frame/crop/debug evidence.
-Registered or semantic targets additionally bind member hashes, timing/proof
-inputs, runtime build, and source family. Ordinary coupled families require
-per-member alpha/checkerboard/tight/motion-stress evidence. A
-`registered-depth-stack` instead adds neutral reconstruction, reference
-comparison, checkerboard exploded members, and both extremes of all three
-responsive reveal envelopes. A stack with `subjectTravelEnvelope` additionally
-proves both subject-only lower-left/upper-right extremes in all three profiles.
-Participating asset/composite semantic checks must
-already be recorded. This is an executable precondition inside `style-review`,
-not another approval state.
+`approve-style-voice` requires a current schema-v1 visual blueprint and exactly
+one active story-specific style sample. The blueprint contract is derived from
+the final schema-v12 execution tree while omitting only replaceable source
+paths, hashes, and provider provenance. It therefore binds every scene,
+duration, transform, z-order, camera, state-facing/playback schedule, path,
+event, proof time, and transition to the current runtime. The renderer retains
+real sources already present and substitutes deterministic labeled proxies only
+for missing production sources. The review package contains a complete
+low-resolution animatic, start/middle/end frames for every scene, and short
+clips for motion-bearing scenes. Machine checks establish coverage, existence,
+hashes, and freshness only; a human makes the visual decision. Approval writes
+both `visual-blueprint-approval.json` and `motion-approval.json`. Every
+non-style-sample provider request and `project:assets-ready` require that
+approval to remain current. Replacing a proxy with a real source is legal;
+changing the visual contract requires a new blueprint and human decision.
 
 A mixed-surface registered sheet records the untouched provider-native RGB/RGBA
 file as the provider root. `assets:derive-registered-family` is the only formal
@@ -507,6 +511,22 @@ accepted calibration decision. It then writes `assets-ready-seal.json`. Low-leve
 `project:advance ... assets-ready` and both render modes only accept a current
 seal; any project, source media, storyboard, quality, subtitle, or runtime change
 invalidates it and routes back through the canonical command.
+
+Automatic quality code may measure file readability, dimensions, alpha
+topology, registration, fingerprints, timing bindings, and proof completeness.
+It may not decide seams, clipping, occlusion appearance, damaged artwork,
+identity/style continuity, facing readability, loop cadence, depth readability,
+or overall composition. Those semantic checks require `reviewer=human:<id>` and
+the human's note. Generate one current fingerprint-bound contact sheet, show it
+to the human, and use `accept-human` for one whole-surface approval.
+
+Every wrapped production failure records the operation, input fingerprint, and
+normalized failure signature in `failure-circuit.jsonl`. One unchanged failed
+input is blocked even with `--force`. The second occurrence of the same failure
+opens a circuit and stops autonomous retries until an explicit human resolution
+is appended with `project:failures`. A changed input that succeeds resolves a
+single prior command failure; it never auto-resolves an open circuit or a human
+review stop.
 
 Fix a wrong mask, crop, anchor, registration, or derivative without another human decision when the approved meaning and budget remain unchanged. Regenerate `project:style-proof` or `project:composition-proof` after the fix; member hashes invalidate prior evidence automatically. Return to concept only when the relationship meaning changes. Return to provider/budget approval only for a provider switch or budget increase. Never hide a contract failure with arbitrary z-index, pixel nudges, or a coarse polygon matte.
 

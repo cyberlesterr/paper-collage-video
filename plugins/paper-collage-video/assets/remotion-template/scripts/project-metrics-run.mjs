@@ -6,6 +6,14 @@ import {
   finishMetricSegment,
   startMetricSegment,
 } from './production-metrics-lib.mjs';
+import {
+  assertOperationAllowed,
+  computeOperationInputFingerprint,
+  deriveFailureSignature,
+  normalizeFailureEvidence,
+  recordOperationFailure,
+  recordOperationSuccess,
+} from './failure-circuit-lib.mjs';
 
 const args = process.argv.slice(2);
 const valueFor = (name) =>
@@ -21,6 +29,7 @@ const qualityActions = new Set([
   'status',
   'scaffold',
   'contact-sheet',
+  'accept-human',
   'record',
   'record-batch',
 ]);
@@ -35,13 +44,24 @@ const run = (file, commandArgs) => new Promise((resolve, reject) => {
     cwd: ROOT,
     stdio: ['inherit', 'pipe', 'pipe'],
   });
-  child.stdout.on('data', (chunk) => process.stdout.write(chunk));
-  child.stderr.on('data', (chunk) => process.stderr.write(chunk));
+  let stdout = '';
+  let stderr = '';
+  child.stdout.on('data', (chunk) => {
+    process.stdout.write(chunk);
+    stdout = `${stdout}${chunk}`.slice(-64 * 1024);
+  });
+  child.stderr.on('data', (chunk) => {
+    process.stderr.write(chunk);
+    stderr = `${stderr}${chunk}`.slice(-64 * 1024);
+  });
   child.once('error', reject);
-  child.once('exit', (code, signal) => resolve({code, signal}));
+  child.once('exit', (code, signal) =>
+    resolve({code, signal, stdout, stderr}),
+  );
 });
 
 let segment = null;
+let inputFingerprint = null;
 try {
   const helpRequested = childArgs.includes('--help') || childArgs.includes('-h');
   if (!category || !operation || !script || (!helpRequested && !slug) || !Number.isInteger(slugIndex)) {
@@ -53,22 +73,59 @@ try {
     const result = await run(path.resolve(ROOT, script), childArgs);
     if (result.code !== 0) process.exitCode = result.code ?? 1;
   } else {
-  segment = await startMetricSegment({
-    slug,
-    category,
-    operation,
-    measurement: 'command-wall-clock',
-    source: 'command-wrapper',
-    metadata: {script, arguments: childArgs},
-  });
-  const result = await run(path.resolve(ROOT, script), childArgs);
-  await finishMetricSegment({
-    slug,
-    segmentId: segment.id,
-    status: result.code === 0 ? 'completed' : 'failed',
-    metadata: {exitCode: result.code, signal: result.signal ?? null},
-  });
-  if (result.code !== 0) process.exitCode = result.code ?? 1;
+    inputFingerprint = await computeOperationInputFingerprint({
+      slug,
+      operation,
+      script,
+      arguments: childArgs,
+    });
+    await assertOperationAllowed({slug, operation, inputFingerprint});
+    segment = await startMetricSegment({
+      slug,
+      category,
+      operation,
+      measurement: 'command-wall-clock',
+      source: 'command-wrapper',
+      metadata: {script, arguments: childArgs},
+    });
+    const result = await run(path.resolve(ROOT, script), childArgs);
+    await finishMetricSegment({
+      slug,
+      segmentId: segment.id,
+      status: result.code === 0 ? 'completed' : 'failed',
+      metadata: {exitCode: result.code, signal: result.signal ?? null},
+    });
+    if (result.code === 0) {
+      await recordOperationSuccess({slug, operation, inputFingerprint});
+    } else {
+      const evidence =
+        normalizeFailureEvidence(`${result.stderr}\n${result.stdout}`) ||
+        `${script} exited with ${result.code ?? result.signal ?? 'unknown'}`;
+      const failure = await recordOperationFailure({
+        slug,
+        operation,
+        inputFingerprint,
+        failureSignature: deriveFailureSignature({
+          operation,
+          exitCode: result.code,
+          signal: result.signal,
+          stdout: result.stdout,
+          stderr: result.stderr,
+        }),
+        evidence,
+      });
+      if (failure.circuit.open) {
+        console.error(
+          `⛔ ${operation} 同类失败第 ${failure.circuit.count} 次；` +
+            `熔断 ${failure.circuit.circuitId} 已打开，停止自动重试。`,
+        );
+      } else {
+        console.error(
+          `⚠ ${operation} 首次失败已记录；输入未变化时禁止重跑。`,
+        );
+      }
+      process.exitCode = result.code ?? 1;
+    }
   }
 } catch (error) {
   if (segment) {
@@ -79,6 +136,6 @@ try {
       metadata: {error: error.message},
     }).catch(() => {});
   }
-  console.error(`production metrics wrapper failed: ${error.message}`);
+  console.error(`production control stopped: ${error.message}`);
   process.exitCode = 1;
 }

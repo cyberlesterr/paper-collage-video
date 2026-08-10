@@ -7,6 +7,8 @@ import sharp from 'sharp';
 import {createProductionMetrics} from './production-metrics-lib.mjs';
 import {compileStoryboardDirecting} from './motion-treatment-lib.mjs';
 import {createRuntimeBuildManifest} from './runtime-build-lib.mjs';
+import {createAssetRecordId} from './asset-manifest-lib.mjs';
+import {runCommand} from './project-lib.mjs';
 import {
   loadStyleCatalog,
   materializeStyleProfile,
@@ -141,6 +143,7 @@ for (const entry of [
   'scripts/provider-lib.mjs',
   'scripts/provider-root-plan-lib.mjs',
   'scripts/generation-attempt-lib.mjs',
+  'scripts/failure-circuit-lib.mjs',
   'scripts/production-metrics-lib.mjs',
   'scripts/semantic-contract-lib.mjs',
   'scripts/provider-attempt.mjs',
@@ -163,12 +166,14 @@ for (const entry of [
   'scripts/project-asset-lifecycle.mjs',
   'scripts/project-checkpoint.mjs',
   'scripts/project-confirm-concept.mjs',
+  'scripts/project-visual-blueprint.mjs',
   'scripts/project-intake.mjs',
   'scripts/project-composition-proof.mjs',
   'scripts/project-budget.mjs',
   'scripts/project-increase-image-budget.mjs',
   'scripts/project-doctor.mjs',
   'scripts/project-handoff-check.mjs',
+  'scripts/project-failures.mjs',
   'scripts/project-lib.mjs',
   'scripts/phase2-proof-lib.mjs',
   'scripts/world-motion-proof-lib.mjs',
@@ -222,6 +227,7 @@ for (const entry of [
   'scripts/timeline-continuity-lib.mjs',
   'scripts/style-motion-proof.mjs',
   'scripts/style-proof-lib.mjs',
+  'scripts/visual-blueprint-lib.mjs',
   'scripts/world-trajectory-lib.mjs',
   'src/Root.tsx',
   'src/MainVideo.tsx',
@@ -282,6 +288,7 @@ for (const entry of [
   'tests/spatial-contract.test.mjs',
   'tests/timeline-continuity.test.mjs',
   'tests/render-continuity.test.mjs',
+  'tests/visual-blueprint-circuit.test.mjs',
   'tests/visibility-scene-transition.test.mjs',
   'fixtures/composition-v4',
   'fixtures/canonical-container',
@@ -345,6 +352,7 @@ const workspacePackage = {
     'project:revise-preview-semantic': rootPackage.scripts['project:revise-preview-semantic'],
     'project:semantic-contracts': rootPackage.scripts['project:semantic-contracts'],
     'project:confirm-concept': rootPackage.scripts['project:confirm-concept'],
+    'project:visual-blueprint': rootPackage.scripts['project:visual-blueprint'],
     'project:quality': rootPackage.scripts['project:quality'],
     'project:composition-proof': rootPackage.scripts['project:composition-proof'],
     'project:metrics': rootPackage.scripts['project:metrics'],
@@ -353,6 +361,7 @@ const workspacePackage = {
     'project:resume': rootPackage.scripts['project:resume'],
     'project:status': rootPackage.scripts['project:status'],
     'project:handoff-check': rootPackage.scripts['project:handoff-check'],
+    'project:failures': rootPackage.scripts['project:failures'],
     'project:checkpoint': rootPackage.scripts['project:checkpoint'],
     'project:asset-lifecycle': rootPackage.scripts['project:asset-lifecycle'],
     'project:review-sync': rootPackage.scripts['project:review-sync'],
@@ -683,6 +692,8 @@ const production = {
     review: 'projects/starter-demo/review.md',
     motionLanguageCard: 'projects/starter-demo/motion-language-card.json',
     motionApproval: 'projects/starter-demo/motion-approval.json',
+    visualBlueprint: null,
+    visualBlueprintApproval: null,
     validationReport: null,
     assetsReadySeal: null,
     preview: null,
@@ -697,23 +708,6 @@ await writeJson(
   production,
 );
 await writeJson(
-  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'motion-approval.json'),
-  {
-    schemaVersion: 1,
-    slug: 'starter-demo',
-    approvedAt: at,
-    humanNote: 'Bundled fixture',
-    styleProfileBinding: storyboard.motionContract.styleProfileBinding,
-    motionApprovalFingerprint:
-      storyboard.motionContract.approvalFingerprint,
-    approvedExecutionFingerprint: storyboard.motionContract.fingerprint,
-    styleProofPlanFingerprint:
-      storyboard.directingSummary.styleProofPlan.fingerprint,
-    styleProofReport: 'dist/starter-demo/style-motion-proof.json',
-    styleProofReportSha256: '0'.repeat(64),
-  },
-);
-await writeJson(
   path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'production-metrics.json'),
   createProductionMetrics({slug: 'starter-demo', createdAt: at}),
 );
@@ -724,15 +718,6 @@ await writeJson(
 await writeJson(
   path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'providers.json'),
   {$schema: '../../schemas/providers.schema.json', schemaVersion: 1},
-);
-await writeJson(
-  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'assets-manifest.json'),
-  {
-    $schema: '../../schemas/assets-manifest.schema.json',
-    schemaVersion: 4,
-    projectSlug: 'starter-demo',
-    assets: [],
-  },
 );
 await fs.writeFile(
   path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'brief.md'),
@@ -752,6 +737,11 @@ const starterRequests = path.join(
 );
 await fs.mkdir(starterRequests, {recursive: true});
 await fs.writeFile(path.join(starterRequests, '.gitkeep'), '', 'utf8');
+await fs.writeFile(
+  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'failure-circuit.jsonl'),
+  '',
+  'utf8',
+);
 
 await copy(
   'fixtures/starter-demo/01-bg.png',
@@ -760,6 +750,74 @@ await copy(
 await copy(
   'fixtures/starter-demo/01-traveler.png',
   'public/projects/starter-demo/assets/characters/alpha/01-traveler.png',
+);
+const starterStyleSampleRelative =
+  'public/projects/starter-demo/assets/characters/alpha/01-traveler.png';
+const starterStyleSampleFile = path.join(
+  RUNTIME_ROOT,
+  starterStyleSampleRelative,
+);
+const starterStyleSampleSha256 = await hashFile(starterStyleSampleFile);
+const starterStyleSampleStat = await fs.stat(starterStyleSampleFile);
+const starterStyleSampleMedia = await sharp(
+  starterStyleSampleFile,
+).metadata();
+const starterStyleRequest = {
+  quality: {
+    kind: 'style-sample',
+    requiredChecks: [
+      'no-text',
+      'no-watermark',
+      'subject-complete',
+      'style-consistent',
+    ],
+  },
+};
+const starterStyleRequestFingerprint = createHash('sha256')
+  .update(JSON.stringify(starterStyleRequest))
+  .digest('hex');
+await writeJson(
+  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'assets-manifest.json'),
+  {
+    $schema: '../../schemas/assets-manifest.schema.json',
+    schemaVersion: 4,
+    projectSlug: 'starter-demo',
+    assets: [
+      {
+        recordId: createAssetRecordId({
+          assetId: 'starter-style-sample',
+          requestFingerprint: starterStyleRequestFingerprint,
+          sha256: starterStyleSampleSha256,
+          recordedAt: at,
+        }),
+        assetId: 'starter-style-sample',
+        capability: 'image',
+        file: starterStyleSampleRelative,
+        provider: 'fixture',
+        adapter: 'manual',
+        requestFingerprint: starterStyleRequestFingerprint,
+        reusedFrom: null,
+        sha256: starterStyleSampleSha256,
+        sizeBytes: starterStyleSampleStat.size,
+        media: {
+          width: starterStyleSampleMedia.width,
+          height: starterStyleSampleMedia.height,
+          format: starterStyleSampleMedia.format ?? null,
+          hasAlpha: starterStyleSampleMedia.hasAlpha === true,
+        },
+        recordedAt: at,
+        request: starterStyleRequest,
+        compositionBinding: null,
+        familyFingerprint: null,
+        lifecycle: {
+          status: 'active',
+          changedAt: at,
+          reason: 'Bundled story-specific style fixture',
+          supersededBy: null,
+        },
+      },
+    ],
+  },
 );
 const narrationFile = path.join(
   RUNTIME_ROOT,
@@ -825,7 +883,7 @@ await writeJson(
         technical: {passed: true, checks: []},
         semanticChecks: Object.fromEntries(checks.map((check) => [check, 'passed'])),
         status: 'passed',
-        reviewer: 'bundled-fixture',
+        reviewer: 'human:bundled-fixture',
         reviewedAt: at,
         note: 'Repository-owned technical fixture',
       })),
@@ -890,6 +948,9 @@ const runtimeProjectLib = await import(
 );
 const runtimeQualityLib = await import(
   `${pathToFileURL(path.join(RUNTIME_ROOT, 'scripts', 'quality-lib.mjs')).href}?sync=${Date.now()}`,
+);
+const runtimeVisualBlueprintLib = await import(
+  `${pathToFileURL(path.join(RUNTIME_ROOT, 'scripts', 'visual-blueprint-lib.mjs')).href}?sync=${Date.now()}`,
 );
 const {project: starterRuntimeProject} = await runtimeProjectLib.loadProject(
   'starter-demo',
@@ -1013,6 +1074,262 @@ await writeJson(path.join(starterProofDirectory, 'report.json'), {
   },
 });
 
+const starterBlueprintDirectory = path.join(
+  RUNTIME_ROOT,
+  'dist',
+  'starter-demo',
+  'visual-blueprint',
+);
+const starterBlueprintKeyframes = path.join(
+  starterBlueprintDirectory,
+  'keyframes',
+);
+const starterBlueprintClips = path.join(
+  starterBlueprintDirectory,
+  'motion-clips',
+);
+await fs.mkdir(starterBlueprintKeyframes, {recursive: true});
+await fs.mkdir(starterBlueprintClips, {recursive: true});
+const starterBlueprintSamples = [
+  ['start', 'proof-establish'],
+  ['middle', 'proof-action'],
+  ['end', 'proof-final'],
+];
+const starterBlueprintFrameFiles = {};
+for (const [phase, proofTimeId] of starterBlueprintSamples) {
+  const file = path.join(
+    starterBlueprintKeyframes,
+    `starter-${phase}.jpg`,
+  );
+  await sharp(path.join(RUNTIME_ROOT, starterProofFiles.get(proofTimeId)))
+    .resize(480, 270, {fit: 'cover'})
+    .jpeg({quality: 86, chromaSubsampling: '4:4:4'})
+    .toFile(file);
+  starterBlueprintFrameFiles[phase] = path
+    .relative(RUNTIME_ROOT, file)
+    .split(path.sep)
+    .join('/');
+}
+const starterBlueprintContactSheet = path.join(
+  starterBlueprintDirectory,
+  'scene-keyframes.jpg',
+);
+await sharp({
+  create: {
+    width: 1440,
+    height: 324,
+    channels: 3,
+    background: project.theme.canvas,
+  },
+})
+  .composite([
+    {
+      input: Buffer.from(
+        `<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="54">` +
+          `<rect width="100%" height="100%" fill="${project.theme.canvas}"/>` +
+          `<text x="18" y="36" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="${project.theme.subtitle}">Starter · 开头 / 中间 / 结尾</text>` +
+          '</svg>',
+      ),
+      left: 0,
+      top: 0,
+    },
+    ...starterBlueprintSamples.map(([phase], index) => ({
+      input: path.join(
+        RUNTIME_ROOT,
+        starterBlueprintFrameFiles[phase],
+      ),
+      left: index * 480,
+      top: 54,
+    })),
+  ])
+  .jpeg({quality: 88, chromaSubsampling: '4:4:4'})
+  .toFile(starterBlueprintContactSheet);
+const starterBlueprintStyleFrame = path.join(
+  starterBlueprintDirectory,
+  'style-frame.jpg',
+);
+await fs.copyFile(
+  path.join(RUNTIME_ROOT, starterBlueprintFrameFiles.middle),
+  starterBlueprintStyleFrame,
+);
+const starterBlueprintAnimatic = path.join(
+  starterBlueprintDirectory,
+  'animatic.mp4',
+);
+await runCommand(
+  'ffmpeg',
+  [
+    '-y',
+    '-v',
+    'error',
+    '-loop',
+    '1',
+    '-framerate',
+    '30',
+    '-i',
+    path.join(RUNTIME_ROOT, starterBlueprintFrameFiles.middle),
+    '-t',
+    '1.2',
+    '-an',
+    '-c:v',
+    'libx264',
+    '-preset',
+    'veryfast',
+    '-crf',
+    '32',
+    '-pix_fmt',
+    'yuv420p',
+    '-map_metadata',
+    '-1',
+    '-fflags',
+    '+bitexact',
+    '-flags:v',
+    '+bitexact',
+    starterBlueprintAnimatic,
+  ],
+  {cwd: RUNTIME_ROOT},
+);
+const starterBlueprintMotionClip = path.join(
+  starterBlueprintClips,
+  'starter.mp4',
+);
+await fs.copyFile(starterBlueprintAnimatic, starterBlueprintMotionClip);
+const starterBlueprintRelative = (file) =>
+  path.relative(RUNTIME_ROOT, file).split(path.sep).join('/');
+const starterBlueprintArtifactFiles = [
+  starterBlueprintRelative(starterBlueprintAnimatic),
+  starterBlueprintRelative(starterBlueprintContactSheet),
+  starterBlueprintRelative(starterBlueprintStyleFrame),
+  ...Object.values(starterBlueprintFrameFiles),
+  starterBlueprintRelative(starterBlueprintMotionClip),
+];
+const starterBlueprintReport = {
+  $schema: '../../../schemas/visual-blueprint.schema.json',
+  schemaVersion: 1,
+  projectSlug: 'starter-demo',
+  generatedAt: at,
+  status: 'awaiting-human',
+  reviewMode: 'single-human-visual-decision',
+  source: {
+    project: 'projects/starter-demo/project.json',
+    storyboard: 'projects/starter-demo/storyboard.json',
+    contract:
+      runtimeVisualBlueprintLib.createVisualBlueprintContract(
+        starterRuntimeProject,
+      ),
+  },
+  visualContractFingerprint:
+    runtimeVisualBlueprintLib.visualBlueprintFingerprint(
+      starterRuntimeProject,
+    ),
+  runtimeBuildFingerprint: packagedRuntimeBuild.fingerprint,
+  renderProfile: {
+    width: 480,
+    height: 270,
+    fps: 30,
+    sourceRenderer: 'Paper-Collage',
+    proxyPolicy: 'keep-current-real-source-else-deterministic-proxy',
+  },
+  sourceCoverage: {actual: 2, proxy: 0, total: 2, actualRatio: 1},
+  styleReference: {
+    assetId: 'starter-style-sample',
+    file: starterStyleSampleRelative,
+    sha256: starterStyleSampleSha256,
+  },
+  artifacts: {
+    animatic: starterBlueprintRelative(starterBlueprintAnimatic),
+    contactSheet: starterBlueprintRelative(starterBlueprintContactSheet),
+    styleFrame: starterBlueprintRelative(starterBlueprintStyleFrame),
+  },
+  artifactHashes: Object.fromEntries(
+    await Promise.all(
+      starterBlueprintArtifactFiles.map(async (file) => [
+        file,
+        await hashFile(path.join(RUNTIME_ROOT, file)),
+      ]),
+    ),
+  ),
+  scenes: [
+    {
+      sceneId: 'starter',
+      label: '纸片分层视频',
+      durationSeconds: 1.2,
+      keyframes: starterBlueprintFrameFiles,
+      motionClip: starterBlueprintRelative(starterBlueprintMotionClip),
+      userDecisionScope: [
+        '构图与主体位置',
+        '图层前后关系与遮挡意图',
+        '角色运动方向与朝向',
+        '逐帧状态切换、循环区间与位移协调',
+        '镜头运动、景深和节奏',
+      ],
+    },
+  ],
+  machineChecks: [
+    {id: 'all-scenes-covered', passed: true},
+    {id: 'three-keyframes-per-scene', passed: true},
+    {id: 'motion-clips-for-dynamic-scenes', passed: true},
+    {id: 'current-runtime-bound', passed: true},
+    {id: 'artifact-hashes-recorded', passed: true},
+  ],
+  decisionBoundary: {
+    machine: '只确认技术完整性，不判断画面好坏。',
+    human: '一次观看蓝图并批准或提出修改。',
+    finalPreview: '正式素材替换后由人判断真实视觉缺陷。',
+  },
+};
+const starterBlueprintReportFile = path.join(
+  starterBlueprintDirectory,
+  'index.json',
+);
+await writeJson(starterBlueprintReportFile, starterBlueprintReport);
+await runtimeVisualBlueprintLib.assertVisualBlueprintReady('starter-demo');
+const starterBlueprintApprovalFile = path.join(
+  RUNTIME_ROOT,
+  'projects',
+  'starter-demo',
+  'visual-blueprint-approval.json',
+);
+await writeJson(starterBlueprintApprovalFile, {
+  $schema: '../../schemas/visual-blueprint-approval.schema.json',
+  schemaVersion: 1,
+  projectSlug: 'starter-demo',
+  status: 'approved',
+  blueprintReport: starterBlueprintRelative(starterBlueprintReportFile),
+  blueprintReportSha256: await hashFile(starterBlueprintReportFile),
+  visualContractFingerprint:
+    starterBlueprintReport.visualContractFingerprint,
+  runtimeBuildFingerprint: packagedRuntimeBuild.fingerprint,
+  decision: {
+    authority: 'human',
+    note: 'Bundled fixture approved by maintainers',
+    decidedAt: at,
+  },
+});
+await writeJson(
+  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'motion-approval.json'),
+  {
+    schemaVersion: 1,
+    slug: 'starter-demo',
+    approvedAt: at,
+    humanNote: 'Bundled fixture approved by maintainers',
+    styleProfileBinding: storyboard.motionContract.styleProfileBinding,
+    motionApprovalFingerprint:
+      storyboard.motionContract.approvalFingerprint,
+    approvedExecutionFingerprint: storyboard.motionContract.fingerprint,
+    visualBlueprintFingerprint:
+      starterBlueprintReport.visualContractFingerprint,
+    visualBlueprintReport:
+      starterBlueprintRelative(starterBlueprintReportFile),
+    visualBlueprintReportSha256:
+      await hashFile(starterBlueprintReportFile),
+  },
+);
+production.artifacts.visualBlueprint =
+  starterBlueprintRelative(starterBlueprintReportFile);
+production.artifacts.visualBlueprintApproval =
+  starterBlueprintRelative(starterBlueprintApprovalFile);
+
 const starterPreparedQuality = await runtimeQualityLib.prepareQualityReport(
   'starter-demo',
   {write: false},
@@ -1022,7 +1339,7 @@ for (const asset of starterPreparedQuality.report.assets) {
   asset.semanticChecks = Object.fromEntries(
     asset.requiredChecks.map((check) => [check, 'passed']),
   );
-  asset.reviewer = 'bundled-fixture';
+  asset.reviewer = 'human:bundled-fixture';
   asset.reviewedAt = at;
   asset.note = 'Repository-owned technical fixture asset';
   asset.evidenceFiles = [];
@@ -1032,7 +1349,7 @@ for (const composite of starterPreparedQuality.report.composites) {
   composite.semanticChecks = Object.fromEntries(
     composite.requiredChecks.map((check) => [check, 'passed']),
   );
-  composite.reviewer = 'bundled-fixture';
+  composite.reviewer = 'human:bundled-fixture';
   composite.reviewedAt = at;
   composite.note = 'Repository-owned technical fixture proof';
   composite.evidenceFiles = await Promise.all(

@@ -2,6 +2,12 @@ import {createHash, randomUUID} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {
+  assertOperationAllowed,
+  deriveFailureSignature,
+  recordOperationFailure,
+  recordOperationSuccess,
+} from './failure-circuit-lib.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(scriptDirectory, '..');
@@ -172,6 +178,12 @@ export const reserveGenerationAttempt = async ({request, provider, model = null}
   if (maximum === 0) {
     throw new Error('人批准的图片尝试上限为 0，不能发起生图。');
   }
+  const requestFingerprint = generationRequestFingerprint(request);
+  await assertOperationAllowed({
+    slug: request.projectSlug,
+    operation: `provider-image:${request.assetId}`,
+    inputFingerprint: requestFingerprint,
+  });
   return withLedgerLock(request.projectSlug, async () => {
     const loaded = await readGenerationAttemptEvents(request.projectSlug);
     const summary = summarizeGenerationAttempts(loaded.events);
@@ -191,7 +203,7 @@ export const reserveGenerationAttempt = async ({request, provider, model = null}
       assetId: request.assetId,
       provider: provider.id,
       model: canonicalAttemptModel({request, provider, model}),
-      requestFingerprint: generationRequestFingerprint(request),
+      requestFingerprint,
       quotaConsumed: false,
       output: null,
       outputSha256: null,
@@ -283,7 +295,7 @@ export const closeGenerationAttempt = async ({
   if (status === 'failed-before-generation' && quotaConsumed) {
     throw new Error('failed-before-generation 不得计入生成额度。');
   }
-  return withLedgerLock(slug, async () => {
+  const result = await withLedgerLock(slug, async () => {
     const loaded = await readGenerationAttemptEvents(slug);
     const attempt = reduceGenerationAttempts(loaded.events).get(attemptId);
     if (!attempt) throw new Error(`生成尝试不存在：${attemptId}`);
@@ -319,4 +331,30 @@ export const closeGenerationAttempt = async ({
     await appendEvent(loaded.file, event);
     return {file: loaded.file, event, reused: false};
   });
+  if (
+    !result.reused &&
+    ['rejected', 'abandoned', 'failed-before-generation'].includes(
+      result.event.status,
+    )
+  ) {
+    result.failureCircuit = await recordOperationFailure({
+      slug,
+      operation: `provider-image:${result.event.assetId}`,
+      inputFingerprint: result.event.requestFingerprint,
+      failureSignature: deriveFailureSignature({
+        operation: `provider-image:${result.event.assetId}`,
+        explicit: 'provider image attempt did not produce an accepted asset',
+      }),
+      evidence:
+        `${result.event.status} · quotaConsumed=${result.event.quotaConsumed}` +
+        `${result.event.note ? ` · ${result.event.note}` : ''}`,
+    });
+  } else if (!result.reused && result.event.status === 'succeeded') {
+    await recordOperationSuccess({
+      slug,
+      operation: `provider-image:${result.event.assetId}`,
+      inputFingerprint: result.event.requestFingerprint,
+    });
+  }
+  return result;
 };

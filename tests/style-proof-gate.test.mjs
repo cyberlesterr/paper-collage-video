@@ -466,22 +466,24 @@ test('style topology gate rejects hard-alpha false confidence, unrelated evidenc
       {cwd: ROOT, encoding: 'utf8'},
     );
     assert.notEqual(blockedAdvance.status, 0);
-    assert.match(blockedAdvance.stderr, /风格拓扑证明/);
+    assert.match(blockedAdvance.stderr, /同源视觉蓝图/);
 
     const {target, evidencePath, unrelatedPath} = await writeProofEvidence({slug, project: fixture.project, files: fixture.files});
     quality = await prepareQualityReport(slug);
     const reviews = quality.report.assets.map((entry) => ({
       assetId: entry.assetId,
-      reviewer: 'fixture-vision',
+      reviewer: 'human:fixture-vision',
       passedChecks: entry.requiredChecks,
       evidenceFiles: entry.requiredChecks.some((check) => ['silhouette-fidelity', 'negative-space-clean', 'background-leak-free'].includes(check)) ? [evidencePath] : [],
+      note: 'Fixture reviewed',
     }));
     const composite = quality.report.composites.find(({compositeId}) => compositeId === target.compositeId);
     reviews.push({
       compositeId: composite.compositeId,
-      reviewer: 'fixture-vision',
+      reviewer: 'human:fixture-vision',
       passedChecks: composite.requiredChecks,
       evidenceFiles: [evidencePath],
+      note: 'Fixture reviewed',
     });
     const recorded = await recordQualityReviews({slug, reviews});
     assert.ok(recorded.report.assets.find(({assetId}) => assetId === 'subject').evidenceFiles.length > 0);
@@ -489,15 +491,17 @@ test('style topology gate rejects hard-alpha false confidence, unrelated evidenc
 
     const unrelatedReviews = recorded.report.assets.map((entry) => ({
       assetId: entry.assetId,
-      reviewer: 'fixture-vision',
+      reviewer: 'human:fixture-vision',
       passedChecks: entry.requiredChecks,
       evidenceFiles: entry.requiredChecks.some((check) => ['silhouette-fidelity', 'negative-space-clean', 'background-leak-free'].includes(check)) ? [unrelatedPath] : [],
+      note: 'Fixture reviewed',
     }));
     unrelatedReviews.push({
       compositeId: composite.compositeId,
-      reviewer: 'fixture-vision',
+      reviewer: 'human:fixture-vision',
       passedChecks: composite.requiredChecks,
       evidenceFiles: [unrelatedPath],
+      note: 'Fixture reviewed',
     });
     await recordQualityReviews({slug, reviews: unrelatedReviews});
     await assert.rejects(() => assertStyleProofReady(slug), /未引用当前证明证据/);
@@ -521,16 +525,6 @@ test('style topology gate rejects hard-alpha false confidence, unrelated evidenc
       path.join(fixture.projectDirectory, 'project.json'),
       `${JSON.stringify(fixture.project, null, 2)}\n`,
     );
-    const approvedAdvance = spawnSync(
-      process.execPath,
-      [path.join(ROOT, 'scripts', 'project-advance.mjs'), slug, 'approve-style-voice', '--note=fixture approval'],
-      {cwd: ROOT, encoding: 'utf8'},
-    );
-    assert.equal(approvedAdvance.status, 0, approvedAdvance.stderr);
-    const production = JSON.parse(await fs.readFile(path.join(fixture.projectDirectory, 'production.json'), 'utf8'));
-    assert.equal(production.stage, 'asset-production');
-    assert.equal(production.artifacts.styleProof, relativeWorkspaceFile(styleProofReportPath(slug)));
-
     await sharp(fixture.files.subject).modulate({brightness: 0.98}).png().toFile(`${fixture.files.subject}.changed.png`);
     await fs.rename(`${fixture.files.subject}.changed.png`, fixture.files.subject);
     await assert.rejects(() => assertStyleProofReady(slug), /过期|重新生成/);

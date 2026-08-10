@@ -138,7 +138,7 @@ test('production metrics union overlapping intervals and expose AI review share'
     assert.equal(metrics.summary.measuredUnionMs, 4_500);
     assert.equal(metrics.summary.unattributedMs, 5_500);
     assert.equal(metrics.summary.coverage.status, 'full');
-    assert.match(metrics.measurementNotes.reviewSessionWindow, /not provider-only inference time/);
+    assert.match(metrics.measurementNotes.reviewSessionWindow, /recorded human decision/);
     assert.match(metrics.measurementNotes.tokenTelemetry, /does not estimate token usage/);
     assert.match(metrics.measurementNotes.categoryOverlap, /de-duplicates all overlaps/);
   } finally {
@@ -275,14 +275,14 @@ test('quality record-batch emits output and creates a bound incremental scaffold
         slug,
         'scaffold',
         `--output=${path.relative(ROOT, scaffoldFile)}`,
-        '--reviewer=host-vision',
+        '--reviewer=human:test-editor',
       ],
       {cwd: ROOT, encoding: 'utf8'},
     );
     assert.equal(scaffoldResult.status, 0, scaffoldResult.stderr);
     assert.match(scaffoldResult.stdout, /质量审核脚手架/);
     const scaffold = JSON.parse(await fs.readFile(scaffoldFile, 'utf8'));
-    assert.equal(scaffold.schemaVersion, 3);
+    assert.equal(scaffold.schemaVersion, 4);
     assert.equal(scaffold.reviews.length, 2);
     for (const review of scaffold.reviews.slice(0, 1)) {
       review.passedChecks = review.pendingChecks;
@@ -312,18 +312,26 @@ test('quality record-batch emits output and creates a bound incremental scaffold
       'quality-review-scaffold.pending.json',
     );
     const pendingScaffold = JSON.parse(await fs.readFile(pendingFile, 'utf8'));
-    assert.equal(pendingScaffold.schemaVersion, 3);
+    assert.equal(pendingScaffold.schemaVersion, 4);
     assert.equal(pendingScaffold.reviews.length, 1);
     assert.match(
       pendingScaffold.sourceReport.fingerprint,
       /^[a-f0-9]{64}$/,
     );
-    for (const review of pendingScaffold.reviews) {
-      review.passedChecks = review.pendingChecks;
-      review.failedChecks = [];
-      review.note = 'Inspected remaining fixture';
-    }
-    await writeJson(pendingFile, pendingScaffold);
+    const contactSheet = spawnSync(
+      'npm',
+      [
+        'run',
+        'project:quality',
+        '--',
+        slug,
+        'contact-sheet',
+        `--input=${path.relative(ROOT, pendingFile)}`,
+        '--quiet',
+      ],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(contactSheet.status, 0, contactSheet.stderr);
     const finalRecord = spawnSync(
       'npm',
       [
@@ -331,8 +339,10 @@ test('quality record-batch emits output and creates a bound incremental scaffold
         'project:quality',
         '--',
         slug,
-        'record-batch',
+        'accept-human',
         `--input=${path.relative(ROOT, pendingFile)}`,
+        '--reviewer=human:test-editor',
+        '--note=Inspected remaining fixture',
         '--quiet',
       ],
       {cwd: ROOT, encoding: 'utf8'},
@@ -347,15 +357,18 @@ test('quality record-batch emits output and creates a bound incremental scaffold
     assert.ok(
       reviewSegments.every(
         ({category, status, durationMs}) =>
-          category === 'ai-review' &&
+          category === 'human-review' &&
           status === 'completed' &&
           durationMs >= 0,
       ),
     );
-    assert.equal(metrics.summary.aiReview.segmentCount, 2);
+    assert.equal(
+      metrics.summary.byCategory['human-review'].segmentCount,
+      2,
+    );
     assert.equal(
       metrics.summary.byCategory['deterministic-check'].segmentCount,
-      3,
+      4,
     );
   } finally {
     await fs.rm(projectDirectory, {recursive: true, force: true});

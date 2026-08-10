@@ -20,7 +20,7 @@ export const motionApprovalFileFor = (slug) =>
 export const recordMotionApproval = async ({
   slug,
   humanNote,
-  styleProof,
+  visualBlueprint,
   at = new Date().toISOString(),
 }) => {
   const note = humanNote.trim();
@@ -40,13 +40,11 @@ export const recordMotionApproval = async ({
     );
   }
   if (
-    styleProof.motionContractFingerprint !==
-      storyboard.motionContract.fingerprint ||
-    styleProof.motionApprovalFingerprint !==
-      storyboard.motionContract.approvalFingerprint
+    visualBlueprint?.report?.visualContractFingerprint === undefined ||
+    visualBlueprint.report.projectSlug !== slug
   ) {
     throw new Error(
-      'style proof 没有绑定当前动作语言契约，不能记录批准。',
+      '同源视觉蓝图没有绑定当前项目，不能记录动作语言批准。',
     );
   }
   const record = {
@@ -58,10 +56,15 @@ export const recordMotionApproval = async ({
     motionApprovalFingerprint:
       storyboard.motionContract.approvalFingerprint,
     approvedExecutionFingerprint: storyboard.motionContract.fingerprint,
-    styleProofPlanFingerprint:
-      storyboard.directingSummary.styleProofPlan.fingerprint,
-    styleProofReport: path.relative(ROOT, styleProof.report),
-    styleProofReportSha256: await hashFile(styleProof.report),
+    visualBlueprintFingerprint:
+      visualBlueprint.report.visualContractFingerprint,
+    visualBlueprintReport: path.relative(
+      ROOT,
+      visualBlueprint.file,
+    ),
+    visualBlueprintReportSha256: await hashFile(
+      visualBlueprint.file,
+    ),
   };
   const file = motionApprovalFileFor(slug);
   await writeJson(file, record);
@@ -84,7 +87,10 @@ export const assertMotionApprovalCurrent = async (slug) => {
     record.schemaVersion !== 1 ||
     record.slug !== slug ||
     !record.humanNote?.trim() ||
-    !Number.isFinite(Date.parse(record.approvedAt))
+    !Number.isFinite(Date.parse(record.approvedAt)) ||
+    !/^[a-f0-9]{64}$/.test(record.visualBlueprintFingerprint ?? '') ||
+    !record.visualBlueprintReport?.trim() ||
+    !/^[a-f0-9]{64}$/.test(record.visualBlueprintReportSha256 ?? '')
   ) {
     throw new Error('motion-approval.json 格式或人工归因无效。');
   }

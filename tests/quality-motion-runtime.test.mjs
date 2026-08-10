@@ -841,13 +841,30 @@ test('required asset quality resets on hashes and batch reviews write atomically
           reviews: [
             {
               assetId: status.report.assets[0].assetId,
-              reviewer: 'test-vision',
+              reviewer: 'codex:vision',
+              passedChecks: [status.report.assets[0].requiredChecks[0]],
+              note: 'AI must not decide visual quality',
+            },
+          ],
+        }),
+      /必须来自 human:<id>/,
+    );
+    await assert.rejects(
+      () =>
+        recordQualityReviews({
+          slug,
+          reviews: [
+            {
+              assetId: status.report.assets[0].assetId,
+              reviewer: 'human:test-vision',
               passedChecks: status.report.assets[0].requiredChecks,
+              note: 'Fixture reviewed',
             },
             {
               assetId: 'missing-asset',
-              reviewer: 'test-vision',
+              reviewer: 'human:test-vision',
               passedChecks: [],
+              note: 'Fixture reviewed',
             },
           ],
         }),
@@ -855,7 +872,10 @@ test('required asset quality resets on hashes and batch reviews write atomically
     );
     assert.equal(await fs.readFile(reportFile, 'utf8'), beforeInvalidBatch);
 
-    const built = await buildQualityReviewScaffold({slug, reviewer: 'test-vision'});
+    const built = await buildQualityReviewScaffold({
+      slug,
+      reviewer: 'human:test-vision',
+    });
     assert.ok(built.scaffold.reviews.every(({evidenceFiles}) => evidenceFiles.length > 0));
     assert.equal(built.scaffold.schemaVersion, 4);
     assert.equal(
@@ -1101,9 +1121,10 @@ test('asset approval cannot bypass a pending or stale supported-subject composit
       slug,
       reviews: status.report.assets.map((entry) => ({
         assetId: entry.assetId,
-        reviewer: 'fixture-reviewer',
+        reviewer: 'human:fixture-reviewer',
         passedChecks: entry.requiredChecks,
         evidenceFiles: [path.relative(ROOT, frame)],
+        note: 'Fixture reviewed',
       })),
     });
     assert.equal(status.ready, false);
@@ -1114,9 +1135,10 @@ test('asset approval cannot bypass a pending or stale supported-subject composit
       slug,
       reviews: [{
         compositeId: composite.compositeId,
-        reviewer: 'fixture-reviewer',
+        reviewer: 'human:fixture-reviewer',
         passedChecks: composite.requiredChecks,
         evidenceFiles: [path.relative(ROOT, frame)],
+        note: 'Fixture reviewed',
       }],
     });
     assert.equal(status.ready, true);

@@ -14,6 +14,7 @@ import {
 } from './render-cache-lib.mjs';
 import {createSubtitleContract} from './subtitle-contract-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
+import {assertVisualBlueprintApprovalCurrent} from './visual-blueprint-lib.mjs';
 
 const stableValidation = (report) => ({
   schemaVersion: report.schemaVersion,
@@ -52,7 +53,10 @@ export const createAssetsReadyBasis = async ({
   quality,
   storyboard,
 }) => {
-  const subtitleContract = await createSubtitleContract(project);
+  const [subtitleContract, visualBlueprint] = await Promise.all([
+    createSubtitleContract(project),
+    assertVisualBlueprintApprovalCurrent(project.slug),
+  ]);
   return {
     projectSlug: project.slug,
     visualFingerprint: await createVisualFingerprint(project, 'assets-ready'),
@@ -62,6 +66,13 @@ export const createAssetsReadyBasis = async ({
     qualityFingerprint: hashCompositionValue(stableQuality(quality.report ?? quality)),
     subtitleFingerprint: subtitleContract.fingerprint,
     subtitleContract,
+    visualBlueprint: {
+      visualContractFingerprint:
+        visualBlueprint.approval.visualContractFingerprint,
+      approvalFile: path.relative(ROOT, visualBlueprint.file),
+      approvalNote: visualBlueprint.approval.decision.note,
+      decidedAt: visualBlueprint.approval.decision.decidedAt,
+    },
   };
 };
 

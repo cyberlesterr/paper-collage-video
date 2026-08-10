@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "title": "全片动作语言卡",
+  "summary": "先建立纸面空间，再让主体完成清晰动作，最后留出可读稳定段。",
+  "pacing": {
+    "approved": "gentle",
+    "styleDefault": "gentle",
+    "deviationRationale": null
+  },
+  "performance": {
+    "grammar": [
+      "establish",
+      "action",
+      "settle"
+    ],
+    "anticipation": "selective",
+    "followThrough": "selective",
+    "poseStrategy": "mixed",
+    "minimumFinalHoldRatio": 0.1
+  },
+  "camera": {
+    "strategy": "motivated"
+  },
+  "transitions": {
+    "strategy": "story-led"
+  },
+  "ambient": {
+    "strategy": "selective"
+  },
+  "scenes": [
+    {
+      "sceneId": "starter",
+      "motionPolicy": "standard",
+      "phraseSequence": [
+        {
+          "role": "establish",
+          "beatId": "establish",
+          "proofTimeId": "proof-establish"
+        },
+        {
+          "role": "action",
+          "beatId": "subject-arrives",
+          "proofTimeId": "proof-action"
+        },
+        {
+          "role": "settle",
+          "beatId": "lockup",
+          "proofTimeId": "proof-final"
+        }
+      ],
+      "finalHoldRatio": 0.1,
+      "exception": null
+    }
+  ],
+  "approvalFingerprint": "13f317323e6777f5a858bc95a5165b3ced4cbb2efa6e6516de87535affb57a5d",
+  "executionFingerprint": "1ae3150d35c2e272a042b9d3651b6cb5c6cffe16ab529968edeca9dfb077a320"
+}

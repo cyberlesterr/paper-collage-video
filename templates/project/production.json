@@ -20,6 +20,8 @@
     "review": "projects/{{slug}}/review.md",
     "motionLanguageCard": null,
     "motionApproval": null,
+    "visualBlueprint": null,
+    "visualBlueprintApproval": null,
     "validationReport": null,
     "assetsReadySeal": null,
     "preview": null,

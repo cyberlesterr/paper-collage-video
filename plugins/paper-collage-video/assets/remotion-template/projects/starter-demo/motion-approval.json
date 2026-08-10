@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "slug": "starter-demo",
+  "approvedAt": "2026-01-01T00:00:00.000Z",
+  "humanNote": "Bundled fixture approved by maintainers",
+  "styleProfileBinding": {
+    "id": "childrens-picture-book-paper",
+    "profileFingerprint": "2188718c60920f8709f9e74c14175a6800f2a5a3695ce34b9c27ca94800c7f2e",
+    "pacing": "gentle"
+  },
+  "motionApprovalFingerprint": "13f317323e6777f5a858bc95a5165b3ced4cbb2efa6e6516de87535affb57a5d",
+  "approvedExecutionFingerprint": "1ae3150d35c2e272a042b9d3651b6cb5c6cffe16ab529968edeca9dfb077a320",
+  "visualBlueprintFingerprint": "34352527397dd3769b49db283da3c60edbdd83424cca3df13d6b5af19b2cbe1c",
+  "visualBlueprintReport": "dist/starter-demo/visual-blueprint/index.json",
+  "visualBlueprintReportSha256": "f0dcfafda94f20e029640d36b9e19c1526570974fea5584258cf44775cebb32b"
+}

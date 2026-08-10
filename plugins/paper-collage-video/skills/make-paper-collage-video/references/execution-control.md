@@ -29,6 +29,33 @@ every unresolved work item.
 
 A recoverable tool error is not a handoff. A genuine blocker may end an automatic stage only after recording the failed work batch and reporting one specific human/external action.
 
+## Failure Circuit
+
+Wrapped production commands and quota-consuming image attempts record failures
+in `projects/<slug>/failure-circuit.jsonl`.
+
+- After a first failure, do not run the same operation with the same input
+  fingerprint. Change a real input or fix the root cause; `--force` is not an
+  override.
+- A changed input gets one new attempt. If the same normalized failure occurs
+  a second time, the circuit opens immediately. Stop autonomous retries, run
+  `project:failures -- <slug> summary`, and show the exact risk to the human.
+- Only `project:failures -- <slug> resolve --circuit=<id>
+  --note="<human decision>"` reopens an open circuit. A changed input that
+  succeeds automatically resolves a single earlier command failure.
+- If a diagnosed sandbox or host-permission boundary is the only changed
+  condition, label that real change with
+  `PAPER_COLLAGE_EXECUTION_CONTEXT=<stable-label>`. The label enters the input
+  fingerprint; it is evidence of a changed environment, not a generic retry
+  bypass.
+- Human rejection of a visual blueprint uses its own review circuit. The same
+  unchanged blueprint cannot be rerendered; a second rejected revision stops
+  automatic redesign until the human decides how to proceed.
+
+Pending review is not a tool failure. Generate the current visual surface once
+and wait for the human instead of polling status commands or repeatedly
+regenerating contact sheets.
+
 ## Coarse Recoverable Batches
 
 Use `project:checkpoint` for material batches such as one location's plates, a character-sheet group, narration set, quality-review batch, or timeline pass. Provider provenance remains per asset in `assets-manifest.json`.
@@ -40,5 +67,9 @@ Do not create `in-progress` and `completed` history entries for every small dete
 When collaboration workers are available, delegate bounded built-in image-generation units only. Keep the root workflow responsible for approvals, prompts, asset selection, state transitions, timeline work, and user updates.
 
 Before dispatching, tell the human that generation is running and no response is needed. For schema-v8 provider-generation/edit requests, validate the current project's exact executable Style Profile binding and reserve an attempt before invoking the built-in image tool. After a worker returns, verify the workspace file and record it with the same attempt id. If the output is abandoned or generation fails, explicitly close the attempt with truthful quota consumption. A worker result is not a human gate.
+
+Before any non-style-sample image dispatch, require the current
+`visual-blueprint-approval.json`. The one style sample is the only image request
+allowed before that approval.
 
 If workers are unavailable, prefer a pollable provider. If the only callable image surface forces the main turn to end and cannot resume, report that exact capability blocker before invoking it.

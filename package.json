@@ -1,6 +1,6 @@
 {
   "name": "paper-collage-video-pipeline",
-  "version": "0.19.1-dev.2",
+  "version": "0.19.1-dev.3",
   "description": "Configuration-driven paper-collage video pipeline and Codex plugin built with Remotion.",
   "private": true,
   "type": "module",
@@ -56,6 +56,7 @@
     "project:revise-preview-semantic": "node scripts/project-revise-preview-semantic.mjs",
     "project:semantic-contracts": "node scripts/project-semantic-contracts.mjs",
     "project:confirm-concept": "node scripts/project-confirm-concept.mjs",
+    "project:visual-blueprint": "node scripts/project-metrics-run.mjs --category=evidence-render --operation=visual-blueprint --script=scripts/project-visual-blueprint.mjs --slug-index=0 --",
     "project:quality": "node scripts/project-metrics-run.mjs --category=deterministic-check --operation=quality-command --script=scripts/project-quality.mjs --slug-index=0 --",
     "project:composition-proof": "node scripts/project-metrics-run.mjs --category=evidence-render --operation=composition-proof --script=scripts/project-composition-proof.mjs --slug-index=0 --",
     "project:metrics": "node scripts/project-metrics.mjs",
@@ -64,6 +65,7 @@
     "project:resume": "node scripts/project-status.mjs --resume-json",
     "project:status": "node scripts/project-status.mjs",
     "project:handoff-check": "node scripts/project-handoff-check.mjs",
+    "project:failures": "node scripts/project-failures.mjs",
     "project:checkpoint": "node scripts/project-checkpoint.mjs",
     "project:asset-lifecycle": "node scripts/project-asset-lifecycle.mjs",
     "project:review-sync": "node scripts/project-review-sync.mjs",

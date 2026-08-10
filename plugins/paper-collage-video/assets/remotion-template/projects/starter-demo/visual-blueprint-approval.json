@@ -1,0 +1,15 @@
+{
+  "$schema": "../../schemas/visual-blueprint-approval.schema.json",
+  "schemaVersion": 1,
+  "projectSlug": "starter-demo",
+  "status": "approved",
+  "blueprintReport": "dist/starter-demo/visual-blueprint/index.json",
+  "blueprintReportSha256": "f0dcfafda94f20e029640d36b9e19c1526570974fea5584258cf44775cebb32b",
+  "visualContractFingerprint": "34352527397dd3769b49db283da3c60edbdd83424cca3df13d6b5af19b2cbe1c",
+  "runtimeBuildFingerprint": "80d6bf3d77149aa0716c5e58b5464f7906c473a44b41eef3808ede652d7c40ff",
+  "decision": {
+    "authority": "human",
+    "note": "Bundled fixture approved by maintainers",
+    "decidedAt": "2026-01-01T00:00:00.000Z"
+  }
+}

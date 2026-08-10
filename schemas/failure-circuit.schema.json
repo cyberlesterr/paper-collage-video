@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/failure-circuit.schema.json",
+  "title": "Failure circuit event",
+  "oneOf": [
+    {"$ref": "#/$defs/failure"},
+    {"$ref": "#/$defs/resolution"}
+  ],
+  "$defs": {
+    "base": {
+      "type": "object",
+      "required": [
+        "schemaVersion",
+        "eventId",
+        "event",
+        "projectSlug",
+        "circuitId",
+        "operation",
+        "at"
+      ],
+      "properties": {
+        "schemaVersion": {"const": 1},
+        "eventId": {"type": "string", "minLength": 1},
+        "event": {"enum": ["failure", "resolved"]},
+        "projectSlug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "circuitId": {
+          "type": "string",
+          "pattern": "^circuit-[a-f0-9]{16}$"
+        },
+        "operation": {"type": "string", "minLength": 1},
+        "at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "failure": {
+      "allOf": [
+        {"$ref": "#/$defs/base"},
+        {
+          "type": "object",
+          "required": [
+            "inputFingerprint",
+            "failureSignature",
+            "evidence"
+          ],
+          "properties": {
+            "event": {"const": "failure"},
+            "inputFingerprint": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "failureSignature": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "evidence": {"type": "string"}
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "resolution": {
+      "allOf": [
+        {"$ref": "#/$defs/base"},
+        {
+          "type": "object",
+          "required": ["note"],
+          "properties": {
+            "event": {"const": "resolved"},
+            "note": {"type": "string", "minLength": 1}
+          }
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

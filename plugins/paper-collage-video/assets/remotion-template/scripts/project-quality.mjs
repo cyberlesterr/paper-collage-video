@@ -3,9 +3,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
   assertQualityReviewScaffoldCurrent,
+  assertQualityReviewContactSheetsCurrent,
   formatQualityStatus,
   buildQualityReviewScaffold,
   createQualityReviewContactSheets,
+  HUMAN_VISUAL_REVIEWER_PATTERN,
   prepareQualityReport,
   recordQualityReview,
   recordQualityReviews,
@@ -19,7 +21,7 @@ import {
 
 const args = process.argv.slice(2);
 const usage =
-  '用法：project:quality -- <slug> <prepare|status|scaffold|contact-sheet|record|record-batch> [--scope=all|style] [--input=<reviews.json>] [--output=<path>] [--reviewer=<id>] [--all] [--quiet] [--json]；也兼容 <action> <slug>。';
+  '用法：project:quality -- <slug> <prepare|status|scaffold|contact-sheet|accept-human|record|record-batch> [--scope=all|style] [--input=<reviews.json>] [--output=<path>] [--reviewer=human:<id>] [--note=<用户原话>] [--all] [--quiet] [--json]；也兼容 <action> <slug>。';
 if (args.includes('--help') || args.includes('-h')) {
   console.log(usage);
   process.exit(0);
@@ -30,6 +32,7 @@ const actions = [
   'status',
   'scaffold',
   'contact-sheet',
+  'accept-human',
   'record',
   'record-batch',
 ];
@@ -117,7 +120,7 @@ try {
     const reviewScope = valueFor('--scope') ?? 'all';
     const built = await buildQualityReviewScaffold({
       slug,
-      reviewer: valueFor('--reviewer') ?? 'host-vision',
+      reviewer: valueFor('--reviewer') ?? 'human:pending',
       includePassed: args.includes('--all'),
       reviewScope,
     });
@@ -135,7 +138,7 @@ try {
     await fs.writeFile(file, `${JSON.stringify(built.scaffold, null, 2)}\n`, 'utf8');
     console.log(`✓ 质量审核脚手架：${path.relative(ROOT, file)} (${built.scaffold.reviews.length} reviews)`);
     if (built.scaffold.reviews.length > 0) {
-      const reviewer = valueFor('--reviewer') ?? 'host-vision';
+      const reviewer = valueFor('--reviewer') ?? 'human:pending';
       await startMetricSegment({
         slug,
         category: classifyQualityReviewer(reviewer),
@@ -167,6 +170,65 @@ try {
       scaffold,
       outputDirectory,
     });
+  } else if (action === 'accept-human') {
+    const input =
+      valueFor('--input') ??
+      path.relative(ROOT, defaultScaffoldFile(slug));
+    const file = path.resolve(ROOT, input);
+    if (file !== ROOT && !file.startsWith(`${ROOT}${path.sep}`)) {
+      throw new Error(`scaffold 路径越过工作区：${input}`);
+    }
+    const scaffold = JSON.parse(await fs.readFile(file, 'utf8'));
+    await assertQualityReviewScaffoldCurrent({slug, scaffold});
+    const reviewer = valueFor('--reviewer') ?? '';
+    const note = valueFor('--note') ?? '';
+    if (!HUMAN_VISUAL_REVIEWER_PATTERN.test(reviewer)) {
+      throw new Error('accept-human 必须提供 --reviewer=human:<id>。');
+    }
+    if (!note.trim()) {
+      throw new Error('accept-human 必须用 --note 保留用户的明确批准原话。');
+    }
+    const contactSheetIndex = path.join(
+      defaultContactSheetDirectory(slug),
+      'index.json',
+    );
+    await assertQualityReviewContactSheetsCurrent({
+      slug,
+      scaffold,
+      indexFile: contactSheetIndex,
+    });
+    const reviews = scaffold.reviews
+      .filter(({pendingChecks}) => pendingChecks.length > 0)
+      .map((review) => ({
+        ...review,
+        reviewer,
+        passedChecks: review.pendingChecks,
+        failedChecks: [],
+        note,
+      }));
+    if (reviews.length === 0) {
+      throw new Error('当前审核面没有待人工判断的视觉项。');
+    }
+    status = await recordQualityReviews({
+      slug,
+      reviews,
+      sourceReportFingerprint: scaffold.sourceReport.fingerprint,
+      allowPendingSemanticEvidenceTargets:
+        scaffold.reviewScope === 'style',
+    });
+    await finishLatestMetricSegment({
+      slug,
+      operation: 'quality-review',
+      metadata: {
+        reviewers: [reviewer],
+        recordedReviewCount: reviews.length,
+        input: path.relative(ROOT, file),
+        decisionMode: 'single-human-visual-decision',
+      },
+    });
+    console.log(
+      `✓ 已记录一次人工视觉批准：${reviews.length} 项 · ${reviewer}`,
+    );
   } else if (action === 'record') {
     status = await recordQualityReview({
           slug,
@@ -213,7 +275,7 @@ try {
         slug,
         reviewer:
           reviews.find(({reviewer}) => reviewer?.trim())?.reviewer ??
-          'host-vision',
+          'human:pending',
         reviewScope: payload.reviewScope ?? 'all',
       });
       const pendingFile = defaultPendingScaffoldFile(slug);
@@ -235,13 +297,13 @@ try {
       await startMetricSegment({
         slug,
         category: classifyQualityReviewer(
-          built.scaffold.reviews[0]?.reviewer ?? 'host-vision',
+          built.scaffold.reviews[0]?.reviewer ?? 'human:pending',
         ),
         operation: 'quality-review',
         measurement: 'review-session-window',
         metadata: {
           reviewer:
-            built.scaffold.reviews[0]?.reviewer ?? 'host-vision',
+            built.scaffold.reviews[0]?.reviewer ?? 'human:pending',
           reviewCount: built.scaffold.reviews.length,
           scaffold: path.relative(ROOT, pendingFile),
           incremental: true,

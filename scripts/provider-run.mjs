@@ -18,6 +18,7 @@ import {
   isQuotaConsumingImageRequest,
   reserveGenerationAttempt,
 } from './generation-attempt-lib.mjs';
+import {assertProviderVisualBlueprintGate} from './visual-blueprint-lib.mjs';
 
 const args = process.argv.slice(2);
 const valueFor = (name) =>
@@ -53,6 +54,9 @@ try {
     const shouldTrack =
       loadedRequest.request.schemaVersion >= 3 &&
       isQuotaConsumingImageRequest(loadedRequest.request);
+    if (shouldTrack) {
+      await assertProviderVisualBlueprintGate(loadedRequest.request);
+    }
     const reserved = shouldTrack
       ? await reserveGenerationAttempt({request: loadedRequest.request, provider})
       : null;

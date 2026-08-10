@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/visual-blueprint-approval.schema.json",
+  "title": "Human visual blueprint approval",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "projectSlug",
+    "status",
+    "blueprintReport",
+    "blueprintReportSha256",
+    "visualContractFingerprint",
+    "runtimeBuildFingerprint",
+    "decision"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "projectSlug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "status": {"const": "approved"},
+    "blueprintReport": {"type": "string", "minLength": 1},
+    "blueprintReportSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "visualContractFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "runtimeBuildFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "decision": {
+      "type": "object",
+      "required": ["authority", "note", "decidedAt"],
+      "properties": {
+        "authority": {"const": "human"},
+        "note": {"type": "string", "minLength": 1},
+        "decidedAt": {"type": "string", "format": "date-time"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

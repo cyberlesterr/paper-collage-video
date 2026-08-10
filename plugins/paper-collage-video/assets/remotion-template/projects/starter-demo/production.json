@@ -36,6 +36,8 @@
     "review": "projects/starter-demo/review.md",
     "motionLanguageCard": "projects/starter-demo/motion-language-card.json",
     "motionApproval": "projects/starter-demo/motion-approval.json",
+    "visualBlueprint": "dist/starter-demo/visual-blueprint/index.json",
+    "visualBlueprintApproval": "projects/starter-demo/visual-blueprint-approval.json",
     "validationReport": "dist/starter-demo/validation-report.json",
     "assetsReadySeal": "dist/starter-demo/assets-ready-seal.json",
     "preview": null,

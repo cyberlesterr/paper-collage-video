@@ -4,8 +4,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- 新增 `0.19.1-dev.3` 的同源视觉蓝图：正式素材生产前，用最终 Remotion 执行树生成全片低清 animatic、每幕开头/中间/结尾和动态片段，并将一次人工批准绑定到几何、层级、朝向、状态循环、时序与运行时指纹。
+- 新增追加式 failure circuit：首次失败后禁止输入不变的重跑，同类失败第二次立即熔断；provider 尝试、命令和人工蓝图退回共享可审计的停止/解除语义。
+
 ### Changed
 
+- 明显视觉缺陷和整体观感统一由用户通过当前联系表判断；机器只负责技术完整性、证据新鲜度和哈希，`accept-human` 可一次记录完整人工批准。
 - 将开发版本推进到 `0.19.1-dev.2`；scenario 现在把完整图片调用估算编译为逐项 `providerRootPlan`，每个真实 provider 请求必须绑定风格样张、单背景、source-package 角色或姿态母版中的一个批准根。
 - 将开发版本推进到 `0.19.1-dev.1`，并同步升级 Remotion/CLI `4.0.505`、React/React DOM `19.2.8` 及对应类型包。
 - 更新 `@emnapi/runtime` 锁文件到 `1.11.3`，并将 GitHub Actions 的 Python 设置动作升级到 `actions/setup-python@v7`。
@@ -13,6 +19,7 @@
 
 ### Fixed
 
+- 消除 style proof 依赖正式素材、而正式素材又必须等待风格批准的前置死锁；现在只允许先做一张故事样张，蓝图批准后才开放其余 provider 请求。
 - 阻止 `full-depth` 项目用少量 provider 图加大量 `manual-import`/本地 SVG 满足结构和质量计数后提前进入 human review；`assets-ready` 现在要求完整根资产逐项兑现，并拒绝本地漂移但仍沿用旧 `runtime-build.json` 的工作区。
 
 ## [0.19.0] - 2026-08-04

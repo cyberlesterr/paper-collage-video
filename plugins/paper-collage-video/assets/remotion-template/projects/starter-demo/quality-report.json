@@ -221,18 +221,19 @@
         "style-consistent": "passed",
         "style-profile-conformant": "passed"
       },
-      "reviewer": "bundled-fixture",
+      "reviewer": "human:bundled-fixture",
       "reviewedAt": "2026-01-01T00:00:00.000Z",
       "note": "Repository-owned technical fixture asset",
       "evidenceFiles": [],
       "status": "passed"
     },
     {
-      "assetId": "runtime-904ce3e224ac",
+      "assetId": "starter-style-sample",
       "file": "public/projects/starter-demo/assets/characters/alpha/01-traveler.png",
       "kind": "character",
       "sources": [
-        "scene:starter:node:traveler"
+        "scene:starter:node:traveler",
+        "manifest:starter-style-sample"
       ],
       "reviewScope": "runtime-visible",
       "semanticBinding": null,
@@ -246,23 +247,25 @@
       "stateSheetRecoveryBinding": null,
       "recoverySourceFile": null,
       "recoverySourceSha256": null,
-      "recoveryEvidenceFiles": [],
-      "manifestRecordId": null,
-      "manifestSha256": null,
+      "recoveryEvidenceFiles": [
+        "public/projects/starter-demo/assets/characters/alpha/01-traveler.png"
+      ],
+      "manifestRecordId": "79af2b4274c94ddb646f7f0dcff2907f0f1e49bfdfb6d4249fbb8df9e493d57a",
+      "manifestSha256": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f",
+      "requiredChecks": [
+        "no-text",
+        "no-watermark",
+        "subject-complete",
+        "style-consistent",
+        "style-profile-conformant"
+      ],
       "semanticContractFingerprints": {},
       "styleProfileBinding": {
         "id": "childrens-picture-book-paper",
         "profileFingerprint": "2188718c60920f8709f9e74c14175a6800f2a5a3695ce34b9c27ca94800c7f2e"
       },
       "sha256": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f",
-      "fingerprint": "5aa0adc43fcb08b3bcabffc5e9c971015e7825ac81eeaca43ef46a60ed04405e",
-      "requiredChecks": [
-        "subject-complete",
-        "identity-consistent",
-        "edge-clean",
-        "style-consistent",
-        "style-profile-conformant"
-      ],
+      "fingerprint": "64e7dd089fa1f4e8779698fe83e18df9369d983133674d635c8015c4863e6481",
       "technical": {
         "passed": true,
         "checks": [
@@ -376,13 +379,13 @@
         ]
       },
       "semanticChecks": {
+        "no-text": "passed",
+        "no-watermark": "passed",
         "subject-complete": "passed",
-        "identity-consistent": "passed",
-        "edge-clean": "passed",
         "style-consistent": "passed",
         "style-profile-conformant": "passed"
       },
-      "reviewer": "bundled-fixture",
+      "reviewer": "human:bundled-fixture",
       "reviewedAt": "2026-01-01T00:00:00.000Z",
       "note": "Repository-owned technical fixture asset",
       "evidenceFiles": [],
@@ -402,7 +405,7 @@
         "projects/starter-demo/assets/plates/01-bg.png": "8b281acc2007312e394832a74ece76229b8c049d48a46c82f4377409a44a0d57"
       },
       "compositionHash": "9f99e72cb300cc5e8bd58ca115ca06115e677ced2261303824342466747f7c01",
-      "fingerprint": "083c19dfef655d27812735cf65b3a49e263fe252027dd522b6e798542de35eab",
+      "fingerprint": "78afb5e9acf1f58470017d703c814442f460ca95cd58422a04aaf34beed0f151",
       "proofTimeIds": [
         "proof-establish"
       ],
@@ -437,8 +440,8 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "083c19dfef655d27812735cf65b3a49e263fe252027dd522b6e798542de35eab",
-            "actual": "083c19dfef655d27812735cf65b3a49e263fe252027dd522b6e798542de35eab"
+            "expected": "78afb5e9acf1f58470017d703c814442f460ca95cd58422a04aaf34beed0f151",
+            "actual": "78afb5e9acf1f58470017d703c814442f460ca95cd58422a04aaf34beed0f151"
           },
           {
             "id": "proof-artifacts-present",
@@ -463,7 +466,7 @@
         "proof-time-bound": "passed",
         "final-state-preserved": "passed"
       },
-      "reviewer": "bundled-fixture",
+      "reviewer": "human:bundled-fixture",
       "reviewedAt": "2026-01-01T00:00:00.000Z",
       "note": "Repository-owned technical fixture proof",
       "evidenceFiles": [
@@ -486,7 +489,7 @@
         "projects/starter-demo/assets/characters/alpha/01-traveler.png": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f"
       },
       "compositionHash": "33ca0da49ad6545fd8c4c140d191c3b619c876ab40e435a6514496d94f6000cb",
-      "fingerprint": "b84da2108e0aebf25ff72c9eae03654b15225e2c6e176a7af35465f4cf23c9ba",
+      "fingerprint": "55d0f9a5b2cd6ac5edd79c0931191b5d8c0b1d2b1894cad10f5ef643349a53f7",
       "proofTimeIds": [
         "proof-action"
       ],
@@ -521,8 +524,8 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "b84da2108e0aebf25ff72c9eae03654b15225e2c6e176a7af35465f4cf23c9ba",
-            "actual": "b84da2108e0aebf25ff72c9eae03654b15225e2c6e176a7af35465f4cf23c9ba"
+            "expected": "55d0f9a5b2cd6ac5edd79c0931191b5d8c0b1d2b1894cad10f5ef643349a53f7",
+            "actual": "55d0f9a5b2cd6ac5edd79c0931191b5d8c0b1d2b1894cad10f5ef643349a53f7"
           },
           {
             "id": "proof-artifacts-present",
@@ -547,7 +550,7 @@
         "proof-time-bound": "passed",
         "final-state-preserved": "passed"
       },
-      "reviewer": "bundled-fixture",
+      "reviewer": "human:bundled-fixture",
       "reviewedAt": "2026-01-01T00:00:00.000Z",
       "note": "Repository-owned technical fixture proof",
       "evidenceFiles": [
@@ -570,7 +573,7 @@
         "projects/starter-demo/assets/characters/alpha/01-traveler.png": "5012594d62cc65af7ea21409f9bff9f8b120bfe348c4f2ec0c7f5c0f89b4dd5f"
       },
       "compositionHash": "e0b2febd866012364c55f448cee0cca01ad63359e1ffe7776b238f7996a82e39",
-      "fingerprint": "e0aaeb23482299ffa30eadd01ae38bcfb27f6126992911059ce875dd43a14431",
+      "fingerprint": "885c2ab1bcaefca303b9d8f9f970a89c9b4432d5c0ba4900a34d860c9da6a1cb",
       "proofTimeIds": [
         "proof-final"
       ],
@@ -605,8 +608,8 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "e0aaeb23482299ffa30eadd01ae38bcfb27f6126992911059ce875dd43a14431",
-            "actual": "e0aaeb23482299ffa30eadd01ae38bcfb27f6126992911059ce875dd43a14431"
+            "expected": "885c2ab1bcaefca303b9d8f9f970a89c9b4432d5c0ba4900a34d860c9da6a1cb",
+            "actual": "885c2ab1bcaefca303b9d8f9f970a89c9b4432d5c0ba4900a34d860c9da6a1cb"
           },
           {
             "id": "proof-artifacts-present",
@@ -631,7 +634,7 @@
         "proof-time-bound": "passed",
         "final-state-preserved": "passed"
       },
-      "reviewer": "bundled-fixture",
+      "reviewer": "human:bundled-fixture",
       "reviewedAt": "2026-01-01T00:00:00.000Z",
       "note": "Repository-owned technical fixture proof",
       "evidenceFiles": [
@@ -656,7 +659,7 @@
         "projects/starter-demo/assets/plates/01-bg.png": "8b281acc2007312e394832a74ece76229b8c049d48a46c82f4377409a44a0d57"
       },
       "compositionHash": "e06069badae5aca97615b854159703f808db6ebab186121be251114657dc1ab0",
-      "fingerprint": "e85ea873e90afd8ff2bb3ceb18f3c4429c24f5de9bf3f85780ef7c8f366c7b53",
+      "fingerprint": "0091b08130f369e016173c4c5b6c8ca7635ec78d2eca8dae1966093fa3713bb6",
       "proofTimeIds": [
         "proof-establish",
         "proof-action",
@@ -740,8 +743,8 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "e85ea873e90afd8ff2bb3ceb18f3c4429c24f5de9bf3f85780ef7c8f366c7b53",
-            "actual": "e85ea873e90afd8ff2bb3ceb18f3c4429c24f5de9bf3f85780ef7c8f366c7b53"
+            "expected": "0091b08130f369e016173c4c5b6c8ca7635ec78d2eca8dae1966093fa3713bb6",
+            "actual": "0091b08130f369e016173c4c5b6c8ca7635ec78d2eca8dae1966093fa3713bb6"
           },
           {
             "id": "proof-artifacts-present",
@@ -772,7 +775,7 @@
       "semanticChecks": {
         "style-profile-consistent": "passed"
       },
-      "reviewer": "bundled-fixture",
+      "reviewer": "human:bundled-fixture",
       "reviewedAt": "2026-01-01T00:00:00.000Z",
       "note": "Repository-owned technical fixture proof",
       "evidenceFiles": [
@@ -802,7 +805,7 @@
         "projects/starter-demo/assets/plates/01-bg.png": "8b281acc2007312e394832a74ece76229b8c049d48a46c82f4377409a44a0d57"
       },
       "compositionHash": "5d49509e53bca73ce5e6e021bfd5f6963e497b332c87aa1351f218df4daaf690",
-      "fingerprint": "d9b7c8322290254cb9f94ef4fc8d7181d4adfc94c59d8fce3ec9bcc11644330a",
+      "fingerprint": "c5914edbbbee0344d5fa3af3ebdf8c0746ad82d44012fb7b9c990f198f80b6c5",
       "proofTimeIds": [
         "proof-establish",
         "proof-action",
@@ -891,8 +894,8 @@
           {
             "id": "proof-current",
             "passed": true,
-            "expected": "d9b7c8322290254cb9f94ef4fc8d7181d4adfc94c59d8fce3ec9bcc11644330a",
-            "actual": "d9b7c8322290254cb9f94ef4fc8d7181d4adfc94c59d8fce3ec9bcc11644330a"
+            "expected": "c5914edbbbee0344d5fa3af3ebdf8c0746ad82d44012fb7b9c990f198f80b6c5",
+            "actual": "c5914edbbbee0344d5fa3af3ebdf8c0746ad82d44012fb7b9c990f198f80b6c5"
           },
           {
             "id": "proof-artifacts-present",
@@ -928,7 +931,7 @@
         "ambient-strategy-consistent": "passed",
         "sync-anchors-current": "passed"
       },
-      "reviewer": "bundled-fixture",
+      "reviewer": "human:bundled-fixture",
       "reviewedAt": "2026-01-01T00:00:00.000Z",
       "note": "Repository-owned technical fixture proof",
       "evidenceFiles": [
@@ -948,5 +951,5 @@
       "status": "passed"
     }
   ],
-  "reviewSurfaceFingerprint": "426735d6dd2e3582f497587519fa53b93aee5e95c5db77a47c453be8be214c2a"
+  "reviewSurfaceFingerprint": "0f219acdc3c64e2f1e7631d28abc2f74f1a6814051c13ead449d6fad3f52fc0d"
 }
