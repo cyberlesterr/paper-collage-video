@@ -18,7 +18,7 @@ import {
   isQuotaConsumingImageRequest,
   reserveGenerationAttempt,
 } from './generation-attempt-lib.mjs';
-import {assertProviderVisualBlueprintGate} from './visual-blueprint-lib.mjs';
+import {assertProviderVisualBlueprintGate} from './visual-blueprint-review-lib.mjs';
 
 const args = process.argv.slice(2);
 const valueFor = (name) =>
@@ -41,22 +41,21 @@ try {
   );
   const readiness = await inspectProviderReadiness(provider);
   if (provider.adapter !== 'command') {
+    await assertProviderVisualBlueprintGate(loadedRequest.request);
     console.error(
       `${provider.id} 使用 ${provider.adapter} adapter，不能由 provider:run 直接调用。\n` +
         `${provider.toolHint ?? '先生成或导入输出文件。'}\n` +
-        `${loadedRequest.request.schemaVersion >= 3 && isQuotaConsumingImageRequest(loadedRequest.request) ? `调用宿主工具前先运行 provider:attempt reserve --request=${path.relative(ROOT, loadedRequest.file)} --provider=${provider.id}。\n` : ''}` +
+        `${loadedRequest.request.schemaVersion >= 3 && isQuotaConsumingImageRequest(loadedRequest.request) ? `调用宿主工具前先运行 provider:attempt reserve --request=${path.relative(ROOT, loadedRequest.file)} --provider=${provider.id}。\n` : `调用宿主工具前先运行 provider:request authorize --request=${path.relative(ROOT, loadedRequest.file)} --provider=${provider.id} --json。\n`}` +
         `完成后运行 provider:record -- --request=${path.relative(ROOT, loadedRequest.file)} --provider=${provider.id}${loadedRequest.request.schemaVersion >= 3 && isQuotaConsumingImageRequest(loadedRequest.request) ? ' --attempt-id=<reserved-id>' : ''}`,
     );
     process.exitCode = 2;
   } else if (readiness.status === 'error') {
     throw new Error(readiness.message);
   } else {
+    await assertProviderVisualBlueprintGate(loadedRequest.request);
     const shouldTrack =
       loadedRequest.request.schemaVersion >= 3 &&
       isQuotaConsumingImageRequest(loadedRequest.request);
-    if (shouldTrack) {
-      await assertProviderVisualBlueprintGate(loadedRequest.request);
-    }
     const reserved = shouldTrack
       ? await reserveGenerationAttempt({request: loadedRequest.request, provider})
       : null;

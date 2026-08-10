@@ -12,11 +12,17 @@
     "blueprintReportSha256",
     "visualContractFingerprint",
     "runtimeBuildFingerprint",
+    "reviewRequest",
+    "reviewRequestSha256",
+    "reviewRequestFingerprint",
+    "reviewReceipt",
+    "reviewReceiptSha256",
+    "reviewReceiptFingerprint",
     "decision"
   ],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 1},
+    "schemaVersion": {"const": 2},
     "projectSlug": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -35,11 +41,33 @@
       "type": "string",
       "pattern": "^[a-f0-9]{64}$"
     },
+    "reviewRequest": {"type": "string", "minLength": 1},
+    "reviewRequestSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewRequestFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewReceipt": {"type": "string", "minLength": 1},
+    "reviewReceiptSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewReceiptFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
     "decision": {
       "type": "object",
-      "required": ["authority", "note", "decidedAt"],
+      "required": ["authority", "reviewer", "note", "decidedAt"],
       "properties": {
-        "authority": {"const": "human"},
+        "authority": {"const": "human-review-receipt"},
+        "reviewer": {
+          "type": "string",
+          "pattern": "^human:.+"
+        },
         "note": {"type": "string", "minLength": 1},
         "decidedAt": {"type": "string", "format": "date-time"}
       },

@@ -17,7 +17,7 @@ import {
 } from './production-state.mjs';
 import {assertMotionApprovalCurrent} from './motion-approval-lib.mjs';
 import {assertRuntimeBuildManifestCurrent} from './runtime-build-lib.mjs';
-import {assertVisualBlueprintApprovalCurrent} from './visual-blueprint-lib.mjs';
+import {assertVisualBlueprintApprovalCurrent} from './visual-blueprint-review-lib.mjs';
 
 const [slug, ...args] = process.argv.slice(2);
 

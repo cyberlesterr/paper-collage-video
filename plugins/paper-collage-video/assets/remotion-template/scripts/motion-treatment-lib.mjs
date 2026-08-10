@@ -21,6 +21,10 @@ import {
 } from './motion-contract-lib.mjs';
 import {validatePathMotion} from '../src/pathMotion.mjs';
 import {validateEncounterAuthoring} from './encounter-contract-lib.mjs';
+import {
+  compileSceneSoundEffects,
+  soundEffectPlanFor,
+} from './sound-effect-lib.mjs';
 
 export const TREATMENT_IMPORTANCE = ['hero', 'supporting', 'ambient'];
 export const TREATMENT_NECESSITY = ['required', 'enhancement'];
@@ -895,7 +899,7 @@ export const validateTreatment = (treatment, {location = 'treatment', beatAt = n
   return issues;
 };
 
-const compileScene = (scene) => {
+const compileScene = (scene, {projectSlug}) => {
   const patterns = new Set();
   const relationships = new Map();
   const stateFamilies = new Map();
@@ -1190,6 +1194,7 @@ const compileScene = (scene) => {
     visibilityEvents: visibilityEvents.sort((left, right) => left.at - right.at || left.id.localeCompare(right.id)),
     motifFields: motifFields.sort((left, right) => left.at - right.at || left.id.localeCompare(right.id)),
     graphics: graphics.sort((left, right) => left.at - right.at || left.id.localeCompare(right.id)),
+    soundEffects: compileSceneSoundEffects({scene, projectSlug}),
     layerStacks: [...layerStacks.values()].sort((left, right) =>
       left.targetId.localeCompare(right.targetId),
     ),
@@ -1595,7 +1600,9 @@ export const compileStoryboardDirecting = (
 
   let scenes;
   try {
-    scenes = storyboard.scenes.map(compileScene);
+    scenes = storyboard.scenes.map((scene) =>
+      compileScene(scene, {projectSlug: storyboard.slug}),
+    );
   } catch (cause) {
     const error = new Error(cause.message);
     error.issues = [{code: 'storyboard-compile', message: cause.message, location: 'scenes'}];
@@ -1712,6 +1719,10 @@ export const compileStoryboardDirecting = (
     ...demand,
     profileFulfillment,
     generationBudget,
+    soundEffectPlan: soundEffectPlanFor({
+      slug: storyboard.slug,
+      scenes,
+    }),
     styleProofPlan,
   };
   directingSummary.fingerprint = hashCompositionValue({
@@ -2201,6 +2212,29 @@ export const validateDirectingExecution = ({scene, storyboardScene, location = '
       }
     } else if (!hasVisibleNodeMotion(node)) {
       addIssue(issues, 'directing-graphic-motion', `图形目标 ${planned.nodeId} 必须实现 ${planned.animation} 动效。`, `${location}.composition.nodes#${planned.nodeId}.motion`);
+    }
+  }
+  for (
+    const planned of
+      storyboardScene?.compositionPlan?.soundEffects ?? []
+  ) {
+    const expectedSource = String(planned.output)
+      .replace(/^public[\\/]/, '')
+      .split('\\')
+      .join('/');
+    const event = (scene?.events ?? []).find(
+      (candidate) =>
+        candidate.beatId === planned.beatId &&
+        Math.abs(candidate.at - planned.at) <= 0.035 &&
+        candidate.sound?.src === expectedSource,
+    );
+    if (!event) {
+      addIssue(
+        issues,
+        'directing-sound-effect-drift',
+        `节拍 ${planned.beatId} 必须绑定已编译音效 ${expectedSource}。`,
+        `${location}.events`,
+      );
     }
   }
   return issues;

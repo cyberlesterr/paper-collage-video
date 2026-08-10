@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/sound-effect-plan.schema.json",
+  "title": "Paper Collage Sound Effect Plan",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "projectSlug",
+    "required",
+    "requiredSoundEffectCount",
+    "assets"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "projectSlug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "required": {"type": "boolean"},
+    "requiredSoundEffectCount": {"type": "integer", "minimum": 0},
+    "assets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["assetId", "cue", "output", "bindings"],
+        "properties": {
+          "assetId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "cue": {"type": "string", "minLength": 1},
+          "output": {"type": "string", "minLength": 1},
+          "bindings": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "sceneId",
+                "beatId",
+                "targetId",
+                "at",
+                "proofTimeId"
+              ],
+              "properties": {
+                "sceneId": {"type": "string", "minLength": 1},
+                "beatId": {"type": "string", "minLength": 1},
+                "targetId": {"type": "string", "minLength": 1},
+                "at": {"type": "number", "minimum": 0, "maximum": 1},
+                "proofTimeId": {"type": "string", "minLength": 1}
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

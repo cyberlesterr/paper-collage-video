@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import path from 'node:path';
 import {
-  ROOT,
   assertSlug,
   fileExists,
   loadProject,
@@ -17,17 +16,9 @@ import {
 import {assertSelectedProvidersReady} from './provider-lib.mjs';
 import {assertCreativePlanReady} from './creative-plan-lib.mjs';
 import {assertStoryboardReady} from './storyboard-lib.mjs';
-import {recordMotionApproval} from './motion-approval-lib.mjs';
 import {
-  assertVisualBlueprintReady,
-  recordVisualBlueprintApproval,
-  visualBlueprintPaths,
-  visualBlueprintReviewOperation,
-} from './visual-blueprint-lib.mjs';
-import {
-  deriveFailureSignature,
-  recordOperationFailure,
-} from './failure-circuit-lib.mjs';
+  requiredProviderCapabilitiesForProject,
+} from './sound-effect-lib.mjs';
 
 const args = process.argv.slice(2);
 const positional = args.filter((arg) => !arg.startsWith('--'));
@@ -53,12 +44,26 @@ try {
     throw new Error('用法：project-advance.mjs <slug> <action> [--note=说明]');
   }
   assertSlug(slug);
+  if (
+    [
+      'approve-style-voice',
+      'approve-visual-blueprint',
+      'request-visual-blueprint-revision',
+    ].includes(action)
+  ) {
+    throw new Error(
+      `${action} 不能再由自由文本 --note 直接记录；请先向用户展示当前视觉蓝图，再使用 ` +
+        'npm run project:visual-review -- <slug> <approve|revise> --receipt=<绑定当前用户消息的回执>。',
+    );
+  }
   const {state: currentState} = await loadProduction(slug);
   transitionProduction(currentState, action, {note});
 
   const artifacts = {};
   if (action === 'capabilities-ready') {
-    await assertSelectedProvidersReady(slug);
+    await assertSelectedProvidersReady(slug, {
+      capabilities: await requiredProviderCapabilitiesForProject(slug),
+    });
   }
   if (action === 'brief-ready') {
     const {project} = await loadProject(slug);
@@ -67,65 +72,6 @@ try {
       slug,
       project.plan,
       project.styleProfile,
-    );
-  }
-  if (action === 'approve-style-voice') {
-    const visualBlueprint = await assertVisualBlueprintReady(slug);
-    const motionApproval = await recordMotionApproval({
-      slug,
-      humanNote: note,
-      visualBlueprint,
-    });
-    artifacts.motionApproval = path.relative(
-      ROOT,
-      motionApproval.file,
-    );
-    const visualBlueprintApproval = await recordVisualBlueprintApproval({
-      slug,
-      humanNote: note,
-    });
-    artifacts.visualBlueprint =
-      visualBlueprintApproval.record.blueprintReport;
-    artifacts.visualBlueprintApproval = path.relative(
-      ROOT,
-      visualBlueprintApproval.file,
-    );
-    console.log(
-      `✓ 动作语言批准：${motionApproval.record.motionApprovalFingerprint}`,
-    );
-    console.log(
-      `✓ 同源视觉蓝图批准：${visualBlueprintApproval.record.visualContractFingerprint}`,
-    );
-  }
-  if (action === 'approve-visual-blueprint') {
-    const visualBlueprintApproval = await recordVisualBlueprintApproval({
-      slug,
-      humanNote: note,
-    });
-    artifacts.visualBlueprint =
-      visualBlueprintApproval.record.blueprintReport;
-    artifacts.visualBlueprintApproval = path.relative(
-      ROOT,
-      visualBlueprintApproval.file,
-    );
-  }
-  if (action === 'request-visual-blueprint-revision') {
-    const report = await readJson(visualBlueprintPaths(slug).report);
-    const failure = await recordOperationFailure({
-      slug,
-      operation: visualBlueprintReviewOperation,
-      inputFingerprint: report.visualContractFingerprint,
-      failureSignature: deriveFailureSignature({
-        operation: visualBlueprintReviewOperation,
-        explicit: 'human visual blueprint rejected',
-      }),
-      evidence:
-        `human rejected visual contract ${report.visualContractFingerprint}: ${note}`,
-    });
-    console.log(
-      failure.circuit.open
-        ? `⛔ 同源视觉蓝图第 ${failure.circuit.count} 次被退回；熔断 ${failure.circuit.circuitId} 已打开，停止自动改稿。`
-        : '⚠ 同源视觉蓝图首次被退回；必须改变项目几何、时序或运动输入后才能重新生成。',
     );
   }
   if (action === 'approve-preview') {

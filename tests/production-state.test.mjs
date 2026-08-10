@@ -206,7 +206,7 @@ test('assets-ready settles validated directing revisions and blocks other unfini
   current.workItems = [
     {
       id: 'directing-revision-scene-02',
-      label: '同步导演重编镜头 scene-02',
+      label: '重新验证导演重编镜头 scene-02',
       status: 'pending',
       updatedAt: current.updatedAt,
       artifact: 'projects/test-film/directing-revision.json',
@@ -253,7 +253,7 @@ test('assets-ready settles validated directing revisions and blocks other unfini
   blockedRevision.workItems = [
     {
       id: 'directing-revision-scene-02',
-      label: '同步导演重编镜头 scene-02',
+      label: '重新验证导演重编镜头 scene-02',
       status: 'blocked',
       updatedAt: blockedRevision.updatedAt,
       artifact: 'projects/test-film/directing-revision.json',
@@ -375,7 +375,7 @@ test('preview approval and both render modes reject unfinished work items', () =
   review.workItems = [
     {
       id: 'directing-revision-scene-02',
-      label: '同步导演重编镜头 scene-02',
+      label: '重新验证导演重编镜头 scene-02',
       status: 'pending',
       updatedAt: review.updatedAt,
       artifact: 'projects/test-film/directing-revision.json',

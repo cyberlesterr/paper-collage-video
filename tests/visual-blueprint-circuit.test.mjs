@@ -14,11 +14,20 @@ import {
   summarizeFailureCircuits,
 } from '../scripts/failure-circuit-lib.mjs';
 import {
-  assertProviderVisualBlueprintGate,
+  materializeVisualBlueprintProject,
   sceneNeedsMotionClip,
+  visualBlueprintReviewRequestFingerprint,
   visualBlueprintFingerprint,
 } from '../scripts/visual-blueprint-lib.mjs';
+import {
+  assertHumanVisualReviewReceipt,
+  assertProviderVisualBlueprintGate,
+  assertVisualBlueprintApprovalCurrent,
+  humanReviewReceiptFingerprint,
+} from '../scripts/visual-blueprint-review-lib.mjs';
 import {ROOT} from '../scripts/project-lib.mjs';
+import {spawnSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 
 const visualProject = () => ({
   slug: 'blueprint-test',
@@ -170,20 +179,206 @@ test('only the single style sample may use an image provider before blueprint ap
     await assert.doesNotReject(() =>
       assertProviderVisualBlueprintGate({
         projectSlug: slug,
+        capability: 'image',
         quality: {kind: 'style-sample'},
+      }),
+    );
+    await assert.doesNotReject(() =>
+      assertProviderVisualBlueprintGate({
+        projectSlug: slug,
+        capability: 'voice',
       }),
     );
     await assert.rejects(
       () =>
         assertProviderVisualBlueprintGate({
           projectSlug: slug,
+          capability: 'image',
           quality: {kind: 'character'},
+        }),
+      /正式素材生产前必须获得当前同源视觉蓝图的人工批准/,
+    );
+    await assert.rejects(
+      () =>
+        assertProviderVisualBlueprintGate({
+          projectSlug: slug,
+          capability: 'voice',
+          timingBinding: {
+            sceneId: 'scene-01',
+            maxDurationSeconds: 3,
+          },
+        }),
+      /正式素材生产前必须获得当前同源视觉蓝图的人工批准/,
+    );
+    await assert.rejects(
+      () =>
+        assertProviderVisualBlueprintGate({
+          projectSlug: slug,
+          capability: 'sound',
+          prompt: 'paper tap',
         }),
       /正式素材生产前必须获得当前同源视觉蓝图的人工批准/,
     );
   } finally {
     await fs.rm(projectDirectory, {recursive: true, force: true});
   }
+});
+
+test('visual blueprint preserves readable project audio and discloses every fallback', async () => {
+  const slug = `blueprint-audio-${process.pid}`;
+  const publicDirectory = path.join(ROOT, 'public', 'projects', slug);
+  const distDirectory = path.join(ROOT, 'dist', slug);
+  try {
+    await fs.mkdir(publicDirectory, {recursive: true});
+    await fs.writeFile(path.join(publicDirectory, 'narration.wav'), 'voice');
+    await fs.writeFile(path.join(publicDirectory, 'music.wav'), 'music');
+    const project = visualProject();
+    project.slug = slug;
+    project.audio = {
+      narration: {volume: 1},
+      music: {src: `projects/${slug}/music.wav`, volume: 0.2},
+      mastering: {targetLufs: -16, toleranceLufs: 1, truePeakDbtp: -1},
+    };
+    project.scenes[0].narration.src =
+      `projects/${slug}/narration.wav`;
+    project.scenes[0].events = [
+      {
+        id: 'missing-sfx',
+        beatId: 'action',
+        at: 0.5,
+        targetId: 'walker',
+        visual: null,
+        sound: {
+          src: `projects/${slug}/missing.wav`,
+          volume: 1,
+        },
+      },
+    ];
+    const materialized = await materializeVisualBlueprintProject(project);
+    assert.equal(
+      materialized.project.scenes[0].narration.src,
+      project.scenes[0].narration.src,
+    );
+    assert.equal(materialized.project.audio.music.src, project.audio.music.src);
+    assert.equal(materialized.project.scenes[0].events[0].sound, undefined);
+    assert.equal(
+      materialized.audio.mode,
+      'mixed-current-and-silent-fallback',
+    );
+    assert.deepEqual(materialized.audio.narration.silentFallbackSceneIds, []);
+    assert.deepEqual(
+      materialized.audio.eventSounds.omitted.map(({eventId}) => eventId),
+      ['missing-sfx'],
+    );
+  } finally {
+    await fs.rm(publicDirectory, {recursive: true, force: true});
+    await fs.rm(distDirectory, {recursive: true, force: true});
+  }
+});
+
+test('human visual review receipt is bound to the current request and old note shortcut is blocked', () => {
+  const request = {
+    schemaVersion: 1,
+    projectSlug: 'blueprint-test',
+    status: 'awaiting-human',
+    createdAt: '2026-08-10T01:00:00.000Z',
+  };
+  request.requestFingerprint =
+    visualBlueprintReviewRequestFingerprint(request);
+  const receipt = {
+    $schema:
+      '../../schemas/visual-blueprint-review-receipt.schema.json',
+    schemaVersion: 1,
+    projectSlug: request.projectSlug,
+    requestFingerprint: request.requestFingerprint,
+    decision: 'approved',
+    reviewer: {id: 'human:fixture-owner', role: 'human'},
+    note: '我已查看全片蓝图和每幕关键帧，同意这个视觉方案。',
+    decidedAt: '2026-08-10T01:05:00.000Z',
+    evidence: {
+      kind: 'host-user-message',
+      host: 'codex-desktop',
+      threadId: 'fixture-thread',
+      messageReference: 'fixture-user-turn',
+      userMessageSha256: createHash('sha256')
+        .update('explicit user approval')
+        .digest('hex'),
+    },
+  };
+  receipt.receiptFingerprint = humanReviewReceiptFingerprint(receipt);
+  assert.equal(
+    assertHumanVisualReviewReceipt({receipt, request}),
+    receipt,
+  );
+  assert.throws(
+    () =>
+      assertHumanVisualReviewReceipt({
+        receipt,
+        request: {
+          ...request,
+          requestFingerprint: 'f'.repeat(64),
+        },
+      }),
+    /human review receipt/,
+  );
+
+  const blocked = spawnSync(
+    process.execPath,
+    [
+      path.join(ROOT, 'scripts', 'project-advance.mjs'),
+      'blueprint-test',
+      'approve-style-voice',
+      '--note=agent supplied note',
+    ],
+    {cwd: ROOT, encoding: 'utf8'},
+  );
+  assert.notEqual(blocked.status, 0);
+  assert.match(blocked.stderr, /不能再由自由文本 --note 直接记录/);
+});
+
+test('a stale approval without the current receipt reports the human review boundary', async () => {
+  const slug = 'missing-current-review-receipt';
+  const projectDirectory = path.join(ROOT, 'projects', slug);
+  try {
+    await fs.mkdir(projectDirectory, {recursive: true});
+    await fs.writeFile(
+      path.join(projectDirectory, 'visual-blueprint-approval.json'),
+      '{"schemaVersion":1,"status":"approved"}\n',
+    );
+    await assert.rejects(
+      () => assertVisualBlueprintApprovalCurrent(slug),
+      /正在等待人工审片回执.*不能继续正式素材生产/,
+    );
+  } finally {
+    await fs.rm(projectDirectory, {recursive: true, force: true});
+  }
+});
+
+test('Chromium work stops before rendering or failure-circuit accounting in a restricted host', () => {
+  const result = spawnSync(
+    process.execPath,
+    [
+      path.join(ROOT, 'scripts', 'project-metrics-run.mjs'),
+      '--category=evidence-render',
+      '--operation=visual-blueprint',
+      '--script=scripts/project-visual-blueprint.mjs',
+      '--slug-index=0',
+      '--',
+      'chromium-preflight-fixture',
+    ],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        CODEX_SANDBOX: 'seatbelt',
+        PAPER_COLLAGE_EXECUTION_CONTEXT: '',
+      },
+    },
+  );
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /HOST_CHROMIUM_AUTHORIZATION_REQUIRED/);
+  assert.doesNotMatch(result.stderr, /首次失败已记录|同类失败第/);
 });
 
 test('unchanged failures stop immediately and the second matching failure opens a circuit', async () => {

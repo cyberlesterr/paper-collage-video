@@ -12,7 +12,8 @@
       "properties": {
         "text": {"$ref": "#/$defs/capability"},
         "image": {"$ref": "#/$defs/capability"},
-        "voice": {"$ref": "#/$defs/capability"}
+        "voice": {"$ref": "#/$defs/capability"},
+        "sound": {"$ref": "#/$defs/capability"}
       },
       "additionalProperties": false
     }
@@ -40,6 +41,18 @@
         "tool": {"type": "string", "minLength": 1},
         "toolHint": {"type": "string"},
         "model": {"type": "string"},
+        "outputAcquisition": {
+          "type": "object",
+          "required": ["mode", "evidence", "verifiedAt"],
+          "properties": {
+            "mode": {
+              "enum": ["local-file", "public-download-url"]
+            },
+            "evidence": {"type": "string", "minLength": 1},
+            "verifiedAt": {"type": "string", "format": "date-time"}
+          },
+          "additionalProperties": false
+        },
         "invocation": {
           "type": "object",
           "properties": {

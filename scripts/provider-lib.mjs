@@ -45,7 +45,12 @@ import {
 import {assertWorldTopologyBinding} from './world-topology-proof-lib.mjs';
 import {assertScenarioRootRequest} from './provider-root-plan-lib.mjs';
 
-export const PROVIDER_CAPABILITIES = ['text', 'image', 'voice'];
+export const CORE_PROVIDER_CAPABILITIES = ['text', 'image', 'voice'];
+export const OPTIONAL_PROVIDER_CAPABILITIES = ['sound'];
+export const PROVIDER_CAPABILITIES = [
+  ...CORE_PROVIDER_CAPABILITIES,
+  ...OPTIONAL_PROVIDER_CAPABILITIES,
+];
 export const PROVIDER_ADAPTERS = ['host', 'command', 'manual'];
 export const PROVIDER_SCOPES = ['project', 'workspace'];
 const IMAGE_QUALITY_KINDS = [
@@ -148,6 +153,7 @@ export const createRequestFingerprint = ({request, providerId, model}) => {
     containerPackageBinding: request.containerPackageBinding ?? null,
     semanticBinding: request.semanticBinding ?? null,
     timingBinding: request.timingBinding ?? null,
+    soundBinding: request.soundBinding ?? null,
     outputSurface: request.outputSurface ?? null,
     providerSource: request.providerSource ?? null,
     worldTopologyBinding: request.worldTopologyBinding ?? null,
@@ -182,7 +188,13 @@ export const validateProviderConfig = (config) => {
   if (config?.schemaVersion !== 1) {
     add('error', 'schema-version', 'provider schemaVersion 必须为 1。', 'schemaVersion');
   }
-  for (const capability of PROVIDER_CAPABILITIES) {
+  const configuredCapabilities = [
+    ...CORE_PROVIDER_CAPABILITIES,
+    ...OPTIONAL_PROVIDER_CAPABILITIES.filter(
+      (capability) => config?.capabilities?.[capability],
+    ),
+  ];
+  for (const capability of configuredCapabilities) {
     const definition = config?.capabilities?.[capability];
     if (!definition) {
       add('error', 'capability-missing', `缺少 ${capability} provider 配置。`, `capabilities.${capability}`);
@@ -282,6 +294,38 @@ export const validateProviderConfig = (config) => {
             `${location}.invocation`,
           );
         }
+      }
+      if (provider?.outputAcquisition !== undefined) {
+        const acquisition = provider.outputAcquisition;
+        if (
+          !isPlainObject(acquisition) ||
+          !['local-file', 'public-download-url'].includes(
+            acquisition.mode,
+          ) ||
+          typeof acquisition.evidence !== 'string' ||
+          !acquisition.evidence.trim() ||
+          !Number.isFinite(Date.parse(acquisition.verifiedAt))
+        ) {
+          add(
+            'error',
+            'provider-output-acquisition',
+            'outputAcquisition 必须声明已验证的 local-file 或 public-download-url、本地取回证据和验证时间。',
+            `${location}.outputAcquisition`,
+          );
+        }
+      }
+      if (
+        selection?.provider === providerId &&
+        provider?.adapter === 'host' &&
+        capability !== 'text' &&
+        !provider.outputAcquisition
+      ) {
+        add(
+          'error',
+          'provider-output-acquisition-required',
+          `${capability} host provider 获批前必须验证输出可直接落盘；受登录保护的下载页不算可取回输出。`,
+          `${location}.outputAcquisition`,
+        );
       }
       if (provider?.adapter === 'command') {
         if (!provider.command?.executable || !Array.isArray(provider.command?.args)) {
@@ -400,12 +444,15 @@ export const buildProviderInvocation = ({request, provider, attemptId = null, mo
 
 export const normalizeReportedModel = normalizeAttemptModel;
 
-export const assertProviderSelections = (loaded) => {
+export const assertProviderSelections = (
+  loaded,
+  {capabilities = CORE_PROVIDER_CAPABILITIES} = {},
+) => {
   assertProviderConfig(loaded);
   const selections = summarizeProviderSelections(loaded.config);
-  const missing = Object.entries(selections)
-    .filter(([, status]) => !status.confirmed)
-    .map(([capability]) => capability);
+  const missing = capabilities.filter(
+    (capability) => !selections[capability]?.confirmed,
+  );
   if (missing.length) {
     throw new Error(`以下能力尚未获得用户确认：${missing.join(', ')}`);
   }
@@ -473,9 +520,14 @@ export const inspectProviderReadiness = async (provider) => {
   };
 };
 
-export const assertSelectedProvidersReady = async (slug) => {
-  const loaded = assertProviderSelections(await loadProviderConfig(slug));
-  for (const capability of PROVIDER_CAPABILITIES) {
+export const assertSelectedProvidersReady = async (
+  slug,
+  {capabilities = CORE_PROVIDER_CAPABILITIES} = {},
+) => {
+  const loaded = assertProviderSelections(await loadProviderConfig(slug), {
+    capabilities,
+  });
+  for (const capability of capabilities) {
     const provider = resolveProvider(loaded.config, capability);
     const readiness = await inspectProviderReadiness(provider);
     if (readiness.status === 'error') {
@@ -540,6 +592,8 @@ export const writeProviderSelections = async ({
       adapter = null,
       tool = null,
       model = null,
+      outputMode = null,
+      outputEvidence = null,
     } = input;
     if (!PROVIDER_CAPABILITIES.includes(capability)) {
       throw new Error(`capability 必须是：${PROVIDER_CAPABILITIES.join(', ')}。`);
@@ -548,7 +602,8 @@ export const writeProviderSelections = async ({
       throw new Error('provider id 只能包含小写字母、数字和单个连字符。');
     }
     const existing =
-      prospectiveConfig.capabilities[capability].providers[providerId] ?? null;
+      prospectiveConfig.capabilities?.[capability]?.providers?.[providerId] ??
+      null;
     const selectedAdapter = adapter ?? existing?.adapter;
     if (!PROVIDER_ADAPTERS.includes(selectedAdapter)) {
       throw new Error(`新 provider 必须指定 adapter：${PROVIDER_ADAPTERS.join(', ')}。`);
@@ -563,9 +618,34 @@ export const writeProviderSelections = async ({
       adapter: selectedAdapter,
       ...(tool ? {tool} : {}),
       ...(model ? {model} : {}),
+      ...(outputMode
+        ? {
+            outputAcquisition: {
+              mode: outputMode,
+              evidence: String(outputEvidence ?? '').trim(),
+              verifiedAt: at,
+            },
+          }
+        : {}),
     };
     if (provider.adapter === 'host' && capability !== 'text' && !provider.tool) {
-      throw new Error('host image/voice provider 必须记录已发现的可调用 tool。');
+      throw new Error(
+        `host ${capability} provider 必须记录已发现的可调用 tool。`,
+      );
+    }
+    if (
+      provider.adapter === 'host' &&
+      capability !== 'text' &&
+      (
+        !['local-file', 'public-download-url'].includes(
+          provider.outputAcquisition?.mode,
+        ) ||
+        !provider.outputAcquisition?.evidence
+      )
+    ) {
+      throw new Error(
+        `host ${capability} provider 必须先验证输出可直接落盘，并记录 --output-mode=local-file|public-download-url 与 --output-evidence。`,
+      );
     }
     if (scope === 'workspace') {
       const projectCapability = projectOverlay?.capabilities?.[capability];
@@ -585,7 +665,14 @@ export const writeProviderSelections = async ({
     overlay.capabilities[capability] ??= {};
     const targetCapability = overlay.capabilities[capability];
     targetCapability.defaultProvider = providerId;
-    if (!existing || label || adapter || tool || model) {
+    if (
+      !existing ||
+      label ||
+      adapter ||
+      tool ||
+      model ||
+      outputMode
+    ) {
       targetCapability.providers ??= {};
       targetCapability.providers[providerId] = provider;
     }
@@ -708,10 +795,11 @@ export const validateAssetRequest = (request) => {
   if (request?.schemaVersion !== 8) errors.push('schemaVersion 必须为 8');
   if (!SLUG_PATTERN.test(request?.projectSlug ?? '')) errors.push('projectSlug 格式无效');
   if (!SLUG_PATTERN.test(request?.assetId ?? '')) errors.push('assetId 格式无效');
-  if (!PROVIDER_CAPABILITIES.includes(request?.capability)) errors.push('capability 必须是 text、image 或 voice');
+  if (!PROVIDER_CAPABILITIES.includes(request?.capability)) errors.push('capability 必须是 text、image、voice 或 sound');
   if (!request?.output || typeof request.output !== 'string') errors.push('output 不能为空');
   if (request?.capability === 'text' && !request.prompt) errors.push('text request 缺少 prompt');
   if (request?.capability === 'image' && !request.prompt) errors.push('image request 缺少 prompt');
+  if (request?.capability === 'sound' && !request.prompt) errors.push('sound request 缺少 prompt');
   if (request?.capability === 'image' && !isPlainObject(request.compositionBinding)) {
     errors.push('image request 缺少 compositionBinding');
   }
@@ -849,6 +937,39 @@ export const validateAssetRequest = (request) => {
     }
   }
   if (request?.capability === 'voice' && !request.text) errors.push('voice request 缺少 text');
+  if (request?.capability === 'sound') {
+    const binding = request.soundBinding;
+    if (
+      !isPlainObject(binding) ||
+      typeof binding.cue !== 'string' ||
+      !binding.cue.trim() ||
+      !Array.isArray(binding.bindings) ||
+      binding.bindings.length === 0
+    ) {
+      errors.push('sound request 缺少有效 soundBinding.cue 与 bindings');
+    } else {
+      for (const [index, item] of binding.bindings.entries()) {
+        if (
+          !isPlainObject(item) ||
+          typeof item.sceneId !== 'string' ||
+          !item.sceneId ||
+          typeof item.beatId !== 'string' ||
+          !item.beatId ||
+          typeof item.targetId !== 'string' ||
+          !item.targetId ||
+          !Number.isFinite(item.at) ||
+          item.at < 0 ||
+          item.at > 1 ||
+          typeof item.proofTimeId !== 'string' ||
+          !item.proofTimeId
+        ) {
+          errors.push(`soundBinding.bindings[${index}] 无效`);
+        }
+      }
+    }
+  } else if (request?.soundBinding !== undefined) {
+    errors.push('soundBinding 只能用于 sound request');
+  }
   if (request?.timingBinding !== undefined) {
     if (request.capability !== 'voice') errors.push('只有 voice request 可以声明 timingBinding');
     const binding = request.timingBinding;
@@ -1987,12 +2108,15 @@ export const verifyOutputFile = async (file, request = null) => {
         };
       }
     }
-  } else if (request?.capability === 'voice') {
+  } else if (
+    request?.capability === 'voice' ||
+    request?.capability === 'sound'
+  ) {
     const probe = await probeMedia(file).catch(() => null);
     const audio = probe?.streams?.find(({codec_type: type}) => type === 'audio');
     const durationSeconds = Number(probe?.format?.duration ?? 0);
     if (!audio || !Number.isFinite(durationSeconds) || durationSeconds <= 0) {
-      throw new Error(`provider 语音媒体不可读：${path.relative(ROOT, file)}`);
+      throw new Error(`provider 音频媒体不可读：${path.relative(ROOT, file)}`);
     }
     const minimum = request.timingBinding?.minDurationSeconds;
     const maximum = request.timingBinding?.maxDurationSeconds;

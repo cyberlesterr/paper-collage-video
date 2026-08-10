@@ -42,4 +42,33 @@ npm run provider:status -- --compact-json
 
 The bootstrap owns npm installation and `.venv`; do not ask the human to activate Python manually.
 
+For an existing workspace, inspect identity without writing:
+
+```bash
+node <plugin-root>/scripts/bootstrap-workspace.mjs \
+  --target=<absolute-writable-workspace> --status-json
+```
+
+The JSON reports loaded Skill/installed plugin version, workspace marker and
+package versions, declared and recomputed runtime fingerprints, required
+commands, the exact upgrade command, and preserved user scopes. Run it once per
+session/environment identity; do not repeat it after it passes unless one of
+those inputs changes.
+
+If the target already has a workspace marker from another plugin version, the
+bootstrap stops instead of silently reusing stale runtime code. Upgrade the
+managed runtime explicitly:
+
+```bash
+node <plugin-root>/scripts/bootstrap-workspace.mjs \
+  --target=<absolute-writable-workspace> --upgrade --install
+```
+
+Upgrade replaces only packaged schemas, scripts, renderer source, fixtures,
+tests, starter-demo, and dependency manifests. It preserves user projects,
+`public/projects` and `dist` entries other than starter-demo,
+`providers.local.json`, installed dependency/cache directories, and unrelated
+user files. `providers.json` is merged so existing selections remain while new
+optional capabilities become available.
+
 If setup fails, preserve the target and report the failed check, workspace path, safe resume command, and one required permission/dependency/provider action. Do not proceed to generation until required local checks pass.

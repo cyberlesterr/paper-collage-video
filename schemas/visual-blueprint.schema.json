@@ -15,6 +15,7 @@
     "runtimeBuildFingerprint",
     "renderProfile",
     "sourceCoverage",
+    "audio",
     "styleReference",
     "artifacts",
     "artifactHashes",
@@ -24,7 +25,7 @@
   ],
   "properties": {
     "$schema": {"type": "string"},
-    "schemaVersion": {"const": 1},
+    "schemaVersion": {"const": 2},
     "projectSlug": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -78,6 +79,81 @@
         "proxy": {"type": "integer", "minimum": 0},
         "total": {"type": "integer", "minimum": 0},
         "actualRatio": {"type": "number", "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "audio": {
+      "type": "object",
+      "required": [
+        "narration",
+        "music",
+        "eventSounds",
+        "mode",
+        "reviewNotice"
+      ],
+      "properties": {
+        "narration": {
+          "type": "object",
+          "required": [
+            "totalScenes",
+            "currentSourceSceneIds",
+            "silentFallbackSceneIds"
+          ],
+          "properties": {
+            "totalScenes": {"type": "integer", "minimum": 1},
+            "currentSourceSceneIds": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            },
+            "silentFallbackSceneIds": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1}
+            }
+          },
+          "additionalProperties": false
+        },
+        "music": {
+          "type": "object",
+          "required": ["declared", "current", "omittedBecauseMissing"],
+          "properties": {
+            "declared": {"type": "boolean"},
+            "current": {"type": "boolean"},
+            "omittedBecauseMissing": {"type": "boolean"}
+          },
+          "additionalProperties": false
+        },
+        "eventSounds": {
+          "type": "object",
+          "required": ["declared", "current", "omitted"],
+          "properties": {
+            "declared": {"type": "integer", "minimum": 0},
+            "current": {"type": "integer", "minimum": 0},
+            "omitted": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["sceneId", "eventId", "src"],
+                "properties": {
+                  "sceneId": {"type": "string", "minLength": 1},
+                  "eventId": {"type": "string", "minLength": 1},
+                  "src": {"type": "string", "minLength": 1}
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "mode": {
+          "enum": [
+            "current-project-audio",
+            "mixed-current-and-silent-fallback",
+            "silent-structure-only"
+          ]
+        },
+        "reviewNotice": {"type": "string", "minLength": 1}
       },
       "additionalProperties": false
     },

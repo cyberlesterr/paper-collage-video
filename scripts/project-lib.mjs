@@ -137,6 +137,75 @@ export const writeJson = async (file, value) => {
   await fs.writeFile(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 };
 
+export const jsonDocumentBytes = (value) =>
+  Buffer.from(`${JSON.stringify(value, null, 2)}\n`, 'utf8');
+
+export const writeJsonTransaction = async (entries) => {
+  if (!Array.isArray(entries) || entries.length === 0) {
+    throw new Error('JSON transaction 至少需要一个目标文件。');
+  }
+  const targets = entries.map(({file, value, delete: remove = false}, index) => {
+    if (typeof file !== 'string' || file.length === 0) {
+      throw new Error(`JSON transaction 第 ${index + 1} 个目标路径无效。`);
+    }
+    if (remove !== true && value === undefined) {
+      throw new Error(
+        `JSON transaction 第 ${index + 1} 个目标既没有 JSON value，也没有声明 delete=true。`,
+      );
+    }
+    return {
+      file,
+      value,
+      remove,
+      temporary: path.join(
+        path.dirname(file),
+        `.${path.basename(file)}.${process.pid}.${index}.pending`,
+      ),
+      backup: path.join(
+        path.dirname(file),
+        `.${path.basename(file)}.${process.pid}.${index}.backup`,
+      ),
+      existed: false,
+      installed: false,
+    };
+  });
+  if (new Set(targets.map(({file}) => path.resolve(file))).size !== targets.length) {
+    throw new Error('JSON transaction 不能重复写入同一个目标文件。');
+  }
+
+  try {
+    for (const target of targets) {
+      await fs.mkdir(path.dirname(target.file), {recursive: true});
+      if (!target.remove) {
+        await fs.writeFile(target.temporary, jsonDocumentBytes(target.value));
+      }
+      target.existed = await fileExists(target.file);
+    }
+    for (const target of targets) {
+      if (target.existed) await fs.rename(target.file, target.backup);
+      if (!target.remove) {
+        await fs.rename(target.temporary, target.file);
+      }
+      target.installed = true;
+    }
+    await Promise.all(
+      targets.map(({backup}) => fs.rm(backup, {force: true})),
+    );
+  } catch (error) {
+    for (const target of [...targets].reverse()) {
+      if (target.installed && !target.remove) {
+        await fs.rm(target.file, {force: true}).catch(() => {});
+      }
+      if (target.existed && (await fileExists(target.backup))) {
+        await fs.rename(target.backup, target.file).catch(() => {});
+      }
+      await fs.rm(target.temporary, {force: true}).catch(() => {});
+      await fs.rm(target.backup, {force: true}).catch(() => {});
+    }
+    throw error;
+  }
+};
+
 export const loadProject = async (slug) => {
   assertSlug(slug);
   const paths = projectPaths(slug);

@@ -24,7 +24,7 @@ import {
 } from './style-proof-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
 import {selectStyleProofTargets} from './motion-treatment-lib.mjs';
-import {createRuntimeBuildFingerprint} from './runtime-build-lib.mjs';
+import {createRuntimeSurfaceFingerprint} from './runtime-build-lib.mjs';
 import {
   activeManifestAssets,
   assertAssetManifest,
@@ -144,7 +144,8 @@ try {
   const targetGroups = await Promise.all(directingTargets.map((target) => collectStyleProofTargets(project, target)));
   const targets = [...new Map(targetGroups.flat().map((target) => [target.compositeId, target])).values()];
   if (targets.length === 0) throw new Error('风险覆盖计划没有生成可审核的风格证据目标。');
-  const runtimeBuildFingerprint = await createRuntimeBuildFingerprint();
+  const runtimeBuildFingerprint =
+    await createRuntimeSurfaceFingerprint('composition-proof');
 
   const paths = projectPaths(slug);
   const proofDirectory = path.join(paths.distDirectory, 'style-proof');

@@ -32,7 +32,6 @@ const sceneConcept = (scene) => ({
     label: proof.label,
     kind: proof.kind,
     assertions: proof.assertions,
-    stateAssertions: proof.stateAssertions,
   })),
 });
 
@@ -73,6 +72,20 @@ const changedCategories = (before, after) => {
   }
   if (differs(before.proofTimes?.map(({at}) => at), after.proofTimes?.map(({at}) => at))) {
     categories.push('proof-timing');
+  }
+  if (
+    differs(
+      before.proofTimes?.map(({id, stateAssertions}) => ({
+        id,
+        stateAssertions: stateAssertions ?? [],
+      })),
+      after.proofTimes?.map(({id, stateAssertions}) => ({
+        id,
+        stateAssertions: stateAssertions ?? [],
+      })),
+    )
+  ) {
+    categories.push('proof-coverage');
   }
   if (differs(before.compositionPlan, after.compositionPlan)) categories.push('compiled-plan');
   if (before.directing?.fingerprint !== after.directing?.fingerprint) {
@@ -512,6 +525,14 @@ export const prepareSemanticRevision = ({
       ...directingChangedScenes.map(({sceneId}) => sceneId),
     ]),
   ].sort();
+  const unauthorizedChangedSceneIds = changedSceneIds.filter(
+    (sceneId) => !allowed.has(sceneId),
+  );
+  if (unauthorizedChangedSceneIds.length > 0) {
+    throw new Error(
+      `语义重编的执行变化越过人类授权镜头：${unauthorizedChangedSceneIds.join(', ')}。`,
+    );
+  }
   const nextProduction = transitionDirectingRevision(production, {
     changedSceneIds,
     invalidateStyleProof: true,

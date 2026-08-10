@@ -47,6 +47,21 @@
           "toolHint": "Place an authorized narration file at the request output path, then register it with provider:record."
         }
       }
+    },
+    "sound": {
+      "defaultProvider": "host-sound",
+      "providers": {
+        "host-sound": {
+          "label": "Host sound-effect generation",
+          "adapter": "host",
+          "toolHint": "Use a discovered sound-effect tool only after proving it returns a local file or a public downloadable URL, then register that file with provider:record."
+        },
+        "manual-sound": {
+          "label": "Imported sound effect",
+          "adapter": "manual",
+          "toolHint": "Place an authorized sound-effect file at the request output path, then register it with provider:record."
+        }
+      }
     }
   }
 }

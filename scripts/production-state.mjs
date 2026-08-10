@@ -55,6 +55,8 @@ const ARTIFACT_KEYS = [
   'motionLanguageCard',
   'motionApproval',
   'visualBlueprint',
+  'visualBlueprintReviewRequest',
+  'visualBlueprintReviewReceipt',
   'visualBlueprintApproval',
   'validationReport',
   'assetsReadySeal',
@@ -85,7 +87,7 @@ const nextActionByStage = {
     '先完成画幅/视觉风格/视差 intake；再比较三档故事与制作方案，并一次确认档位、预算上限和 provider',
   brief: '完善 brief.md，运行 project:plan 并锁定 storyboard，再记录 brief-ready',
   'concept-review': '向人展示文案、分镜和素材清单；确认后记录 approve-concept',
-  'style-review': '展示故事专属风格样张、同源全片视觉蓝图、虚构音色与动作语言；一次确认后记录 approve-style-voice',
+  'style-review': '展示故事专属风格样张、同源全片视觉蓝图、虚构音色与动作语言；等待当前人工回执后运行 project:visual-review',
   'asset-production': '生产素材与旁白、同步时长并通过校验；然后记录 assets-ready',
   preview: '运行 project:preview',
   'human-review': '等待人审预览；确认后记录 approve-preview，或记录 request-preview-revision',
@@ -98,7 +100,7 @@ const stageControlByStage = {
     mode: 'wait-human',
     gate: 'intake-or-scenario',
     requiredDecision:
-      '若 intake 未确认，请选择画幅、视觉风格和视差偏好；否则请一次确认 scenario、制作档位、精确图片上限与 text/image/voice provider。',
+      '若 intake 未确认，请选择画幅、视觉风格和视差偏好；否则请一次确认 scenario、制作档位、精确图片上限与当前故事板要求的 provider（sound 仅在存在 soundCue 时需要）。',
     expectedArtifacts: ['intake', 'planningScenarios', 'brief', 'plan', 'storyboard', 'providers'],
   },
   brief: {
@@ -116,7 +118,7 @@ const stageControlByStage = {
     mode: 'wait-human',
     gate: 'styleAndVoice',
     requiredDecision: '请观看故事专属风格样张、同源低清全片、每幕开头/中间/结尾和动态片段；一次批准视觉蓝图、动作语言与虚构音色，或直接指出不满意处。',
-    expectedArtifacts: ['storySpecificStyleSample', 'visualBlueprint', 'motionLanguageCard', 'voiceAudition'],
+    expectedArtifacts: ['storySpecificStyleSample', 'visualBlueprint', 'visualBlueprintReviewRequest', 'motionLanguageCard', 'voiceAudition'],
   },
   'asset-production': {
     mode: 'auto-continue',
@@ -302,7 +304,7 @@ export const summarizeResumeState = (
     } else {
       control.gate = 'scenario-profile-budget-providers';
       control.requiredDecision =
-        '请在三档方案中选择一个，并一次确认对应的故事范围、制作档位、精确图片上限和 text/image/voice provider。';
+        '请在三档方案中选择一个，并一次确认对应的故事范围、制作档位、精确图片上限和当前故事板要求的 provider。';
       control.expectedArtifacts = [
         'planningScenarios',
         'brief',
@@ -625,11 +627,11 @@ export const transitionDirectingRevision = (current, options = {}) => {
     const id = `directing-revision-${sceneId}`;
     const next = {
       id,
-      label: `同步导演重编镜头 ${sceneId}`,
+      label: `重新验证导演重编镜头 ${sceneId}`,
       status: 'pending',
       updatedAt: at,
       artifact: reportPath,
-      note: '按新 storyboard 同步 project.json 执行树并重新验证。',
+      note: '执行树已由修订命令原子同步；重新生成并验证受影响的证明、质量和交付封印。',
     };
     const index = workItems.findIndex((item) => item.id === id);
     if (index >= 0) workItems[index] = next;
@@ -753,6 +755,8 @@ export const transitionProduction = (current, action, options = {}) => {
       resetApproval(state, 'styleAndVoice');
       state.artifacts.motionApproval = null;
       state.artifacts.visualBlueprint = null;
+      state.artifacts.visualBlueprintReviewRequest = null;
+      state.artifacts.visualBlueprintReviewReceipt = null;
       state.artifacts.visualBlueprintApproval = null;
       state.stage = 'concept-review';
       break;
@@ -775,12 +779,14 @@ export const transitionProduction = (current, action, options = {}) => {
       } else {
         assertApproved(state, 'styleAndVoice', action);
       }
+      state.artifacts.visualBlueprintReviewReceipt = null;
       state.artifacts.visualBlueprintApproval = null;
       break;
     case 'request-style-voice-revision':
       assertStage(state, ['style-review'], action);
       setApproval(state, 'styleAndVoice', 'changes-requested', at, note);
       state.artifacts.motionApproval = null;
+      state.artifacts.visualBlueprintReviewReceipt = null;
       state.artifacts.visualBlueprintApproval = null;
       break;
     case 'assets-ready':
@@ -914,7 +920,11 @@ export const recordMotionLanguageCard = async (slug, artifact) => {
   return state;
 };
 
-export const recordVisualBlueprint = async (slug, artifact) => {
+export const recordVisualBlueprint = async (
+  slug,
+  artifact,
+  {reviewRequest = null} = {},
+) => {
   const {paths, state: current} = await loadProduction(slug);
   if (!['style-review', 'asset-production'].includes(current.stage)) {
     throw new Error(
@@ -923,6 +933,8 @@ export const recordVisualBlueprint = async (slug, artifact) => {
   }
   const state = clone(current);
   state.artifacts.visualBlueprint = artifact;
+  state.artifacts.visualBlueprintReviewRequest = reviewRequest;
+  state.artifacts.visualBlueprintReviewReceipt = null;
   state.artifacts.visualBlueprintApproval = null;
   const at = new Date().toISOString();
   state.updatedAt = at;

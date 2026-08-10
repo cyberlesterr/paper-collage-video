@@ -8,6 +8,9 @@ import {
   summarizeProviderSelections,
 } from './provider-lib.mjs';
 import {ROOT} from './project-lib.mjs';
+import {
+  requiredProviderCapabilitiesForProject,
+} from './sound-effect-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--')) ?? null;
@@ -17,6 +20,9 @@ const compactJson = args.includes('--compact-json');
 try {
   const loaded = await loadProviderConfig(slug);
   const selections = summarizeProviderSelections(loaded.config);
+  const requiredCapabilities = slug
+    ? await requiredProviderCapabilitiesForProject(slug)
+    : ['text', 'image', 'voice'];
   const capabilities = {};
   for (const capability of PROVIDER_CAPABILITIES) {
     const provider = resolveProvider(loaded.config, capability);
@@ -31,6 +37,7 @@ try {
         model: configured.model ?? null,
         tool: configured.tool ?? null,
         invocation: configured.invocation ?? null,
+        outputAcquisition: configured.outputAcquisition ?? null,
         readiness: await inspectProviderReadiness({...configured, id, capability}),
       });
     }
@@ -42,16 +49,21 @@ try {
         model: provider.model ?? null,
         tool: provider.tool ?? null,
         invocation: provider.invocation ?? null,
+        outputAcquisition: provider.outputAcquisition ?? null,
       },
       readiness: await inspectProviderReadiness(provider),
       candidates,
+      required: requiredCapabilities.includes(capability),
       ...selections[capability],
     };
   }
   const summary = {
     slug,
     valid: !loaded.issues.some(({level}) => level === 'error'),
-    allConfirmed: Object.values(selections).every(({confirmed}) => confirmed),
+    requiredCapabilities,
+    allConfirmed: requiredCapabilities.every(
+      (capability) => selections[capability]?.confirmed,
+    ),
     sources: loaded.sources.map((source) => ({
       ...source,
       file: path.relative(ROOT, source.file),
@@ -66,6 +78,7 @@ try {
           slug,
           valid: summary.valid,
           allConfirmed: summary.allConfirmed,
+          requiredCapabilities,
           issues: summary.issues,
           capabilities: Object.fromEntries(
             Object.entries(capabilities).map(([capability, status]) => [
@@ -77,6 +90,7 @@ try {
                   missingEnv: status.readiness.missingEnv,
                 },
                 confirmed: status.confirmed,
+                required: status.required,
               },
             ]),
           ),
@@ -100,7 +114,7 @@ try {
             ? '✓'
             : '◇';
       console.log(
-        `${symbol} ${capability}: ${status.provider.id} (${status.provider.adapter}) — ${status.confirmed ? '用户已确认' : '等待用户确认'}；${status.readiness.message}`,
+        `${symbol} ${capability}${status.required ? ' [required]' : ' [optional]'}: ${status.provider.id} (${status.provider.adapter}) — ${status.confirmed ? '用户已确认' : '等待用户确认'}；${status.readiness.message}`,
       );
       console.log(
         `  candidates: ${status.candidates.map(({id, readiness}) => `${id}=${readiness.status}`).join(', ')}`,

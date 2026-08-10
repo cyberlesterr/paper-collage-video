@@ -10,11 +10,12 @@ import {
   writeJson,
 } from './project-lib.mjs';
 import {loadProduction, recordVisualBlueprint} from './production-state.mjs';
-import {createRuntimeBuildFingerprint} from './runtime-build-lib.mjs';
+import {createRuntimeSurfaceFingerprint} from './runtime-build-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
 import {deriveSceneTimeline} from '../src/sceneTimeline.mjs';
 import {assertOperationAllowed} from './failure-circuit-lib.mjs';
 import {
+  createVisualBlueprintReviewRequest,
   createVisualBlueprintContract,
   findVisualBlueprintStyleReference,
   materializeVisualBlueprintProject,
@@ -332,7 +333,8 @@ try {
   );
   const styleReference = await findVisualBlueprintStyleReference(slug);
   const visualContractFingerprint = visualBlueprintFingerprint(project);
-  const runtimeBuildFingerprint = await createRuntimeBuildFingerprint();
+  const runtimeBuildFingerprint =
+    await createRuntimeSurfaceFingerprint('final-visual');
   const scenes = timeline.scenes.map((scene) => {
     const sceneSamples = samples.filter(({sceneId}) => sceneId === scene.id);
     return {
@@ -371,7 +373,7 @@ try {
   );
   const report = {
     $schema: '../../../schemas/visual-blueprint.schema.json',
-    schemaVersion: 1,
+    schemaVersion: 2,
     projectSlug: slug,
     generatedAt: new Date().toISOString(),
     status: 'awaiting-human',
@@ -391,6 +393,7 @@ try {
       proxyPolicy: 'keep-current-real-source-else-deterministic-proxy',
     },
     sourceCoverage: materialized.coverage,
+    audio: materialized.audio,
     styleReference,
     artifacts: {
       animatic: relativeRootPath(paths.animatic),
@@ -405,6 +408,7 @@ try {
       {id: 'motion-clips-for-dynamic-scenes', passed: project.scenes.every((scene) => !sceneNeedsMotionClip(scene) || clipsByScene.has(scene.id))},
       {id: 'current-runtime-bound', passed: true},
       {id: 'artifact-hashes-recorded', passed: artifactFiles.every((file) => Boolean(artifactHashes[file]))},
+      {id: 'audio-policy-disclosed', passed: Boolean(materialized.audio?.mode)},
     ],
     decisionBoundary: {
       machine:
@@ -416,16 +420,30 @@ try {
     },
   };
   await writeJson(paths.report, report);
-  await recordVisualBlueprint(slug, relativeRootPath(paths.report));
+  const reviewRequest = await createVisualBlueprintReviewRequest({
+    slug,
+    report,
+  });
+  await writeJson(reviewRequest.file, reviewRequest.request);
+  await recordVisualBlueprint(slug, relativeRootPath(paths.report), {
+    reviewRequest: relativeRootPath(reviewRequest.file),
+  });
   console.log(`✓ 同源视觉蓝图：${relativeRootPath(paths.animatic)}`);
   console.log(`✓ 每幕关键帧：${relativeRootPath(paths.contactSheet)}`);
   console.log(`✓ 蓝图报告：${relativeRootPath(paths.report)}`);
+  console.log(`✓ 人审请求：${relativeRootPath(reviewRequest.file)}`);
   console.log(
     `  sources: ${materialized.coverage.actual} actual + ${materialized.coverage.proxy} proxy`,
   );
+  console.log(
+    `  audio: ${materialized.audio.mode} — ${materialized.audio.reviewNotice}`,
+  );
+  console.log(
+    '⏸ 已停在人工视觉决策边界：必须先向用户展示上述 animatic 与关键帧；没有当前用户消息回执，不得进入正式素材生产。',
+  );
   if (!styleReference) {
     console.log(
-      '⚠ 尚无故事专属风格样张；可以先看布局，但 approve-style-voice 会拒绝批准，直到样张存在并重新生成蓝图。',
+      '⚠ 尚无故事专属风格样张；可以先看布局，但 project:visual-review 会拒绝批准，直到样张存在并重新生成蓝图。',
     );
   }
 } catch (error) {

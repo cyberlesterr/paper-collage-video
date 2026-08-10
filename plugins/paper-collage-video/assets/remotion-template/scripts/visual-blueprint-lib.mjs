@@ -9,16 +9,11 @@ import {
   projectPaths,
   readJson,
   resolvePublicFile,
-  writeJson,
 } from './project-lib.mjs';
 import {validateCompositionStructure} from './composition-lib.mjs';
 import {validateDirectingExecution} from './motion-treatment-lib.mjs';
-import {createRuntimeBuildFingerprint} from './runtime-build-lib.mjs';
+import {createRuntimeSurfaceFingerprint} from './runtime-build-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
-import {
-  assertOperationCircuitClosed,
-  recordOperationSuccess,
-} from './failure-circuit-lib.mjs';
 
 const HASH_PATTERN = /^[a-f0-9]{64}$/;
 const OMITTED_VISUAL_KEYS = new Set([
@@ -155,6 +150,14 @@ export const visualBlueprintPaths = (slug) => {
     approval: path.join(
       paths.projectDirectory,
       'visual-blueprint-approval.json',
+    ),
+    reviewRequest: path.join(
+      paths.projectDirectory,
+      'visual-blueprint-review-request.json',
+    ),
+    reviewReceipt: path.join(
+      paths.projectDirectory,
+      'visual-blueprint-review-receipt.json',
     ),
     proxyDirectory: path.join(
       paths.publicDirectory,
@@ -508,7 +511,31 @@ export const materializeVisualBlueprintProject = async (project) => {
   const coverage = {actual: 0, proxy: 0};
   const silence = await ensureSilentWav(paths);
   const clone = structuredClone(project);
-  clone.audio = {...clone.audio, music: null};
+  const audio = {
+    narration: {
+      totalScenes: clone.scenes?.length ?? 0,
+      currentSourceSceneIds: [],
+      silentFallbackSceneIds: [],
+    },
+    music: {
+      declared: Boolean(clone.audio?.music),
+      current: false,
+      omittedBecauseMissing: false,
+    },
+    eventSounds: {
+      declared: 0,
+      current: 0,
+      omitted: [],
+    },
+  };
+  if (clone.audio?.music) {
+    if (await sourceIsCurrent(clone.audio.music.src)) {
+      audio.music.current = true;
+    } else {
+      clone.audio = {...clone.audio, music: null};
+      audio.music.omittedBecauseMissing = true;
+    }
+  }
   if (
     clone.theme?.surface?.texture?.src &&
     !(await sourceIsCurrent(clone.theme.surface.texture.src))
@@ -519,25 +546,72 @@ export const materializeVisualBlueprintProject = async (project) => {
     delete clone.theme.fontFile;
   }
   clone.scenes = await Promise.all(
-    (clone.scenes ?? []).map(async (scene) => ({
-      ...scene,
-      narration: {...scene.narration, src: silence, timingSrc: undefined},
-      events: (scene.events ?? []).map(({sound, ...event}) => event),
-      composition: {
-        ...scene.composition,
-        nodes: await Promise.all(
-          (scene.composition?.nodes ?? []).map((node) =>
-            materializeNodeSources({
-              node,
-              project,
-              paths,
-              coverage,
-            }),
+    (clone.scenes ?? []).map(async (scene) => {
+      const narrationCurrent = await sourceIsCurrent(scene.narration?.src);
+      if (narrationCurrent) {
+        audio.narration.currentSourceSceneIds.push(scene.id);
+      } else {
+        audio.narration.silentFallbackSceneIds.push(scene.id);
+      }
+      const events = await Promise.all(
+        (scene.events ?? []).map(async (event) => {
+          if (!event.sound) return event;
+          audio.eventSounds.declared += 1;
+          if (await sourceIsCurrent(event.sound.src)) {
+            audio.eventSounds.current += 1;
+            return event;
+          }
+          audio.eventSounds.omitted.push({
+            sceneId: scene.id,
+            eventId: event.id,
+            src: event.sound.src,
+          });
+          const {sound, ...withoutMissingSound} = event;
+          return withoutMissingSound;
+        }),
+      );
+      return {
+        ...scene,
+        narration: narrationCurrent
+          ? scene.narration
+          : {...scene.narration, src: silence, timingSrc: undefined},
+        events,
+        composition: {
+          ...scene.composition,
+          nodes: await Promise.all(
+            (scene.composition?.nodes ?? []).map((node) =>
+              materializeNodeSources({
+                node,
+                project,
+                paths,
+                coverage,
+              }),
+            ),
           ),
-        ),
-      },
-    })),
+        },
+      };
+    }),
   );
+  const currentAudioSourceCount =
+    audio.narration.currentSourceSceneIds.length +
+    (audio.music.current ? 1 : 0) +
+    audio.eventSounds.current;
+  const missingAudioSourceCount =
+    audio.narration.silentFallbackSceneIds.length +
+    (audio.music.omittedBecauseMissing ? 1 : 0) +
+    audio.eventSounds.omitted.length;
+  audio.mode =
+    currentAudioSourceCount === 0
+      ? 'silent-structure-only'
+      : missingAudioSourceCount === 0
+        ? 'current-project-audio'
+        : 'mixed-current-and-silent-fallback';
+  audio.reviewNotice =
+    audio.mode === 'current-project-audio'
+      ? '蓝图使用当前项目中可读的旁白、音乐和事件音效。'
+      : audio.mode === 'mixed-current-and-silent-fallback'
+        ? '蓝图保留可读的当前音频；缺失旁白使用静音时长占位，缺失音乐或事件音效被明确省略。'
+        : '蓝图只有静音时长占位，用于判断画面结构与动作，不代表最终声音。';
   return {
     project: clone,
     coverage: {
@@ -548,6 +622,7 @@ export const materializeVisualBlueprintProject = async (project) => {
           ? 1
           : coverage.actual / (coverage.actual + coverage.proxy),
     },
+    audio,
   };
 };
 
@@ -580,7 +655,7 @@ const activeStyleSample = async (slug) => {
   };
 };
 
-const requiredArtifactFiles = (report) => [
+export const requiredVisualBlueprintArtifactFiles = (report) => [
   report.artifacts?.animatic,
   report.artifacts?.contactSheet,
   report.artifacts?.styleFrame,
@@ -601,6 +676,60 @@ const assertWorkspaceArtifact = async (file) => {
   return absolute;
 };
 
+const reviewRequestFingerprintValue = (request) => {
+  const {requestFingerprint, ...value} = request;
+  return value;
+};
+
+export const visualBlueprintReviewRequestFingerprint = (request) =>
+  hashValue(reviewRequestFingerprintValue(request));
+
+export const createVisualBlueprintReviewRequest = async ({
+  slug,
+  report,
+  createdAt = new Date().toISOString(),
+}) => {
+  const paths = visualBlueprintPaths(slug);
+  if (
+    report?.schemaVersion !== 2 ||
+    report.projectSlug !== slug ||
+    report.status !== 'awaiting-human'
+  ) {
+    throw new Error('只有当前 schema-v2 视觉蓝图才能创建人审请求。');
+  }
+  const reviewArtifacts = requiredVisualBlueprintArtifactFiles(report).map(
+    (file) => ({
+      file,
+      sha256: report.artifactHashes?.[file] ?? null,
+    }),
+  );
+  if (
+    reviewArtifacts.length === 0 ||
+    reviewArtifacts.some(({sha256}) => !HASH_PATTERN.test(sha256 ?? ''))
+  ) {
+    throw new Error('视觉蓝图人审请求必须绑定全部待看产物及其哈希。');
+  }
+  const request = {
+    $schema: '../../schemas/visual-blueprint-review-request.schema.json',
+    schemaVersion: 1,
+    projectSlug: slug,
+    status: 'awaiting-human',
+    createdAt,
+    blueprintReport: path.relative(ROOT, paths.report),
+    blueprintReportSha256: await hashFile(paths.report),
+    visualContractFingerprint: report.visualContractFingerprint,
+    runtimeBuildFingerprint: report.runtimeBuildFingerprint,
+    reviewArtifacts,
+    audio: report.audio,
+    requiredDecision: ['approved', 'revise'],
+    instruction:
+      '先向用户展示 animatic、全片接触表、每幕开头/中间/结尾和动态片段；收到用户本轮明确决定后，才可创建绑定该用户消息的回执。',
+  };
+  request.requestFingerprint =
+    visualBlueprintReviewRequestFingerprint(request);
+  return {file: paths.reviewRequest, request};
+};
+
 export const assertVisualBlueprintReady = async (slug) => {
   const paths = visualBlueprintPaths(slug);
   if (!(await fileExists(paths.report))) {
@@ -613,10 +742,10 @@ export const assertVisualBlueprintReady = async (slug) => {
       readJson(paths.report),
       loadProject(slug),
       loadStoryboard(slug),
-      createRuntimeBuildFingerprint(),
+      createRuntimeSurfaceFingerprint('final-visual'),
     ]);
   if (
-    report.schemaVersion !== 1 ||
+    report.schemaVersion !== 2 ||
     report.projectSlug !== slug ||
     report.reviewMode !== 'single-human-visual-decision'
   ) {
@@ -648,7 +777,7 @@ export const assertVisualBlueprintReady = async (slug) => {
   if (await hashFile(styleReference) !== report.styleReference.sha256) {
     throw new Error('故事专属风格样张已变化；请重新生成视觉蓝图。');
   }
-  for (const file of requiredArtifactFiles(report)) {
+  for (const file of requiredVisualBlueprintArtifactFiles(report)) {
     const absolute = await assertWorkspaceArtifact(file);
     const expected = report.artifactHashes?.[file];
     if (!HASH_PATTERN.test(expected ?? '') || (await hashFile(absolute)) !== expected) {
@@ -662,96 +791,6 @@ export const assertVisualBlueprintReady = async (slug) => {
     throw new Error('视觉蓝图技术预检未通过，不能记录人的视觉批准。');
   }
   return {file: paths.report, report, project, storyboard};
-};
-
-export const recordVisualBlueprintApproval = async ({
-  slug,
-  humanNote,
-}) => {
-  const note = String(humanNote ?? '').trim();
-  if (!note) throw new Error('视觉蓝图批准必须保留人的明确原话。');
-  const ready = await assertVisualBlueprintReady(slug);
-  await assertOperationCircuitClosed({
-    slug,
-    operation: visualBlueprintReviewOperation,
-  });
-  const paths = visualBlueprintPaths(slug);
-  const record = {
-    $schema: '../../schemas/visual-blueprint-approval.schema.json',
-    schemaVersion: 1,
-    projectSlug: slug,
-    status: 'approved',
-    blueprintReport: path.relative(ROOT, ready.file),
-    blueprintReportSha256: await hashFile(ready.file),
-    visualContractFingerprint:
-      ready.report.visualContractFingerprint,
-    runtimeBuildFingerprint: ready.report.runtimeBuildFingerprint,
-    decision: {
-      authority: 'human',
-      note,
-      decidedAt: new Date().toISOString(),
-    },
-  };
-  await writeJson(paths.approval, record);
-  await recordOperationSuccess({
-    slug,
-    operation: visualBlueprintReviewOperation,
-    inputFingerprint: ready.report.visualContractFingerprint,
-    note: `human approval: ${note}`,
-  });
-  return {file: paths.approval, record};
-};
-
-export const assertVisualBlueprintApprovalCurrent = async (slug) => {
-  const paths = visualBlueprintPaths(slug);
-  if (!(await fileExists(paths.approval))) {
-    throw new Error('正式素材生产前必须获得当前同源视觉蓝图的人工批准。');
-  }
-  const [approval, ready] = await Promise.all([
-    readJson(paths.approval),
-    assertVisualBlueprintReady(slug),
-  ]);
-  if (
-    approval.schemaVersion !== 1 ||
-    approval.status !== 'approved' ||
-    approval.projectSlug !== slug ||
-    approval.decision?.authority !== 'human' ||
-    !String(approval.decision?.note ?? '').trim()
-  ) {
-    throw new Error('visual-blueprint-approval.json 无效或缺少人的决定。');
-  }
-  if (
-    approval.visualContractFingerprint !==
-      ready.report.visualContractFingerprint ||
-    approval.runtimeBuildFingerprint !==
-      ready.report.runtimeBuildFingerprint ||
-    approval.blueprintReport !== path.relative(ROOT, ready.file) ||
-    approval.blueprintReportSha256 !== (await hashFile(ready.file))
-  ) {
-    throw new Error('视觉蓝图批准已过期；正式生产不得偏离已批准几何与时序。');
-  }
-  return {file: paths.approval, approval, ready};
-};
-
-export const assertProviderVisualBlueprintGate = async (request) => {
-  if (request?.quality?.kind === 'style-sample') {
-    return {required: false, reason: 'single-style-sample-before-blueprint'};
-  }
-  const productionFile = projectPaths(request.projectSlug).productionFile;
-  if (!(await fileExists(productionFile))) {
-    return {
-      required: false,
-      reason: 'library-fixture-without-production-state',
-    };
-  }
-  const current = await assertVisualBlueprintApprovalCurrent(
-    request.projectSlug,
-  );
-  return {
-    required: true,
-    reason: 'bulk-provider-production',
-    approval: current.approval,
-  };
 };
 
 export const findVisualBlueprintStyleReference = activeStyleSample;

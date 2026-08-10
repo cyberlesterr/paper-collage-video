@@ -10,6 +10,9 @@ import {
 } from './provider-lib.mjs';
 import {readGenerationAttempt} from './generation-attempt-lib.mjs';
 import {ROOT} from './project-lib.mjs';
+import {
+  assertProviderVisualBlueprintGate,
+} from './visual-blueprint-review-lib.mjs';
 
 const args = process.argv.slice(2);
 const valueFor = (name) =>
@@ -42,6 +45,7 @@ try {
     loadedRequest.request.capability,
     attempt?.provider ?? providerId,
   );
+  await assertProviderVisualBlueprintGate(loadedRequest.request);
   const reportedModel = valueFor('--model');
   const inheritedModel = attempt?.model ?? null;
   const normalizedReportedModel = reportedModel

@@ -2,7 +2,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {resolveWorkspacePath} from './provider-lib.mjs';
-import {loadProject, ROOT, writeJson} from './project-lib.mjs';
+import {
+  loadProject,
+  ROOT,
+  writeJsonTransaction,
+} from './project-lib.mjs';
 import {
   loadProduction,
   recordMotionLanguageCard,
@@ -15,6 +19,7 @@ import {
 } from './storyboard-lib.mjs';
 import {materializeSceneTransitionRecipes} from '../src/sceneTimeline.mjs';
 import {motionLanguageCard} from './motion-contract-lib.mjs';
+import {soundEffectArtifactsFor} from './sound-effect-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
@@ -55,17 +60,20 @@ try {
   if (issues.length > 0) {
     throw new Error(issues.map(({location, message}) => `${location}: ${message}`).join('\n'));
   }
-  await writeJson(storyboardFileFor(slug), storyboard);
-  await writeJson(
-    paths.motionLanguageCardFile,
-    motionLanguageCard(storyboard.motionContract),
-  );
-  await writeJson(paths.projectFile, {
+  const card = motionLanguageCard(storyboard.motionContract);
+  const updatedProject = {
     ...project,
     motionContract: storyboard.motionContract,
     editorial: storyboard.editorial,
     spatialContracts: storyboard.spatialContracts ?? [],
-  });
+  };
+  const soundEffects = await soundEffectArtifactsFor(storyboard);
+  await writeJsonTransaction([
+    {file: storyboardFileFor(slug), value: storyboard},
+    {file: paths.motionLanguageCardFile, value: card},
+    {file: paths.projectFile, value: updatedProject},
+    ...soundEffects.entries,
+  ]);
   await recordMotionLanguageCard(
     slug,
     path.relative(ROOT, paths.motionLanguageCardFile),
@@ -82,6 +90,9 @@ try {
   console.log(`  motion budget: ${summary.directing.estimatedPoseSheetCalls} pose-sheet calls · ${summary.directing.avoidedIsolatedStateCalls} isolated calls avoided`);
   console.log(
     `  source packages: ${storyboard.directingSummary.generationBudget.requiredProviderImageCalls} required provider calls · ${storyboard.directingSummary.generationBudget.localDerivatives} local derivatives · ${storyboard.directingSummary.generationBudget.avoidedCalls} calls avoided · hard ceiling ${storyboard.directingSummary.generationBudget.hardCeiling}`,
+  );
+  console.log(
+    `  sound effects: ${soundEffects.plan.requiredSoundEffectCount} unique provider assets · ${soundEffects.requests.length} active requests · ${soundEffects.removedRequests.length} stale requests removed`,
   );
 } catch (error) {
   console.error(`project:storyboard failed: ${error.message}`);

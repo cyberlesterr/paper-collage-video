@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/visual-blueprint-review-request.schema.json",
+  "title": "Visual blueprint human review request",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "projectSlug",
+    "status",
+    "createdAt",
+    "blueprintReport",
+    "blueprintReportSha256",
+    "visualContractFingerprint",
+    "runtimeBuildFingerprint",
+    "reviewArtifacts",
+    "audio",
+    "requiredDecision",
+    "instruction",
+    "requestFingerprint"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "projectSlug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "status": {"const": "awaiting-human"},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "blueprintReport": {"type": "string", "minLength": 1},
+    "blueprintReportSha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "visualContractFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "runtimeBuildFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "reviewArtifacts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["file", "sha256"],
+        "properties": {
+          "file": {"type": "string", "minLength": 1},
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "audio": {
+      "$ref": "https://local.paper-collage.dev/visual-blueprint.schema.json#/properties/audio"
+    },
+    "requiredDecision": {
+      "type": "array",
+      "const": ["approved", "revise"]
+    },
+    "instruction": {"type": "string", "minLength": 1},
+    "requestFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

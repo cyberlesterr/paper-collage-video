@@ -1,14 +1,21 @@
 {
   "$schema": "../../schemas/visual-blueprint-approval.schema.json",
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "projectSlug": "starter-demo",
   "status": "approved",
   "blueprintReport": "dist/starter-demo/visual-blueprint/index.json",
-  "blueprintReportSha256": "f0dcfafda94f20e029640d36b9e19c1526570974fea5584258cf44775cebb32b",
+  "blueprintReportSha256": "4df2b94dc54d9a34603198e62f4813ebad40f34f62c629bed4e16e286813595f",
   "visualContractFingerprint": "34352527397dd3769b49db283da3c60edbdd83424cca3df13d6b5af19b2cbe1c",
-  "runtimeBuildFingerprint": "80d6bf3d77149aa0716c5e58b5464f7906c473a44b41eef3808ede652d7c40ff",
+  "runtimeBuildFingerprint": "993e2aaa3bfdebb53c5d0e7724b38efb5a9bb00eb03158ba3fcca80338f0d0d4",
+  "reviewRequest": "projects/starter-demo/visual-blueprint-review-request.json",
+  "reviewRequestSha256": "b3fadf2c1b199f93517935443ad944612554a2b68eec675ceaa78abf991958ce",
+  "reviewRequestFingerprint": "7f5024139a10823c21244496c52b8186ad61b1be9b432fcb820ee5c424aa8ac0",
+  "reviewReceipt": "projects/starter-demo/visual-blueprint-review-receipt.json",
+  "reviewReceiptSha256": "0bd0670b9cf6e9c1e041592abe8ef4f922f80f284b63567634e1489f1b9bc387",
+  "reviewReceiptFingerprint": "984909b45165d0694eeeb9f09aee251bd3bf7b7bea4339c518c65a28db1f2aa0",
   "decision": {
-    "authority": "human",
+    "authority": "human-review-receipt",
+    "reviewer": "human:bundled-fixture-maintainer",
     "note": "Bundled fixture approved by maintainers",
     "decidedAt": "2026-01-01T00:00:00.000Z"
   }

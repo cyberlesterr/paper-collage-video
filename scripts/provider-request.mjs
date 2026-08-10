@@ -9,6 +9,9 @@ import {
   resolveConfirmedProvider,
 } from './provider-lib.mjs';
 import {ROOT} from './project-lib.mjs';
+import {
+  assertProviderVisualBlueprintGate,
+} from './visual-blueprint-review-lib.mjs';
 
 const args = process.argv.slice(2);
 const action = args.find((arg) => !arg.startsWith('--'));
@@ -16,8 +19,10 @@ const valueFor = (name) =>
   args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
 
 try {
-  if (action !== 'validate') {
-    throw new Error('用法：provider:request -- validate --request=<request.json> [--json]');
+  if (!['validate', 'authorize'].includes(action)) {
+    throw new Error(
+      '用法：provider:request -- <validate|authorize> --request=<request.json> [--json]',
+    );
   }
   const requestInput = valueFor('--request');
   if (!requestInput) throw new Error('validate 必须提供 --request=<request.json>。');
@@ -35,8 +40,12 @@ try {
     provider,
     model: valueFor('--model'),
   });
+  if (action === 'authorize') {
+    await assertProviderVisualBlueprintGate(loaded.request);
+  }
   const summary = {
     valid: true,
+    authorized: action === 'authorize',
     request: path.relative(ROOT, loaded.file),
     output: path.relative(ROOT, loaded.output),
     provider: provider.id,
@@ -49,7 +58,9 @@ try {
   };
   if (args.includes('--json')) console.log(JSON.stringify(summary, null, 2));
   else {
-    console.log(`✓ 请求有效：${summary.request}`);
+    console.log(
+      `${summary.authorized ? '✓ 请求已通过生产授权门' : '✓ 请求有效'}：${summary.request}`,
+    );
     console.log(`  provider: ${summary.provider}`);
     console.log(`  request fingerprint: ${summary.requestFingerprint}`);
     console.log(`  invocation fingerprint: ${summary.invocation.fingerprint}`);

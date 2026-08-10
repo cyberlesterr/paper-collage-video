@@ -1,12 +1,20 @@
 # Provider Selection and Provenance
 
-Read this only when discovering, confirming, changing, invoking, or recording a text/image/voice provider.
+Read this only when discovering, confirming, changing, invoking, or recording a text/image/voice/sound provider.
 
 ## Discover and Confirm Once
 
 Run `npm run provider:status -- <slug> --compact-json`, then verify recorded host tool ids against the current registry. `agent-check-required` is expected for a callable host provider; `error` is a real configuration problem. Do not probe availability with a paid call.
 
-Collect text/image/voice selections with the combined scenario/concept decision and run `project:confirm-concept`. The initial aspect/style/parallax intake never selects or authorizes providers. Use project scope unless the human explicitly asks to remember a workspace-wide choice. Never request or store secrets; command providers name environment variables in `requiredEnv`.
+Collect text/image/voice selections with the combined scenario/concept decision;
+also collect `sound` when the compiled `sound-effect-plan.json` is non-empty.
+`provider:status` reports `requiredCapabilities` and computes `allConfirmed`
+from that project-specific set, so an unused optional sound provider does not
+block production. Run `project:confirm-concept`. The initial
+aspect/style/parallax intake never selects or authorizes providers. Use project
+scope unless the human explicitly asks to remember a workspace-wide choice.
+Never request or store secrets; command providers name environment variables
+in `requiredEnv`.
 
 Use `provider:select` only for an isolated change or fallback. A provider switch or generated-image budget increase returns to the existing human decision; deterministic derivatives within an approved source family do not.
 After an explicit post-concept budget decision, run
@@ -21,6 +29,18 @@ original scenario proposal, and cannot exceed the profile hard ceiling.
 | `host` | Current host tool, skill, model, or app (Codex, Claude, etc.) | Invoke, write local output, then `provider:record` |
 | `command` | User CLI/wrapper/private adapter | `provider:run` executes without a shell and records success |
 | `manual` | Authorized supplied or deterministic local asset | Copy/derive output, then `provider:record` |
+
+For any selected host `image`, `voice`, or `sound` provider, record the actual
+callable tool plus a verified `outputAcquisition` mode:
+`local-file` or `public-download-url`, with concrete evidence and timestamp.
+A login-protected preview/download page is not an output contract. Do this
+before provider confirmation, not after a paid call has already completed.
+
+`project:storyboard` compiles each non-empty `beat.soundCue` into a deduplicated
+sound asset, schema-v8 request, and exact scene/beat/event binding. Reused cues
+share one provider call; changed or removed cues delete their superseded
+requests in the same transaction. Sound requests require `soundBinding`, and
+recording probes the returned audio before manifest provenance is committed.
 
 ## Schema-v8 Image Requests and Reuse
 
@@ -273,6 +293,14 @@ npm run provider:recover-rejected-source -- --spec=projects/<slug>/recovery/<ass
 ```
 
 Try exact reuse before reserving an attempt. Validate the request first. `provider:attempt reserve --json` returns the canonical provider/model invocation mapping plus its fingerprint, so the host handoff does not need to guess connector ids. `provider:record` inherits provider/model from the attempt and rejects conflicting overrides. `provider:run` reserves automatically; a host tool call must use the explicit reserve command first. If a host result is abandoned instead of recorded, close it with `provider:attempt close` and state whether quota was consumed. When the ledger already says `succeeded` but manifest recording was interrupted, `provider:recover-record` verifies request/output identity and creates exactly one provenance record without consuming quota twice. Never delete or rewrite `generation-attempts.jsonl`.
+
+Before a host production voice or sound call, run
+`provider:request authorize --request=<request> --json`; it requires the
+current visual-blueprint approval and returns the bound invocation. Production
+voice is distinguished from a short fictional-voice audition by its required
+`timingBinding`. Sound has no pre-blueprint exemption. Command adapters enforce
+the same gate in `provider:run`, and `provider:record` refuses to accept output
+that bypassed it.
 
 Provider-native chroma output is allowed to approximate the requested prompt
 color. New provider-native sheet requests must declare

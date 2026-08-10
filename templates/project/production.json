@@ -21,6 +21,8 @@
     "motionLanguageCard": null,
     "motionApproval": null,
     "visualBlueprint": null,
+    "visualBlueprintReviewRequest": null,
+    "visualBlueprintReviewReceipt": null,
     "visualBlueprintApproval": null,
     "validationReport": null,
     "assetsReadySeal": null,

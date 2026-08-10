@@ -36,6 +36,10 @@ import {
 } from '../scripts/project-lib.mjs';
 import {createEditorialFixture} from '../fixtures/editorial-fixture.mjs';
 import {createMotionDirectionFixture} from '../fixtures/motion-contract-fixture.mjs';
+import {
+  requiredProviderCapabilitiesForProject,
+  writeSoundEffectPlan,
+} from '../scripts/sound-effect-lib.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const STYLE_REQUEST = {
@@ -50,6 +54,60 @@ const STYLE_REQUEST = {
     requiredChecks: ['style-profile-conformant'],
   },
 };
+
+test('sound plans deduplicate provider requests and remove superseded cues', async () => {
+  const slug = `sound-plan-${process.pid}`;
+  const projectDirectory = path.join(ROOT, 'projects', slug);
+  const assetId = 'sfx-paper-tap-fixture';
+  const soundEffect = (sceneId) => ({
+    id: `${sceneId}-tap-sound`,
+    sceneId,
+    beatId: 'tap',
+    targetId: 'paper-prop',
+    cue: 'paper tap',
+    at: 0.5,
+    proofTimeId: `${sceneId}-proof-tap`,
+    assetId,
+    output: `public/projects/${slug}/audio/sfx/${assetId}.wav`,
+  });
+  try {
+    const storyboard = {
+      slug,
+      scenes: ['scene-01', 'scene-02'].map((sceneId) => ({
+        compositionPlan: {
+          soundEffects: [soundEffect(sceneId)],
+        },
+      })),
+    };
+    const written = await writeSoundEffectPlan(storyboard);
+    assert.equal(written.plan.requiredSoundEffectCount, 1);
+    assert.equal(written.requests.length, 1);
+    assert.deepEqual(
+      await requiredProviderCapabilitiesForProject(slug),
+      ['text', 'image', 'voice', 'sound'],
+    );
+    const requestFile = path.join(
+      projectDirectory,
+      'requests',
+      `${assetId}.json`,
+    );
+    const request = JSON.parse(await fsp.readFile(requestFile, 'utf8'));
+    assert.doesNotThrow(() => validateAssetRequest(request));
+    assert.equal(request.soundBinding.bindings.length, 2);
+
+    const cleared = await writeSoundEffectPlan({slug, scenes: []});
+    assert.deepEqual(cleared.removedRequests, [
+      `projects/${slug}/requests/${assetId}.json`,
+    ]);
+    assert.equal(fs.existsSync(requestFile), false);
+    assert.deepEqual(
+      await requiredProviderCapabilitiesForProject(slug),
+      ['text', 'image', 'voice'],
+    );
+  } finally {
+    await fsp.rm(projectDirectory, {recursive: true, force: true});
+  }
+});
 
 test('asset lifecycle preserves audit records and enforces one active record', () => {
   const record = (recordId, status) => ({
@@ -825,6 +883,8 @@ test('new projects require a locked storyboard before concept approval', async (
       '--adapter=host',
       '--tool=image_gen__imagegen',
       '--model=gpt-image',
+      '--output-mode=local-file',
+      '--output-evidence=Image tool returned a verified local PNG fixture',
       '--note=Use the detected GPT Image capability',
     );
     assert.equal(imageSelection.status, 0, imageSelection.stderr);

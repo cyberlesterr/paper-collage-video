@@ -12,9 +12,12 @@ Read this only when creating/changing project files or diagnosing validation/sta
 | `storyboard.json` | Approved schema-v12 motion direction, beat performance roles/treatments, editorial authoring, scene boundaries, layer source packages, and compiler-owned motion/edit/directing/proof plans and fingerprints |
 | `motion-language-card.json` | Human-readable whole-film action grammar, pacing, scene phrases, final holds, exceptions, and approval/execution fingerprints |
 | `dist/<slug>/visual-blueprint/index.json` | Same-source low-resolution full-film animatic, every-scene keyframes, motion clips, source coverage, and exact geometry/timing/runtime fingerprint |
+| `visual-blueprint-review-request.json` | Hash-bound list of the current visual artifacts that must be shown to the human |
+| `visual-blueprint-review-receipt.json` | Host-attributed current user-message decision bound to that request |
 | `visual-blueprint-approval.json` | Attributable human approval of the current visual blueprint |
 | `motion-approval.json` | Attributable style/voice-gate approval binding the human note, Style Profile, motion fingerprints, and visual blueprint |
 | `project.json` | Frozen executable Style Profile, compiled motion contract, materialized theme, Creative Plan v4 ceilings/cap/source-package decision, exact provider-root plan, and v12 Remotion execution tree |
+| `sound-effect-plan.json` | Deduplicated compiled sound cues, provider outputs, and exact scene/beat/event bindings |
 | `requests/*.json` | Per-output generation/import request plus exact style/composition/provider-root binding |
 | `semantic-contracts.json` | Reusable identity, topology, mechanism, diagram, and evidence-target invariants |
 | `generation-attempts.jsonl` | Append-only quota reservation and real provider-attempt outcomes |
@@ -34,7 +37,7 @@ Never ask the human to edit machine JSON. Paths in `project.json` are relative t
 | Stage | Successful action | Next |
 |---|---|---|
 | `capability-review` | `project:intake`, `project:scenarios`, then `project:confirm-concept` | `style-review` after intake and combined scenario/profile/budget/provider approval |
-| `style-review` | one style sample + `project:visual-blueprint`, then `approve-style-voice` | `asset-production` |
+| `style-review` | one style sample + displayed `project:visual-blueprint`, then `project:visual-review ... approve` with a current human receipt | `asset-production` |
 | `asset-production` | `project:assets-ready` | `preview` |
 | `preview` | successful `project:preview` | `human-review` |
 | `human-review` | `approve-preview` | `final-render` |
@@ -50,7 +53,16 @@ a named external destination/action, `approve-publish` records that exact
 authorization while leaving the stage at `complete`; it is an audit event, not
 an additional stage.
 
-After `request-preview-revision`, a directing-only change uses `project:revise-preview-directing`. It preserves approved concept/style semantics, recompiles the edited authoring fields against the existing motion budget, records `directing-revision.json`, invalidates old render/proof artifacts, and creates execution-sync work items. Concept, factual, provider, or production-profile changes still require their owning approval path.
+After `request-preview-revision`, a directing-only change uses
+`project:revise-preview-directing`. It preserves approved concept/style
+semantics, recompiles the edited authoring fields against the existing motion
+budget, synchronizes the changed execution tree, and writes storyboard,
+project, revision report, and production state as one transaction. If a new
+state/source cannot be inferred, a scoped `--execution` candidate must provide
+it; unresolved or out-of-scope execution changes fail before any write. The
+command invalidates old render/proof artifacts and creates revalidation work
+items. Concept, factual, provider, or production-profile changes still require
+their owning approval path.
 
 An explicitly approved image-budget increase after concept approval uses
 `project:increase-image-budget`. It leaves the production stage and original
@@ -60,7 +72,7 @@ used/reserved counts, profile ceiling, timestamp, and human note. The command
 is increase-only and rejects missing approval, broken revision chains, or a cap
 above the current profile hard ceiling. Never hand-edit the machine plan.
 
-Those execution-sync work items are delivery gates, not advisory history.
+Those post-revision validation work items are delivery gates, not advisory history.
 `project:assets-ready` may atomically complete pending/in-progress
 `directing-revision-*` items only after the current seal proves that the
 storyboard and project execution tree are synchronized and all dependent
@@ -78,8 +90,11 @@ report, and contact-sheet artifact. A `locked-static` scene may lower only the
 three motion-scene floors recorded in `profilePromiseRevision`; state-family,
 layer, call, and semantic-action promises remain fixed.
 
-`approve-style-voice` requires a current schema-v1 visual blueprint and exactly
-one active story-specific style sample. The blueprint contract is derived from
+`project:visual-review ... approve` requires a current schema-v2 visual
+blueprint, its hash-bound review request, a host-attributed user-message receipt,
+and exactly one active story-specific style sample. A free-text
+`approve-style-voice` note, blanket autonomy, user absence, silence, or a
+machine result cannot mint approval. The blueprint contract is derived from
 the final schema-v12 execution tree while omitting only replaceable source
 paths, hashes, and provider provenance. It therefore binds every scene,
 duration, transform, z-order, camera, state-facing/playback schedule, path,
@@ -87,9 +102,12 @@ event, proof time, and transition to the current runtime. The renderer retains
 real sources already present and substitutes deterministic labeled proxies only
 for missing production sources. The review package contains a complete
 low-resolution animatic, start/middle/end frames for every scene, and short
-clips for motion-bearing scenes. Machine checks establish coverage, existence,
-hashes, and freshness only; a human makes the visual decision. Approval writes
-both `visual-blueprint-approval.json` and `motion-approval.json`. Every
+clips for motion-bearing scenes. The blueprint records whether current project
+audio was retained or which narration/music/event sounds were omitted or
+replaced by silence. Machine checks establish coverage, existence, hashes,
+freshness, and this disclosure only; a human makes the visual decision after
+the media is actually displayed. Approval atomically writes the review receipt,
+`visual-blueprint-approval.json`, `motion-approval.json`, and production state. Every
 non-style-sample provider request and `project:assets-ready` require that
 approval to remain current. Replacing a proxy with a real source is legal;
 changing the visual contract requires a new blueprint and human decision.
@@ -476,12 +494,12 @@ before/at/after frames.
   responsive/transition plans, `directing`, fingerprints, risk ranking, or
   pose-sheet grids. `project:storyboard` deterministically compiles those
   derived fields and default transition recipes, then rejects drift.
-- Scene id, blueprint, compiled `compositionPlan`, proof ids/times/assertions/stateAssertions, and beat ids must match the approved storyboard. Beat-bound, treatment-bound, and state-bound proof intent is immutable.
+- Scene id, blueprint, compiled `compositionPlan`, proof ids/times/assertions/stateAssertions, and beat ids must match the approved storyboard. Beat-bound, treatment-bound, and state-bound proof intent is immutable. `stateAssertions` are execution/proof coverage, not story meaning; changing them routes through deterministic directing sync instead of fabricating a semantic revision.
 - A compiled continuous target must exist and have visible keyframe/idle motion. `parallax-camera` additionally requires enabled camera parallax and a real depth spread. `scroll-world-x` instead requires one matching `looping-environment` whose axis, direction, distance, speed bounds, ground/tracked ids, seam proof ids, start phase, optional normalized `activeFrom` cue, optional terminal `activeUntil` lock, or `frozen=true` lock, and ordered strip roles/depths exactly match the compiler-owned plan. Before `activeFrom`, the world phase is held; when `activeUntil` is present the completed phase remains locked thereafter, otherwise the full authored travel completes by scene end. A frozen world holds phase throughout and must provide `world-lock-clean` evidence; a terminally locked travelling world must provide both its ordinary world-motion evidence and `world-lock-clean`. A compiled path target must exist as one matching `state-sequence` with exact `motion.path`, independent compiled loop playback, explicit camera-follow decision, and one matching `path-locomotion` spatial contract; ordinary x/y/rotation keyframes are forbidden on that target. A compiled `motif-field` target must exist with the exact preset, distribution, count, cycles, bounds, exclusions, and optional world binding; a world-bound target must resolve to an actual top-level looping world strip. A compiled visibility target must have a matching persistent event and truthful initial state; a compiled generic graphic target must exist as the declared editable node. A compiled `role=visual-sfx` graphic must be editable typography with exact text, start hidden, bind the same beat and discrete `soundCue`, and execute synchronized `fade-scale` show, declared emphasis, and `fade-scale` hide around its Profile-bounded duration. Every compiled state family must exist as one matching `state-sequence` node including its resolved playback plan.
 - Each scene has establish, action/peak, and final proof moments; final remains at or after `0.82` and proofs stay outside scene-boundary intervals.
 - A final state assertion must resolve to one fully opaque state, remain outside any state crossfade for at least that transition duration, and preserve the asserted state through the scene end.
 - Every node keyframe path starts at `0`, ends at `1`, and authors at least one of `offsetX`, `offsetY`, `scale`, `rotation`, or `opacity`; legacy node-keyframe `x`/`y` is invalid rather than ambiguously interpreted.
-- `scene.events` is the only visual/sound event source. Every storyboard beat has one or more ordered events; event drift is at most `0.035` normalized units.
+- `scene.events` is the only visual/sound event source. Every storyboard beat has one or more ordered events; event drift is at most `0.035` normalized units. Every compiled sound plan entry binds the exact registered output path to its approved beat; narration never satisfies `soundCue`.
 - A visibility event targets an existing composition node and persists after its window. A first `show` requires `visibility.initial=hidden`; a first `hide` requires an initially visible node. Supported transitions are `cut`, `fade-rise`, and `fade-scale`.
 - Emphasis events are transient and use the bounded actions from `schemas/composition.schema.json`, including `drop-impact` and `carve`. They do not control persistent visibility.
 - Bind a critical event to `proofTimeId`. Transient emphasis/hold proof remains inside its action window; visibility proof may show the settled persistent state after the action starts and before the same target's next visibility change. If the approved beat names audio, at least one matching event owns both that proof id and the sound.

@@ -1,6 +1,6 @@
 {
   "name": "paper-collage-video-workspace",
-  "version": "0.19.1-dev.3",
+  "version": "0.20.0-dev.3",
   "description": "Configuration-driven paper-collage video pipeline and Codex plugin built with Remotion.",
   "private": true,
   "type": "module",
@@ -57,6 +57,7 @@
     "project:semantic-contracts": "node scripts/project-semantic-contracts.mjs",
     "project:confirm-concept": "node scripts/project-confirm-concept.mjs",
     "project:visual-blueprint": "node scripts/project-metrics-run.mjs --category=evidence-render --operation=visual-blueprint --script=scripts/project-visual-blueprint.mjs --slug-index=0 --",
+    "project:visual-review": "node scripts/project-visual-review.mjs",
     "project:quality": "node scripts/project-metrics-run.mjs --category=deterministic-check --operation=quality-command --script=scripts/project-quality.mjs --slug-index=0 --",
     "project:composition-proof": "node scripts/project-metrics-run.mjs --category=evidence-render --operation=composition-proof --script=scripts/project-composition-proof.mjs --slug-index=0 --",
     "project:metrics": "node scripts/project-metrics.mjs",
@@ -75,6 +76,7 @@
     "project:audio-calibration": "node scripts/project-metrics-run.mjs --category=deterministic-check --operation=audio-calibration --script=scripts/project-audio-calibration.mjs --slug-index=0 --",
     "project:stitch-narration": "node scripts/project-metrics-run.mjs --category=deterministic-check --operation=stitch-narration --script=scripts/project-stitch-narration.mjs --slug-index=0 --",
     "project:sync": "node scripts/project-sync.mjs",
+    "project:sync-directing": "node scripts/project-sync-directing.mjs",
     "project:subtitles": "node scripts/project-subtitles.mjs",
     "project:validate": "node scripts/project-metrics-run.mjs --category=deterministic-check --operation=validate --script=scripts/project-validate.mjs --slug-index=0 --",
     "project:preview": "node scripts/project-metrics-run.mjs --category=video-render --operation=preview-render --script=scripts/project-render.mjs --slug-index=1 -- preview",

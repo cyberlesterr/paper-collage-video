@@ -76,7 +76,45 @@ test('runtime build inputs discover every current style card from the catalog', 
       relative.startsWith('public/style-catalog/') &&
       relative.endsWith('.png'),
     ),
-    catalog.styles.map(({image}) => `public/${image}`),
+    catalog.styles.map(({image}) => `public/${image}`).sort(),
+  );
+});
+
+test('complete runtime identity automatically covers every managed contract and executable', async () => {
+  const managedRoots = [
+    'schemas',
+    'scripts',
+    'src',
+    'templates',
+  ];
+  const expected = [];
+  const visit = async (relative) => {
+    const absolute = path.join(ROOT, relative);
+    const stat = await fs.stat(absolute).catch(() => null);
+    if (!stat) return;
+    if (stat.isFile()) {
+      if (relative !== 'scripts/sync-plugin-package.mjs') {
+        expected.push(relative.split(path.sep).join('/'));
+      }
+      return;
+    }
+    for (const entry of await fs.readdir(absolute, {withFileTypes: true})) {
+      await visit(path.join(relative, entry.name));
+    }
+  };
+  for (const root of managedRoots) await visit(root);
+  for (const relative of expected) {
+    assert.ok(
+      RUNTIME_BUILD_INPUTS.includes(relative),
+      `${relative} must participate in complete runtime identity`,
+    );
+  }
+  assert.ok(!RUNTIME_BUILD_INPUTS.includes('scripts/sync-plugin-package.mjs'));
+  assert.ok(
+    !RUNTIME_SURFACE_INPUTS['final-visual'].includes(
+      'scripts/project-visual-review.mjs',
+    ),
+    'review plumbing must not invalidate an unchanged visual blueprint',
   );
 });
 
@@ -87,11 +125,14 @@ test('runtime build identity closes over every local static module dependency', 
   });
   assert.deepEqual(discovered, [
     'fixtures/editorial-fixture.mjs',
+    'scripts/directing-execution-sync-lib.mjs',
     'scripts/production-metrics-lib.mjs',
     'scripts/python-runtime.mjs',
     'scripts/semantic-slices-lib.mjs',
+    'scripts/sound-effect-lib.mjs',
     'scripts/state-sheet-lib.mjs',
     'scripts/timeline-continuity-lib.mjs',
+    'scripts/visual-blueprint-review-lib.mjs',
   ]);
   for (const relative of discovered) {
     assert.ok(
@@ -110,6 +151,7 @@ test('discovered runtime dependencies invalidate only their owning surfaces', as
     'fixtures/editorial-fixture.mjs',
     'scripts/production-metrics-lib.mjs',
     'scripts/python-runtime.mjs',
+    'scripts/visual-blueprint-review-lib.mjs',
   ];
   for (const relative of [...visualDependencies, ...operationalDependencies]) {
     assert.ok(RUNTIME_BUILD_INPUTS.includes(relative));

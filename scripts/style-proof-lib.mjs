@@ -13,7 +13,7 @@ import {
 } from './project-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
 import {selectStyleProofTargets} from './motion-treatment-lib.mjs';
-import {createRuntimeBuildFingerprint} from './runtime-build-lib.mjs';
+import {createRuntimeSurfaceFingerprint} from './runtime-build-lib.mjs';
 import {buildSpatialContractProof} from './spatial-contract-lib.mjs';
 
 const REQUIRED_ASSET_EVIDENCE = [
@@ -149,7 +149,8 @@ export const assertStyleProofReady = async (slug) => {
   if (report.schemaVersion !== 7 || report.scope !== 'style' || !Array.isArray(report.composites)) {
     throw new Error('风格拓扑证明格式过旧或不完整；请重新运行 npm run project:style-proof。');
   }
-  const runtimeBuildFingerprint = await createRuntimeBuildFingerprint();
+  const runtimeBuildFingerprint =
+    await createRuntimeSurfaceFingerprint('composition-proof');
   if (
     report.planFingerprint !== storyboard.directingSummary.styleProofPlan.fingerprint ||
     report.motionContractFingerprint !==

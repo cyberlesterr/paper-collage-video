@@ -16,7 +16,7 @@
         "properties": {
           "recordId": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
           "assetId": {"type": "string"},
-          "capability": {"enum": ["text", "image", "voice"]},
+          "capability": {"enum": ["text", "image", "voice", "sound"]},
           "file": {"type": "string"},
           "provider": {"type": "string"},
           "adapter": {"enum": ["host", "command", "manual", "registered-sheet-cell", "registered-family-member", "semantic-slice-derivative", "looping-strip-derivative", "canonical-container-derivative", "provider-source-derivative"]},
@@ -36,7 +36,14 @@
               "width": {"type": "integer", "minimum": 1},
               "height": {"type": "integer", "minimum": 1},
               "format": {"type": ["string", "null"]},
-              "hasAlpha": {"type": "boolean"}
+              "hasAlpha": {"type": "boolean"},
+              "durationSeconds": {"type": "number", "exclusiveMinimum": 0},
+              "codec": {"type": ["string", "null"]},
+              "sampleRate": {
+                "type": ["integer", "null"],
+                "minimum": 1
+              },
+              "channels": {"type": ["integer", "null"], "minimum": 1}
             },
             "additionalProperties": false
           },

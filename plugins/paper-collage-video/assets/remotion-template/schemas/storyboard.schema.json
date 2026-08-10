@@ -509,7 +509,7 @@
     },
     "compositionPlan": {
       "type": "object",
-      "required": ["patterns", "relationships", "stateSequences", "continuousMotions", "pathMotions", "visibilityEvents", "motifFields", "graphics", "layerStacks", "loopingEnvironments", "canonicalContainers"],
+      "required": ["patterns", "relationships", "stateSequences", "continuousMotions", "pathMotions", "visibilityEvents", "motifFields", "graphics", "soundEffects", "layerStacks", "loopingEnvironments", "canonicalContainers"],
       "properties": {
         "patterns": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"enum": ["free", "supported-subject", "registered-environment", "registered-depth-stack", "looping-environment", "canonical-container"]}},
         "relationships": {
@@ -533,9 +533,39 @@
         "visibilityEvents": {"type": "array", "items": {"$ref": "#/$defs/visibilityEvent"}},
         "motifFields": {"type": "array", "items": {"$ref": "#/$defs/motifFieldPlan"}},
         "graphics": {"type": "array", "items": {"$ref": "#/$defs/graphicPlan"}},
+        "soundEffects": {"type": "array", "items": {"$ref": "#/$defs/soundEffectPlanEntry"}},
         "layerStacks": {"type": "array", "items": {"$ref": "#/$defs/layerStackPlan"}},
         "loopingEnvironments": {"type": "array", "items": {"$ref": "#/$defs/loopingEnvironmentPlan"}},
         "canonicalContainers": {"type": "array", "items": {"$ref": "#/$defs/canonicalContainerPlan"}}
+      },
+      "additionalProperties": false
+    },
+    "soundEffectPlanEntry": {
+      "type": "object",
+      "required": [
+        "id",
+        "sceneId",
+        "beatId",
+        "targetId",
+        "cue",
+        "at",
+        "proofTimeId",
+        "assetId",
+        "output"
+      ],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "sceneId": {"type": "string", "minLength": 1},
+        "beatId": {"type": "string", "minLength": 1},
+        "targetId": {"type": "string", "minLength": 1},
+        "cue": {"type": "string", "minLength": 1},
+        "at": {"type": "number", "minimum": 0, "maximum": 1},
+        "proofTimeId": {"type": "string", "minLength": 1},
+        "assetId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "output": {"type": "string", "minLength": 1}
       },
       "additionalProperties": false
     },
@@ -949,7 +979,7 @@
     },
     "directingSummary": {
       "type": "object",
-      "required": ["profile", "requiredStateFamilies", "enhancementStateFamilies", "totalStateFamilies", "totalStates", "estimatedPoseSheetCalls", "maxStatesInFamily", "continuousTargets", "localMotionTargets", "visibilityTargets", "motifFieldTargets", "graphicTreatments", "coupledRelationships", "avoidedIsolatedStateCalls", "poseSheetPlans", "budget", "profileFulfillment", "generationBudget", "styleProofPlan", "fingerprint"],
+      "required": ["profile", "requiredStateFamilies", "enhancementStateFamilies", "totalStateFamilies", "totalStates", "estimatedPoseSheetCalls", "maxStatesInFamily", "continuousTargets", "localMotionTargets", "visibilityTargets", "motifFieldTargets", "graphicTreatments", "coupledRelationships", "avoidedIsolatedStateCalls", "poseSheetPlans", "budget", "profileFulfillment", "generationBudget", "soundEffectPlan", "styleProofPlan", "fingerprint"],
       "properties": {
         "profile": {"oneOf": [{"enum": ["draft", "balanced", "full-depth"]}, {"type": "null"}]},
         "requiredStateFamilies": {"type": "integer", "minimum": 0},
@@ -1086,6 +1116,71 @@
                   {"$ref": "#/$defs/layerStackPlan"},
                   {"$ref": "#/$defs/canonicalContainerPlan"}
                 ]
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "soundEffectPlan": {
+          "type": "object",
+          "required": [
+            "schemaVersion",
+            "projectSlug",
+            "required",
+            "requiredSoundEffectCount",
+            "assets"
+          ],
+          "properties": {
+            "schemaVersion": {"const": 1},
+            "projectSlug": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "required": {"type": "boolean"},
+            "requiredSoundEffectCount": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "assets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["assetId", "cue", "output", "bindings"],
+                "properties": {
+                  "assetId": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  },
+                  "cue": {"type": "string", "minLength": 1},
+                  "output": {"type": "string", "minLength": 1},
+                  "bindings": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": [
+                        "sceneId",
+                        "beatId",
+                        "targetId",
+                        "at",
+                        "proofTimeId"
+                      ],
+                      "properties": {
+                        "sceneId": {"type": "string", "minLength": 1},
+                        "beatId": {"type": "string", "minLength": 1},
+                        "targetId": {"type": "string", "minLength": 1},
+                        "at": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "proofTimeId": {"type": "string", "minLength": 1}
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "additionalProperties": false
               }
             }
           },

@@ -10,6 +10,7 @@ import {
   writeJson,
 } from './project-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
+import {assertVisualBlueprintApprovalCurrent} from './visual-blueprint-review-lib.mjs';
 
 const hashFile = async (file) =>
   createHash('sha256').update(await fs.readFile(file)).digest('hex');
@@ -19,13 +20,19 @@ export const motionApprovalFileFor = (slug) =>
 
 export const recordMotionApproval = async ({
   slug,
-  humanNote,
   visualBlueprint,
-  at = new Date().toISOString(),
+  reviewReceipt,
+  write = true,
 }) => {
-  const note = humanNote.trim();
-  if (!note) {
-    throw new Error('动作语言批准必须保留人的明确原话。');
+  const note = String(reviewReceipt?.note ?? '').trim();
+  if (
+    reviewReceipt?.decision !== 'approved' ||
+    reviewReceipt?.reviewer?.role !== 'human' ||
+    !reviewReceipt?.reviewer?.id?.startsWith('human:') ||
+    !reviewReceipt?.receiptFingerprint ||
+    !note
+  ) {
+    throw new Error('动作语言批准必须绑定当前视觉蓝图的人工批准回执。');
   }
   const [{project}, storyboard] = await Promise.all([
     loadProject(slug),
@@ -48,10 +55,12 @@ export const recordMotionApproval = async ({
     );
   }
   const record = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     slug,
-    approvedAt: at,
+    approvedAt: reviewReceipt.decidedAt,
+    reviewer: reviewReceipt.reviewer.id,
     humanNote: note,
+    reviewReceiptFingerprint: reviewReceipt.receiptFingerprint,
     styleProfileBinding: storyboard.motionContract.styleProfileBinding,
     motionApprovalFingerprint:
       storyboard.motionContract.approvalFingerprint,
@@ -67,7 +76,7 @@ export const recordMotionApproval = async ({
     ),
   };
   const file = motionApprovalFileFor(slug);
-  await writeJson(file, record);
+  if (write) await writeJson(file, record);
   return {file, record};
 };
 
@@ -75,19 +84,22 @@ export const assertMotionApprovalCurrent = async (slug) => {
   const file = motionApprovalFileFor(slug);
   if (!(await fileExists(file))) {
     throw new Error(
-      '缺少当前动作语言批准；请在现有风格/虚构声音 gate 展示动作语言卡并重新记录 approve-style-voice。',
+      '缺少当前动作语言批准；请展示当前视觉蓝图与动作语言卡，并用 project:visual-review 消费人工回执。',
     );
   }
-  const [record, {project}, storyboard] = await Promise.all([
+  const [record, {project}, storyboard, visualApproval] = await Promise.all([
     readJson(file),
     loadProject(slug),
     loadStoryboard(slug),
+    assertVisualBlueprintApprovalCurrent(slug),
   ]);
   if (
-    record.schemaVersion !== 1 ||
+    record.schemaVersion !== 2 ||
     record.slug !== slug ||
+    !record.reviewer?.startsWith('human:') ||
     !record.humanNote?.trim() ||
     !Number.isFinite(Date.parse(record.approvedAt)) ||
+    !/^[a-f0-9]{64}$/.test(record.reviewReceiptFingerprint ?? '') ||
     !/^[a-f0-9]{64}$/.test(record.visualBlueprintFingerprint ?? '') ||
     !record.visualBlueprintReport?.trim() ||
     !/^[a-f0-9]{64}$/.test(record.visualBlueprintReportSha256 ?? '')
@@ -103,6 +115,19 @@ export const assertMotionApprovalCurrent = async (slug) => {
     throw new Error(
       '动作语言批准已过期：全片动作语法、节拍角色、同步锚点、转场意图或 Style Profile 已变化。',
     );
+  }
+  if (
+    record.visualBlueprintFingerprint !==
+      visualApproval.approval.visualContractFingerprint ||
+    record.visualBlueprintReport !==
+      visualApproval.approval.blueprintReport ||
+    record.visualBlueprintReportSha256 !==
+      visualApproval.approval.blueprintReportSha256 ||
+    record.reviewReceiptFingerprint !==
+      visualApproval.approval.reviewReceiptFingerprint ||
+    record.reviewer !== visualApproval.receipt.reviewer.id
+  ) {
+    throw new Error('动作语言批准没有绑定当前视觉蓝图人工回执。');
   }
   if (
     record.styleProfileBinding?.profileFingerprint !==

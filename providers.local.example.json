@@ -61,6 +61,26 @@
           }
         }
       }
+    },
+    "sound": {
+      "defaultProvider": "custom-sound",
+      "providers": {
+        "custom-sound": {
+          "label": "My sound-effect service",
+          "adapter": "command",
+          "requiredEnv": ["MY_SOUND_API_KEY"],
+          "model": "my-sound-model",
+          "command": {
+            "executable": "node",
+            "args": [
+              "scripts/local/sound-adapter.mjs",
+              "--request={request}",
+              "--output={output}"
+            ],
+            "timeoutSeconds": 900
+          }
+        }
+      }
     }
   }
 }

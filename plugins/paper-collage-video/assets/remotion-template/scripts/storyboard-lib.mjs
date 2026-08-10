@@ -236,6 +236,13 @@ export const validateStoryboard = (
       if (!Array.isArray(compositionPlan.graphics)) {
         add('storyboard-graphics', 'compositionPlan.graphics 必须是数组。', `${location}.compositionPlan.graphics`);
       }
+      if (!Array.isArray(compositionPlan.soundEffects)) {
+        add(
+          'storyboard-sound-effects',
+          'compositionPlan.soundEffects 必须是由 soundCue 编译出的数组。',
+          `${location}.compositionPlan.soundEffects`,
+        );
+      }
     }
     if (!Array.isArray(scene.beats) || scene.beats.length < 3) {
       add('storyboard-beats', '每个镜头至少需要 3 个节拍。', `${location}.beats`);
@@ -413,6 +420,8 @@ export const summarizeStoryboard = (storyboard) => ({
         estimatedPoseSheetCalls: storyboard.directingSummary?.estimatedPoseSheetCalls ?? 0,
         avoidedIsolatedStateCalls: storyboard.directingSummary?.avoidedIsolatedStateCalls ?? 0,
         generationBudget: storyboard.directingSummary?.generationBudget ?? null,
+        soundEffectPlan:
+          storyboard.directingSummary?.soundEffectPlan ?? null,
       }
     : null,
 });

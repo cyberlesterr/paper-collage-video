@@ -38,6 +38,14 @@ const slug =
   qualityActions.has(childArgs[0])
     ? childArgs[1]
     : childArgs[slugIndex];
+const browserOperations = new Set([
+  'visual-blueprint',
+  'composition-proof',
+  'style-proof',
+  'scene-preview-render',
+  'preview-render',
+  'final-render',
+]);
 
 const run = (file, commandArgs) => new Promise((resolve, reject) => {
   const child = spawn(process.execPath, [file, ...commandArgs], {
@@ -73,6 +81,16 @@ try {
     const result = await run(path.resolve(ROOT, script), childArgs);
     if (result.code !== 0) process.exitCode = result.code ?? 1;
   } else {
+    if (
+      browserOperations.has(operation) &&
+      process.env.CODEX_SANDBOX &&
+      process.env.PAPER_COLLAGE_EXECUTION_CONTEXT !== 'authorized-host'
+    ) {
+      throw new Error(
+        'HOST_CHROMIUM_AUTHORIZATION_REQUIRED：当前命令会启动 Chromium，已在任何渲染和 failure-circuit 写入前停止。' +
+          '请直接在获准宿主环境中以 PAPER_COLLAGE_EXECUTION_CONTEXT=authorized-host 重跑同一条命令；不要先在沙箱内试跑。',
+      );
+    }
     inputFingerprint = await computeOperationInputFingerprint({
       slug,
       operation,

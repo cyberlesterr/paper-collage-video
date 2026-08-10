@@ -21,7 +21,7 @@ import {
 } from '../scripts/quality-lib.mjs';
 import {padEvidenceBounds} from '../scripts/asset-evidence-lib.mjs';
 import {ROOT} from '../scripts/project-lib.mjs';
-import {createRuntimeBuildFingerprint} from '../scripts/runtime-build-lib.mjs';
+import {createRuntimeSurfaceFingerprint} from '../scripts/runtime-build-lib.mjs';
 import {withCompiledEditorialFixture} from '../fixtures/editorial-fixture.mjs';
 
 const relativePublicSource = (file) => path.relative(path.join(ROOT, 'public'), file);
@@ -335,7 +335,8 @@ const writeProofEvidence = async ({slug, project, files}) => {
   const unrelatedFile = path.join(evidenceDirectory, 'unrelated.png');
   await sharp({create: {width: 20, height: 20, channels: 4, background: '#ffffffff'}}).png().toFile(unrelatedFile);
   const [target] = await collectCompositeQualityTargets(project);
-  const runtimeBuildFingerprint = await createRuntimeBuildFingerprint();
+  const runtimeBuildFingerprint =
+    await createRuntimeSurfaceFingerprint('composition-proof');
   const evidencePath = relativeWorkspaceFile(evidenceFile);
   await fs.writeFile(
     styleProofReportPath(slug),
@@ -466,7 +467,7 @@ test('style topology gate rejects hard-alpha false confidence, unrelated evidenc
       {cwd: ROOT, encoding: 'utf8'},
     );
     assert.notEqual(blockedAdvance.status, 0);
-    assert.match(blockedAdvance.stderr, /同源视觉蓝图/);
+    assert.match(blockedAdvance.stderr, /视觉蓝图/);
 
     const {target, evidencePath, unrelatedPath} = await writeProofEvidence({slug, project: fixture.project, files: fixture.files});
     quality = await prepareQualityReport(slug);

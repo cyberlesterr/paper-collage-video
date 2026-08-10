@@ -195,6 +195,8 @@ test('packaged runtime is lightweight and independent from production projects',
   );
   assert.equal(packageJson.scripts['project:storyboard'], 'node scripts/project-storyboard.mjs');
   assert.equal(packageJson.scripts['project:revise-preview-directing'], 'node scripts/project-revise-preview-directing.mjs');
+  assert.equal(packageJson.scripts['project:sync-directing'], 'node scripts/project-sync-directing.mjs');
+  assert.equal(packageJson.scripts['project:visual-review'], 'node scripts/project-visual-review.mjs');
   assert.equal(packageJson.scripts['project:asset-lifecycle'], 'node scripts/project-asset-lifecycle.mjs');
   assert.equal(packageJson.scripts['project:semantic-contracts'], 'node scripts/project-semantic-contracts.mjs');
   assert.equal(
@@ -312,6 +314,8 @@ test('packaged runtime is lightweight and independent from production projects',
     'projects/starter-demo/motion-language-card.json',
     'projects/starter-demo/motion-approval.json',
     'projects/starter-demo/visual-blueprint-approval.json',
+    'projects/starter-demo/visual-blueprint-review-request.json',
+    'projects/starter-demo/visual-blueprint-review-receipt.json',
     'dist/starter-demo/validation-report.json',
     'dist/starter-demo/visual-blueprint/index.json',
     'dist/starter-demo/visual-blueprint/animatic.mp4',
@@ -349,6 +353,7 @@ test('packaged runtime is lightweight and independent from production projects',
     'runtime-build.json',
     'scripts/production-state.mjs',
     'scripts/directing-revision-lib.mjs',
+    'scripts/directing-execution-sync-lib.mjs',
     'scripts/editorial-system-lib.mjs',
     'scripts/alpha-band-lib.mjs',
     'scripts/asset-hardening-proof-lib.mjs',
@@ -409,6 +414,7 @@ test('packaged runtime is lightweight and independent from production projects',
     'scripts/motion-treatment-lib.mjs',
     'scripts/motion-contract-lib.mjs',
     'scripts/motion-approval-lib.mjs',
+    'scripts/sound-effect-lib.mjs',
     'scripts/project-composition-proof.mjs',
     'scripts/project-render-status.mjs',
     'scripts/phase2-proof-lib.mjs',
@@ -418,8 +424,10 @@ test('packaged runtime is lightweight and independent from production projects',
     'scripts/project-intake.mjs',
     'scripts/project-scenarios.mjs',
     'scripts/project-visual-blueprint.mjs',
+    'scripts/project-visual-review.mjs',
     'scripts/project-storyboard.mjs',
     'scripts/project-revise-preview-directing.mjs',
+    'scripts/project-sync-directing.mjs',
     'scripts/project-scene-preview.mjs',
     'scripts/storyboard-lib.mjs',
     'scripts/world-trajectory-lib.mjs',
@@ -436,6 +444,7 @@ test('packaged runtime is lightweight and independent from production projects',
     'scripts/style-motion-proof.mjs',
     'scripts/style-proof-lib.mjs',
     'scripts/visual-blueprint-lib.mjs',
+    'scripts/visual-blueprint-review-lib.mjs',
     'src/MainVideo.tsx',
     'src/EditorialNodes.tsx',
     'src/editorialPrimitives.mjs',
@@ -477,6 +486,9 @@ test('packaged runtime is lightweight and independent from production projects',
     'schemas/provider-source-normalization.schema.json',
     'schemas/visual-blueprint.schema.json',
     'schemas/visual-blueprint-approval.schema.json',
+    'schemas/visual-blueprint-review-request.schema.json',
+    'schemas/visual-blueprint-review-receipt.schema.json',
+    'schemas/sound-effect-plan.schema.json',
     'templates/project/production.json',
     'templates/project/planning-scenarios.json',
     'templates/project/production-metrics.json',
@@ -565,8 +577,11 @@ test('packaged starter proof keeps the complete quality gate ready', async () =>
   const runtimeVisualBlueprint = await import(
     `${pathToFileURL(path.join(RUNTIME_ROOT, 'scripts', 'visual-blueprint-lib.mjs')).href}?test=${Date.now()}`,
   );
+  const runtimeVisualBlueprintReview = await import(
+    `${pathToFileURL(path.join(RUNTIME_ROOT, 'scripts', 'visual-blueprint-review-lib.mjs')).href}?test=${Date.now()}`,
+  );
   await runtimeVisualBlueprint.assertVisualBlueprintReady('starter-demo');
-  await runtimeVisualBlueprint.assertVisualBlueprintApprovalCurrent(
+  await runtimeVisualBlueprintReview.assertVisualBlueprintApprovalCurrent(
     'starter-demo',
   );
   const runtimeAssetsReadySeal = await import(
@@ -604,6 +619,28 @@ test('bootstrap creates an isolated resumable workspace and is idempotent', asyn
     );
     assert.ok(fs.existsSync(path.join(target, 'providers.json')));
     assert.ok(fs.existsSync(path.join(target, 'providers.local.example.json')));
+    const status = spawnSync(
+      process.execPath,
+      [bootstrap, `--target=${target}`, '--status-json'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(status.status, 0, status.stderr);
+    const statusReport = JSON.parse(status.stdout);
+    assert.equal(statusReport.compatible, true);
+    assert.equal(statusReport.identity.skillVersion, repositoryVersion);
+    assert.equal(
+      statusReport.identity.workspaceMarkerVersion,
+      repositoryVersion,
+    );
+    assert.equal(
+      statusReport.identity.workspacePackageVersion,
+      repositoryVersion,
+    );
+    assert.deepEqual(
+      statusReport.identity.actualRuntimeBuild,
+      statusReport.identity.packagedRuntimeBuild,
+    );
+    assert.ok(Object.values(statusReport.commands).every(Boolean));
 
     const second = spawnSync(
       process.execPath,
@@ -612,6 +649,123 @@ test('bootstrap creates an isolated resumable workspace and is idempotent', asyn
     );
     assert.equal(second.status, 0, second.stderr);
     assert.match(second.stdout, /保留现有文件/);
+  } finally {
+    await fsp.rm(target, {recursive: true, force: true});
+  }
+});
+
+test('bootstrap upgrades only the managed runtime and preserves user work', async () => {
+  const target = await fsp.mkdtemp(
+    path.join(os.tmpdir(), 'paper-collage-plugin-upgrade-'),
+  );
+  const bootstrap = path.join(
+    PLUGIN_ROOT,
+    'scripts',
+    'bootstrap-workspace.mjs',
+  );
+  try {
+    const first = spawnSync(
+      process.execPath,
+      [bootstrap, `--target=${target}`],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(first.status, 0, first.stderr);
+
+    const userProjectFile = path.join(
+      target,
+      'projects',
+      'user-story',
+      'project.json',
+    );
+    const userAssetFile = path.join(
+      target,
+      'public',
+      'projects',
+      'user-story',
+      'hero.png',
+    );
+    const localProvidersFile = path.join(target, 'providers.local.json');
+    await fsp.mkdir(path.dirname(userProjectFile), {recursive: true});
+    await fsp.mkdir(path.dirname(userAssetFile), {recursive: true});
+    await fsp.writeFile(userProjectFile, '{"owner":"user"}\n', 'utf8');
+    await fsp.writeFile(userAssetFile, 'user-asset', 'utf8');
+    await fsp.writeFile(
+      localProvidersFile,
+      '{"schemaVersion":1,"capabilities":{"text":{"defaultProvider":"custom-text"}}}\n',
+      'utf8',
+    );
+    await fsp.writeFile(
+      path.join(target, 'scripts', 'project-lib.mjs'),
+      'managed runtime drift\n',
+      'utf8',
+    );
+    const markerFile = path.join(
+      target,
+      '.paper-collage-video-workspace.json',
+    );
+    const marker = readJson(markerFile);
+    marker.pluginVersion = '0.0.0-old';
+    await fsp.writeFile(
+      markerFile,
+      `${JSON.stringify(marker, null, 2)}\n`,
+      'utf8',
+    );
+
+    const blocked = spawnSync(
+      process.execPath,
+      [bootstrap, `--target=${target}`],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(blocked.status, 1);
+    assert.match(blocked.stderr, /--upgrade/);
+    const staleStatus = spawnSync(
+      process.execPath,
+      [bootstrap, `--target=${target}`, '--status-json'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(staleStatus.status, 0, staleStatus.stderr);
+    assert.equal(JSON.parse(staleStatus.stdout).compatible, false);
+
+    const upgraded = spawnSync(
+      process.execPath,
+      [bootstrap, `--target=${target}`, '--upgrade'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(upgraded.status, 0, upgraded.stderr);
+    assert.match(upgraded.stdout, /受管运行时已升级/);
+    assert.equal(
+      await fsp.readFile(userProjectFile, 'utf8'),
+      '{"owner":"user"}\n',
+    );
+    assert.equal(
+      await fsp.readFile(userAssetFile, 'utf8'),
+      'user-asset',
+    );
+    assert.equal(
+      await fsp.readFile(localProvidersFile, 'utf8'),
+      '{"schemaVersion":1,"capabilities":{"text":{"defaultProvider":"custom-text"}}}\n',
+    );
+    assert.deepEqual(
+      await fsp.readFile(path.join(target, 'scripts', 'project-lib.mjs')),
+      await fsp.readFile(
+        path.join(RUNTIME_ROOT, 'scripts', 'project-lib.mjs'),
+      ),
+    );
+    const upgradedMarker = readJson(markerFile);
+    assert.equal(upgradedMarker.schemaVersion, 2);
+    assert.equal(upgradedMarker.pluginVersion, repositoryVersion);
+    assert.equal(upgradedMarker.previousPluginVersion, '0.0.0-old');
+    assert.match(upgradedMarker.runtimeBuildFingerprint, /^[a-f0-9]{64}$/);
+    assert.ok(
+      readJson(path.join(target, 'providers.json')).capabilities.sound,
+    );
+    const currentStatus = spawnSync(
+      process.execPath,
+      [bootstrap, `--target=${target}`, '--status-json'],
+      {cwd: ROOT, encoding: 'utf8'},
+    );
+    assert.equal(currentStatus.status, 0, currentStatus.stderr);
+    assert.equal(JSON.parse(currentStatus.stdout).compatible, true);
   } finally {
     await fsp.rm(target, {recursive: true, force: true});
   }

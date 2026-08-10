@@ -43,7 +43,9 @@ invalidates all dependent style/proof/render evidence.
   the full film, every scene's start/middle/end, and motion-bearing clips.
   Geometry, layer order, facing, state playback, displacement, camera, timing,
   and transitions are therefore decided before the expensive asset pass.
-- The human owns every visual judgment on this surface. Machine checks may
+- The human owns every visual judgment on this surface, including visible
+  seams, clipping, accidental occlusion, layer order, broken assets, facing,
+  loop/displacement coordination, and overall appeal. Machine checks may
   confirm artifact readability, coverage, hashes, and freshness only. Show the
   style sample, animatic, contact sheet, clips, voice audition, and motion card
   together and record one approval or one revision response.
@@ -51,10 +53,13 @@ invalidates all dependent style/proof/render evidence.
   Show `motion-language-card.json` with the sample and blueprint. It must expose the
   whole-film grammar, pacing, camera/transition/ambient strategy, per-scene
   performance roles and proof anchors, final holds, exceptions, and
-  `approvalFingerprint`. `approve-style-voice` writes the attributable human
-  note and current Style Profile/motion/visual-blueprint bindings to
-  `motion-approval.json` and `visual-blueprint-approval.json`. This is not a
-  fourth gate.
+  `approvalFingerprint`. `project:visual-blueprint` writes a hash-bound review
+  request. After the human explicitly decides the displayed current artifacts,
+  `project:visual-review ... --receipt=<host-attributed-receipt>` atomically
+  writes the receipt and current Style Profile/motion/visual-blueprint bindings
+  to `motion-approval.json` and `visual-blueprint-approval.json`. A blanket
+  permission, user absence, silence, prior message, machine score, or agent note
+  is not a receipt. This is not a fourth gate.
 - A directing-only timing or treatment refinement may keep that approval only
   when `approvalFingerprint` is unchanged; its exact execution fingerprint
   still invalidates stale proof, quality, and render artifacts. Changing motion

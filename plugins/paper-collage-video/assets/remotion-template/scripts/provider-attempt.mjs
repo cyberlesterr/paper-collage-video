@@ -14,7 +14,7 @@ import {
   summarizeGenerationAttempts,
 } from './generation-attempt-lib.mjs';
 import {ROOT, loadProject} from './project-lib.mjs';
-import {assertProviderVisualBlueprintGate} from './visual-blueprint-lib.mjs';
+import {assertProviderVisualBlueprintGate} from './visual-blueprint-review-lib.mjs';
 
 const args = process.argv.slice(2);
 const action = args.find((arg) => !arg.startsWith('--'));

@@ -21,6 +21,41 @@ const STYLE_CATALOG_IMAGE_INPUTS = styleCatalog.styles.map(({image}) => {
   return normalized;
 });
 
+const collectManagedRuntimeFiles = async () => {
+  const roots = [
+    'package.json',
+    'providers.json',
+    'providers.local.example.json',
+    'requirements.txt',
+    'remotion.config.ts',
+    'tsconfig.json',
+    'schemas',
+    'scripts',
+    'src',
+    'templates',
+  ];
+  const files = [];
+  const visit = async (relative) => {
+    const absolute = path.join(RUNTIME_ROOT, relative);
+    const stat = await fs.stat(absolute).catch(() => null);
+    if (!stat) return;
+    if (stat.isFile()) {
+      if (relative !== 'scripts/sync-plugin-package.mjs') {
+        files.push(relative.split(path.sep).join('/'));
+      }
+      return;
+    }
+    const entries = await fs.readdir(absolute, {withFileTypes: true});
+    for (const entry of entries.sort((left, right) =>
+      left.name.localeCompare(right.name)
+    )) {
+      await visit(path.join(relative, entry.name));
+    }
+  };
+  for (const relative of roots) await visit(relative);
+  return files.sort();
+};
+
 export const RUNTIME_EXPLICIT_INPUTS = [
   'package.json',
   'requirements.txt',
@@ -57,6 +92,7 @@ export const RUNTIME_EXPLICIT_INPUTS = [
   'schemas/failure-circuit.schema.json',
   'schemas/style-catalog.schema.json',
   'schemas/style-profile.schema.json',
+  'schemas/sound-effect-plan.schema.json',
   'schemas/visual-blueprint.schema.json',
   'schemas/visual-blueprint-approval.schema.json',
   STYLE_CATALOG_FILE,
@@ -284,10 +320,17 @@ export const discoverRuntimeInputClosure = async ({
 
 const RUNTIME_DISCOVERED_INPUTS = await discoverRuntimeInputClosure();
 
-export const RUNTIME_BUILD_INPUTS = [
+const RUNTIME_OUTPUT_INPUTS = [
   ...RUNTIME_EXPLICIT_INPUTS,
   ...RUNTIME_DISCOVERED_INPUTS,
 ];
+
+export const RUNTIME_BUILD_INPUTS = [
+  ...new Set([
+    ...RUNTIME_OUTPUT_INPUTS,
+    ...(await collectManagedRuntimeFiles()),
+  ]),
+].sort();
 
 const AUDIO_DELIVERY_ONLY_INPUTS = [
   'schemas/audio-calibration.schema.json',
@@ -313,6 +356,7 @@ const NON_OUTPUT_RUNTIME_INPUTS = [
   'fixtures/editorial-fixture.mjs',
   'scripts/production-metrics-lib.mjs',
   'scripts/python-runtime.mjs',
+  'scripts/visual-blueprint-review-lib.mjs',
 ];
 
 const AUDIO_DELIVERY_RUNTIME_INPUTS = new Set([
@@ -330,18 +374,18 @@ const AUDIO_DELIVERY_RUNTIME_INPUTS = new Set([
 ]);
 
 export const RUNTIME_SURFACE_INPUTS = {
-  'final-visual': RUNTIME_BUILD_INPUTS.filter(
+  'final-visual': RUNTIME_OUTPUT_INPUTS.filter(
     (relative) => ![
       ...AUDIO_DELIVERY_ONLY_INPUTS,
       ...NON_OUTPUT_RUNTIME_INPUTS,
     ].includes(relative),
   ),
-  'composition-proof': RUNTIME_BUILD_INPUTS.filter((relative) => ![
+  'composition-proof': RUNTIME_OUTPUT_INPUTS.filter((relative) => ![
     ...AUDIO_DELIVERY_ONLY_INPUTS,
     ...SUBTITLE_PRESENTATION_INPUTS,
     ...NON_OUTPUT_RUNTIME_INPUTS,
   ].includes(relative)),
-  'audio-delivery': RUNTIME_BUILD_INPUTS.filter(
+  'audio-delivery': RUNTIME_OUTPUT_INPUTS.filter(
     (relative) => AUDIO_DELIVERY_RUNTIME_INPUTS.has(relative),
   ),
 };

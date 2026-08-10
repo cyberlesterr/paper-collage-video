@@ -14,7 +14,7 @@ import {
 } from './render-cache-lib.mjs';
 import {createSubtitleContract} from './subtitle-contract-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
-import {assertVisualBlueprintApprovalCurrent} from './visual-blueprint-lib.mjs';
+import {assertVisualBlueprintApprovalCurrent} from './visual-blueprint-review-lib.mjs';
 
 const stableValidation = (report) => ({
   schemaVersion: report.schemaVersion,

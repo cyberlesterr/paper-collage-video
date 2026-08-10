@@ -51,6 +51,31 @@ const staticTreatment = ({id, targetId = 'subject', proofTimeId = null}) => ({
   rationale: 'A still hold keeps this beat readable.',
 });
 
+const bindCompiledSoundEffects = (scene, storyboardScene) => {
+  scene.events ??= [];
+  for (const planned of storyboardScene.compositionPlan?.soundEffects ?? []) {
+    const event =
+      scene.events.find(
+        (candidate) =>
+          candidate.beatId === planned.beatId &&
+          Math.abs(candidate.at - planned.at) <= 0.035,
+      ) ??
+      {
+        id: `fixture-${planned.id}`,
+        beatId: planned.beatId,
+        targetId: planned.targetId,
+        at: planned.at,
+        proofTimeId: planned.proofTimeId,
+        visual: null,
+      };
+    event.sound = {
+      src: planned.output.replace(/^public\//, ''),
+      volume: 1,
+    };
+    if (!scene.events.includes(event)) scene.events.push(event);
+  }
+};
+
 test('state-sheet grids always provide enough cells through the 12-state ceiling', () => {
   assert.deepEqual(stateSheetGridForCount(1), {columns: 2, rows: 2});
   assert.deepEqual(stateSheetGridForCount(4), {columns: 2, rows: 2});
@@ -344,6 +369,7 @@ test('v10 compiles one horizontal looping world with compiler-owned strip roles 
       }],
     },
   };
+  bindCompiledSoundEffects(runtimeScene, frozenStoryboard.scenes[0]);
   assert.deepEqual(validateDirectingExecution({scene: runtimeScene, storyboardScene: frozenStoryboard.scenes[0]}), []);
   runtimeScene.composition.nodes[0].loopingEnvironment.travel.frozen = false;
   assert.ok(validateDirectingExecution({scene: runtimeScene, storyboardScene: frozenStoryboard.scenes[0]})
@@ -406,6 +432,7 @@ test('traverse and bottom-pivot sway treatments require their runtime motion sig
       ],
     },
   };
+  bindCompiledSoundEffects(runtimeScene, storyboard.scenes[0]);
   assert.deepEqual(validateDirectingExecution({
     scene: runtimeScene,
     storyboardScene: storyboard.scenes[0],
@@ -593,6 +620,7 @@ test('question marks and circles route to editable graphics without pose-sheet c
       motion: {keyframes: [{at: 0, offsetY: 0}, {at: 1, offsetY: -0.04}]},
     }]},
   };
+  bindCompiledSoundEffects(runtimeScene, storyboard.scenes[0]);
   assert.deepEqual(validateDirectingExecution({
     scene: runtimeScene,
     storyboardScene: storyboard.scenes[0],
@@ -707,6 +735,7 @@ test('visual sound effects compile as sparse audio-bound typography with a compl
       },
     ],
   };
+  bindCompiledSoundEffects(runtimeScene, storyboard.scenes[0]);
   assert.deepEqual(validateDirectingExecution({
     scene: runtimeScene,
     storyboardScene: storyboard.scenes[0],
@@ -751,6 +780,7 @@ test('visibility changes compile to persistent events with an explicit initial s
     composition: {nodes: [{id: 'subject', kind: 'asset', visibility: {initial: 'hidden'}, motion: {keyframes: [{at: 0}, {at: 1}]}}]},
     events: [{id: 'subject-show', beatId: 'action', targetId: 'subject', at: 0.48, visual: {kind: 'visibility', action: 'show', transition: 'fade-rise', durationSeconds: 0.5}}],
   };
+  bindCompiledSoundEffects(runtimeScene, storyboard.scenes[0]);
   assert.deepEqual(validateDirectingExecution({scene: runtimeScene, storyboardScene: storyboard.scenes[0]}), []);
   delete runtimeScene.composition.nodes[0].visibility;
   assert.ok(validateDirectingExecution({scene: runtimeScene, storyboardScene: storyboard.scenes[0]})
@@ -878,6 +908,7 @@ test('parallax rigs and motif fields compile into first-class directing plans', 
       ],
     },
   };
+  bindCompiledSoundEffects(runtimeScene, storyboard.scenes[0]);
   assert.deepEqual(validateDirectingExecution({
     scene: runtimeScene,
     storyboardScene: storyboard.scenes[0],
@@ -1069,6 +1100,7 @@ test('state-family authoring compiles a held prelude and registered gait plan th
       }],
     },
   };
+  bindCompiledSoundEffects(runtimeScene, storyboard.scenes[0]);
   assert.deepEqual(validateDirectingExecution({scene: runtimeScene, storyboardScene: storyboard.scenes[0]}), []);
   runtimeScene.composition.nodes[0].playback.activeStateIds = ['stride-b', 'stride-a'];
   assert.ok(validateDirectingExecution({scene: runtimeScene, storyboardScene: storyboard.scenes[0]})

@@ -9,7 +9,7 @@ Build an editable video while keeping the human in charge of concept, style/voic
 
 ## Start With One Small State Read
 
-1. Treat the current directory as a workspace only when `package.json` exposes `project:new`, `project:resume`, `project:preview`, and `project:render`. Otherwise read [references/setup.md](references/setup.md), bootstrap a writable workspace, and run its doctor. If this Skill was injected from a versioned plugin-cache path that no longer exists, stop and report a stale task snapshot — do not scan for or silently select the highest cached version; start a new host session/task so the loader formally exposes the installed version.
+1. Treat the current directory as a workspace only when `package.json` exposes `project:new`, `project:resume`, `project:preview`, and `project:render`. Resolve this loaded Skill's plugin root and run its `bootstrap-workspace.mjs --target=<cwd> --status-json` once before the first project write or provider call. It compares the loaded Skill/installed plugin, workspace marker, workspace package, declared and recomputed full runtime fingerprint, and current required command surface. If `compatible=false`, show the exact identities plus managed replacement/preserved-user scopes and obtain explicit upgrade approval (unless the current user message already authorizes this exact upgrade); then run `--upgrade` and repeat status plus doctor once. Never continue production on a stale workspace. Otherwise, or when no workspace exists, read [references/setup.md](references/setup.md), bootstrap a writable workspace, and run its doctor. If this Skill was injected from a versioned plugin-cache path that no longer exists, stop and report a stale task snapshot — do not scan for or silently select the highest cached version; start a new host session/task so the loader formally exposes the installed version.
 2. Inspect `git status --short` in Git workspaces and preserve unrelated changes.
 3. For an existing slug, run only:
 
@@ -75,7 +75,7 @@ At `capability-review`, use the current host model only to prepare a provisional
    - When one rigid bottle, tank, gauge, cavity, or bezel keeps the same outer frame while its contents change, read `canonical-containers.md` and author one `canonical-container` intent, compiling to one clean plate, one unique canonical frame, one complete content-state sheet, one shared interior polygon, and one authoritative internal surface. Never model the same fill as separate water/waterline nodes or redraw the frame per state.
 
    **Sound and camera IDs**
-   - `beat.soundCue` is only for a discrete event sound effect; narration only ever belongs to `scene.narration` — the compiler rejects the removed `audioCue` field so the two can't be conflated.
+   - `beat.soundCue` is only for a discrete event sound effect; narration only ever belongs to `scene.narration` — the compiler rejects the removed `audioCue` field so the two can't be conflated. `project:storyboard` compiles all cues into one deduplicated `sound-effect-plan.json`, schema-v8 sound requests, and exact event bindings; it removes superseded cue requests. Confirm a `sound` provider only when that plan is non-empty.
    - Camera treatments use the single target id `scene-camera`; scene-number aliases like `scene-04-camera` are invalid.
    - Never render dialogue, exposition, or narration as speech balloons in generated images — spoken content belongs to audio plus subtitles. A rare, short, editable `graphic.role=visual-sfx` typography node may reinforce a discrete impact/motion sound only when it binds the same beat's `soundCue`, stays within the Profile's per-scene count/duration range, begins hidden, and has explicit show/emphasis/hide events. Environmental sound (wind, rain, traffic, crowd) stays audio-only — never turn it into persistent decorative words.
 
@@ -107,17 +107,32 @@ At `style-review`, make the final film understandable before bulk production:
 1. Create exactly one story-specific style sample and only enough fictional speech to judge the voice. This is the only provider image request allowed before this gate.
 2. Materialize the complete approved storyboard into the final schema-v12 execution tree: every scene, duration, camera, z-order, transform, facing, state-sequence playback window, locomotion path, transition, and proof time must already be authored. Missing production sources stay missing; do not fake completion with hand-built opacity piles.
 3. Run `project:visual-blueprint -- <slug>`. It uses the actual `Paper-Collage` renderer and the same project execution tree, retaining current real sources and substituting deterministic labeled proxies only for missing sources. It emits one low-resolution full-film animatic, one contact sheet containing every scene's start/middle/end, and 2–5 second clips for motion-bearing scenes.
-4. Show the human the story-specific sample, full animatic, scene contact sheet, motion clips, fictional voice audition, and `motion-language-card.json` together. The human—not AI or automatic screening—judges composition, depth/layer order, intended occlusion, character travel/facing, state-loop timing versus displacement, camera, pacing, and overall direction. Ask for one combined approval or direct revision notes.
+4. Open or embed the story-specific sample, full animatic, scene contact sheet, every scene's start/middle/end, motion clips, fictional voice audition, and `motion-language-card.json` in the current conversation. Listing paths or saying the command passed is not presentation. The human—not AI or automatic screening—judges composition, depth/layer order, intended occlusion, seams/clipping/broken assets, character travel/facing, state-loop timing versus displacement, camera, pacing, and overall direction. Ask for one combined approval or direct revision notes, then stop at `wait-human`.
 
 Before the single style-sample call, classify its semantic risk. If it is not decorative, author and lock `semantic-contracts.json` as described in `semantic-contracts.md`; do not treat the prompt as the contract. Use a schema-v8 request with the current project's exact `styleProfileBinding`, include every bound directive verbatim, declare all profile-required asset checks, choose an explicit output surface, and bind the current `scenarioRootBinding`. Reserve the quota-consuming attempt before invoking a host image provider.
 
-After explicit approval, run:
+`project:visual-blueprint` also writes
+`visual-blueprint-review-request.json`, binding every shown artifact and its
+hash. Blanket autonomy, permission to work while the user is away, prior
+approval, silence, a machine score, or an agent-authored note is not a visual
+decision. Only after a user message explicitly decides the artifacts from the
+current request may the host create
+`visual-blueprint-review-receipt.json`, binding that request fingerprint and
+the host user-message reference/hash. Then run one of:
 
 ```bash
-npm run project:advance -- <slug> approve-style-voice --note="<explicit decision>"
+npm run project:visual-review -- <slug> approve --receipt=<current-human-receipt.json>
+npm run project:visual-review -- <slug> revise --receipt=<current-human-receipt.json>
 ```
 
-`approve-style-voice` refuses a missing, stale, incomplete, or sample-free visual blueprint. It binds the human note to `visual-blueprint-approval.json` and records the whole-film action-language approval in `motion-approval.json`. All non-style-sample provider requests are blocked until that current approval exists. Replacing proxy sources with production assets does not invalidate the approved blueprint; changing geometry, timing, z-order, facing, playback, camera, transitions, or runtime does. This remains the existing style/voice gate, not an extra wait.
+The old free-text `project:advance ... approve-style-voice --note=...`
+shortcut is rejected. The approval command atomically records the receipt,
+`visual-blueprint-approval.json`, `motion-approval.json`, and production state.
+All non-style-sample provider requests are blocked until that current approval
+exists. Replacing proxy sources with production assets does not invalidate the
+approved blueprint; changing geometry, timing, z-order, facing, playback,
+camera, transitions, or runtime does. This remains the existing style/voice
+gate, not an extra wait.
 
 Never substitute a real-person clone. Treat cloning as a separate opt-in requiring licensed audio and transcript authorization.
 
@@ -173,7 +188,7 @@ At `asset-production`:
    - Never emulate state replacement, a visibility lifecycle, depth parallax, a looping world, or a motif field with overlapping asset piles and opacity toggles.
 
    **Events**
-   - Copy approved proof ids/times/assertions/stateAssertions exactly. Map every storyboard beat to one or more ordered `scene.events[]` records, keeping visual and sound on the same event when they're one beat. Use the storyboard's approved proof id for critical visual/sound events.
+   - Copy approved proof ids/times/assertions/stateAssertions exactly. Use `project:sync-directing` (or the revision commands' built-in atomic sync) to map compiler-owned proof, state playback, path, visibility, graphic, and sound plans into `project.json`; do not maintain a second manual timing implementation. When a newly planned state/source cannot be derived from the current execution tree, provide one scoped `--execution` candidate and let the command fail before any write if it remains unresolved.
    - For every compiled encounter, bind the four matching events with `event.encounter.contractId` and its phase. Only the `answer` event carries the contract's narration cue. Project validation rejects a wrong target, missing/duplicated phase, mistimed cue, or any visibility event that teleports the encountered target.
 10. Run `project:composition-proof`; it synchronizes real narration duration, renders a subtitle-free composition surface, reuses only current surface-scoped fingerprints, renders changed relationship/semantic-contract/spatial-contract evidence, and creates per-member alpha/checkerboard/tight/alpha-band evidence plus family-aware layer-stack and canonical-container mask/progression/terminal proof.
     - Spatial debug frames draw the support polyline, resolved anchor/gap, subtitle zones, and pass/fail state; the proof also samples real state cadence, actual stacking paths, adjacent-scene families/framing, and alpha-tight subject/front bounds where required. A failing spatial or canonical-container proof stops the command.
@@ -210,7 +225,7 @@ At `human-review`, show `preview.mp4`, `contact-sheet.jpg`, `subtitle-contact-sh
 npm run project:advance -- <slug> approve-preview --note="<explicit decision>"
 ```
 
-When the human requests a directing-only revision, export/edit the current compiled storyboard and run `project:revise-preview-directing -- <slug> --input=<storyboard.json>`. Use `--source=asset-production` only for explicit human feedback received after style approval but before assets are sealed; otherwise its default `preview` source requires the recorded preview revision request. The command accepts timing, treatments, proof timing, and legal scene-boundary changes; it rejects changes to the approved arc, style, scene/beat meaning, or proof assertions, recompiles against the approved motion budget, invalidates derived preview/final evidence, and creates one execution-sync work item per affected scene. It does not call a provider or silently change the production profile. A visibility-event proof may show its settled persistent state any time after the event begins and before the same target's next visibility change.
+When the human requests a directing-only revision, export/edit the current compiled storyboard and run `project:revise-preview-directing -- <slug> --input=<storyboard.json>`. Use `--source=asset-production` only for explicit human feedback received after style approval but before assets are sealed; otherwise its default `preview` source requires the recorded preview revision request. The command accepts timing, treatments, proof timing, proof state coverage, and legal scene-boundary changes; it rejects changes to the approved arc, style, scene/beat meaning, or semantic proof assertions, recompiles against the approved motion budget, deterministically synchronizes the execution tree, and commits storyboard/project/revision/production together or writes nothing. Supply `--execution=<candidate-project.json>` only when a newly required source/state cannot be inferred. It invalidates derived preview/final evidence and creates one revalidation work item per affected scene; it does not call a provider or silently change the production profile. A visibility-event proof may show its settled persistent state any time after the event begins and before the same target's next visibility change.
 
 When the recorded human feedback explicitly changes scene meaning, narration, or deliberate stillness, use a schema-v1 authorization and run `project:revise-preview-semantic -- <slug> --input=<storyboard.json> --authorization=<authorization.json>`. Only listed scenes may change; top-level arc/style drift is rejected. A `motionPolicy=locked-static` scene must have a rationale and static-only treatments. The command records old/new concept fingerprints, preserves the approved provider cap, recalculates only legal motion-scene floors, and invalidates all downstream style/proof/render evidence.
 

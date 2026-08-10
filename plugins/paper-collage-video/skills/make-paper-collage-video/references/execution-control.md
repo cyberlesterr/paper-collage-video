@@ -48,13 +48,19 @@ in `projects/<slug>/failure-circuit.jsonl`.
   `PAPER_COLLAGE_EXECUTION_CONTEXT=<stable-label>`. The label enters the input
   fingerprint; it is evidence of a changed environment, not a generic retry
   bypass.
+- Chromium-backed blueprint, proof, preview, and final-render operations run a
+  host-permission preflight before rendering, metrics, or failure-circuit
+  writes. In a restricted host, rerun once in an authorized execution context;
+  do not count the denied launch as a content failure and do not poison the
+  retry circuit.
 - Human rejection of a visual blueprint uses its own review circuit. The same
   unchanged blueprint cannot be rerendered; a second rejected revision stops
   automatic redesign until the human decides how to proceed.
 
 Pending review is not a tool failure. Generate the current visual surface once
-and wait for the human instead of polling status commands or repeatedly
-regenerating contact sheets.
+and actually display its media to the human, then wait instead of polling status
+commands or repeatedly regenerating contact sheets. Blanket autonomy or the
+user being unavailable never converts `wait-human` into `auto-continue`.
 
 ## Coarse Recoverable Batches
 

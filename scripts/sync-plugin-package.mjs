@@ -124,6 +124,7 @@ for (const entry of [
   'scripts/motion-treatment-lib.mjs',
   'scripts/motion-contract-lib.mjs',
   'scripts/motion-approval-lib.mjs',
+  'scripts/sound-effect-lib.mjs',
   'scripts/process-character-sheet.mjs',
   'scripts/derive-registered-family.mjs',
   'scripts/derive-semantic-slices.mjs',
@@ -158,6 +159,7 @@ for (const entry of [
   'scripts/provider-status.mjs',
   'scripts/production-state.mjs',
   'scripts/directing-revision-lib.mjs',
+  'scripts/directing-execution-sync-lib.mjs',
   'scripts/editorial-system-lib.mjs',
   'scripts/project-advance.mjs',
   'scripts/project-assets-ready.mjs',
@@ -167,6 +169,7 @@ for (const entry of [
   'scripts/project-checkpoint.mjs',
   'scripts/project-confirm-concept.mjs',
   'scripts/project-visual-blueprint.mjs',
+  'scripts/project-visual-review.mjs',
   'scripts/project-intake.mjs',
   'scripts/project-composition-proof.mjs',
   'scripts/project-budget.mjs',
@@ -197,6 +200,7 @@ for (const entry of [
   'scripts/project-world-topology-proof.mjs',
   'scripts/project-revise-preview-directing.mjs',
   'scripts/project-revise-preview-semantic.mjs',
+  'scripts/project-sync-directing.mjs',
   'scripts/project-semantic-contracts.mjs',
   'scripts/storyboard-lib.mjs',
   'scripts/render-phase2-proof.mjs',
@@ -228,6 +232,7 @@ for (const entry of [
   'scripts/style-motion-proof.mjs',
   'scripts/style-proof-lib.mjs',
   'scripts/visual-blueprint-lib.mjs',
+  'scripts/visual-blueprint-review-lib.mjs',
   'scripts/world-trajectory-lib.mjs',
   'src/Root.tsx',
   'src/MainVideo.tsx',
@@ -353,6 +358,7 @@ const workspacePackage = {
     'project:semantic-contracts': rootPackage.scripts['project:semantic-contracts'],
     'project:confirm-concept': rootPackage.scripts['project:confirm-concept'],
     'project:visual-blueprint': rootPackage.scripts['project:visual-blueprint'],
+    'project:visual-review': rootPackage.scripts['project:visual-review'],
     'project:quality': rootPackage.scripts['project:quality'],
     'project:composition-proof': rootPackage.scripts['project:composition-proof'],
     'project:metrics': rootPackage.scripts['project:metrics'],
@@ -371,6 +377,7 @@ const workspacePackage = {
     'project:audio-calibration': rootPackage.scripts['project:audio-calibration'],
     'project:stitch-narration': rootPackage.scripts['project:stitch-narration'],
     'project:sync': rootPackage.scripts['project:sync'],
+    'project:sync-directing': rootPackage.scripts['project:sync-directing'],
     'project:subtitles': rootPackage.scripts['project:subtitles'],
     'project:validate': rootPackage.scripts['project:validate'],
     'project:preview': rootPackage.scripts['project:preview'],
@@ -952,6 +959,12 @@ const runtimeQualityLib = await import(
 const runtimeVisualBlueprintLib = await import(
   `${pathToFileURL(path.join(RUNTIME_ROOT, 'scripts', 'visual-blueprint-lib.mjs')).href}?sync=${Date.now()}`,
 );
+const runtimeVisualBlueprintReviewLib = await import(
+  `${pathToFileURL(path.join(RUNTIME_ROOT, 'scripts', 'visual-blueprint-review-lib.mjs')).href}?sync=${Date.now()}`,
+);
+const runtimeMotionApprovalLib = await import(
+  `${pathToFileURL(path.join(RUNTIME_ROOT, 'scripts', 'motion-approval-lib.mjs')).href}?sync=${Date.now()}`,
+);
 const {project: starterRuntimeProject} = await runtimeProjectLib.loadProject(
   'starter-demo',
 );
@@ -1205,7 +1218,7 @@ const starterBlueprintArtifactFiles = [
 ];
 const starterBlueprintReport = {
   $schema: '../../../schemas/visual-blueprint.schema.json',
-  schemaVersion: 1,
+  schemaVersion: 2,
   projectSlug: 'starter-demo',
   generatedAt: at,
   status: 'awaiting-human',
@@ -1222,7 +1235,8 @@ const starterBlueprintReport = {
     runtimeVisualBlueprintLib.visualBlueprintFingerprint(
       starterRuntimeProject,
     ),
-  runtimeBuildFingerprint: packagedRuntimeBuild.fingerprint,
+  runtimeBuildFingerprint:
+    packagedRuntimeBuild.surfaces['final-visual'],
   renderProfile: {
     width: 480,
     height: 270,
@@ -1231,6 +1245,11 @@ const starterBlueprintReport = {
     proxyPolicy: 'keep-current-real-source-else-deterministic-proxy',
   },
   sourceCoverage: {actual: 2, proxy: 0, total: 2, actualRatio: 1},
+  audio: (
+    await runtimeVisualBlueprintLib.materializeVisualBlueprintProject(
+      starterRuntimeProject,
+    )
+  ).audio,
   styleReference: {
     assetId: 'starter-style-sample',
     file: starterStyleSampleRelative,
@@ -1271,6 +1290,7 @@ const starterBlueprintReport = {
     {id: 'motion-clips-for-dynamic-scenes', passed: true},
     {id: 'current-runtime-bound', passed: true},
     {id: 'artifact-hashes-recorded', passed: true},
+    {id: 'audio-policy-disclosed', passed: true},
   ],
   decisionBoundary: {
     machine: '只确认技术完整性，不判断画面好坏。',
@@ -1284,51 +1304,72 @@ const starterBlueprintReportFile = path.join(
 );
 await writeJson(starterBlueprintReportFile, starterBlueprintReport);
 await runtimeVisualBlueprintLib.assertVisualBlueprintReady('starter-demo');
-const starterBlueprintApprovalFile = path.join(
-  RUNTIME_ROOT,
-  'projects',
-  'starter-demo',
-  'visual-blueprint-approval.json',
-);
-await writeJson(starterBlueprintApprovalFile, {
-  $schema: '../../schemas/visual-blueprint-approval.schema.json',
+const starterReviewRequest =
+  await runtimeVisualBlueprintLib.createVisualBlueprintReviewRequest({
+    slug: 'starter-demo',
+    report: starterBlueprintReport,
+    createdAt: at,
+  });
+await writeJson(starterReviewRequest.file, starterReviewRequest.request);
+const starterReviewReceipt = {
+  $schema: '../../schemas/visual-blueprint-review-receipt.schema.json',
   schemaVersion: 1,
   projectSlug: 'starter-demo',
-  status: 'approved',
-  blueprintReport: starterBlueprintRelative(starterBlueprintReportFile),
-  blueprintReportSha256: await hashFile(starterBlueprintReportFile),
-  visualContractFingerprint:
-    starterBlueprintReport.visualContractFingerprint,
-  runtimeBuildFingerprint: packagedRuntimeBuild.fingerprint,
-  decision: {
-    authority: 'human',
-    note: 'Bundled fixture approved by maintainers',
-    decidedAt: at,
+  requestFingerprint: starterReviewRequest.request.requestFingerprint,
+  decision: 'approved',
+  reviewer: {
+    id: 'human:bundled-fixture-maintainer',
+    role: 'human',
   },
-});
-await writeJson(
-  path.join(RUNTIME_ROOT, 'projects', 'starter-demo', 'motion-approval.json'),
-  {
-    schemaVersion: 1,
+  note: 'Bundled fixture approved by maintainers',
+  decidedAt: at,
+  evidence: {
+    kind: 'host-user-message',
+    host: 'repository-package-sync',
+    threadId: 'bundled-fixture',
+    messageReference: 'maintainer-reviewed-starter-blueprint',
+    userMessageSha256: createHash('sha256')
+      .update('Bundled starter fixture maintainer approval')
+      .digest('hex'),
+  },
+};
+starterReviewReceipt.receiptFingerprint =
+  runtimeVisualBlueprintReviewLib.humanReviewReceiptFingerprint(
+    starterReviewReceipt,
+  );
+const starterBlueprintApproval =
+  await runtimeVisualBlueprintReviewLib.recordVisualBlueprintApproval({
     slug: 'starter-demo',
-    approvedAt: at,
-    humanNote: 'Bundled fixture approved by maintainers',
-    styleProfileBinding: storyboard.motionContract.styleProfileBinding,
-    motionApprovalFingerprint:
-      storyboard.motionContract.approvalFingerprint,
-    approvedExecutionFingerprint: storyboard.motionContract.fingerprint,
-    visualBlueprintFingerprint:
-      starterBlueprintReport.visualContractFingerprint,
-    visualBlueprintReport:
-      starterBlueprintRelative(starterBlueprintReportFile),
-    visualBlueprintReportSha256:
-      await hashFile(starterBlueprintReportFile),
-  },
+    receipt: starterReviewReceipt,
+    write: false,
+  });
+const starterMotionApproval =
+  await runtimeMotionApprovalLib.recordMotionApproval({
+    slug: 'starter-demo',
+    visualBlueprint: starterBlueprintApproval.current.ready,
+    reviewReceipt: starterReviewReceipt,
+    write: false,
+  });
+await writeJson(
+  starterBlueprintApproval.receiptFile,
+  starterReviewReceipt,
+);
+await writeJson(
+  starterBlueprintApproval.file,
+  starterBlueprintApproval.record,
+);
+await writeJson(
+  starterMotionApproval.file,
+  starterMotionApproval.record,
 );
 production.artifacts.visualBlueprint =
   starterBlueprintRelative(starterBlueprintReportFile);
 production.artifacts.visualBlueprintApproval =
-  starterBlueprintRelative(starterBlueprintApprovalFile);
+  starterBlueprintRelative(starterBlueprintApproval.file);
+production.artifacts.visualBlueprintReviewRequest =
+  starterBlueprintRelative(starterReviewRequest.file);
+production.artifacts.visualBlueprintReviewReceipt =
+  starterBlueprintRelative(starterBlueprintApproval.receiptFile);
 
 const starterPreparedQuality = await runtimeQualityLib.prepareQualityReport(
   'starter-demo',

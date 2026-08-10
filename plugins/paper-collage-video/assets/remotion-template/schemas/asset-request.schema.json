@@ -9,7 +9,7 @@
     "schemaVersion": {"const": 8},
     "projectSlug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
     "assetId": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
-    "capability": {"enum": ["text", "image", "voice"]},
+    "capability": {"enum": ["text", "image", "voice", "sound"]},
     "output": {"type": "string", "minLength": 1},
     "providerSource": {
       "type": "object",
@@ -108,6 +108,36 @@
         {"required": ["minDurationSeconds"]},
         {"required": ["maxDurationSeconds"]}
       ],
+      "additionalProperties": false
+    },
+    "soundBinding": {
+      "type": "object",
+      "required": ["cue", "bindings"],
+      "properties": {
+        "cue": {"type": "string", "minLength": 1},
+        "bindings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "sceneId",
+              "beatId",
+              "targetId",
+              "at",
+              "proofTimeId"
+            ],
+            "properties": {
+              "sceneId": {"type": "string", "minLength": 1},
+              "beatId": {"type": "string", "minLength": 1},
+              "targetId": {"type": "string", "minLength": 1},
+              "at": {"type": "number", "minimum": 0, "maximum": 1},
+              "proofTimeId": {"type": "string", "minLength": 1}
+            },
+            "additionalProperties": false
+          }
+        }
+      },
       "additionalProperties": false
     },
     "compositionBinding": {
@@ -525,6 +555,8 @@
     {"if": {"required": ["containerPackageBinding"]}, "then": {"properties": {"capability": {"const": "image"}}}},
     {"if": {"required": ["stateSheetRecoveryBinding"]}, "then": {"required": ["stateSheetBinding", "quality", "compositionBinding"], "properties": {"compositionBinding": {"properties": {"pattern": {"const": "state-sequence"}}}}}},
     {"if": {"properties": {"capability": {"const": "voice"}}}, "then": {"required": ["text"]}},
+    {"if": {"properties": {"capability": {"const": "sound"}}}, "then": {"required": ["prompt", "soundBinding"]}},
+    {"if": {"required": ["soundBinding"]}, "then": {"properties": {"capability": {"const": "sound"}}}},
     {"if": {"required": ["timingBinding"]}, "then": {"properties": {"capability": {"const": "voice"}}}}
   ],
   "$defs": {

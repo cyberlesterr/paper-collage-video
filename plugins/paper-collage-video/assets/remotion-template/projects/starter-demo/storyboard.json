@@ -510,12 +510,13 @@
         ],
         "motifFields": [],
         "graphics": [],
+        "soundEffects": [],
         "layerStacks": [],
         "loopingEnvironments": [],
         "canonicalContainers": []
       },
       "directing": {
-        "fingerprint": "a6b601980d443e3560db0f557867b2390f9f0e167240fd4a61577842e8fc7bec",
+        "fingerprint": "e6e35f22a4a036a1f24c9d8aeddc9201d71aa799f8aa5c40bfc63602765f585e",
         "treatmentCount": 3,
         "riskScore": 13,
         "highestRiskTreatmentId": "show-traveler"
@@ -637,6 +638,13 @@
       "hardCeiling": 6,
       "sourcePackagePlans": []
     },
+    "soundEffectPlan": {
+      "schemaVersion": 1,
+      "projectSlug": "starter-demo",
+      "required": false,
+      "requiredSoundEffectCount": 0,
+      "assets": []
+    },
     "styleProofPlan": {
       "requiredCoverage": [
         "baseline:representative"
@@ -648,7 +656,7 @@
           "targetId": "traveler",
           "proofTimeId": "proof-action",
           "riskScore": 13,
-          "directingFingerprint": "a6b601980d443e3560db0f557867b2390f9f0e167240fd4a61577842e8fc7bec",
+          "directingFingerprint": "e6e35f22a4a036a1f24c9d8aeddc9201d71aa799f8aa5c40bfc63602765f585e",
           "sourceFamilyKey": "target:traveler",
           "coverage": [
             "baseline:representative"
@@ -659,8 +667,8 @@
         "target:traveler"
       ],
       "motionContractFingerprint": "1ae3150d35c2e272a042b9d3651b6cb5c6cffe16ab529968edeca9dfb077a320",
-      "fingerprint": "01164240c0b5acbd95c15afb7f1537fd0a40b332c442231129560ec336525eec"
+      "fingerprint": "622f23b60349c20fab0d2e5e8165993d38efd70d20271193bc4d1cf007ba7eed"
     },
-    "fingerprint": "dc5aaf681e20c03f9ca2d86d8e48a9968be81a5502f9b31746e380cbd43cff04"
+    "fingerprint": "21141c67987e60c752f81d1dae559b96e31b40b46e9ab956445be34ed9702c24"
   }
 }

@@ -6,7 +6,7 @@ import {
   fileExists,
   loadProject,
   readJson,
-  writeJson,
+  writeJsonTransaction,
 } from './project-lib.mjs';
 import {
   loadProduction,
@@ -17,6 +17,9 @@ import {
   storyboardFileFor,
 } from './storyboard-lib.mjs';
 import {prepareSemanticRevision} from './directing-revision-lib.mjs';
+import {
+  synchronizeDirectingExecution,
+} from './directing-execution-sync-lib.mjs';
 import {motionLanguageCard} from './motion-contract-lib.mjs';
 
 const args = process.argv.slice(2);
@@ -27,12 +30,13 @@ const valueFor = (name) =>
     ?.slice(name.length + 1);
 const input = valueFor('--input');
 const authorizationInput = valueFor('--authorization');
+const executionInput = valueFor('--execution');
 const json = args.includes('--json');
 
 try {
   if (!slug || !input || !authorizationInput) {
     throw new Error(
-      '用法：project:revise-preview-semantic -- <slug> --input=<storyboard.json> --authorization=<semantic-revision-authorization.json> [--json]',
+      '用法：project:revise-preview-semantic -- <slug> --input=<storyboard.json> --authorization=<semantic-revision-authorization.json> [--execution=<candidate-project.json>] [--json]',
     );
   }
   const [
@@ -86,26 +90,47 @@ try {
     reportPath,
     scenarioOption,
   });
-  await Promise.all([
-    writeJson(storyboardFileFor(slug), result.storyboard),
-    writeJson(
-      paths.projectFile,
-      {
-        ...project,
-        plan: result.plan,
-        motionContract: result.storyboard.motionContract,
-        editorial: result.storyboard.editorial,
-      },
-    ),
-    writeJson(
-      paths.motionLanguageCardFile,
-      motionLanguageCard(result.storyboard.motionContract),
-    ),
-    writeJson(
-      path.join(productionPaths.projectDirectory, 'semantic-revision.json'),
-      result.report,
-    ),
-    writeJson(productionPaths.productionFile, result.production),
+  const executionCandidate = executionInput
+    ? JSON.parse(
+        await fs.readFile(
+          resolveWorkspacePath(
+            executionInput,
+            '语义重编 execution candidate 路径',
+          ),
+          'utf8',
+        ),
+      )
+    : project;
+  const synchronized = synchronizeDirectingExecution({
+    currentProject: {
+      ...project,
+      plan: result.plan,
+    },
+    storyboard: result.storyboard,
+    executionCandidate: {
+      ...executionCandidate,
+      plan: result.plan,
+    },
+    allowedSceneIds: result.report.changedSceneIds,
+  });
+  synchronized.project.plan = result.plan;
+  result.report.executionSyncRequired = false;
+  result.report.executionSync = synchronized.report;
+  await writeJsonTransaction([
+    {file: storyboardFileFor(slug), value: result.storyboard},
+    {file: paths.projectFile, value: synchronized.project},
+    {
+      file: paths.motionLanguageCardFile,
+      value: motionLanguageCard(result.storyboard.motionContract),
+    },
+    {
+      file: path.join(
+        productionPaths.projectDirectory,
+        'semantic-revision.json',
+      ),
+      value: result.report,
+    },
+    {file: productionPaths.productionFile, value: result.production},
   ]);
   await syncReviewFromProduction(slug, result.production);
   if (json) {
@@ -119,7 +144,7 @@ try {
         `  locked-static 重算：${result.report.profilePromiseRecalculation.lockedSceneIds.join(', ')}`,
       );
     }
-    console.log('  旧 style/composition/render 证据已失效；请同步执行树并重新证明。');
+    console.log('  project.json 执行树已在写入前自动同步；旧 style/composition/render 证据已失效，请重新证明。');
     console.log(`  报告：${reportPath}`);
   }
 } catch (error) {

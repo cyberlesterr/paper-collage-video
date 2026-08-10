@@ -6,7 +6,6 @@ import {
   assertConfirmedPlanDecision,
 } from './creative-plan-lib.mjs';
 import {
-  PROVIDER_CAPABILITIES,
   assertSelectedProvidersReady,
   resolveWorkspacePath,
   writeProviderSelections,
@@ -26,6 +25,9 @@ import {
 } from './planning-scenario-lib.mjs';
 import {assertIntakeConfirmed} from './intake-lib.mjs';
 import {readJson} from './project-lib.mjs';
+import {
+  requiredProviderCapabilitiesForStoryboard,
+} from './sound-effect-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
@@ -60,13 +62,6 @@ try {
   const note = String(payload.note ?? '').trim();
   if (!note) throw new Error('确认文件必须记录人的概念与 provider 决定。');
   const selections = normalizeSelections(payload.selections);
-  const supplied = new Set(selections.map(({capability}) => capability));
-  const missing = PROVIDER_CAPABILITIES.filter(
-    (capability) => !supplied.has(capability),
-  );
-  if (missing.length) {
-    throw new Error(`一次确认必须包含 text、image、voice；缺少：${missing.join(', ')}。`);
-  }
   const {paths, state} = await loadProduction(slug);
   if (state.stage !== 'capability-review') {
     throw new Error(
@@ -106,6 +101,17 @@ try {
     project.plan,
     project.styleProfile,
   );
+  const requiredProviderCapabilities =
+    requiredProviderCapabilitiesForStoryboard(storyboard);
+  const supplied = new Set(selections.map(({capability}) => capability));
+  const missing = requiredProviderCapabilities.filter(
+    (capability) => !supplied.has(capability),
+  );
+  if (missing.length) {
+    throw new Error(
+      `本故事板一次确认必须包含 ${requiredProviderCapabilities.join(', ')}；缺少：${missing.join(', ')}。`,
+    );
+  }
   if (selectedScenarioOption) {
     assertStoryboardMatchesScenario(
       selectedScenarioOption,
@@ -130,7 +136,9 @@ try {
     note,
     at,
   });
-  await assertSelectedProvidersReady(slug);
+  await assertSelectedProvidersReady(slug, {
+    capabilities: requiredProviderCapabilities,
+  });
   project.plan = {
     ...project.plan,
     approvedImageBudget,

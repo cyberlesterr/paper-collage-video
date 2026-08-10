@@ -6,6 +6,9 @@ import {
   prepareSemanticRevision,
   storyboardConceptFingerprint,
 } from '../scripts/directing-revision-lib.mjs';
+import {
+  synchronizeDirectingExecution,
+} from '../scripts/directing-execution-sync-lib.mjs';
 import {compileStoryboardDirecting} from '../scripts/storyboard-lib.mjs';
 import {buildProviderRootPlan} from '../scripts/provider-root-plan-lib.mjs';
 import {
@@ -14,6 +17,7 @@ import {
   directingRevisionProduction,
   directingRevisionStyleProfile,
 } from '../fixtures/directing-revision-fixture.mjs';
+import {createEditorialFixture} from '../fixtures/editorial-fixture.mjs';
 
 const loadFixture = async () => {
   const storyboard = compileStoryboardDirecting(structuredClone(directingRevisionAuthoring), {
@@ -29,6 +33,65 @@ const loadFixture = async () => {
     production: structuredClone(directingRevisionProduction),
   };
 };
+
+const executionProjectFor = (storyboard) => ({
+  schemaVersion: 12,
+  slug: storyboard.slug,
+  title: 'Directing revision fixture',
+  intake: {},
+  styleProfile: structuredClone(directingRevisionStyleProfile),
+  plan: structuredClone(directingRevisionPlan),
+  quality: {},
+  video: {width: 1920, height: 1080, fps: 30},
+  theme: {},
+  voice: {},
+  audio: {},
+  motionContract: structuredClone(storyboard.motionContract),
+  editorial: structuredClone(storyboard.editorial),
+  spatialContracts: structuredClone(storyboard.spatialContracts ?? []),
+  worlds: [],
+  trajectoryContracts: [],
+  sceneTransitions: [],
+  scenes: storyboard.scenes.map((scene) => ({
+    id: scene.id,
+    label: scene.title,
+    tailSeconds: 0,
+    motion: {
+      blueprint: scene.blueprint,
+      proofTimes: structuredClone(scene.proofTimes),
+    },
+    composition: {
+      coordinateSpace: {width: 1920, height: 1080},
+      nodes: [
+        {
+          id: 'background',
+          kind: 'asset',
+          assetRole: 'background',
+          z: 0,
+          src: 'fixtures/vox-primitives/background.png',
+          transform: {x: 0, y: 0, width: 1, height: 1},
+        },
+        {
+          id: 'subject',
+          kind: 'asset',
+          assetRole: 'character',
+          z: 1,
+          src: 'fixtures/vox-primitives/traveler.png',
+          visibility: {initial: 'hidden'},
+          transform: {x: 0.3, y: 0.3, width: 0.4, height: 0.5},
+        },
+      ],
+    },
+    camera: {preset: 'static', intensity: 0},
+    narration: {
+      src: 'fixtures/vox-primitives/tone.wav',
+      startSeconds: 0,
+      durationSeconds: scene.estimatedDurationSeconds,
+      text: scene.message,
+    },
+    events: [],
+  })),
+});
 
 test('editorial attribution limits responsive placement changes to affected scenes', () => {
   const before = {
@@ -130,6 +193,78 @@ test('preview directing revision records spatial-contract corrections as directi
   assert.deepEqual(result.report.changedSceneIds, ['scene-01']);
   assert.equal(result.storyboard.spatialContracts.length, 1);
   assert.equal(result.report.protectedConceptFingerprint, storyboardConceptFingerprint(storyboard));
+});
+
+test('proof state coverage is execution-owned and synchronizes atomically without semantic escalation', async () => {
+  const {storyboard, project, production} = await loadFixture();
+  const supplied = structuredClone(storyboard);
+  supplied.scenes[0].proofTimes[1].stateAssertions = [
+    {nodeId: 'subject', stateId: 'visible'},
+  ];
+  const result = prepareDirectingRevision({
+    currentStoryboard: storyboard,
+    suppliedStoryboard: supplied,
+    plan: project.plan,
+    styleProfile: project.styleProfile,
+    production,
+    reportPath:
+      'projects/directing-revision-fixture/directing-revision.json',
+    at: '2026-08-10T01:00:00.000Z',
+  });
+  assert.deepEqual(result.report.changedSceneIds, ['scene-01']);
+  assert.ok(
+    result.report.changedScenes[0].categories.includes('proof-coverage'),
+  );
+  const currentProject = executionProjectFor(storyboard);
+  const synchronized = synchronizeDirectingExecution({
+    currentProject,
+    storyboard: result.storyboard,
+    allowedSceneIds: result.report.changedSceneIds,
+  });
+  assert.deepEqual(
+    synchronized.project.scenes[0].motion.proofTimes,
+    result.storyboard.scenes[0].proofTimes,
+  );
+  assert.equal(synchronized.report.unresolvedIssueCount, 0);
+});
+
+test('execution synchronization removes storyboard/project semantic drift without allowing source smuggling', async () => {
+  const {storyboard} = await loadFixture();
+  const currentProject = executionProjectFor(storyboard);
+  const revised = structuredClone(storyboard);
+  revised.scenes[0].title = '同步后的镜头标题';
+  revised.scenes[0].message = '同步后的旁白文案。';
+  revised.scenes[0].blueprint = 'quiet-lockup';
+  const synchronized = synchronizeDirectingExecution({
+    currentProject,
+    storyboard: revised,
+    allowedSceneIds: ['scene-01'],
+  });
+  assert.equal(
+    synchronized.project.scenes[0].label,
+    '同步后的镜头标题',
+  );
+  assert.equal(
+    synchronized.project.scenes[0].narration.text,
+    '同步后的旁白文案。',
+  );
+  assert.equal(
+    synchronized.project.scenes[0].motion.blueprint,
+    'quiet-lockup',
+  );
+
+  const smuggled = structuredClone(currentProject);
+  smuggled.scenes[0].narration.src = 'unauthorized-new-voice.wav';
+  assert.throws(
+    () =>
+      synchronizeDirectingExecution({
+        currentProject,
+        storyboard: revised,
+        executionCandidate: smuggled,
+        allowedSceneIds: ['scene-01'],
+      }),
+    /改变了旁白源、时长、字幕或其他非导演镜头字段/,
+  );
 });
 
 test('style-review directing revision preserves the approved concept before style approval exists', async () => {
@@ -304,5 +439,86 @@ test('semantic revision cannot change an unapproved scene or masquerade as a dir
       reportPath: 'projects/example/semantic-revision.json',
     }),
     /人工授权|当前项目/,
+  );
+});
+
+test('semantic revision rejects directing changes outside the authorized scene set', async () => {
+  const authoring = structuredClone(directingRevisionAuthoring);
+  const second = structuredClone(authoring.scenes[0]);
+  second.id = 'scene-02';
+  second.title = '第二张纸面';
+  for (const beat of second.beats) {
+    beat.id = `second-${beat.id}`;
+    beat.proofTimeId = `second-${beat.proofTimeId}`;
+    for (const treatment of beat.treatments) {
+      treatment.id = `second-${treatment.id}`;
+      treatment.targetId =
+        treatment.targetId === 'subject' ? 'subject-02' : 'background-02';
+      treatment.proofTimeId = `second-${treatment.proofTimeId}`;
+    }
+  }
+  for (const proof of second.proofTimes) {
+    proof.id = `second-${proof.id}`;
+  }
+  authoring.scenes.push(second);
+  authoring.sceneTransitions = [
+    {
+      id: 'scene-01-scene-02',
+      fromSceneId: 'scene-01',
+      toSceneId: 'scene-02',
+      intent: 'location-change',
+      rationale: '第二张纸面继续同一个可读动作。',
+      treatment: {
+        type: 'wipe',
+        edgeStyle: 'paper',
+        motivation: 'authored',
+        direction: 'left-to-right',
+        durationSeconds: 0.4,
+      },
+    },
+  ];
+  authoring.editorial = createEditorialFixture({
+    sceneIds: ['scene-01', 'scene-02'],
+    mediaDurationSeconds: 12,
+  });
+  const plan = {
+    ...directingRevisionPlan,
+    resolved: {
+      ...directingRevisionPlan.resolved,
+      durationSeconds: 12,
+      sceneCount: 2,
+    },
+  };
+  const current = compileStoryboardDirecting(authoring, {
+    plan,
+    styleProfile: directingRevisionStyleProfile,
+  });
+  const supplied = structuredClone(current);
+  supplied.scenes[0].message = '人工只授权改变第一幕含义。';
+  supplied.scenes[1].beats[1].treatments[0].rationale +=
+    ' 未经授权的导演变化。';
+  const authorization = {
+    schemaVersion: 1,
+    id: 'scene-one-only',
+    slug: current.slug,
+    source: 'preview-changes-requested',
+    allowedSceneIds: ['scene-01'],
+    humanNote: '只修改第一幕。',
+    equivalentQualityEvidence: ['第二幕必须保持不变。'],
+    decidedAt: '2026-08-10T00:30:00.000Z',
+  };
+  assert.throws(
+    () =>
+      prepareSemanticRevision({
+        currentStoryboard: current,
+        suppliedStoryboard: supplied,
+        plan,
+        styleProfile: directingRevisionStyleProfile,
+        production: structuredClone(directingRevisionProduction),
+        authorization,
+        reportPath:
+          'projects/directing-revision-fixture/semantic-revision.json',
+      }),
+    /执行变化越过人类授权镜头：scene-02/,
   );
 });

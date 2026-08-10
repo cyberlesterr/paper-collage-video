@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.paper-collage.dev/visual-blueprint-review-receipt.schema.json",
+  "title": "Host-attributed visual blueprint human decision",
+  "type": "object",
+  "required": [
+    "$schema",
+    "schemaVersion",
+    "projectSlug",
+    "requestFingerprint",
+    "decision",
+    "reviewer",
+    "note",
+    "decidedAt",
+    "evidence",
+    "receiptFingerprint"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": 1},
+    "projectSlug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "requestFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "decision": {"enum": ["approved", "revise"]},
+    "reviewer": {
+      "type": "object",
+      "required": ["id", "role"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^human:.+"},
+        "role": {"const": "human"}
+      },
+      "additionalProperties": false
+    },
+    "note": {"type": "string", "minLength": 1},
+    "decidedAt": {"type": "string", "format": "date-time"},
+    "evidence": {
+      "type": "object",
+      "required": [
+        "kind",
+        "host",
+        "threadId",
+        "messageReference",
+        "userMessageSha256"
+      ],
+      "properties": {
+        "kind": {"const": "host-user-message"},
+        "host": {"type": "string", "minLength": 1},
+        "threadId": {"type": "string", "minLength": 1},
+        "messageReference": {"type": "string", "minLength": 1},
+        "userMessageSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "receiptFingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": false
+}

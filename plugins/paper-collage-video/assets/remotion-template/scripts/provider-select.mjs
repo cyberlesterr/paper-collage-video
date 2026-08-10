@@ -13,7 +13,8 @@ try {
   if (!slug || !capability || !providerId) {
     throw new Error(
       `用法：provider:select -- <slug> <${PROVIDER_CAPABILITIES.join('|')}> <provider-id> ` +
-        '--note=<人的决定> [--scope=project|workspace] [--label=<名称>] [--adapter=host|manual] [--tool=<tool-name>] [--model=<model>]',
+        '--note=<人的决定> [--scope=project|workspace] [--label=<名称>] [--adapter=host|manual] [--tool=<tool-name>] [--model=<model>] ' +
+        '[--output-mode=local-file|public-download-url --output-evidence=<已验证的落盘证据>]',
     );
   }
   const result = await writeProviderSelection({
@@ -25,6 +26,8 @@ try {
     adapter: valueFor('--adapter'),
     tool: valueFor('--tool'),
     model: valueFor('--model'),
+    outputMode: valueFor('--output-mode'),
+    outputEvidence: valueFor('--output-evidence'),
     note: valueFor('--note'),
   });
   console.log(
@@ -34,6 +37,11 @@ try {
   console.log(`  scope: ${result.selection.scope}`);
   if (result.provider.tool) console.log(`  tool: ${result.provider.tool}`);
   if (result.provider.model) console.log(`  model: ${result.provider.model}`);
+  if (result.provider.outputAcquisition) {
+    console.log(
+      `  output: ${result.provider.outputAcquisition.mode} — ${result.provider.outputAcquisition.evidence}`,
+    );
+  }
 } catch (error) {
   console.error(`provider:select failed: ${error.message}`);
   process.exitCode = 1;

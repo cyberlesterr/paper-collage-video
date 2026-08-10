@@ -43,7 +43,9 @@
     "preview": null,
     "final": null,
     "report": null,
-    "contactSheet": null
+    "contactSheet": null,
+    "visualBlueprintReviewRequest": "projects/starter-demo/visual-blueprint-review-request.json",
+    "visualBlueprintReviewReceipt": "projects/starter-demo/visual-blueprint-review-receipt.json"
   },
   "history": [
     {
