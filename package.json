@@ -109,7 +109,7 @@
     "@remotion/cli": "4.0.505",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "remotion": "4.0.505"
+    "remotion": "4.0.509"
   },
   "devDependencies": {
     "@types/react": "19.2.18",
