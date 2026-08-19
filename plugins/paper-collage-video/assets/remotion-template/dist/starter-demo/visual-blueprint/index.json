@@ -636,7 +636,7 @@
     }
   },
   "visualContractFingerprint": "34352527397dd3769b49db283da3c60edbdd83424cca3df13d6b5af19b2cbe1c",
-  "runtimeBuildFingerprint": "3dfc169d62ea41d4224fcfabf5f939319c301829895af1c85faf556028f3001a",
+  "runtimeBuildFingerprint": "639ea870f8582579c90c30bd01acf09a70c9edd114c8580a9be3e7bf258a002f",
   "renderProfile": {
     "width": 480,
     "height": 270,
@@ -683,7 +683,7 @@
   },
   "artifactHashes": {
     "dist/starter-demo/visual-blueprint/animatic.mp4": "184ebabc5edbcc3f5a2126f670ab6df15be559a2b1d505addcd548495ea09a77",
-    "dist/starter-demo/visual-blueprint/scene-keyframes.jpg": "9b22c7bda09741f3145344f1e6f07e3bfdfdd980a3c222fd4c9eddafdb45cb13",
+    "dist/starter-demo/visual-blueprint/scene-keyframes.jpg": "2372ad09a9a138c5ae1c81ec3a05e2280100e0b9d1ebf6628ab3cc6d1fad8554",
     "dist/starter-demo/visual-blueprint/style-frame.jpg": "ffb7022127db51cb0944d5b21352bddff5c0dc851e31d8c49be0d3e7c72f1a6d",
     "dist/starter-demo/visual-blueprint/keyframes/starter-start.jpg": "393407b3f0102734fe3545d011c6ae79d0afeed2f5ee3163f69826529124d5a2",
     "dist/starter-demo/visual-blueprint/keyframes/starter-middle.jpg": "ffb7022127db51cb0944d5b21352bddff5c0dc851e31d8c49be0d3e7c72f1a6d",

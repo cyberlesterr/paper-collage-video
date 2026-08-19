@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {PROVIDER_CAPABILITIES, writeProviderSelection} from './provider-lib.mjs';
 import {ROOT} from './project-lib.mjs';
@@ -6,8 +7,7 @@ import {ROOT} from './project-lib.mjs';
 const args = process.argv.slice(2);
 const positionals = args.filter((arg) => !arg.startsWith('--'));
 const [slug, capability, providerId] = positionals;
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!slug || !capability || !providerId) {

@@ -213,11 +213,10 @@ one sheet to fit a scene-count heuristic. The profile ceiling is not
 permission to spend automatically: concept approval binds the exact
 `sourcePackageDecision` plus `budgetDecision.imageAttemptLimit`. The approved
 cap must cover compiled expected calls, cannot exceed the profile ceiling, and
-is the limit enforced by reservation and project validation. A
-`registered-layer-sheet` source package
-normally costs one provider call, yields three deterministic local derivatives,
-and avoids three isolated calls. Full-context layer edits cost four calls and
-are chosen only when the provider cannot reliably return the registered sheet.
+is the limit enforced by reservation and project validation. Per-strategy
+source-package costs are defined once in `layer-complete-assets.md`; choose
+full-context layer edits only when the provider cannot reliably return the
+registered sheet.
 
 When reducing cost or complexity, remove in this order:
 

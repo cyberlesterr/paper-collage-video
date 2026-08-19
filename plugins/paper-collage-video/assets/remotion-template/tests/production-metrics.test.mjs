@@ -375,3 +375,71 @@ test('quality record-batch emits output and creates a bound incremental scaffold
     await fs.rm(publicDirectory, {recursive: true, force: true});
   }
 });
+
+test('friction report aggregates wasted paid attempts, circuits, and time distribution read-only', async () => {
+  const {buildFrictionReport, renderFrictionMarkdown} = await import(
+    '../scripts/friction-report-lib.mjs'
+  );
+  const slug = `friction-report-${process.pid}`;
+  const projectDirectory = path.join(ROOT, 'projects', slug);
+  try {
+    await fs.mkdir(projectDirectory, {recursive: true});
+    const attemptEvents = [
+      {
+        schemaVersion: 1, attemptId: 'img-a', event: 'reserved', status: 'reserved',
+        projectSlug: slug, assetId: 'hero-plate', provider: 'host-image', model: 'fixture',
+        requestFingerprint: '1'.repeat(64), quotaConsumed: false, output: null,
+        outputSha256: null, note: '', at: '2026-08-18T01:00:00.000Z',
+      },
+      {
+        schemaVersion: 1, attemptId: 'img-a', event: 'closed', status: 'rejected',
+        projectSlug: slug, assetId: 'hero-plate', provider: 'host-image', model: 'fixture',
+        requestFingerprint: '1'.repeat(64), quotaConsumed: true, output: null,
+        outputSha256: null, note: 'canvas mismatch', at: '2026-08-18T01:01:00.000Z',
+      },
+      {
+        schemaVersion: 1, attemptId: 'img-b', event: 'reserved', status: 'reserved',
+        projectSlug: slug, assetId: 'hero-plate', provider: 'host-image', model: 'fixture',
+        requestFingerprint: '2'.repeat(64), quotaConsumed: false, output: null,
+        outputSha256: null, note: '', at: '2026-08-18T01:02:00.000Z',
+      },
+      {
+        schemaVersion: 1, attemptId: 'img-b', event: 'closed', status: 'succeeded',
+        projectSlug: slug, assetId: 'hero-plate', provider: 'host-image', model: 'fixture',
+        requestFingerprint: '2'.repeat(64), quotaConsumed: true,
+        output: 'public/projects/x/hero.png', outputSha256: '3'.repeat(64),
+        note: '', at: '2026-08-18T01:03:00.000Z',
+      },
+    ];
+    await fs.writeFile(
+      path.join(projectDirectory, 'generation-attempts.jsonl'),
+      attemptEvents.map((event) => JSON.stringify(event)).join('\n') + '\n',
+    );
+    const circuitEvent = {
+      schemaVersion: 1, eventId: 'failure-1', event: 'failure', projectSlug: slug,
+      circuitId: 'circuit-fixture', operation: 'composition-proof',
+      inputFingerprint: '4'.repeat(64), failureSignature: '5'.repeat(64),
+      evidence: 'renderer crashed', at: '2026-08-18T01:04:00.000Z',
+    };
+    await fs.writeFile(
+      path.join(projectDirectory, 'failure-circuit.jsonl'),
+      `${JSON.stringify(circuitEvent)}\n`,
+    );
+    const report = await buildFrictionReport({slug});
+    assert.equal(report.attempts.total, 2);
+    assert.equal(report.attempts.quotaConsumed, 2);
+    assert.equal(report.attempts.wastedPaid.length, 1);
+    assert.equal(report.attempts.wastedPaid[0].assetId, 'hero-plate');
+    assert.equal(report.attempts.wastedPaid[0].note, 'canvas mismatch');
+    assert.equal(report.circuits.clusters.length, 1);
+    assert.equal(report.circuits.clusters[0].open, false);
+    assert.equal(report.metrics.available, false);
+    const markdown = renderFrictionMarkdown(report);
+    assert.match(markdown, /已计费但未成为正式资产的调用/);
+    assert.match(markdown, /canvas mismatch/);
+    assert.match(markdown, /候选改进/);
+    assert.match(markdown, /无 production-metrics 记录/);
+  } finally {
+    await fs.rm(projectDirectory, {recursive: true, force: true});
+  }
+});

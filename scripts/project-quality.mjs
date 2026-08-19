@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -21,7 +22,7 @@ import {
 
 const args = process.argv.slice(2);
 const usage =
-  '用法：project:quality -- <slug> <prepare|status|scaffold|contact-sheet|accept-human|record|record-batch> [--scope=all|style] [--input=<reviews.json>] [--output=<path>] [--reviewer=human:<id>] [--note=<用户原话>] [--all] [--quiet] [--json]；也兼容 <action> <slug>。';
+  '用法：project:quality -- <slug> <prepare|status|scaffold|contact-sheet|accept-human|record|record-batch> [--scope=all|style|batch] [--assets=<id,...>] [--scene=<sceneId,...>] [--input=<reviews.json>] [--output=<path>] [--reviewer=human:<id>] [--note=<用户原话>] [--all] [--quiet] [--json]；也兼容 <action> <slug>。带 --assets/--scene 时生成批次早审脚手架（quality-review-scaffold.batch.json），早审记录直接计入最终审。';
 if (args.includes('--help') || args.includes('-h')) {
   console.log(usage);
   process.exit(0);
@@ -42,8 +43,7 @@ const [slug, action = 'status'] = actions.includes(first)
   : [first, second ?? 'status'];
 const quiet = args.includes('--quiet');
 const json = args.includes('--json');
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 const listFor = (name) =>
   (valueFor(name) ?? '')
     .split(',')
@@ -58,6 +58,11 @@ const defaultPendingScaffoldFile = (projectSlug) =>
 
 const defaultContactSheetDirectory = (projectSlug) =>
   path.join(ROOT, 'dist', projectSlug, 'quality-review-contact-sheets');
+
+const contactSheetDirectoryForScaffold = (projectSlug, scaffold) =>
+  scaffold?.reviewScope === 'batch'
+    ? `${defaultContactSheetDirectory(projectSlug)}-batch`
+    : defaultContactSheetDirectory(projectSlug);
 
 const inspectReviewArtifact = async ({
   file,
@@ -117,15 +122,32 @@ try {
   let incrementalScaffold = null;
   let contactSheets = null;
   if (action === 'scaffold') {
-    const reviewScope = valueFor('--scope') ?? 'all';
+    const batchAssets = (valueFor('--assets') ?? '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+    const batchScenes = (valueFor('--scene') ?? '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter(Boolean);
+    const hasBatchFilter = batchAssets.length > 0 || batchScenes.length > 0;
+    const reviewScope =
+      valueFor('--scope') ?? (hasBatchFilter ? 'batch' : 'all');
     const built = await buildQualityReviewScaffold({
       slug,
       reviewer: valueFor('--reviewer') ?? 'human:pending',
       includePassed: args.includes('--all'),
       reviewScope,
+      assetFilter: hasBatchFilter
+        ? {assetIds: batchAssets, sceneIds: batchScenes}
+        : null,
     });
     status = built.status;
-    const output = valueFor('--output') ?? `projects/${slug}/quality-review-scaffold.json`;
+    const output =
+      valueFor('--output') ??
+      (reviewScope === 'batch'
+        ? `projects/${slug}/quality-review-scaffold.batch.json`
+        : `projects/${slug}/quality-review-scaffold.json`);
     const file = path.resolve(ROOT, output);
     if (file !== ROOT && !file.startsWith(`${ROOT}${path.sep}`)) {
       throw new Error(`scaffold 路径越过工作区：${output}`);
@@ -164,7 +186,7 @@ try {
     const output = valueFor('--output');
     const outputDirectory = output
       ? path.resolve(ROOT, output)
-      : defaultContactSheetDirectory(slug);
+      : contactSheetDirectoryForScaffold(slug, scaffold);
     contactSheets = await createQualityReviewContactSheets({
       slug,
       scaffold,
@@ -189,7 +211,7 @@ try {
       throw new Error('accept-human 必须用 --note 保留用户的明确批准原话。');
     }
     const contactSheetIndex = path.join(
-      defaultContactSheetDirectory(slug),
+      contactSheetDirectoryForScaffold(slug, scaffold),
       'index.json',
     );
     await assertQualityReviewContactSheetsCurrent({

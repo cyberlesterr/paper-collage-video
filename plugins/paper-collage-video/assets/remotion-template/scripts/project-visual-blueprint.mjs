@@ -13,8 +13,8 @@ import {loadProduction, recordVisualBlueprint} from './production-state.mjs';
 import {createRuntimeSurfaceFingerprint} from './runtime-build-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
 import {deriveSceneTimeline} from '../src/sceneTimeline.mjs';
-import {assertOperationAllowed} from './failure-circuit-lib.mjs';
 import {
+  assertExecutionRevisedAfterRejection,
   createVisualBlueprintReviewRequest,
   createVisualBlueprintContract,
   findVisualBlueprintStyleReference,
@@ -23,7 +23,6 @@ import {
   validateVisualBlueprintExecution,
   visualBlueprintFingerprint,
   visualBlueprintPaths,
-  visualBlueprintReviewOperation,
 } from './visual-blueprint-lib.mjs';
 
 const args = process.argv.slice(2);
@@ -269,13 +268,11 @@ try {
     );
   }
 
-  await assertOperationAllowed({
-    slug,
-    operation: visualBlueprintReviewOperation,
-    inputFingerprint: visualBlueprintFingerprint(project),
-  });
-
   const paths = visualBlueprintPaths(slug);
+  await assertExecutionRevisedAfterRejection({
+    slug,
+    fingerprint: visualBlueprintFingerprint(project),
+  });
   await fs.rm(paths.directory, {recursive: true, force: true});
   await fs.mkdir(paths.directory, {recursive: true});
   const materialized = await materializeVisualBlueprintProject(project);
@@ -425,6 +422,7 @@ try {
     report,
   });
   await writeJson(reviewRequest.file, reviewRequest.request);
+  await fs.rm(paths.reviewReceipt, {force: true});
   await recordVisualBlueprint(slug, relativeRootPath(paths.report), {
     reviewRequest: relativeRootPath(reviewRequest.file),
   });

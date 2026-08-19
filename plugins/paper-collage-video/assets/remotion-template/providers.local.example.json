@@ -30,6 +30,11 @@
           "adapter": "command",
           "requiredEnv": ["MY_IMAGE_API_KEY"],
           "model": "my-image-model",
+          "nativeCanvas": {
+            "minimumWidth": 960,
+            "minimumHeight": 540,
+            "aspectRatioTolerance": 0.02
+          },
           "command": {
             "executable": "node",
             "args": [

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import {
   approveImageBudgetIncrease,
 } from './creative-plan-lib.mjs';
@@ -18,8 +19,7 @@ import {
 
 const args = process.argv.slice(2);
 const slug = args.find((argument) => !argument.startsWith('--'));
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!slug) {

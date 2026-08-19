@@ -1354,3 +1354,79 @@ test('key-edge inspection requires both chroma direction and proximity to the de
     await fsp.rm(directory, {recursive: true, force: true});
   }
 });
+
+test('a provider-level nativeCanvas declaration accepts and observes a native-size output (F052/F061)', async () => {
+  const directory = await fsp.mkdtemp(path.join(os.tmpdir(), 'provider-native-canvas-'));
+  const nativeOutput = path.join(directory, 'native.png');
+  const tinyOutput = path.join(directory, 'tiny.png');
+  const wrongAspectOutput = path.join(directory, 'wrong-aspect.png');
+  const request = {
+    schemaVersion: 8,
+    capability: 'image',
+    outputSurface: {mode: 'opaque'},
+    compositionBinding: {canvas: {width: 32, height: 32}},
+  };
+  const provider = {
+    id: 'host-image',
+    adapter: 'host',
+    nativeCanvas: {
+      minimumWidth: 16,
+      minimumHeight: 16,
+      aspectRatioTolerance: 0.02,
+    },
+  };
+  try {
+    await sharp({
+      create: {width: 28, height: 28, channels: 3, background: '#cccccc'},
+    }).png().toFile(nativeOutput);
+    await assert.rejects(
+      verifyOutputFile(nativeOutput, request),
+      /与请求画布 32x32 不一致/,
+    );
+    const observed = await verifyOutputFile(nativeOutput, request, {provider});
+    assert.equal(observed.providerSourceObservation.mode, 'provider-native');
+    assert.deepEqual(observed.providerSourceObservation.rawCanvas, {width: 28, height: 28});
+    assert.deepEqual(observed.providerSourceObservation.targetCanvas, {width: 32, height: 32});
+    assert.equal(observed.providerSourceObservation.normalizationRequired, true);
+    const exact = await sharp({
+      create: {width: 32, height: 32, channels: 3, background: '#cccccc'},
+    }).png().toBuffer();
+    await fsp.writeFile(nativeOutput, exact);
+    const exactObserved = await verifyOutputFile(nativeOutput, request, {provider});
+    assert.equal(exactObserved.providerSourceObservation, null);
+    await sharp({
+      create: {width: 8, height: 8, channels: 3, background: '#cccccc'},
+    }).png().toFile(tinyOutput);
+    await assert.rejects(
+      verifyOutputFile(tinyOutput, request, {provider}),
+      /不满足最小尺寸或宽高比容差/,
+    );
+    await sharp({
+      create: {width: 28, height: 20, channels: 3, background: '#cccccc'},
+    }).png().toFile(wrongAspectOutput);
+    await assert.rejects(
+      verifyOutputFile(wrongAspectOutput, request, {provider}),
+      /不满足最小尺寸或宽高比容差/,
+    );
+    const explicitPolicyRequest = {
+      ...request,
+      providerSource: {
+        mode: 'provider-native',
+        minimumWidth: 24,
+        minimumHeight: 24,
+        aspectRatioTolerance: 0.01,
+        normalization: {
+          method: 'deterministic-resize',
+          targetCanvas: {width: 32, height: 32},
+        },
+      },
+    };
+    await sharp({
+      create: {width: 28, height: 28, channels: 3, background: '#cccccc'},
+    }).png().toFile(nativeOutput);
+    const explicit = await verifyOutputFile(nativeOutput, explicitPolicyRequest, {provider});
+    assert.deepEqual(explicit.providerSourceObservation.rawCanvas, {width: 28, height: 28});
+  } finally {
+    await fsp.rm(directory, {recursive: true, force: true});
+  }
+});

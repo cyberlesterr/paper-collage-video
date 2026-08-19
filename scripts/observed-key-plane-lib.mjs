@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import sharp from 'sharp';
 
@@ -15,16 +16,6 @@ export const DEFAULT_OBSERVED_KEY_PLANE_POLICY = Object.freeze({
   minimumForegroundP10Distance: 20,
   maximumInterCellObservedDistance: 16,
 });
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (value === null || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 const sha256Value = (value) =>
   createHash('sha256').update(JSON.stringify(stableValue(value))).digest('hex');

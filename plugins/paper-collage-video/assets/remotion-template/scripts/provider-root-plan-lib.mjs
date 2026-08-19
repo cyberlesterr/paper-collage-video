@@ -1,17 +1,8 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 
 const sha256 = (value) =>
   createHash('sha256').update(value).digest('hex');
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 const SOURCE_PACKAGE_ROLES = {
   'single-background': ['background'],

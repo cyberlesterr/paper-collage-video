@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
 import {ROOT} from './project-lib.mjs';
@@ -16,8 +17,7 @@ import {
 } from './failure-circuit-lib.mjs';
 
 const args = process.argv.slice(2);
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 const separator = args.indexOf('--');
 const childArgs = separator >= 0 ? args.slice(separator + 1) : [];
 const category = valueFor('--category');

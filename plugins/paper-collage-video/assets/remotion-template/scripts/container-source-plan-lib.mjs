@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 const finite = (value) =>
   typeof value === 'number' && Number.isFinite(value);
 
@@ -6,18 +7,6 @@ const nonEmpty = (value) =>
 
 const addIssue = (issues, code, message, location) =>
   issues.push({code, message, location});
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (value && typeof value === 'object') {
-    return Object.fromEntries(
-      Object.entries(value)
-        .sort(([left], [right]) => left.localeCompare(right))
-        .map(([key, child]) => [key, stableValue(child)]),
-    );
-  }
-  return value;
-};
 
 const sameValue = (left, right) =>
   JSON.stringify(stableValue(left)) ===

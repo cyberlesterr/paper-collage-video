@@ -24,7 +24,12 @@
         "host-image": {
           "label": "Host image generation",
           "adapter": "host",
-          "toolHint": "Use an installed image-generation skill or tool, then register the resulting local file with provider:record."
+          "toolHint": "Use an installed image-generation skill or tool, then register the resulting local file with provider:record.",
+          "nativeCanvas": {
+            "minimumWidth": 960,
+            "minimumHeight": 540,
+            "aspectRatioTolerance": 0.02
+          }
         },
         "manual-image": {
           "label": "Imported image",

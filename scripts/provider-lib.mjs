@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -124,16 +125,6 @@ const validStateAnchors = (anchors) =>
       y >= 0 &&
       y <= 1,
   );
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!isPlainObject(value)) return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 export const createRequestFingerprint = ({request, providerId, model}) => {
   const reusableRequest = {
@@ -272,6 +263,27 @@ export const validateProviderConfig = (config) => {
           ))
       ) {
         add('error', 'provider-env', 'requiredEnv 只能包含环境变量名。', `${location}.requiredEnv`);
+      }
+      if (provider?.nativeCanvas !== undefined) {
+        const nativeCanvas = provider.nativeCanvas;
+        if (
+          capability !== 'image' ||
+          !isPlainObject(nativeCanvas) ||
+          !Number.isInteger(nativeCanvas.minimumWidth) ||
+          nativeCanvas.minimumWidth < 2 ||
+          !Number.isInteger(nativeCanvas.minimumHeight) ||
+          nativeCanvas.minimumHeight < 2 ||
+          !Number.isFinite(nativeCanvas.aspectRatioTolerance) ||
+          nativeCanvas.aspectRatioTolerance <= 0 ||
+          nativeCanvas.aspectRatioTolerance > 0.5
+        ) {
+          add(
+            'error',
+            'provider-native-canvas',
+            'nativeCanvas 只用于 image provider，且必须声明 minimumWidth/minimumHeight（≥2）与 aspectRatioTolerance（0–0.5）。',
+            `${location}.nativeCanvas`,
+          );
+        }
       }
       if (provider?.invocation !== undefined) {
         const invocation = provider.invocation;
@@ -1874,7 +1886,29 @@ export const runProviderCommand = (command, commandArgs, options) =>
     });
   });
 
-export const verifyOutputFile = async (file, request = null) => {
+const providerNativeCanvasPolicy = ({provider, request, metadata, expected}) => {
+  const declared = provider?.nativeCanvas;
+  if (
+    !declared ||
+    request.providerSource !== undefined ||
+    request.layerPackageBinding?.sheetLayout?.providerSource ||
+    (metadata.width === expected.width && metadata.height === expected.height)
+  ) {
+    return null;
+  }
+  return {
+    mode: 'provider-native',
+    minimumWidth: declared.minimumWidth,
+    minimumHeight: declared.minimumHeight,
+    aspectRatioTolerance: declared.aspectRatioTolerance,
+    normalization: {
+      method: 'deterministic-resize',
+      targetCanvas: {width: expected.width, height: expected.height},
+    },
+  };
+};
+
+export const verifyOutputFile = async (file, request = null, {provider = null} = {}) => {
   const stat = await fs.stat(file).catch(() => null);
   if (!stat?.isFile() || stat.size < 1) {
     throw new Error(`provider 未生成有效输出：${path.relative(ROOT, file)}`);
@@ -1889,7 +1923,9 @@ export const verifyOutputFile = async (file, request = null) => {
     }
     if (request.schemaVersion >= 3) {
       const expected = request.compositionBinding.canvas;
-      const providerSourcePolicy = request.providerSource ?? null;
+      const providerSourcePolicy =
+        request.providerSource ??
+        providerNativeCanvasPolicy({provider, request, metadata, expected});
       const providerSource =
         request.layerPackageBinding?.sheetLayout?.providerSource ?? null;
       const stateSheetLayout = request.stateSheetBinding?.layout ?? null;
@@ -2249,7 +2285,7 @@ export const recordAssetProvenance = async ({
       metadata,
       keyPlaneObservation,
       providerSourceObservation,
-    } = await verifyOutputFile(output, request));
+    } = await verifyOutputFile(output, request, {provider}));
   } catch (error) {
     if (trackedAttempt && !recoverClosedAttempt) {
       await closeGenerationAttempt({

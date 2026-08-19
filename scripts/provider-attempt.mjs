@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {
   assertProviderConfig,
@@ -18,8 +19,7 @@ import {assertProviderVisualBlueprintGate} from './visual-blueprint-review-lib.m
 
 const args = process.argv.slice(2);
 const action = args.find((arg) => !arg.startsWith('--'));
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 const booleanFor = (name) => {
   const value = valueFor(name);
   if (value === 'true') return true;

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import {
   assertApprovedImageBudgetDecision,
@@ -31,8 +32,7 @@ import {
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 
 const normalizeSelections = (value) => {
   if (Array.isArray(value)) return value;

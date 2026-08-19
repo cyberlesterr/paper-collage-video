@@ -9,21 +9,15 @@ import {
   readJson,
   writeJsonTransaction,
 } from './project-lib.mjs';
-import {
-  assertOperationCircuitClosed,
-  recordOperationSuccess,
-} from './failure-circuit-lib.mjs';
+import {sha256Value} from './contract-utils.mjs';
 import {
   assertVisualBlueprintReady,
   requiredVisualBlueprintArtifactFiles,
   visualBlueprintPaths,
-  visualBlueprintReviewOperation,
   visualBlueprintReviewRequestFingerprint,
 } from './visual-blueprint-lib.mjs';
 
 const HASH_PATTERN = /^[a-f0-9]{64}$/;
-const hashValue = (value) =>
-  createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const hashFile = async (file) =>
   createHash('sha256').update(await fs.readFile(file)).digest('hex');
 const hashJsonDocument = (value) =>
@@ -31,7 +25,7 @@ const hashJsonDocument = (value) =>
 
 export const humanReviewReceiptFingerprint = (receipt) => {
   const {receiptFingerprint, ...value} = receipt;
-  return hashValue(value);
+  return sha256Value(value);
 };
 
 export const assertHumanVisualReviewReceipt = ({
@@ -41,33 +35,56 @@ export const assertHumanVisualReviewReceipt = ({
 }) => {
   const reviewerId = receipt?.reviewer?.id;
   const evidence = receipt?.evidence;
+  const issues = [];
+  if (receipt?.schemaVersion !== 1) issues.push('schemaVersion 必须为 1');
+  if (receipt?.projectSlug !== request?.projectSlug) {
+    issues.push('projectSlug 与当前人审请求不一致');
+  }
+  if (receipt?.requestFingerprint !== request?.requestFingerprint) {
+    issues.push('requestFingerprint 未绑定当前人审请求');
+  }
+  if (!['approved', 'revise'].includes(receipt?.decision)) {
+    issues.push('decision 必须为 approved 或 revise');
+  }
+  if (expectedDecision && receipt?.decision !== expectedDecision) {
+    issues.push(`decision 必须为 ${expectedDecision}`);
+  }
+  if (receipt?.reviewer?.role !== 'human') issues.push('reviewer.role 必须为 human');
   if (
-    receipt?.schemaVersion !== 1 ||
-    receipt.projectSlug !== request?.projectSlug ||
-    receipt.requestFingerprint !== request?.requestFingerprint ||
-    !['approved', 'revise'].includes(receipt.decision) ||
-    (expectedDecision && receipt.decision !== expectedDecision) ||
-    receipt.reviewer?.role !== 'human' ||
     typeof reviewerId !== 'string' ||
     !reviewerId.startsWith('human:') ||
-    reviewerId.length <= 'human:'.length ||
-    typeof receipt.note !== 'string' ||
-    !receipt.note.trim() ||
-    !Number.isFinite(Date.parse(receipt.decidedAt)) ||
-    evidence?.kind !== 'host-user-message' ||
-    typeof evidence.host !== 'string' ||
-    !evidence.host.trim() ||
-    typeof evidence.threadId !== 'string' ||
-    !evidence.threadId.trim() ||
-    typeof evidence.messageReference !== 'string' ||
-    !evidence.messageReference.trim() ||
-    !HASH_PATTERN.test(evidence.userMessageSha256 ?? '') ||
-    !HASH_PATTERN.test(receipt.receiptFingerprint ?? '') ||
+    reviewerId.length <= 'human:'.length
+  ) {
+    issues.push('reviewer.id 必须为 human:<id>');
+  }
+  if (typeof receipt?.note !== 'string' || !receipt.note.trim()) {
+    issues.push('note 必须记录用户的明确决定');
+  }
+  if (!Number.isFinite(Date.parse(receipt?.decidedAt))) {
+    issues.push('decidedAt 必须是有效时间');
+  }
+  if (evidence?.kind !== 'host-user-message') {
+    issues.push('evidence.kind 必须为 host-user-message');
+  }
+  for (const key of ['host', 'threadId', 'messageReference']) {
+    if (typeof evidence?.[key] !== 'string' || !evidence[key].trim()) {
+      issues.push(`evidence.${key} 必须为非空字符串`);
+    }
+  }
+  if (!HASH_PATTERN.test(evidence?.userMessageSha256 ?? '')) {
+    issues.push('evidence.userMessageSha256 必须是 64 位 sha256');
+  }
+  if (!HASH_PATTERN.test(receipt?.receiptFingerprint ?? '')) {
+    issues.push('receiptFingerprint 必须是 64 位 sha256');
+  } else if (
     receipt.receiptFingerprint !== humanReviewReceiptFingerprint(receipt)
   ) {
-    throw new Error(
-      '视觉蓝图决定必须使用绑定当前人审请求和宿主用户消息的有效 human review receipt。',
+    issues.push(
+      'receiptFingerprint 与回执内容不符；可用 project:visual-review make-receipt 代算',
     );
+  }
+  if (issues.length > 0) {
+    throw new Error(`human review receipt 无效：${issues.join('；')}。`);
   }
   if (Date.parse(receipt.decidedAt) < Date.parse(request.createdAt)) {
     throw new Error('human review receipt 早于当前人审请求，不能用于批准。');
@@ -131,10 +148,6 @@ export const recordVisualBlueprintApproval = async ({
     request: current.request,
     expectedDecision: 'approved',
   });
-  await assertOperationCircuitClosed({
-    slug,
-    operation: visualBlueprintReviewOperation,
-  });
   const paths = visualBlueprintPaths(slug);
   const record = {
     $schema: '../../schemas/visual-blueprint-approval.schema.json',
@@ -164,13 +177,6 @@ export const recordVisualBlueprintApproval = async ({
       {file: paths.reviewReceipt, value: validatedReceipt},
       {file: paths.approval, value: record},
     ]);
-    await recordOperationSuccess({
-      slug,
-      operation: visualBlueprintReviewOperation,
-      inputFingerprint:
-        current.ready.report.visualContractFingerprint,
-      note: `human receipt approval: ${validatedReceipt.receiptFingerprint}`,
-    });
   }
   return {
     file: paths.approval,

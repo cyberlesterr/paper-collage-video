@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import {
   buildCreativePlan,
   PRODUCTION_PROFILES,
@@ -20,8 +21,7 @@ import {loadProduction} from './production-state.mjs';
 const args = process.argv.slice(2);
 const json = args.includes('--json');
 const slug = args.find((arg) => !arg.startsWith('--'));
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 
 const optionalNumber = (name, {integer = false} = {}) => {
   const raw = valueFor(name);

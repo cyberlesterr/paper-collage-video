@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -9,16 +10,6 @@ const DEFAULT_ROOT = path.resolve(SCRIPT_DIRECTORY, '..');
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const FINGERPRINT_PATTERN = /^[a-f0-9]{64}$/;
 export const STYLE_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!value || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 export const styleProfileBinding = (styleProfile) => {
   const generation = styleProfile?.generation ?? {};

@@ -71,6 +71,17 @@
           "items": {"type": "string", "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"},
           "uniqueItems": true
         },
+        "nativeCanvas": {
+          "type": "object",
+          "description": "Image provider returns its own native canvas; requests without an explicit providerSource are auto-observed and deterministically normalized to the request canvas instead of being rejected after the paid call.",
+          "required": ["minimumWidth", "minimumHeight", "aspectRatioTolerance"],
+          "properties": {
+            "minimumWidth": {"type": "integer", "minimum": 2},
+            "minimumHeight": {"type": "integer", "minimum": 2},
+            "aspectRatioTolerance": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.5}
+          },
+          "additionalProperties": false
+        },
         "command": {
           "type": "object",
           "required": ["executable", "args"],

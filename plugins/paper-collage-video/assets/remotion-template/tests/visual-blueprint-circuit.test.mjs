@@ -14,6 +14,7 @@ import {
   summarizeFailureCircuits,
 } from '../scripts/failure-circuit-lib.mjs';
 import {
+  assertExecutionRevisedAfterRejection,
   materializeVisualBlueprintProject,
   sceneNeedsMotionClip,
   visualBlueprintReviewRequestFingerprint,
@@ -310,6 +311,13 @@ test('human visual review receipt is bound to the current request and old note s
     assertHumanVisualReviewReceipt({receipt, request}),
     receipt,
   );
+  const reorderedReceipt = Object.fromEntries(
+    Object.entries(receipt).reverse(),
+  );
+  assert.equal(
+    humanReviewReceiptFingerprint(reorderedReceipt),
+    receipt.receiptFingerprint,
+  );
   assert.throws(
     () =>
       assertHumanVisualReviewReceipt({
@@ -319,7 +327,7 @@ test('human visual review receipt is bound to the current request and old note s
           requestFingerprint: 'f'.repeat(64),
         },
       }),
-    /human review receipt/,
+    /requestFingerprint 未绑定当前人审请求/,
   );
 
   const blocked = spawnSync(
@@ -404,7 +412,7 @@ test('unchanged failures stop immediately and the second matching failure opens 
       path.join(root, 'scripts', 'task.mjs'),
       'process.exitCode = 1;\n',
     );
-    const operation = 'visual-blueprint-review';
+    const operation = 'composition-proof';
     const command = {
       slug,
       operation,
@@ -415,14 +423,14 @@ test('unchanged failures stop immediately and the second matching failure opens 
     const firstInput = await computeOperationInputFingerprint(command);
     const failureSignature = deriveFailureSignature({
       operation,
-      explicit: 'human visual blueprint rejected',
+      explicit: 'renderer crashed before writing evidence',
     });
     const first = await recordOperationFailure({
       slug,
       operation,
       inputFingerprint: firstInput,
       failureSignature,
-      evidence: 'first human rejection',
+      evidence: 'first renderer crash',
       root,
     });
     assert.equal(first.circuit.open, false);
@@ -456,7 +464,7 @@ test('unchanged failures stop immediately and the second matching failure opens 
       operation,
       inputFingerprint: secondInput,
       failureSignature,
-      evidence: 'second human rejection',
+      evidence: 'second renderer crash',
       root,
     });
     assert.equal(second.circuit.open, true);
@@ -474,7 +482,7 @@ test('unchanged failures stop immediately and the second matching failure opens 
     await resolveFailureCircuit({
       slug,
       circuitId: second.circuit.circuitId,
-      note: 'human changed the directing strategy',
+      note: 'human confirmed the renderer environment was repaired',
       root,
     });
     await assert.doesNotReject(() =>
@@ -487,6 +495,70 @@ test('unchanged failures stop immediately and the second matching failure opens 
     );
   } finally {
     await fs.rm(root, {recursive: true, force: true});
+  }
+});
+
+test('human revise blocks only an unchanged blueprint and never opens a circuit', async () => {
+  const slug = 'revise-guard-test';
+  const projectDirectory = path.join(ROOT, 'projects', slug);
+  const rejectedFingerprint = 'a'.repeat(64);
+  const requestFingerprint = 'b'.repeat(64);
+  try {
+    await fs.mkdir(projectDirectory, {recursive: true});
+    await fs.writeFile(
+      path.join(projectDirectory, 'visual-blueprint-review-request.json'),
+      `${JSON.stringify({
+        schemaVersion: 1,
+        projectSlug: slug,
+        status: 'awaiting-human',
+        requestFingerprint,
+        visualContractFingerprint: rejectedFingerprint,
+      })}\n`,
+    );
+    await fs.writeFile(
+      path.join(projectDirectory, 'visual-blueprint-review-receipt.json'),
+      `${JSON.stringify({
+        schemaVersion: 1,
+        projectSlug: slug,
+        requestFingerprint,
+        decision: 'revise',
+        note: '荷叶的遮挡顺序不对，青蛙要移到前景。',
+      })}\n`,
+    );
+    await assert.rejects(
+      () =>
+        assertExecutionRevisedAfterRejection({
+          slug,
+          fingerprint: rejectedFingerprint,
+        }),
+      /执行树未发生任何变化/,
+    );
+    await assert.doesNotReject(() =>
+      assertExecutionRevisedAfterRejection({
+        slug,
+        fingerprint: 'c'.repeat(64),
+      }),
+    );
+    await fs.writeFile(
+      path.join(projectDirectory, 'visual-blueprint-review-receipt.json'),
+      `${JSON.stringify({
+        schemaVersion: 1,
+        projectSlug: slug,
+        requestFingerprint,
+        decision: 'approved',
+        note: '通过。',
+      })}\n`,
+    );
+    await assert.doesNotReject(() =>
+      assertExecutionRevisedAfterRejection({
+        slug,
+        fingerprint: rejectedFingerprint,
+      }),
+    );
+    const circuits = await readFailureCircuitEvents(slug);
+    assert.equal(circuits.exists, false);
+  } finally {
+    await fs.rm(projectDirectory, {recursive: true, force: true});
   }
 });
 

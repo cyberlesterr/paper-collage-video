@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -59,19 +60,6 @@ export const CONTRACT_KIND_BY_RISK = {
   'topology-critical': 'topology',
   'mechanism-critical': 'mechanism',
   'diagram-critical': 'diagram',
-};
-
-const isPlainObject = (value) =>
-  value !== null && typeof value === 'object' && !Array.isArray(value);
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!isPlainObject(value)) return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])]),
-  );
 };
 
 export const semanticValueFingerprint = (value) =>

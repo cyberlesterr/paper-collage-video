@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -9,14 +10,6 @@ import {
 
 const sha256Value = (value) =>
   createHash('sha256').update(value).digest('hex');
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (value === null || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value).sort().map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 const workspacePath = (root, input, label) => {
   const resolved = path.resolve(root, input);

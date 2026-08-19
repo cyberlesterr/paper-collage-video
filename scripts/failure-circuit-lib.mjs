@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash, randomUUID} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -11,17 +12,9 @@ const OPERATIONAL_FILES = new Set([
   'production-metrics.json',
   'quality-review-scaffold.json',
   'quality-review-scaffold.pending.json',
+  'quality-review-scaffold.reviewed.json',
+  'quality-review-scaffold.batch.json',
 ]);
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (value === null || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 const hashValue = (value) =>
   createHash('sha256')
@@ -84,7 +77,9 @@ const collectDirectorySignature = async ({
       entries.push({
         file: relative,
         size: stat.size,
-        modifiedMs: Math.floor(stat.mtimeMs),
+        // touch 不算输入变化：有内容哈希的文本文件不再计 mtime，
+        // 无法廉价哈希的二进制仍以 size+mtime 侦测变化。
+        modifiedMs: contentHash === null ? Math.floor(stat.mtimeMs) : null,
         contentHash,
       });
     }
@@ -137,19 +132,8 @@ const circuitIdFor = ({operation, failureSignature}) =>
     .digest('hex')
     .slice(0, 16)}`;
 
-export const normalizeFailureEvidence = (value) =>
-  String(value ?? '')
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .filter(
-      (line) =>
-        /failed|error|错误|失败|缺少|未通过|拒绝|invalid|missing|cannot|must|需要/i.test(
-          line,
-        ),
-    )
-    .slice(-6)
-    .join(' | ')
+const scrubFailureLine = (line) =>
+  line
     .replace(/[a-f0-9]{64}/gi, '<hash>')
     .replace(
       /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi,
@@ -160,6 +144,22 @@ export const normalizeFailureEvidence = (value) =>
     .replace(/\s+/g, ' ')
     .trim();
 
+export const normalizeFailureEvidence = (value) =>
+  scrubFailureLine(
+    String(value ?? '')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .filter(
+        (line) =>
+          /failed|error|错误|失败|缺少|未通过|拒绝|invalid|missing|cannot|must|需要/i.test(
+            line,
+          ),
+      )
+      .slice(-6)
+      .join(' | '),
+  );
+
 export const deriveFailureSignature = ({
   operation,
   exitCode = null,
@@ -168,8 +168,16 @@ export const deriveFailureSignature = ({
   stderr = '',
   explicit = null,
 }) => {
+  const raw = explicit ?? `${stderr}\n${stdout}`;
+  const lastRawLines = String(raw ?? '')
+    .split(/\r?\n/)
+    .map((line) => scrubFailureLine(line))
+    .filter(Boolean)
+    .slice(-3)
+    .join(' | ');
   const evidence =
-    normalizeFailureEvidence(explicit ?? `${stderr}\n${stdout}`) ||
+    normalizeFailureEvidence(raw) ||
+    lastRawLines ||
     `exit=${exitCode ?? 'none'} signal=${signal ?? 'none'}`;
   return hashValue({operation, evidence});
 };

@@ -125,12 +125,15 @@ test('runtime build identity closes over every local static module dependency', 
   });
   assert.deepEqual(discovered, [
     'fixtures/editorial-fixture.mjs',
+    'scripts/contract-utils.mjs',
     'scripts/directing-execution-sync-lib.mjs',
+    'scripts/friction-report-lib.mjs',
     'scripts/production-metrics-lib.mjs',
     'scripts/python-runtime.mjs',
     'scripts/semantic-slices-lib.mjs',
     'scripts/sound-effect-lib.mjs',
     'scripts/state-sheet-lib.mjs',
+    'scripts/storyboard-scaffold-lib.mjs',
     'scripts/timeline-continuity-lib.mjs',
     'scripts/visual-blueprint-review-lib.mjs',
   ]);

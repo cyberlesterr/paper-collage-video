@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {
   transactAssetManifest,
@@ -8,8 +9,7 @@ import {ROOT, assertSlug} from './project-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
-const valueFor = (name) =>
-  args.find((arg) => arg.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 
 try {
   assertSlug(slug);

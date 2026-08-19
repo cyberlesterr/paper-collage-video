@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
@@ -53,7 +54,7 @@ import {
 
 const args = process.argv.slice(2);
 const slug = args.find((argument) => !argument.startsWith('--'));
-const valueFor = (name) => args.find((argument) => argument.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 const durationSeconds = Number(valueFor('--duration') ?? 5);
 const STYLE_PROOF_RENDER_SCALE = 0.5;
 const printUsage = () => {

@@ -850,6 +850,7 @@ test('manual attempt closure requires truthful quota semantics', async () => {
       note: 'provider did not start',
     });
     assert.equal(closed.reused, false);
+    assert.equal(closed.failureCircuit, undefined);
     const retried = await closeGenerationAttempt({
       slug,
       attemptId: reserved.event.attemptId,
@@ -858,41 +859,42 @@ test('manual attempt closure requires truthful quota semantics', async () => {
     });
     assert.equal(retried.reused, true);
     assert.equal((await readGenerationAttemptEvents(slug)).events.length, 2);
+    const uncharged = await reserveGenerationAttempt({
+      request,
+      provider: {id: 'provider'},
+    });
+    const rejectedClosure = await closeGenerationAttempt({
+      slug,
+      attemptId: uncharged.event.attemptId,
+      status: 'rejected',
+      quotaConsumed: true,
+      note: 'provider output failed technical validation',
+    });
+    assert.equal(rejectedClosure.reused, false);
+    assert.equal(rejectedClosure.failureCircuit, undefined);
     await assert.rejects(
       () =>
         reserveGenerationAttempt({
           request,
           provider: {id: 'provider'},
         }),
-      /禁止原样重跑/,
+      /同一请求已被拒绝并计费/,
     );
     const changedRequest = {
       ...request,
-      prompt: 'Changed after the first diagnosed failure',
+      prompt: 'Changed after the rejected paid attempt',
     };
     const changedAttempt = await reserveGenerationAttempt({
       request: changedRequest,
       provider: {id: 'provider'},
     });
-    const repeatedFailure = await closeGenerationAttempt({
+    await closeGenerationAttempt({
       slug,
       attemptId: changedAttempt.event.attemptId,
-      status: 'failed-before-generation',
+      status: 'abandoned',
       quotaConsumed: false,
-      note: 'provider still did not start',
+      note: 'session interrupted before invoke',
     });
-    assert.equal(repeatedFailure.failureCircuit.circuit.open, true);
-    await assert.rejects(
-      () =>
-        reserveGenerationAttempt({
-          request: {
-            ...changedRequest,
-            prompt: 'A third prompt must not bypass the open circuit',
-          },
-          provider: {id: 'provider'},
-        }),
-      /流程熔断已打开/,
-    );
     await assert.rejects(
       () => closeGenerationAttempt({
         slug,

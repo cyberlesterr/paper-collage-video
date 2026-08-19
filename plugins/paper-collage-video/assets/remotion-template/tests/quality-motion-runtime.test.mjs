@@ -14,6 +14,7 @@ import {
   compositionProofReportPath,
   createQualityReviewContactSheets,
   createQualityReviewScaffold,
+  mergeCompositeProofReports,
   prepareQualityReport,
   recordQualityReviews,
   requiresTransparentAssetSurface,
@@ -1151,6 +1152,196 @@ test('asset approval cannot bypass a pending or stale supported-subject composit
     assert.ok(status.report.composites[0].technical.checks.some(({id, passed}) => id === 'proof-current' && !passed));
   } finally {
     await fs.rm(projectDirectory, {recursive: true, force: true});
+    await fs.rm(publicDirectory, {recursive: true, force: true});
+    await fs.rm(distDirectory, {recursive: true, force: true});
+  }
+});
+
+test('coexisting composition and style proof reports merge one evidence set (F062)', () => {
+  const target = {compositeId: 'composite-a', fingerprint: 'f'.repeat(64)};
+  const compositionReport = {
+    schemaVersion: 1,
+    projectSlug: 'merge-test',
+    assetEvidence: [
+      {sceneId: 'scene', nodeId: 'rear', alphaBandInspection: {passed: true}},
+    ],
+    composites: [
+      {
+        compositeId: 'composite-a',
+        fingerprint: 'f'.repeat(64),
+        registeredGeometryProof: {passed: true},
+        proofFrames: [
+          {proofTimeId: 'start', fullFrame: 'dist/a-start.png', crop: 'dist/a-start-crop.png'},
+        ],
+      },
+      {compositeId: 'other', fingerprint: '0'.repeat(64), proofFrames: []},
+    ],
+  };
+  const styleReport = {
+    schemaVersion: 1,
+    projectSlug: 'merge-test',
+    assetEvidence: [
+      {sceneId: 'scene', nodeId: 'rear', alphaBandInspection: {passed: true}},
+      {sceneId: 'scene', nodeId: 'front', alphaBandInspection: {passed: true}},
+    ],
+    composites: [
+      {
+        compositeId: 'composite-a',
+        fingerprint: 'f'.repeat(64),
+        proofFrames: [
+          {proofTimeId: 'start', fullFrame: 'dist/a-start.png', crop: 'dist/a-start-crop.png'},
+          {proofTimeId: 'end', fullFrame: 'dist/a-end.png', crop: 'dist/a-end-crop.png'},
+        ],
+        temporalEvidence: {file: 'dist/a-strip.png', sha256: '1'.repeat(64), frames: []},
+      },
+    ],
+  };
+  const merged = mergeCompositeProofReports({
+    proofReports: [compositionReport, styleReport],
+    target,
+  });
+  assert.equal(merged.composites.length, 1);
+  const entry = merged.composites[0];
+  assert.deepEqual(
+    entry.proofFrames.map(({proofTimeId}) => proofTimeId),
+    ['start', 'end'],
+  );
+  assert.equal(entry.registeredGeometryProof.passed, true);
+  assert.equal(entry.temporalEvidence.file, 'dist/a-strip.png');
+  assert.deepEqual(
+    merged.assetEvidence.map(({nodeId}) => nodeId),
+    ['rear', 'front'],
+  );
+  assert.equal(
+    mergeCompositeProofReports({
+      proofReports: [compositionReport],
+      target: {compositeId: 'missing', fingerprint: 'f'.repeat(64)},
+    }),
+    null,
+  );
+});
+
+test('batch scaffold filters early-review subsets without changing final review semantics', async () => {
+  const slug = `batch-scaffold-${process.pid}`;
+  const publicDirectory = path.join(ROOT, 'public', 'projects', slug);
+  const distDirectory = path.join(ROOT, 'dist', slug);
+  const relative = (file) => path.relative(ROOT, file);
+  const files = {
+    assetA: path.join(publicDirectory, 'asset-a.png'),
+    assetB: path.join(publicDirectory, 'asset-b.png'),
+    reference: path.join(publicDirectory, 'reference.png'),
+    frame: path.join(distDirectory, 'frame.png'),
+    crop: path.join(distDirectory, 'crop.png'),
+  };
+  await fs.mkdir(publicDirectory, {recursive: true});
+  await fs.mkdir(distDirectory, {recursive: true});
+  for (const file of Object.values(files)) {
+    await sharp({
+      create: {width: 8, height: 8, channels: 4, background: '#446688'},
+    }).png().toFile(file);
+  }
+  const makeStatus = () => ({
+    report: {
+      styleProfile: {referenceFile: relative(files.reference)},
+      assets: [
+        {
+          assetId: 'asset-a',
+          file: relative(files.assetA),
+          sources: ['scene:scene-01:node:node-a'],
+          requiredChecks: ['subject-complete'],
+          semanticChecks: {'subject-complete': 'pending'},
+          status: 'pending',
+        },
+        {
+          assetId: 'asset-b',
+          file: relative(files.assetB),
+          sources: ['scene:scene-02:node:node-b'],
+          requiredChecks: ['subject-complete'],
+          semanticChecks: {'subject-complete': 'pending'},
+          status: 'pending',
+        },
+      ],
+      composites: [
+        {
+          compositeId: 'group:scene-01:rig',
+          sceneId: 'scene-01',
+          fingerprint: 'a'.repeat(64),
+          memberNodeIds: ['node-a'],
+          requiredChecks: ['support-contact'],
+          semanticChecks: {'support-contact': 'pending'},
+          status: 'pending',
+        },
+      ],
+    },
+  });
+  const compositionProof = {
+    assetEvidence: [],
+    composites: [
+      {
+        compositeId: 'group:scene-01:rig',
+        fingerprint: 'a'.repeat(64),
+        proofFrames: [
+          {fullFrame: relative(files.frame), crop: relative(files.crop)},
+        ],
+      },
+    ],
+  };
+  try {
+    const byAsset = await createQualityReviewScaffold({
+      status: makeStatus(),
+      projectSlug: slug,
+      reviewer: 'human:pending',
+      compositionProof,
+      reviewScope: 'batch',
+      assetFilter: {assetIds: ['asset-a']},
+    });
+    assert.equal(byAsset.reviewScope, 'batch');
+    assert.deepEqual(byAsset.assetFilter, {assetIds: ['asset-a'], sceneIds: []});
+    assert.deepEqual(byAsset.reviews.map(({assetId}) => assetId), ['asset-a']);
+    const byScene = await createQualityReviewScaffold({
+      status: makeStatus(),
+      projectSlug: slug,
+      reviewer: 'human:pending',
+      compositionProof,
+      reviewScope: 'batch',
+      assetFilter: {sceneIds: ['scene-01']},
+    });
+    assert.deepEqual(
+      byScene.reviews.map((review) => review.assetId ?? review.compositeId),
+      ['asset-a', 'group:scene-01:rig'],
+    );
+    await assert.rejects(
+      () => createQualityReviewScaffold({
+        status: makeStatus(),
+        projectSlug: slug,
+        reviewer: 'human:pending',
+        compositionProof,
+        reviewScope: 'batch',
+        assetFilter: {assetIds: ['missing-asset']},
+      }),
+      /没有匹配到任何待审目标/,
+    );
+    await assert.rejects(
+      () => createQualityReviewScaffold({
+        status: makeStatus(),
+        projectSlug: slug,
+        reviewer: 'human:pending',
+        compositionProof,
+        reviewScope: 'batch',
+      }),
+      /batch 审核必须提供/,
+    );
+    await assert.rejects(
+      () => createQualityReviewScaffold({
+        status: makeStatus(),
+        projectSlug: slug,
+        reviewer: 'human:pending',
+        compositionProof,
+        assetFilter: {assetIds: ['asset-a']},
+      }),
+      /只能与 reviewScope=batch 一起使用/,
+    );
+  } finally {
     await fs.rm(publicDirectory, {recursive: true, force: true});
     await fs.rm(distDirectory, {recursive: true, force: true});
   }

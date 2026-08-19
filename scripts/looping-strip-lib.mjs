@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -44,11 +45,6 @@ export const SEAM_SALIENCE_POLICY = {
 const slugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const nonEmpty = (value) => typeof value === 'string' && value.trim().length > 0;
 const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (!isObject(value)) return value;
-  return Object.fromEntries(Object.keys(value).sort().map((key) => [key, stableValue(value[key])]));
-};
 const sameValue = (left, right) =>
   JSON.stringify(stableValue(left)) === JSON.stringify(stableValue(right));
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');

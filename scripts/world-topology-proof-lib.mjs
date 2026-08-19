@@ -1,14 +1,7 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (value === null || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value).sort().map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 const fingerprint = (value) =>
   createHash('sha256')

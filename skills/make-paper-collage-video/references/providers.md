@@ -106,12 +106,29 @@ divided into the declared grid. Do not resize the provider root before
 `provider:record`.
 
 For an ordinary image whose provider-native canvas may differ from the delivery
-canvas, declare root `providerSource.mode=provider-native`, minimum width/height,
-aspect-ratio tolerance, and
-`normalization={method:"deterministic-resize",targetCanvas:{...}}`. Validation
-accepts only a sufficiently large, aspect-compatible native result and records
-the observed raw and target canvases plus an observation fingerprint. Keep that
-provider result byte-for-byte unchanged, then run:
+canvas, declare the behavior once per provider in `providers.json`:
+
+```json
+"host-image": {
+  "label": "Host image generation",
+  "adapter": "host",
+  "nativeCanvas": {
+    "minimumWidth": 960,
+    "minimumHeight": 540,
+    "aspectRatioTolerance": 0.02
+  }
+}
+```
+
+With that declaration, `provider:record` automatically accepts a native-size
+result for any request that does not carry its own `providerSource` policy:
+it validates the minimum size and aspect tolerance, records the observed raw
+and target canvases plus an observation fingerprint, and never rejects the
+paid call for a size mismatch alone. A per-request root
+`providerSource.mode=provider-native` (with explicit minimums, tolerance, and
+`normalization={method:"deterministic-resize",targetCanvas:{...}}`) still
+overrides the provider default when one asset needs different bounds. Keep
+the provider result byte-for-byte unchanged, then run:
 
 ```bash
 npm run assets:normalize-provider-source -- --spec=projects/<slug>/provider-source-normalization/<asset>.json
@@ -207,14 +224,10 @@ image.
 }
 ```
 
-For a layer-complete family, use exactly one of these source strategies:
-
-1. `registered-layer-sheet`: one 2x2 source containing a flat reference, a
-   clean rear plate, a complete subject silhouette, and a complete front
-   overlay; split the three layer cells deterministically;
-2. `context-preserving-layer-edits`: one complete reference plus three edits,
-   each made with the full reference in provider context and each returning one
-   complete full-canvas layer.
+For a layer-complete family, use exactly one of the two source strategies
+defined in `layer-complete-assets.md` (`registered-layer-sheet` or
+`context-preserving-layer-edits`); that document owns each strategy's cell
+contents, member completeness, and per-strategy costs.
 
 The manifest records the untouched provider root and three local derivatives,
 then computes one family fingerprint. If the provider emits its native size or

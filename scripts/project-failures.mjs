@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {
   FAILURE_CIRCUIT_ROOT,
@@ -10,10 +11,7 @@ import {
 const args = process.argv.slice(2);
 const positionals = args.filter((argument) => !argument.startsWith('--'));
 const [slug, action = 'summary'] = positionals;
-const valueFor = (name) =>
-  args.find((argument) => argument.startsWith(`${name}=`))?.slice(
-    name.length + 1,
-  );
+const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!slug || !['summary', 'resolve'].includes(action)) {

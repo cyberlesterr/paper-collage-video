@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -14,8 +15,7 @@ import {
 import {ROOT, fileExists, readJson} from './project-lib.mjs';
 
 const args = process.argv.slice(2);
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 
 const hashFile = async (file) =>
   createHash('sha256').update(await fs.readFile(file)).digest('hex');

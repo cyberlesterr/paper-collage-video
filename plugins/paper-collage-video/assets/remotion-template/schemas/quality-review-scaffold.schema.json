@@ -20,7 +20,16 @@
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
     },
-    "reviewScope": {"enum": ["all", "style"]},
+    "reviewScope": {"enum": ["all", "style", "batch"]},
+    "assetFilter": {
+      "type": "object",
+      "description": "Present only when reviewScope=batch: the early-review subset this scaffold covers.",
+      "properties": {
+        "assetIds": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "sceneIds": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      },
+      "additionalProperties": false
+    },
     "generatedAt": {"type": "string", "format": "date-time"},
     "sourceReport": {"$ref": "#/$defs/sourceReport"},
     "instructions": {"type": "string", "minLength": 1},

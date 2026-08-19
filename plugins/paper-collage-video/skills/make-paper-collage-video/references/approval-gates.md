@@ -55,11 +55,17 @@ invalidates all dependent style/proof/render evidence.
   performance roles and proof anchors, final holds, exceptions, and
   `approvalFingerprint`. `project:visual-blueprint` writes a hash-bound review
   request. After the human explicitly decides the displayed current artifacts,
-  `project:visual-review ... --receipt=<host-attributed-receipt>` atomically
-  writes the receipt and current Style Profile/motion/visual-blueprint bindings
-  to `motion-approval.json` and `visual-blueprint-approval.json`. A blanket
-  permission, user absence, silence, prior message, machine score, or agent note
-  is not a receipt. This is not a fourth gate.
+  generate the receipt with `project:visual-review -- <slug> make-receipt
+  --decision=... --note="<user wording>" --reviewer=human:<id> --host=...
+  --thread=... --message-ref=... --message-file=<user-message.txt>` — the
+  command binds the current request and computes `userMessageSha256` and
+  `receiptFingerprint` itself. Then `project:visual-review -- <slug>
+  <approve|revise> --receipt=<path>` atomically writes the receipt and current
+  Style Profile/motion/visual-blueprint bindings to `motion-approval.json` and
+  `visual-blueprint-approval.json`. A blanket permission, user absence,
+  silence, prior message, machine score, or agent note is not a receipt. This
+  is not a fourth gate. A `revise` receipt records the human notes; regenerate
+  the blueprint only after actually changing the execution tree.
 - A directing-only timing or treatment refinement may keep that approval only
   when `approvalFingerprint` is unchanged; its exact execution fingerprint
   still invalidates stale proof, quality, and render artifacts. Changing motion

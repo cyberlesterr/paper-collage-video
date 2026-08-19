@@ -89,14 +89,12 @@ basis, final-film effect, and these compiled figures:
 - local derivatives and provider calls avoided;
 - `profilePromise` and planned fulfillment.
 
-Layer-capable scenario source packages use the same production names and exact
-costs as the storyboard compiler: `rigid-master` is 1 provider call with no
-local members, `registered-layer-sheet` is 1 call plus 3 deterministic
-full-canvas members and 3 avoided calls, and
-`context-preserving-layer-edits` is 4 calls plus 3 local members and no avoided
-calls. An ordinary `single-background` is also one call with no derivatives,
-but it is intentionally not a compiled layer package. Do not use any other
-planning-only aliases or hand-author different counts. Before proposing a
+Layer-capable scenario source packages use the exact strategy names and
+compiled per-strategy call/derivative counts defined in
+`layer-complete-assets.md`; the scenario compiler rejects any hand-authored
+count that disagrees. An ordinary `single-background` is one call with no
+derivatives, but it is intentionally not a compiled layer package. Do not use
+any other planning-only aliases. Before proposing a
 registered sheet for a viewport-filling environment, compare the
 provider-native sheet cell dimensions with the largest authored display size
 and camera zoom. A 2x2 package that would make one full-screen member

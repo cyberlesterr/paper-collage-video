@@ -20,6 +20,7 @@ import {
 import {materializeSceneTransitionRecipes} from '../src/sceneTimeline.mjs';
 import {motionLanguageCard} from './motion-contract-lib.mjs';
 import {soundEffectArtifactsFor} from './sound-effect-lib.mjs';
+import {findStoryboardTodoMarkers} from './storyboard-scaffold-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
@@ -36,6 +37,13 @@ try {
   const supplied = JSON.parse(
     await fs.readFile(resolveWorkspacePath(input, 'storyboard 输入路径'), 'utf8'),
   );
+  const todoMarkers = findStoryboardTodoMarkers(supplied);
+  if (todoMarkers.length > 0) {
+    throw new Error(
+      `storyboard 输入仍含 ${todoMarkers.length} 处未完成的脚手架标记，先补齐再编译：\n` +
+        todoMarkers.map((marker) => `- ${marker}`).join('\n'),
+    );
+  }
   const authored = {
     ...supplied,
     $schema: '../../schemas/storyboard.schema.json',

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {resolveWorkspacePath} from './provider-lib.mjs';
@@ -24,10 +25,7 @@ import {motionLanguageCard} from './motion-contract-lib.mjs';
 
 const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
-const valueFor = (name) =>
-  args
-    .find((argument) => argument.startsWith(`${name}=`))
-    ?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 const input = valueFor('--input');
 const authorizationInput = valueFor('--authorization');
 const executionInput = valueFor('--execution');

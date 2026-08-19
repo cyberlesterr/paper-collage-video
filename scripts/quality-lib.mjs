@@ -1904,6 +1904,47 @@ export const buildRegisteredGeometryProofForTarget = async ({
   });
 };
 
+export const mergeCompositeProofReports = ({proofReports, target}) => {
+  const matchesTarget = ({compositeId, fingerprint}) =>
+    compositeId === target.compositeId && fingerprint === target.fingerprint;
+  const matchingReports = proofReports.filter((report) =>
+    (report.composites ?? []).some(matchesTarget),
+  );
+  if (matchingReports.length === 0) return null;
+  const matchingEntries = matchingReports.flatMap((report) =>
+    (report.composites ?? []).filter(matchesTarget),
+  );
+  return {
+    ...matchingReports[0],
+    assetEvidence: matchingReports
+      .flatMap((report) => report.assetEvidence ?? [])
+      .filter(
+        (entry, index, entries) =>
+          entries.findIndex(
+            (candidate) =>
+              candidate.sceneId === entry.sceneId &&
+              candidate.nodeId === entry.nodeId,
+          ) === index,
+      ),
+    composites: [{
+      ...matchingEntries[0],
+      proofFrames: matchingEntries
+        .flatMap((entry) => entry.proofFrames ?? [])
+        .filter(
+          (frame, index, frames) =>
+            frames.findIndex(
+              (candidate) =>
+                candidate.proofTimeId === frame.proofTimeId &&
+                candidate.fullFrame === frame.fullFrame,
+            ) === index,
+        ),
+      temporalEvidence:
+        matchingEntries.find((entry) => entry.temporalEvidence)
+          ?.temporalEvidence ?? null,
+    }],
+  };
+};
+
 export const inspectCompositeTechnical = async ({target, proofReport}) => {
   if (target.reviewScope === 'derivation-only') {
     const registeredFamily = assertRegisteredFamilyGroupMembers({
@@ -2889,15 +2930,9 @@ export const prepareQualityReport = async (
   });
   const inspectedComposites = await Promise.all(targets.map(async (target) => {
     const review = await preservedReview({previous: previousComposites.get(target.compositeId), fingerprint: target.fingerprint, requiredChecks: target.requiredChecks});
-    const currentProofReport = proofReports.find((report) =>
-      report.composites?.some(
-        ({compositeId, fingerprint}) =>
-          compositeId === target.compositeId &&
-          fingerprint === target.fingerprint,
-      ));
     const technical = await inspectCompositeTechnical({
       target,
-      proofReport: currentProofReport ?? null,
+      proofReport: mergeCompositeProofReports({proofReports, target}),
     });
     return {
       compositeId: target.compositeId,
@@ -3158,6 +3193,23 @@ const evidenceRecordsFor = async (files) =>
     )
   ).filter(Boolean);
 
+const qualityEntryMatchesAssetFilter = (entry, assetFilter) => {
+  const assetIds = assetFilter?.assetIds ?? [];
+  const sceneIds = assetFilter?.sceneIds ?? [];
+  if (entry.assetId) {
+    if (assetIds.includes(entry.assetId)) return true;
+    const boundScenes = (entry.sources ?? [])
+      .map((source) => source.match(/^scene:([^:]+):node:.+$/))
+      .filter(Boolean)
+      .map((match) => match[1]);
+    return boundScenes.some((sceneId) => sceneIds.includes(sceneId));
+  }
+  return (
+    sceneIds.includes(entry.sceneId) ||
+    assetIds.includes(entry.compositeId)
+  );
+};
+
 export const createQualityReviewScaffold = async ({
   status,
   projectSlug,
@@ -3166,9 +3218,19 @@ export const createQualityReviewScaffold = async ({
   styleProof = null,
   includePassed = false,
   reviewScope = 'all',
+  assetFilter = null,
 }) => {
-  if (!['all', 'style'].includes(reviewScope)) {
-    throw new Error('质量审核 scope 必须是 all 或 style。');
+  if (!['all', 'style', 'batch'].includes(reviewScope)) {
+    throw new Error('质量审核 scope 必须是 all、style 或 batch。');
+  }
+  if (reviewScope === 'batch') {
+    const assetIds = assetFilter?.assetIds ?? [];
+    const sceneIds = assetFilter?.sceneIds ?? [];
+    if (assetIds.length === 0 && sceneIds.length === 0) {
+      throw new Error('batch 审核必须提供 --assets=<id,...> 或 --scene=<sceneId>。');
+    }
+  } else if (assetFilter) {
+    throw new Error('assetFilter 只能与 reviewScope=batch 一起使用。');
   }
   const proofReports = [compositionProof, styleProof].filter(Boolean);
   const currentProofReports = proofReports.filter((report) =>
@@ -3264,7 +3326,17 @@ export const createQualityReviewScaffold = async ({
         reviewScope !== 'style' ||
         Boolean(entry.assetId) ||
         styleCompositeIds.has(entry.compositeId),
+    )
+    .filter(
+      (entry) =>
+        reviewScope !== 'batch' ||
+        qualityEntryMatchesAssetFilter(entry, assetFilter),
     );
+  if (reviewScope === 'batch' && entries.length === 0) {
+    throw new Error(
+      'batch 过滤没有匹配到任何待审目标；检查 --assets/--scene 是否与当前 quality report 中的 id 一致。',
+    );
+  }
   const reviews = [];
   for (const entry of entries) {
     const assetId = entry.assetId ?? null;
@@ -3334,6 +3406,14 @@ export const createQualityReviewScaffold = async ({
     schemaVersion: 4,
     projectSlug,
     reviewScope,
+    ...(reviewScope === 'batch'
+      ? {
+          assetFilter: {
+            assetIds: assetFilter?.assetIds ?? [],
+            sceneIds: assetFilter?.sceneIds ?? [],
+          },
+        }
+      : {}),
     generatedAt: new Date().toISOString(),
     sourceReport: {
       file: path.relative(ROOT, status.file ?? qualityReportPath(projectSlug)),
@@ -3353,6 +3433,7 @@ export const buildQualityReviewScaffold = async ({
   reviewer = 'human:pending',
   includePassed = false,
   reviewScope = 'all',
+  assetFilter = null,
 }) => {
   const status = await prepareQualityReport(slug, {
     allowPendingSemanticEvidenceTargets: reviewScope === 'style',
@@ -3371,6 +3452,7 @@ export const buildQualityReviewScaffold = async ({
     styleProof,
     includePassed,
     reviewScope,
+    assetFilter,
   });
   status.report.updatedAt = new Date().toISOString();
   scaffold.sourceReport = {

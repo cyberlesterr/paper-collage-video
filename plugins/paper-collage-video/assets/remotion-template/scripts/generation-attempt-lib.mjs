@@ -1,13 +1,8 @@
-import {createHash, randomUUID} from 'node:crypto';
+import {randomUUID} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {
-  assertOperationAllowed,
-  deriveFailureSignature,
-  recordOperationFailure,
-  recordOperationSuccess,
-} from './failure-circuit-lib.mjs';
+import {sha256Value} from './contract-utils.mjs';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(scriptDirectory, '..');
@@ -20,24 +15,12 @@ export const GENERATION_ATTEMPT_STATUSES = [
   'failed-before-generation',
 ];
 
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (value === null || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])]),
-  );
-};
-
 export const generationRequestFingerprint = (request) =>
-  createHash('sha256')
-    .update(JSON.stringify(stableValue(
-      Object.fromEntries(
-        Object.entries(request ?? {}).filter(([key]) => key !== '$schema'),
-      ),
-    )))
-    .digest('hex');
+  sha256Value(
+    Object.fromEntries(
+      Object.entries(request ?? {}).filter(([key]) => key !== '$schema'),
+    ),
+  );
 
 export const isQuotaConsumingImageRequest = (request) =>
   request?.capability === 'image' &&
@@ -179,14 +162,20 @@ export const reserveGenerationAttempt = async ({request, provider, model = null}
     throw new Error('人批准的图片尝试上限为 0，不能发起生图。');
   }
   const requestFingerprint = generationRequestFingerprint(request);
-  await assertOperationAllowed({
-    slug: request.projectSlug,
-    operation: `provider-image:${request.assetId}`,
-    inputFingerprint: requestFingerprint,
-  });
   return withLedgerLock(request.projectSlug, async () => {
     const loaded = await readGenerationAttemptEvents(request.projectSlug);
     const summary = summarizeGenerationAttempts(loaded.events);
+    const rejectedTwin = summary.attempts.find(
+      (attempt) =>
+        attempt.requestFingerprint === requestFingerprint &&
+        attempt.status === 'rejected',
+    );
+    if (rejectedTwin) {
+      throw new Error(
+        `同一请求已被拒绝并计费（${rejectedTwin.attemptId}）；` +
+          '请修改 prompt/参数等真实输入后再预留新的生成尝试。',
+      );
+    }
     if (summary.used + summary.reserved >= maximum) {
       throw new Error(
         `生成图预算已用尽：${summary.used} 已计费，${summary.reserved} 已预留，批准上限 ${maximum}。`,
@@ -331,30 +320,5 @@ export const closeGenerationAttempt = async ({
     await appendEvent(loaded.file, event);
     return {file: loaded.file, event, reused: false};
   });
-  if (
-    !result.reused &&
-    ['rejected', 'abandoned', 'failed-before-generation'].includes(
-      result.event.status,
-    )
-  ) {
-    result.failureCircuit = await recordOperationFailure({
-      slug,
-      operation: `provider-image:${result.event.assetId}`,
-      inputFingerprint: result.event.requestFingerprint,
-      failureSignature: deriveFailureSignature({
-        operation: `provider-image:${result.event.assetId}`,
-        explicit: 'provider image attempt did not produce an accepted asset',
-      }),
-      evidence:
-        `${result.event.status} · quotaConsumed=${result.event.quotaConsumed}` +
-        `${result.event.note ? ` · ${result.event.note}` : ''}`,
-    });
-  } else if (!result.reused && result.event.status === 'succeeded') {
-    await recordOperationSuccess({
-      slug,
-      operation: `provider-image:${result.event.assetId}`,
-      inputFingerprint: result.event.requestFingerprint,
-    });
-  }
   return result;
 };

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import {assertIntakeConfirmed} from './intake-lib.mjs';
 import {
@@ -15,8 +16,7 @@ const args = process.argv.slice(2);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const json = args.includes('--json');
 const replaceUnconfirmedPlan = args.includes('--replace-unconfirmed-plan');
-const valueFor = (name) =>
-  args.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
+const valueFor = (name) => parseCliValue(args, name);
 
 const printScenarios = (scenarios) => {
   const decisions = scenarios.options.map(({id}) =>

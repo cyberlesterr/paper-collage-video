@@ -31,12 +31,14 @@ A recoverable tool error is not a handoff. A genuine blocker may end an automati
 
 ## Failure Circuit
 
-Wrapped production commands and quota-consuming image attempts record failures
-in `projects/<slug>/failure-circuit.jsonl`.
+Wrapped production commands record their failures in
+`projects/<slug>/failure-circuit.jsonl`. Human decisions are not failures:
+blueprint revisions live in the review receipt, and rejected provider attempts
+live in the generation-attempt ledger.
 
-- After a first failure, do not run the same operation with the same input
-  fingerprint. Change a real input or fix the root cause; `--force` is not an
-  override.
+- After a first command failure, do not run the same operation with the same
+  input fingerprint. Change a real input or fix the root cause; `--force` is
+  not an override.
 - A changed input gets one new attempt. If the same normalized failure occurs
   a second time, the circuit opens immediately. Stop autonomous retries, run
   `project:failures -- <slug> summary`, and show the exact risk to the human.
@@ -53,9 +55,13 @@ in `projects/<slug>/failure-circuit.jsonl`.
   writes. In a restricted host, rerun once in an authorized execution context;
   do not count the denied launch as a content failure and do not poison the
   retry circuit.
-- Human rejection of a visual blueprint uses its own review circuit. The same
-  unchanged blueprint cannot be rerendered; a second rejected revision stops
-  automatic redesign until the human decides how to proceed.
+- After a human `revise` receipt, the unchanged blueprint cannot be rerendered
+  — `project:visual-blueprint` rejects it locally until the execution tree
+  actually changes. Act on the revision notes in the receipt; no
+  `project:failures` step is involved.
+- A rejected (quota-consumed) image request cannot be re-reserved with the
+  same request fingerprint — change the prompt or real parameters first. The
+  human-approved `imageAttemptLimit` remains the only spend ceiling.
 
 Pending review is not a tool failure. Generate the current visual surface once
 and actually display its media to the human, then wait instead of polling status

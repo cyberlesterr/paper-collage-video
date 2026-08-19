@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -11,14 +12,6 @@ import {
   resolvePublicFile,
   writeJson,
 } from './project-lib.mjs';
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (value === null || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value).sort().map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 export const audioCalibrationPath = (slug) =>
   path.join(ROOT, 'projects', slug, 'audio-calibration.json');

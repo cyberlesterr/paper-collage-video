@@ -1,3 +1,4 @@
+import {stableValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -34,16 +35,6 @@ const OMITTED_VISUAL_KEYS = new Set([
   'src',
   'timingSrc',
 ]);
-
-const stableValue = (value) => {
-  if (Array.isArray(value)) return value.map(stableValue);
-  if (value === null || typeof value !== 'object') return value;
-  return Object.fromEntries(
-    Object.keys(value)
-      .sort()
-      .map((key) => [key, stableValue(value[key])]),
-  );
-};
 
 const hashValue = (value) =>
   createHash('sha256')
@@ -133,7 +124,33 @@ export const createVisualBlueprintContract = (project) => ({
 export const visualBlueprintFingerprint = (project) =>
   hashValue(createVisualBlueprintContract(project));
 
-export const visualBlueprintReviewOperation = 'visual-blueprint-review';
+const readJsonIfExists = async (file) =>
+  fs
+    .readFile(file, 'utf8')
+    .then((text) => JSON.parse(text))
+    .catch(() => null);
+
+export const assertExecutionRevisedAfterRejection = async ({
+  slug,
+  fingerprint,
+}) => {
+  const paths = visualBlueprintPaths(slug);
+  const [receipt, request] = await Promise.all([
+    readJsonIfExists(paths.reviewReceipt),
+    readJsonIfExists(paths.reviewRequest),
+  ]);
+  if (
+    receipt?.decision === 'revise' &&
+    request &&
+    receipt.requestFingerprint === request.requestFingerprint &&
+    request.visualContractFingerprint === fingerprint
+  ) {
+    throw new Error(
+      '人工已退回当前视觉蓝图，且 project/storyboard 执行树未发生任何变化；' +
+        '请先按回执中的修改意见调整几何、时序或运行时，再重新渲染蓝图。',
+    );
+  }
+};
 
 export const visualBlueprintPaths = (slug) => {
   const paths = projectPaths(slug);

@@ -4,7 +4,7 @@
   "approvedAt": "2026-01-01T00:00:00.000Z",
   "reviewer": "human:bundled-fixture-maintainer",
   "humanNote": "Bundled fixture approved by maintainers",
-  "reviewReceiptFingerprint": "c9aec6f84260493f74a4727a33d5b34c293b3b4c4acdd6a2aee4434fdd51ea54",
+  "reviewReceiptFingerprint": "0a897286a3f986a5279b50b94d36ece9412b07e8b8c64e2e1b0c810ee313904b",
   "styleProfileBinding": {
     "id": "childrens-picture-book-paper",
     "profileFingerprint": "2188718c60920f8709f9e74c14175a6800f2a5a3695ce34b9c27ca94800c7f2e",
@@ -14,5 +14,5 @@
   "approvedExecutionFingerprint": "1ae3150d35c2e272a042b9d3651b6cb5c6cffe16ab529968edeca9dfb077a320",
   "visualBlueprintFingerprint": "34352527397dd3769b49db283da3c60edbdd83424cca3df13d6b5af19b2cbe1c",
   "visualBlueprintReport": "dist/starter-demo/visual-blueprint/index.json",
-  "visualBlueprintReportSha256": "7562bea78f4eb0ffbc7afb066f513c77bf5f8fc5ac5adfe75ed6ce6c94c893d0"
+  "visualBlueprintReportSha256": "22e3d9b8b968d2cf191a6ec971e63557cec8e1454ec5333654f8592d2db4b8df"
 }
