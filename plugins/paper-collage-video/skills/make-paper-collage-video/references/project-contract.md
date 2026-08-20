@@ -151,7 +151,30 @@ whole `generationBudget` object. Do not rebuild it by hand: take it from
 `project:storyboard -- <slug> --input=<file> --json`, or let
 `project:confirm-concept -- <slug> --scaffold` emit the entire selection file.
 Concept approval also requires `budgetDecision.imageAttemptLimit`; it records
-expected calls and the profile ceiling at approval time. Provider requests cannot silently add or change a
+expected calls and the profile ceiling at approval time.
+
+### What each call count includes
+
+The scenario card and the compiled storyboard deliberately count on different
+bases, so their numbers are not expected to match. Reconciling them by hand is
+the wrong move — take each from its own owner.
+
+| Field | Owner | Style sample | Pose-sheet calls | Pose-sheet avoided calls |
+| --- | --- | --- | --- | --- |
+| `providerEstimate.expectedImageCalls` | scenario card | included (always 1) | included | — |
+| `providerEstimate.avoidedCalls` | scenario card | — | — | included |
+| `generationBudget.requiredProviderImageCalls` | storyboard | **excluded** | included | — |
+| `generationBudget.expectedProviderImageCalls` | storyboard | **excluded** | included | — |
+| `generationBudget.avoidedCalls` | storyboard | — | — | **excluded** |
+
+On the storyboard side `expectedProviderImageCalls` is by construction equal to
+`requiredProviderImageCalls`; there is no reserve added between them. The one
+style sample is authorized separately at the style gate, which is why the
+storyboard budget never carries it. `generationBudget.avoidedCalls` counts only
+what layered source packages avoid; the isolated-state calls a pose sheet avoids
+are reported by the scenario card and by `summary.directing.avoidedIsolatedStateCalls`.
+
+Provider requests cannot silently add or change a
 layer package afterward, and storyboard call-count drift invalidates the budget
 approval. A scene has
 `composition.nodes`; nodes are recursive `asset`, `state-sequence`,

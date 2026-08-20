@@ -364,3 +364,84 @@ test('--help prints usage and exits zero instead of reporting a failure', async 
     assert.equal(stderr, '');
   }
 });
+
+// The scenario card and the storyboard budget count on different bases. That is
+// intentional, but it is also what makes hand-reconciling them fail, so the
+// documented asymmetry is pinned here.
+test('scenario and storyboard call counts use their documented bases', async () => {
+  const catalog = await loadStyleCatalog({root: ROOT});
+  const intake = confirmIntake({
+    selection: {
+      aspectRatio: '16:9',
+      visualStylePreset: catalog.styles[0].id,
+      parallaxPreference: 'auto',
+    },
+    catalog,
+    at,
+  });
+  const scenarios = buildPlanningScenarios({
+    slug: 'call-accounting',
+    intake,
+    input: scenarioInput(),
+    at,
+  });
+  const option = scenarios.options.find(({id}) => id === 'balanced');
+  const estimate = option.providerEstimate;
+
+  // Scenario side: the single style sample is inside expectedImageCalls.
+  assert.equal(estimate.styleProofProviderCalls, 1);
+  assert.equal(
+    estimate.expectedImageCalls,
+    estimate.styleProofProviderCalls +
+      estimate.sourcePackageProviderCalls +
+      estimate.poseSheetProviderCalls,
+  );
+
+  const plan = buildCreativePlanFromScenario({
+    slug: 'call-accounting',
+    scenarios,
+    optionId: 'balanced',
+    at,
+  });
+  const project = {
+    slug: 'call-accounting',
+    intake,
+    video: {width: 1920, height: 1080, fps: 30},
+    styleProfile: materializeStyleProfile(catalog, catalog.styles[0].id),
+    plan,
+  };
+  const filled = fillMarkers(buildStoryboardScaffold({project, scenarios}));
+  const storyboard = compileStoryboardDirecting(
+    {
+      ...filled,
+      status: 'ready',
+      sceneTransitions: materializeSceneTransitionRecipes(
+        filled.sceneTransitions,
+        project.styleProfile?.motion?.transitionSet,
+      ),
+      updatedAt: at,
+    },
+    {plan, styleProfile: project.styleProfile},
+  );
+  const budget = storyboard.directingSummary.generationBudget;
+
+  // Storyboard side: the style sample is not in the budget, and expected never
+  // adds a reserve on top of required.
+  assert.equal(
+    budget.requiredProviderImageCalls,
+    budget.sourcePackageProviderCalls + budget.poseSheetProviderCalls,
+  );
+  assert.equal(budget.expectedProviderImageCalls, budget.requiredProviderImageCalls);
+  assert.equal(
+    budget.expectedProviderImageCalls,
+    estimate.expectedImageCalls - estimate.styleProofProviderCalls,
+  );
+
+  // Storyboard avoidedCalls covers layered packages only; the isolated-state
+  // calls a pose sheet avoids are reported separately.
+  assert.ok(storyboard.directingSummary.avoidedIsolatedStateCalls > 0);
+  assert.equal(
+    budget.avoidedCalls,
+    budget.sourcePackagePlans.reduce((sum, plan) => sum + plan.avoidedCalls, 0),
+  );
+});
