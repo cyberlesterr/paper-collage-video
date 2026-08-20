@@ -542,3 +542,42 @@ test('semantic revision rejects directing changes outside the authorized scene s
     /执行变化越过人类授权镜头：scene-02/,
   );
 });
+
+// validateDirectingExecution only walks plan → node, so a state sequence the
+// plan no longer contains was invisible to sync. A hand-edited tree could keep
+// one, sync reported a synchronized and verified tree, and only the blueprint
+// rejected it — the success line read as verification it had not performed.
+test('synchronization names an orphan state sequence instead of passing it through', async () => {
+  const {storyboard} = await loadFixture();
+  const currentProject = executionProjectFor(storyboard);
+  currentProject.scenes[0].composition.nodes.push({
+    id: 'sheep-flock',
+    kind: 'state-sequence',
+    assetRole: 'character',
+    poseFamilyId: 'sheep-actions',
+    z: 3,
+    states: [
+      {id: 'grazing', src: 'fixtures/vox-primitives/traveler.png', at: 0, facing: 'front'},
+      {id: 'grazing', src: 'fixtures/vox-primitives/traveler.png', at: 0.5, facing: 'front'},
+    ],
+    playback: {mode: 'once', cycles: 1},
+    transition: {type: 'cut', durationSeconds: 0},
+    transform: {x: 0.1, y: 0.3, width: 0.2, height: 0.4},
+  });
+  assert.throws(
+    () =>
+      synchronizeDirectingExecution({
+        currentProject,
+        storyboard,
+        allowedSceneIds: ['scene-01'],
+      }),
+    (error) =>
+      error.code === 'DIRECTING_EXECUTION_SYNC_UNRESOLVED' &&
+      error.issues.some(
+        ({code, message}) =>
+          code === 'execution-sync-orphan-state-sequence' &&
+          message.includes('sheep-flock') &&
+          message.includes('--execution'),
+      ),
+  );
+});

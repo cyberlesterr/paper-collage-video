@@ -12,6 +12,7 @@ import {loadStoryboard} from './storyboard-lib.mjs';
 import {
   buildExecutionScaffold,
   executionScaffoldChecklist,
+  validateExecutionTree,
 } from './execution-scaffold-lib.mjs';
 
 const args = process.argv.slice(2);
@@ -36,6 +37,21 @@ try {
   ).catch(() => null);
   const scaffold = buildExecutionScaffold({project, storyboard, manifest});
   const {markers, review} = executionScaffoldChecklist({scaffold, manifest});
+  // Run the blueprint's own checks before writing, so a success line can never
+  // again mean "generated" when the next gate will reject it.
+  const issues = validateExecutionTree({
+    project,
+    storyboard,
+    scenes: scaffold.scenes,
+  });
+  if (issues.length > 0) {
+    throw new Error(
+      `生成的执行树未通过蓝图同款校验（${issues.length} 项），未写入任何项目文件：\n` +
+        issues
+          .map(({location, message}) => `- ${location}: ${message}`)
+          .join('\n'),
+    );
+  }
   await writeJsonTransaction([
     {
       file: paths.projectFile,

@@ -1,4 +1,7 @@
-import {hashCompositionValue} from './composition-lib.mjs';
+import {
+  flattenCompositionNodes,
+  hashCompositionValue,
+} from './composition-lib.mjs';
 import {validateDirectingExecution} from './motion-treatment-lib.mjs';
 
 const clone = (value) => structuredClone(value);
@@ -352,6 +355,29 @@ const syncScene = ({scene, storyboardScene}) => {
   return {issues, changes};
 };
 
+// validateDirectingExecution only walks plan → node, so a state sequence the
+// plan no longer contains is invisible to it. A hand-edited tree could keep such
+// an orphan, sync would report a synchronized and verified tree, and only the
+// blueprint would reject it. Sync will not delete authored nodes on its own, so
+// it names them instead of silently passing them through.
+const orphanSequenceIssues = ({scene, storyboardScene}) => {
+  const planned = new Set(
+    (storyboardScene.compositionPlan?.stateSequences ?? []).map(
+      ({nodeId}) => nodeId,
+    ),
+  );
+  return flattenCompositionNodes(scene.composition?.nodes)
+    .map(({node}) => node)
+    .filter(({kind, id}) => kind === 'state-sequence' && !planned.has(id))
+    .map(({id}) => ({
+      code: 'execution-sync-orphan-state-sequence',
+      location: `scene:${scene.id}.composition.nodes#${id}`,
+      message:
+        `执行树里的状态序列 ${id} 已不在当前故事板计划中；自动同步不会删除手写节点。` +
+        '请在 --execution 候选里移除它，或在 storyboard 中恢复对应的状态切换 treatment。',
+    }));
+};
+
 const protectedProjectRoot = (project) => ({
   schemaVersion: project.schemaVersion,
   slug: project.slug,
@@ -482,6 +508,9 @@ export const synchronizeDirectingExecution = ({
     const result = syncScene({scene, storyboardScene});
     for (const issue of result.issues) issues.push(issue);
     for (const id of result.changes) changedSceneIds.add(id);
+    for (const issue of orphanSequenceIssues({scene, storyboardScene})) {
+      issues.push(issue);
+    }
   }
   if (issues.length > 0) {
     const error = new Error(

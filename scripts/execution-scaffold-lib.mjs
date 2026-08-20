@@ -6,15 +6,21 @@
 // the blueprint renderer substitutes deterministic labeled proxies — and only
 // layout judgement is left to the author.
 import {IDLE_PRESETS} from './production-vocabulary.mjs';
+import {validateCompositionStructure} from './composition-lib.mjs';
+import {validateDirectingExecution} from './motion-treatment-lib.mjs';
 
 const TODO_MARKER = 'TODO(author)';
 
 // Presets outside the idle set describe travel or camera behaviour, so they
-// become an actual displacement instead of a self-loop.
+// become an actual displacement instead of a self-loop. The spans here are not
+// cosmetic: the directing contract requires a traverse to cover at least 0.45
+// of the normalized canvas diagonal, so a token nudge is rejected downstream.
+const TRAVERSE_HALF_SPAN = 0.24;
+
 const KEYFRAMES_BY_PRESET = {
   traverse: [
-    {at: 0, offsetX: -0.12},
-    {at: 1, offsetX: 0.12, ease: 'ease-in-out'},
+    {at: 0, offsetX: -TRAVERSE_HALF_SPAN},
+    {at: 1, offsetX: TRAVERSE_HALF_SPAN, ease: 'ease-in-out'},
   ],
   'scroll-world-x': [
     {at: 0, offsetX: -0.2},
@@ -216,7 +222,7 @@ const continuousAssetNodeFor = ({motion, slug, sceneId, index}) => ({
   z: 20 + index,
   depth: 0.2,
   transform: {
-    x: round(0.2 + index * 0.12),
+    x: motion.preset === 'traverse' ? 0.5 : round(0.2 + index * 0.12),
     y: 0.45,
     width: 0.14,
     anchorX: 0.5,
@@ -227,6 +233,7 @@ const continuousAssetNodeFor = ({motion, slug, sceneId, index}) => ({
     ...(IDLE_PRESETS.includes(motion.preset)
       ? {idle: {preset: motion.preset, intensity: 0.3, cycleSeconds: 4}}
       : {}),
+    ...(motion.preset === 'sway' ? {pivot: {x: 0.5, y: 0.9}} : {}),
   },
 });
 
@@ -382,6 +389,45 @@ export const buildExecutionScaffold = ({project, storyboard, manifest = null}) =
     scenes,
     sceneTransitions: storyboard.sceneTransitions ?? [],
   };
+};
+
+// A generator that exits 0 on a tree the blueprint rejects is worse than no
+// generator: the success line reads as verification. This runs exactly the two
+// checks the blueprint runs, so the command can never again claim success on a
+// tree that will fail at the next gate.
+export const validateExecutionTree = ({project, storyboard, scenes}) => {
+  const storyboardScenes = new Map(
+    storyboard.scenes.map((scene) => [scene.id, scene]),
+  );
+  const profile = storyboard.editorial?.responsiveProfiles?.find(
+    ({id}) => id === storyboard.editorial?.activeProfile,
+  );
+  const issues = [];
+  for (const scene of scenes) {
+    const storyboardScene = storyboardScenes.get(scene.id);
+    if (!storyboardScene) continue;
+    for (const issue of validateCompositionStructure({
+      composition: scene.composition,
+      video: project.video,
+      proofTimes: scene.motion?.proofTimes ?? [],
+      durationSeconds: scene.narration?.durationSeconds ?? 1,
+      sceneId: scene.id,
+      editorial: storyboard.editorial,
+      exclusionZones: profile?.exclusionZones ?? [],
+      safeArea: profile?.safeArea ?? {x: 0, y: 0, width: 1, height: 1},
+      location: `scenes#${scene.id}.composition`,
+    }).issues) {
+      if (issue.level === 'error') issues.push(issue);
+    }
+    issues.push(
+      ...validateDirectingExecution({
+        scene,
+        storyboardScene,
+        location: `scenes#${scene.id}`,
+      }),
+    );
+  }
+  return issues;
 };
 
 export const executionScaffoldChecklist = ({scaffold, manifest = null}) => {

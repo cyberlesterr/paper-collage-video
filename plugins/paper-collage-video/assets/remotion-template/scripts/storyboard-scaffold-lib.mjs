@@ -67,12 +67,6 @@ const layeredCompositionFor = (sourcePackage) => ({
   revealEnvelope: defaultRevealEnvelope(),
 });
 
-const hasLayeredSource = (scene) =>
-  (scene.sourcePackages ?? []).some(
-    ({strategy}) =>
-      LAYER_SOURCE_STRATEGIES.includes(strategy) && strategy !== 'rigid-master',
-  );
-
 const sourcePackageTreatmentFor = (scene, sourcePackage, proofIds) => {
   if (!LAYER_SOURCE_STRATEGIES.includes(sourcePackage.strategy)) {
     // single-background and canonical containers never become a layered
@@ -135,23 +129,30 @@ const sourcePackageTreatmentFor = (scene, sourcePackage, proofIds) => {
     ),
     proofTimeId: proofIds.establish,
     graphic: null,
-    // A registered depth stack driven by a parallax camera *is* the scene's
-    // parallax, so a parallax scene needs no second continuous target — which
-    // is what kept the scaffold inside plan.motionBudget.maxContinuousTargets.
-    motion: {
-      kind: 'continuous-transform',
-      preset: scene.parallax ? 'parallax-camera' : 'drift',
-    },
+    // Deliberately not parallax-camera: the execution contract requires every
+    // parallax-camera motion to target scene-camera, so a stack carrying that
+    // preset compiles but is rejected when the tree is validated.
+    motion: {kind: 'continuous-transform', preset: 'drift'},
     composition: layeredCompositionFor(sourcePackage),
   };
 };
 
 // A state sequence must open at at=0 and carry at least two states, so every
-// family is seeded on the establish beat and changed on the action beat.
-const stateFamilyTreatmentFor = (scene, family, {phase, proofTimeId}) => {
+// family is seeded on the establish beat and changed on the action beat. A
+// family the scenario plans with more poses than one scene can show advances
+// through them across scenes — otherwise a 4-pose character stuck in a single
+// scene could never deliver the profile's total-state floor.
+const statesForScene = (family, cursor) => {
   const states = family.states ?? [];
-  const stateId =
-    phase === 'establish' ? states[0] ?? 'state-1' : states[1] ?? states[0] ?? 'state-1';
+  const first = states[Math.min(cursor, Math.max(0, states.length - 2))] ?? 'state-1';
+  const second =
+    states[Math.min(cursor + 1, states.length - 1)] ?? states[0] ?? 'state-2';
+  return {first, second};
+};
+
+const stateFamilyTreatmentFor = (scene, family, {phase, proofTimeId, cursor = 0}) => {
+  const {first, second} = statesForScene(family, cursor);
+  const stateId = phase === 'establish' ? first : second;
   return {
     id: `${scene.id}-${family.id}-${phase}`,
     targetId: stateNodeIdFor(family),
@@ -257,7 +258,7 @@ const changingFamiliesIn = (scene) =>
     (family) => new Set(family.states ?? []).size >= 2,
   );
 
-const beatsFor = (scene, sceneProofIds) => {
+const beatsFor = (scene, sceneProofIds, cursors = new Map()) => {
   const actions = scene.characterActions ?? [];
   const establish = [
     ...(scene.sourcePackages ?? []).map((sourcePackage) =>
@@ -267,17 +268,17 @@ const beatsFor = (scene, sceneProofIds) => {
       stateFamilyTreatmentFor(scene, family, {
         phase: 'establish',
         proofTimeId: sceneProofIds.establish,
+        cursor: cursors.get(family.id) ?? 0,
       }),
     ),
-    ...(scene.parallax && !hasLayeredSource(scene)
-      ? [parallaxTreatmentFor(scene, sceneProofIds)]
-      : []),
+    ...(scene.parallax ? [parallaxTreatmentFor(scene, sceneProofIds)] : []),
   ];
   const action = [
     ...changingFamiliesIn(scene).map((family) =>
       stateFamilyTreatmentFor(scene, family, {
         phase: 'action',
         proofTimeId: sceneProofIds.action,
+        cursor: cursors.get(family.id) ?? 0,
       }),
     ),
     // An ambient scene is proven by an `ambient` treatment that actually
@@ -339,7 +340,7 @@ const beatsFor = (scene, sceneProofIds) => {
   ];
 };
 
-const proofTimesFor = (scene, sceneProofIds, semanticCoverage) => {
+const proofTimesFor = (scene, sceneProofIds, semanticCoverage, cursors = new Map()) => {
   const sceneCoverage = semanticCoverage.filter(
     (entry) => entry.sceneId === scene.id,
   );
@@ -350,9 +351,8 @@ const proofTimesFor = (scene, sceneProofIds, semanticCoverage) => {
   // that plays it, otherwise the compiler reports an unproven state.
   const stateAssertionsAt = (phase) =>
     changingFamiliesIn(scene).flatMap((family) => {
-      const states = family.states ?? [];
-      const stateId =
-        phase === 'establish' ? states[0] : states[1] ?? states[0];
+      const {first, second} = statesForScene(family, cursors.get(family.id) ?? 0);
+      const stateId = phase === 'establish' ? first : second;
       return stateId ? [{nodeId: stateNodeIdFor(family), stateId}] : [];
     });
   return [
@@ -448,26 +448,38 @@ export const buildStoryboardScaffold = ({project, scenarios}) => {
       : scenarios.commonStory?.summary ?? '';
   const sceneCount = Math.max(option.scenes?.length ?? 0, 1);
   const perSceneSeconds = round((option.durationSeconds ?? 60) / sceneCount);
+  // Scene order is the film's order, so a family's poses advance as it reappears.
+  const stateCursors = new Map();
   const scenes = (option.scenes ?? []).map((scene) => {
     const sceneProofIds = {
       establish: `${scene.id}-proof-establish`,
       action: `${scene.id}-proof-action`,
       final: `${scene.id}-proof-final`,
     };
-    return {
+    const cursors = new Map(stateCursors);
+    const built = {
       id: scene.id,
       title: scene.label ?? scene.id,
       narrativeRole: storyboardTodoMarker('该场在整体叙事弧中的角色'),
       message: scene.beat ?? storyboardTodoMarker('该场要传达的一句话'),
       blueprint: sceneBlueprintFor(scene, option),
       estimatedDurationSeconds: perSceneSeconds,
-      beats: beatsFor(scene, sceneProofIds),
+      beats: beatsFor(scene, sceneProofIds, cursors),
       proofTimes: proofTimesFor(
         scene,
         sceneProofIds,
         option.semanticActionCoverage ?? [],
+        cursors,
       ),
     };
+    for (const family of changingFamiliesIn(scene)) {
+      const used = cursors.get(family.id) ?? 0;
+      stateCursors.set(
+        family.id,
+        Math.min(used + 2, Math.max(0, (family.states ?? []).length - 2)),
+      );
+    }
+    return built;
   });
   const sceneTransitions = scenes.slice(1).map((scene, index) => ({
     id: `boundary-${scenes[index].id}-${scene.id}`,

@@ -21,8 +21,10 @@ import {
   findStoryboardTodoMarkers,
 } from '../scripts/storyboard-scaffold-lib.mjs';
 import {buildSelectionScaffold} from '../scripts/selection-scaffold-lib.mjs';
-import {buildExecutionScaffold} from '../scripts/execution-scaffold-lib.mjs';
-import {validateCompositionStructure} from '../scripts/composition-lib.mjs';
+import {
+  buildExecutionScaffold,
+  validateExecutionTree,
+} from '../scripts/execution-scaffold-lib.mjs';
 import {
   compileStoryboardDirecting,
   validateStoryboard,
@@ -52,7 +54,15 @@ const fillMarkers = (value) => {
   return value;
 };
 
-const sceneFor = ({profile, index, layered, parallax, ambient, families}) => ({
+const sceneFor = ({
+  profile,
+  index,
+  layered,
+  parallax,
+  ambient,
+  families,
+  localMotionCount,
+}) => ({
   id: `${profile}-scene-${String(index + 1).padStart(2, '0')}`,
   label: `第 ${index + 1} 幕`,
   beat: `共同故事节拍 ${index + 1}`,
@@ -75,11 +85,10 @@ const sceneFor = ({profile, index, layered, parallax, ambient, families}) => ({
   ],
   parallax,
   ambientElements: ambient ? ['飘动的叶片'] : [],
-  localMotionTargets: [
-    {targetId: `target-${index + 1}-1`, preset: 'drift'},
-    {targetId: `target-${index + 1}-2`, preset: 'breathe'},
-    {targetId: `target-${index + 1}-3`, preset: 'sway'},
-  ],
+  localMotionTargets: Array.from({length: localMotionCount}, (_, motion) => ({
+    targetId: `target-${index + 1}-${motion + 1}`,
+    preset: ['drift', 'sway', 'traverse'][motion % 3],
+  })),
 });
 
 const optionFor = ({
@@ -89,6 +98,8 @@ const optionFor = ({
   durationSeconds,
   familyCount,
   enhancementCount = 0,
+  localMotionCount,
+  parallaxScenes,
 }) => {
   const families = [
     ...Array.from({length: familyCount}, (_, index) => ({
@@ -107,9 +118,20 @@ const optionFor = ({
       profile: id,
       index,
       layered: true,
-      parallax: true,
+      parallax: index < parallaxScenes,
       ambient: true,
-      families: index < families.length ? [families[index]] : [],
+      // A four-pose family cannot show all of them in one scene (three beats),
+      // so families are dealt round-robin and each reappears to advance its
+      // poses until the profile's total-state floor is actually delivered.
+      families: families.length
+        ? [
+            ...new Set([
+              families[(index * 2) % families.length],
+              families[(index * 2 + 1) % families.length],
+            ]),
+          ]
+        : [],
+      localMotionCount,
     }),
   );
   const closing = scenes.at(-1);
@@ -170,8 +192,14 @@ const scenarioInput = () => ({
     ],
   },
   options: [
-    optionFor({id: 'draft', storyScope: 'concise', sceneCount: 4, durationSeconds: 32, familyCount: 1}),
-    optionFor({id: 'balanced', storyScope: 'standard', sceneCount: 6, durationSeconds: 54, familyCount: 2}),
+    optionFor({
+      id: 'draft', storyScope: 'concise', sceneCount: 4, durationSeconds: 32,
+      familyCount: 1, localMotionCount: 1, parallaxScenes: 0,
+    }),
+    optionFor({
+      id: 'balanced', storyScope: 'standard', sceneCount: 6, durationSeconds: 54,
+      familyCount: 2, localMotionCount: 2, parallaxScenes: 2,
+    }),
     optionFor({
       id: 'full-depth',
       storyScope: 'expanded',
@@ -179,6 +207,8 @@ const scenarioInput = () => ({
       durationSeconds: 82,
       familyCount: 4,
       enhancementCount: 3,
+      localMotionCount: 3,
+      parallaxScenes: 6,
     }),
   ],
 });
@@ -282,32 +312,19 @@ test('an agent can go from scenarios to a confirmed concept without reading any 
   };
   const execution = buildExecutionScaffold({project, storyboard, manifest});
   assert.equal(execution.scenes.length, storyboard.scenes.length);
-  const profile = storyboard.editorial.responsiveProfiles.find(
-    ({id}) => id === storyboard.editorial.activeProfile,
+  // The blueprint runs two checks, not one. Validating only the structural half
+  // is what let a tree ship that satisfied composition rules but violated the
+  // directing plan (sway needs a bottom pivot, traverse needs a real span).
+  assert.deepEqual(
+    validateExecutionTree({project, storyboard, scenes: execution.scenes}),
+    [],
   );
+  // Node ids join plan to tree within a scene. A recurring character keeps the
+  // same id across scenes on purpose, so uniqueness is per scene, not global.
   for (const scene of execution.scenes) {
-    const {issues} = validateCompositionStructure({
-      composition: scene.composition,
-      video: project.video,
-      proofTimes: scene.motion.proofTimes,
-      durationSeconds: scene.narration.durationSeconds,
-      sceneId: scene.id,
-      editorial: storyboard.editorial,
-      exclusionZones: profile?.exclusionZones ?? [],
-      safeArea: profile?.safeArea ?? {x: 0, y: 0, width: 1, height: 1},
-      location: `scenes#${scene.id}.composition`,
-    });
-    assert.deepEqual(
-      issues.filter(({level}) => level === 'error'),
-      [],
-      `${scene.id} 执行树应当零 error`,
-    );
+    const ids = scene.composition.nodes.map(({id}) => id);
+    assert.equal(new Set(ids).size, ids.length, `${scene.id} 节点 id 应当唯一`);
   }
-  // Node ids are the join key the whole downstream pipeline uses.
-  const nodeIds = execution.scenes.flatMap((scene) =>
-    scene.composition.nodes.map(({id}) => id),
-  );
-  assert.equal(new Set(nodeIds).size, nodeIds.length);
 });
 
 test('decisions compare by value and name the offending field', () => {
@@ -495,4 +512,95 @@ test('every packaged command answers --help with usage and exit zero', async () 
     }
   }
   assert.deepEqual(failures, []);
+});
+
+// These three rules live in validateDirectingExecution, not in the structural
+// validator. Checking only the structural half is what shipped a tree the
+// blueprint rejected, so each rule is pinned to the generated output directly.
+test('generated motion satisfies the directing plan, not just the structure', async () => {
+  const catalog = await loadStyleCatalog({root: ROOT});
+  const intake = confirmIntake({
+    selection: {
+      aspectRatio: '16:9',
+      visualStylePreset: catalog.styles[0].id,
+      parallaxPreference: 'auto',
+    },
+    catalog,
+    at,
+  });
+  const slug = 'directing-conformance';
+  const scenarios = buildPlanningScenarios({
+    slug,
+    intake,
+    input: scenarioInput(),
+    at,
+  });
+  // full-depth is the option whose floors exercise sway, traverse and parallax
+  // together; the balanced option never reaches the traverse preset.
+  const plan = buildCreativePlanFromScenario({
+    slug,
+    scenarios,
+    optionId: 'full-depth',
+    at,
+  });
+  const project = {
+    slug,
+    intake,
+    video: {width: 1920, height: 1080, fps: 30},
+    styleProfile: materializeStyleProfile(catalog, catalog.styles[0].id),
+    plan,
+  };
+  const filled = fillMarkers(buildStoryboardScaffold({project, scenarios}));
+  const storyboard = compileStoryboardDirecting(
+    {
+      ...filled,
+      status: 'ready',
+      sceneTransitions: materializeSceneTransitionRecipes(
+        filled.sceneTransitions,
+        project.styleProfile?.motion?.transitionSet,
+      ),
+      updatedAt: at,
+    },
+    {plan, styleProfile: project.styleProfile},
+  );
+  const execution = buildExecutionScaffold({
+    project,
+    storyboard,
+    manifest: {assets: [{assetId: 'style-sample', sha256: 'c'.repeat(64)}]},
+  });
+  const nodesById = new Map(
+    execution.scenes.flatMap((scene) =>
+      scene.composition.nodes.map((node) => [`${scene.id}::${node.id}`, node]),
+    ),
+  );
+
+  let sway = 0;
+  let traverse = 0;
+  let parallax = 0;
+  for (const scene of storyboard.scenes) {
+    for (const motion of scene.compositionPlan?.continuousMotions ?? []) {
+      const node = nodesById.get(`${scene.id}::${motion.nodeId}`);
+      if (motion.preset === 'sway') {
+        sway += 1;
+        // A sway must rock around a bottom pivot, not merely idle.
+        assert.equal(node.motion.idle?.preset, 'sway');
+        assert.ok(node.motion.pivot?.y >= 0.8);
+      }
+      if (motion.preset === 'traverse') {
+        traverse += 1;
+        const offsets = node.motion.keyframes.map(({offsetX = 0}) => offsetX);
+        assert.ok(Math.max(...offsets) - Math.min(...offsets) >= 0.45);
+      }
+      if (motion.preset === 'parallax-camera') {
+        parallax += 1;
+        // Parallax is a camera behaviour; it may only target scene-camera.
+        assert.equal(motion.nodeId, 'scene-camera');
+        const executionScene = execution.scenes.find(({id}) => id === scene.id);
+        assert.equal(executionScene.camera.parallax.enabled, true);
+      }
+    }
+  }
+  assert.ok(sway > 0, 'fixture should exercise the sway pivot rule');
+  assert.ok(traverse > 0, 'fixture should exercise the traverse span rule');
+  assert.ok(parallax > 0, 'fixture should exercise the parallax rule');
 });
