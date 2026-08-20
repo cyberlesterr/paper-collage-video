@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -14,13 +15,16 @@ import {
 } from './directing-execution-sync-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:sync-directing -- <slug> [--execution=<candidate-project.json>] [--scenes=<scene-a,scene-b>] [--json]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!slug) {
     throw new Error(
-      '用法：project:sync-directing -- <slug> [--execution=<candidate-project.json>] [--scenes=<scene-a,scene-b>] [--json]',
+      USAGE,
     );
   }
   const [{project, paths}, storyboard] = await Promise.all([

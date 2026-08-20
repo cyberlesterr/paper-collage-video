@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {
@@ -16,6 +17,9 @@ import {
 } from './visual-blueprint-review-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：provider:record -- --request=<request.json> [--provider=<id>] [--model=<model>] [--external-id=<id>] [--attempt-id=<id>]';
+printCliHelp(args, USAGE);
 const valueFor = (name) => parseCliValue(args, name);
 
 try {
@@ -23,7 +27,7 @@ try {
   const providerId = valueFor('--provider') ?? 'auto';
   if (!requestInput) {
     throw new Error(
-      '用法：provider:record -- --request=<request.json> [--provider=<id>] [--model=<model>] [--external-id=<id>] [--attempt-id=<id>]',
+      USAGE,
     );
   }
   const loadedRequest = await loadAssetRequest(requestInput);

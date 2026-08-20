@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import path from 'node:path';
 import {prepareRegisteredFamilyProof} from './asset-hardening-proof-lib.mjs';
 import {
@@ -6,6 +7,10 @@ import {
   computeRegisteredGeometryProof,
 } from './registered-geometry-lib.mjs';
 import {ROOT, writeJson} from './project-lib.mjs';
+
+const USAGE =
+  "用法：npm run proof:registered-geometry --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const outputDirectory = path.join(
   ROOT,

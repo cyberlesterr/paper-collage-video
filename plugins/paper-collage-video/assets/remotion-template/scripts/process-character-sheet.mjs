@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {spawn} from 'node:child_process';
 import {availableParallelism} from 'node:os';
 import fs from 'node:fs/promises';
@@ -7,6 +8,9 @@ import {ROOT} from './project-lib.mjs';
 import {resolvePythonCommand} from './python-runtime.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：process-character-sheet.mjs <input> <sourceDir> <alphaDir> <prefix> <count> [--columns=2] [--names=a,b,c,d] [--key-color=auto|#rrggbb] [--matte-erode=1]';
+printCliHelp(args, USAGE);
 const positionals = args.filter((arg) => !arg.startsWith('--'));
 const [input, sourceDirectory, alphaDirectory, prefix, countValue] = positionals;
 const count = Number(countValue);
@@ -45,7 +49,7 @@ const runInherited = (command, commandArgs) =>
 try {
   if (!input || !sourceDirectory || !alphaDirectory || !prefix || !Number.isInteger(count) || count < 1) {
     throw new Error(
-      '用法：process-character-sheet.mjs <input> <sourceDir> <alphaDir> <prefix> <count> [--columns=2] [--names=a,b,c,d] [--key-color=auto|#rrggbb] [--matte-erode=1]',
+      USAGE,
     );
   }
   if (names.length > 0 && names.length !== count) {

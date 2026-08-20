@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {
   formatProduction,
   getStageControl,
@@ -9,6 +10,9 @@ import {loadProject, readJson} from './project-lib.mjs';
 import {loadStoryboard, summarizeStoryboard} from './storyboard-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  "用法：npm run project:resume -- <slug> [--compact-json] [--control-json] [--json] [--resume-json]";
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const json = args.includes('--json');
 const controlJson = args.includes('--control-json');

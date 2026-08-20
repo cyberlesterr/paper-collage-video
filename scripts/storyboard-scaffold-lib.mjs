@@ -249,13 +249,21 @@ const stageHoldTreatmentFor = (scene, role, proofTimeId) => ({
   composition: {pattern: 'free'},
 });
 
+// A family the scenario plans with a single state in this scene is not a state
+// change; giving it a state sequence would emit two entries with the same state
+// id and an assertion the execution layer can never satisfy.
+const changingFamiliesIn = (scene) =>
+  (scene.stateFamilies ?? []).filter(
+    (family) => new Set(family.states ?? []).size >= 2,
+  );
+
 const beatsFor = (scene, sceneProofIds) => {
   const actions = scene.characterActions ?? [];
   const establish = [
     ...(scene.sourcePackages ?? []).map((sourcePackage) =>
       sourcePackageTreatmentFor(scene, sourcePackage, sceneProofIds),
     ),
-    ...(scene.stateFamilies ?? []).map((family) =>
+    ...changingFamiliesIn(scene).map((family) =>
       stateFamilyTreatmentFor(scene, family, {
         phase: 'establish',
         proofTimeId: sceneProofIds.establish,
@@ -266,7 +274,7 @@ const beatsFor = (scene, sceneProofIds) => {
       : []),
   ];
   const action = [
-    ...(scene.stateFamilies ?? []).map((family) =>
+    ...changingFamiliesIn(scene).map((family) =>
       stateFamilyTreatmentFor(scene, family, {
         phase: 'action',
         proofTimeId: sceneProofIds.action,
@@ -341,7 +349,7 @@ const proofTimesFor = (scene, sceneProofIds, semanticCoverage) => {
   // Each state the scaffold actually plays needs a proof moment at the beat
   // that plays it, otherwise the compiler reports an unproven state.
   const stateAssertionsAt = (phase) =>
-    (scene.stateFamilies ?? []).flatMap((family) => {
+    changingFamiliesIn(scene).flatMap((family) => {
       const states = family.states ?? [];
       const stateId =
         phase === 'establish' ? states[0] : states[1] ?? states[0];

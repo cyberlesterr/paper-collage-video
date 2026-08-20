@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {
@@ -14,6 +15,9 @@ import {readGenerationAttempt} from './generation-attempt-lib.mjs';
 import {ROOT, readJson} from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：provider:recover-rejected-source -- --spec=<recovery.json> [--check]';
+printCliHelp(args, USAGE);
 const valueFor = (name) => parseCliValue(args, name);
 
 try {
@@ -21,7 +25,7 @@ try {
   const checkOnly = args.includes('--check');
   if (!specInput) {
     throw new Error(
-      '用法：provider:recover-rejected-source -- --spec=<recovery.json> [--check]',
+      USAGE,
     );
   }
   const specFile = path.resolve(ROOT, specInput);

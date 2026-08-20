@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import {
   approveImageBudgetIncrease,
@@ -18,13 +19,16 @@ import {
 } from './production-state.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:increase-image-budget -- <slug> --limit=<整数> --note=<人的明确决定> [--json]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!slug) {
     throw new Error(
-      '用法：project:increase-image-budget -- <slug> --limit=<整数> --note=<人的明确决定> [--json]',
+      USAGE,
     );
   }
   const imageAttemptLimit = Number(valueFor('--limit'));

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -53,12 +54,15 @@ import {
 } from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:style-proof -- <slug> [--duration=<3..5>]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 const durationSeconds = Number(valueFor('--duration') ?? 5);
 const STYLE_PROOF_RENDER_SCALE = 0.5;
 const printUsage = () => {
-  console.log('用法：project:style-proof -- <slug> [--duration=<3..5>]');
+  console.log(USAGE);
 };
 
 const debugOverlay = ({width, height, bounds, label}) => Buffer.from(`

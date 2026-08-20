@@ -36,12 +36,21 @@ export const directingRevisionAuthoring = {
     estimatedDurationSeconds: 6,
     beats: [
       {
-        id: 'establish', at: 0.05, performanceRole: 'establish', purpose: '建立纸面', visual: '背景稳定出现', soundCue: null,
+        id: 'establish', at: 0, performanceRole: 'establish', purpose: '建立纸面', visual: '背景稳定出现', soundCue: null,
         proofTimeId: 'proof-establish',
         treatments: [{
           id: 'hold-background', targetId: 'background', importance: 'supporting', necessity: 'required',
           changeClass: 'static-hold', motion: {kind: 'static'}, composition: {pattern: 'free'}, graphic: null,
           semanticRisk: 'decorative', proofTimeId: 'proof-establish', rationale: '先建立稳定空间。',
+        }, {
+          id: 'narrator-waiting', targetId: 'narrator', importance: 'supporting', necessity: 'required',
+          changeClass: 'pose-change',
+          motion: {
+            kind: 'state-sequence', poseFamilyId: 'narrator-actions', stateId: 'waiting',
+            visualChange: '讲述者以等待姿态站定。', facing: 'front', playback: 'once', cycles: 1, transition: 'cut',
+          },
+          composition: {pattern: 'free'}, graphic: null, semanticRisk: 'identity',
+          proofTimeId: 'proof-establish', rationale: '讲述者先建立身份。',
         }],
       },
       {
@@ -53,6 +62,15 @@ export const directingRevisionAuthoring = {
           motion: {kind: 'visibility-transition', action: 'show', transition: 'fade-rise', durationSeconds: 0.5},
           composition: {pattern: 'free'}, graphic: null, semanticRisk: 'decorative',
           proofTimeId: 'proof-action', rationale: '主体持续出现并保持可见。',
+        }, {
+          id: 'narrator-pointing', targetId: 'narrator', importance: 'supporting', necessity: 'required',
+          changeClass: 'pose-change',
+          motion: {
+            kind: 'state-sequence', poseFamilyId: 'narrator-actions', stateId: 'pointing',
+            visualChange: '讲述者抬手指向主体。', facing: 'front', playback: 'once', cycles: 1, transition: 'cut',
+          },
+          composition: {pattern: 'free'}, graphic: null, semanticRisk: 'identity',
+          proofTimeId: 'proof-action', rationale: '讲述者把注意力引向主体。',
         }],
       },
       {
@@ -66,8 +84,8 @@ export const directingRevisionAuthoring = {
       },
     ],
     proofTimes: [
-      {id: 'proof-establish', at: 0.1, label: '纸面建立', kind: 'establish', assertions: ['背景完整'], stateAssertions: []},
-      {id: 'proof-action', at: 0.55, label: '主体出现', kind: 'action', assertions: ['主体可见'], stateAssertions: []},
+      {id: 'proof-establish', at: 0.1, label: '纸面建立', kind: 'establish', assertions: ['背景完整'], stateAssertions: [{nodeId: 'narrator', stateId: 'waiting'}]},
+      {id: 'proof-action', at: 0.55, label: '主体出现', kind: 'action', assertions: ['主体可见'], stateAssertions: [{nodeId: 'narrator', stateId: 'pointing'}]},
       {id: 'proof-final', at: 0.9, label: '构图稳定', kind: 'final', assertions: ['主体保持完整'], stateAssertions: []},
     ],
   }],

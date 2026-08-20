@@ -332,6 +332,38 @@ export const validateStoryboard = (
         }
       }
     }
+    // The reverse direction: an assertion pointing at a target that never
+    // becomes a state sequence in this scene. The execution layer requires a
+    // stateAssertion to resolve to a real state-sequence node with at least two
+    // proven states, so a static "it is still doing X" claim recorded here is
+    // unsatisfiable — and used to surface only after the whole execution tree
+    // had been materialized, past the point where the storyboard can be edited.
+    const plannedSequenceIds = new Set(
+      (compositionPlan?.stateSequences ?? []).map(({nodeId}) => nodeId),
+    );
+    const assertedNodeIds = new Set(
+      (scene.proofTimes ?? []).flatMap((proof) =>
+        (proof.stateAssertions ?? []).map(({nodeId}) => nodeId),
+      ),
+    );
+    for (const nodeId of assertedNodeIds) {
+      if (!plannedSequenceIds.has(nodeId)) {
+        add(
+          'storyboard-proof-state-without-sequence',
+          `${nodeId} 有状态证明，但本场没有让它换状态的 treatment。静态事实写进 proofTime.assertions 文字断言；stateAssertions 只用于真实发生切换的状态族。`,
+          `${location}.proofTimes`,
+        );
+      }
+    }
+    for (const sequence of compositionPlan?.stateSequences ?? []) {
+      if ((sequence.states ?? []).length < 2) {
+        add(
+          'storyboard-proof-state-single',
+          `${sequence.nodeId} 在本场只规划了 ${(sequence.states ?? []).length} 个状态；状态序列至少需要两个状态才能执行。要么补上真实的第二个状态，要么改用文字断言。`,
+          `${location}.proofTimes`,
+        );
+      }
+    }
     for (const binding of beatEvidenceBindings) {
       if (!proofIds.has(binding.proofTimeId)) {
         add(

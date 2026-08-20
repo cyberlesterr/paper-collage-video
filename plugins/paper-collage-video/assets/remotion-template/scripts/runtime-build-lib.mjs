@@ -144,6 +144,7 @@ export const RUNTIME_EXPLICIT_INPUTS = [
   'scripts/project-failures.mjs',
   'scripts/project-friction.mjs',
   'scripts/project-storyboard-scaffold.mjs',
+  'scripts/project-materialize-execution.mjs',
   'scripts/project-lib.mjs',
   'scripts/project-metrics-run.mjs',
   'scripts/project-plan.mjs',

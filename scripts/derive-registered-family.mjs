@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {validateCompositionStructure} from './composition-lib.mjs';
@@ -14,6 +15,10 @@ import {
 } from './project-lib.mjs';
 import {transactAssetManifest} from './asset-manifest-lib.mjs';
 
+const USAGE =
+  '用法：derive-registered-family.mjs <registered-family.json>';
+printCliHelp(process.argv.slice(2), USAGE);
+
 const workspacePath = (input, label) => {
   const resolved = path.resolve(ROOT, input);
   if (resolved !== ROOT && !resolved.startsWith(`${ROOT}${path.sep}`)) {
@@ -27,7 +32,7 @@ try {
     (argument) => !argument.startsWith('--'),
   );
   if (!specInput) {
-    throw new Error('用法：derive-registered-family.mjs <registered-family.json>');
+    throw new Error(USAGE);
   }
   const specFile = workspacePath(specInput, 'registered family spec');
   const spec = await readJson(specFile);

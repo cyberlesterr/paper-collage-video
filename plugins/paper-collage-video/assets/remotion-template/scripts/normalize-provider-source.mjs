@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -8,6 +9,10 @@ import {
   transactAssetManifest,
 } from './asset-manifest-lib.mjs';
 import {ROOT, readJson} from './project-lib.mjs';
+
+const USAGE =
+  '用法：normalize-provider-source.mjs <provider-source-normalization.json>';
+printCliHelp(process.argv.slice(2), USAGE);
 
 const inside = (input, label) => {
   const resolved = path.resolve(ROOT, input);
@@ -27,7 +32,7 @@ try {
     argumentsList.find((argument) => !argument.startsWith('--'));
   if (!specInput) {
     throw new Error(
-      '用法：normalize-provider-source.mjs <provider-source-normalization.json>',
+      USAGE,
     );
   }
   const spec = await readJson(inside(specInput, 'normalization spec'));

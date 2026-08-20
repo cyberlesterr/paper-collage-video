@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import path from 'node:path';
 import {
   PROVIDER_CAPABILITIES,
@@ -13,6 +14,9 @@ import {
 } from './sound-effect-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  "用法：npm run provider:status -- <slug> [--compact-json] [--json]";
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--')) ?? null;
 const json = args.includes('--json');
 const compactJson = args.includes('--compact-json');

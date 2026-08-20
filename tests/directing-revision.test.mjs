@@ -80,6 +80,20 @@ const executionProjectFor = (storyboard) => ({
           visibility: {initial: 'hidden'},
           transform: {x: 0.3, y: 0.3, width: 0.4, height: 0.5},
         },
+        {
+          id: 'narrator',
+          kind: 'state-sequence',
+          assetRole: 'character',
+          poseFamilyId: 'narrator-actions',
+          z: 2,
+          states: [
+            {id: 'waiting', src: 'fixtures/vox-primitives/traveler.png', at: 0, facing: 'front'},
+            {id: 'pointing', src: 'fixtures/vox-primitives/traveler.png', at: 0.45, facing: 'front'},
+          ],
+          playback: {mode: 'once', cycles: 1},
+          transition: {type: 'cut', durationSeconds: 0},
+          transform: {x: 0.7, y: 0.3, width: 0.2, height: 0.5},
+        },
       ],
     },
     camera: {preset: 'static', intensity: 0},
@@ -199,7 +213,8 @@ test('proof state coverage is execution-owned and synchronizes atomically withou
   const {storyboard, project, production} = await loadFixture();
   const supplied = structuredClone(storyboard);
   supplied.scenes[0].proofTimes[1].stateAssertions = [
-    {nodeId: 'subject', stateId: 'visible'},
+    {nodeId: 'narrator', stateId: 'pointing'},
+    {nodeId: 'narrator', stateId: 'waiting'},
   ];
   const result = prepareDirectingRevision({
     currentStoryboard: storyboard,
@@ -369,6 +384,9 @@ test('human-authorized semantic revision records changed meaning and recalculate
       treatment.rationale = '人工授权的完全静止阅读镜头。';
     }
   }
+  for (const proof of supplied.scenes[0].proofTimes) {
+    proof.stateAssertions = [];
+  }
   const authorization = {
     schemaVersion: 1,
     id: 'quiet-ending',
@@ -452,13 +470,15 @@ test('semantic revision rejects directing changes outside the authorized scene s
     beat.proofTimeId = `second-${beat.proofTimeId}`;
     for (const treatment of beat.treatments) {
       treatment.id = `second-${treatment.id}`;
-      treatment.targetId =
-        treatment.targetId === 'subject' ? 'subject-02' : 'background-02';
+      treatment.targetId = `${treatment.targetId}-02`;
       treatment.proofTimeId = `second-${treatment.proofTimeId}`;
     }
   }
   for (const proof of second.proofTimes) {
     proof.id = `second-${proof.id}`;
+    for (const assertion of proof.stateAssertions ?? []) {
+      assertion.nodeId = `${assertion.nodeId}-02`;
+    }
   }
   authoring.scenes.push(second);
   authoring.sceneTransitions = [

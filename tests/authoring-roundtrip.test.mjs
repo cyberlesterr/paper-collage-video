@@ -21,6 +21,8 @@ import {
   findStoryboardTodoMarkers,
 } from '../scripts/storyboard-scaffold-lib.mjs';
 import {buildSelectionScaffold} from '../scripts/selection-scaffold-lib.mjs';
+import {buildExecutionScaffold} from '../scripts/execution-scaffold-lib.mjs';
+import {validateCompositionStructure} from '../scripts/composition-lib.mjs';
 import {
   compileStoryboardDirecting,
   validateStoryboard,
@@ -272,6 +274,40 @@ test('an agent can go from scenarios to a confirmed concept without reading any 
     selection.budgetDecision.imageAttemptLimit,
     scenarioDecisionFor(scenarios, 'balanced').proposedImageAttemptLimit,
   );
+
+  // Gate 5 — execution tree. Materializing it by hand was thousands of lines of
+  // data the compiler had already derived.
+  const manifest = {
+    assets: [{assetId: 'style-sample', sha256: 'b'.repeat(64)}],
+  };
+  const execution = buildExecutionScaffold({project, storyboard, manifest});
+  assert.equal(execution.scenes.length, storyboard.scenes.length);
+  const profile = storyboard.editorial.responsiveProfiles.find(
+    ({id}) => id === storyboard.editorial.activeProfile,
+  );
+  for (const scene of execution.scenes) {
+    const {issues} = validateCompositionStructure({
+      composition: scene.composition,
+      video: project.video,
+      proofTimes: scene.motion.proofTimes,
+      durationSeconds: scene.narration.durationSeconds,
+      sceneId: scene.id,
+      editorial: storyboard.editorial,
+      exclusionZones: profile?.exclusionZones ?? [],
+      safeArea: profile?.safeArea ?? {x: 0, y: 0, width: 1, height: 1},
+      location: `scenes#${scene.id}.composition`,
+    });
+    assert.deepEqual(
+      issues.filter(({level}) => level === 'error'),
+      [],
+      `${scene.id} 执行树应当零 error`,
+    );
+  }
+  // Node ids are the join key the whole downstream pipeline uses.
+  const nodeIds = execution.scenes.flatMap((scene) =>
+    scene.composition.nodes.map(({id}) => id),
+  );
+  assert.equal(new Set(nodeIds).size, nodeIds.length);
 });
 
 test('decisions compare by value and name the offending field', () => {
@@ -343,25 +379,6 @@ test('a workspace target holding only OS metadata is still initializable', async
     );
   } finally {
     await fs.rm(directory, {recursive: true, force: true});
-  }
-});
-
-test('--help prints usage and exits zero instead of reporting a failure', async () => {
-  const {execFile} = await import('node:child_process');
-  const {promisify} = await import('node:util');
-  const run = promisify(execFile);
-  for (const command of [
-    'project-scenarios.mjs',
-    'project-storyboard.mjs',
-    'project-confirm-concept.mjs',
-    'project-storyboard-scaffold.mjs',
-  ]) {
-    const {stdout, stderr} = await run('node', [
-      path.join(ROOT, 'scripts', command),
-      '--help',
-    ]);
-    assert.match(stdout, /^用法：/);
-    assert.equal(stderr, '');
   }
 });
 
@@ -444,4 +461,38 @@ test('scenario and storyboard call counts use their documented bases', async () 
     budget.avoidedCalls,
     budget.sourcePackagePlans.reduce((sum, plan) => sum + plan.avoidedCalls, 0),
   );
+});
+
+// A partial sweep once left three commands reporting help as a failure, and a
+// regex that "ran clean" was mistaken for coverage. This enumerates every
+// command package.json exposes and executes it, so coverage cannot be assumed.
+test('every packaged command answers --help with usage and exit zero', async () => {
+  const fs = await import('node:fs/promises');
+  const {execFile} = await import('node:child_process');
+  const {promisify} = await import('node:util');
+  const run = promisify(execFile);
+  const pkg = JSON.parse(
+    await fs.readFile(path.join(ROOT, 'package.json'), 'utf8'),
+  );
+  const entries = new Map();
+  for (const [name, command] of Object.entries(pkg.scripts)) {
+    const direct = command.match(/^node (scripts\/[a-z0-9-]+\.mjs)/);
+    if (!direct) continue;
+    const wrapped = command.match(/--script=(scripts\/[a-z0-9-]+\.mjs)/);
+    entries.set(name, wrapped ? wrapped[1] : direct[1]);
+  }
+  assert.ok(entries.size >= 70, `expected the full command surface, saw ${entries.size}`);
+  const failures = [];
+  for (const [name, file] of entries) {
+    try {
+      const {stdout} = await run('node', [path.join(ROOT, file), '--help'], {
+        cwd: ROOT,
+        timeout: 20000,
+      });
+      if (!/用法：/.test(stdout)) failures.push(`${name} (${file}): exit 0 但未打印用法`);
+    } catch (error) {
+      failures.push(`${name} (${file}): exit ${error.code}`);
+    }
+  }
+  assert.deepEqual(failures, []);
 });

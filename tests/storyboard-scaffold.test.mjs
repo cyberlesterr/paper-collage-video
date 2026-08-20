@@ -257,3 +257,81 @@ test('a scaffold with its markers filled in compiles as a storyboard', () => {
   // The profile floors the scenario gate promised are met by construction.
   assert.equal(storyboard.directingSummary.profileFulfillment.passed, true);
 });
+
+// A static "it is still doing X" claim recorded as a stateAssertion cannot be
+// executed: the execution layer resolves it to a state-sequence node needing at
+// least two proven states. It used to pass the storyboard gate and only fail
+// after the whole execution tree had been materialized, past the point where
+// the storyboard could still be edited.
+test('a state assertion with no state change in that scene is rejected at compile', () => {
+  const project = fixtureProject();
+  const scaffold = buildStoryboardScaffold({
+    project,
+    scenarios: fixtureScenarios(),
+  });
+  const fill = (value) => {
+    if (typeof value === 'string') {
+      return value.includes('TODO(author)') ? '作者补写的具体内容' : value;
+    }
+    if (Array.isArray(value)) return value.map(fill);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, child]) => [key, fill(child)]),
+      );
+    }
+    return value;
+  };
+  const filled = fill(scaffold);
+  filled.scenes[0].proofTimes[1].stateAssertions = [
+    ...filled.scenes[0].proofTimes[1].stateAssertions,
+    {nodeId: 'sheep-flock', stateId: 'grazing'},
+  ];
+  const storyboard = compileStoryboardDirecting(
+    {
+      ...filled,
+      status: 'ready',
+      sceneTransitions: materializeSceneTransitionRecipes(
+        filled.sceneTransitions,
+        project.styleProfile.motion.transitionSet,
+      ),
+      updatedAt: '2026-08-21T00:00:00.000Z',
+    },
+    {plan: project.plan, styleProfile: project.styleProfile},
+  );
+  const issues = validateStoryboard(storyboard, {
+    slug: project.slug,
+    plan: project.plan,
+    styleProfile: project.styleProfile,
+  });
+  const reported = issues.find(
+    ({code}) => code === 'storyboard-proof-state-without-sequence',
+  );
+  assert.ok(reported, '应当报出没有状态切换的状态证明');
+  assert.match(reported.message, /sheep-flock/);
+  // The message has to name the fix, not just the violation.
+  assert.match(reported.message, /文字断言/);
+});
+
+// The scaffold must not author the shape it just taught the compiler to reject.
+test('scaffold skips state sequences for families planned with a single state', () => {
+  const scenarios = fixtureScenarios();
+  scenarios.options[1].scenes[0].stateFamilies.push({
+    id: 'sheep-flock',
+    necessity: 'required',
+    states: ['grazing'],
+  });
+  const scaffold = buildStoryboardScaffold({
+    project: fixtureProject(),
+    scenarios,
+  });
+  const first = scaffold.scenes[0];
+  const treatmentIds = first.beats.flatMap(({treatments}) =>
+    treatments.map(({id}) => id),
+  );
+  assert.ok(!treatmentIds.some((id) => id.includes('sheep-flock')));
+  const asserted = first.proofTimes.flatMap(({stateAssertions}) =>
+    stateAssertions.map(({nodeId}) => nodeId),
+  );
+  assert.ok(!asserted.includes('sheep-flock-node'));
+  assert.ok(asserted.includes('turtle-walk-node'));
+});

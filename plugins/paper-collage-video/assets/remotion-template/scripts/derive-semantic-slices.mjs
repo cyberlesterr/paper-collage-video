@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {transactAssetManifest} from './asset-manifest-lib.mjs';
@@ -9,6 +10,10 @@ import {
   writeJson,
 } from './project-lib.mjs';
 import {deriveSemanticSlices} from './semantic-slices-lib.mjs';
+
+const USAGE =
+  '用法：derive-semantic-slices.mjs <semantic-slices.json>';
+printCliHelp(process.argv.slice(2), USAGE);
 
 const workspacePath = (input, label) => {
   const resolved = path.resolve(ROOT, input);
@@ -23,7 +28,7 @@ try {
     (argument) => !argument.startsWith('--'),
   );
   if (!specInput) {
-    throw new Error('用法：derive-semantic-slices.mjs <semantic-slices.json>');
+    throw new Error(USAGE);
   }
   const spec = await readJson(workspacePath(specInput, 'semantic slices spec'));
   const projectDirectory = path.join(ROOT, 'projects', spec.projectSlug ?? '');

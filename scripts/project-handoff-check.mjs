@@ -1,7 +1,11 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {assessHandoff, loadProduction} from './production-state.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  "用法：npm run project:handoff-check -- <slug>";
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const option = (name) =>
   args.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3);

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {
@@ -15,13 +16,16 @@ import {
 } from './visual-blueprint-review-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：provider:request -- <validate|authorize> --request=<request.json> [--json]';
+printCliHelp(args, USAGE);
 const action = args.find((arg) => !arg.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!['validate', 'authorize'].includes(action)) {
     throw new Error(
-      '用法：provider:request -- <validate|authorize> --request=<request.json> [--json]',
+      USAGE,
     );
   }
   const requestInput = valueFor('--request');

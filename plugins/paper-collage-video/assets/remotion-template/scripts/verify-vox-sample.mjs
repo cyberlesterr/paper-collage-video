@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -23,6 +24,10 @@ import {
 } from './vox-sample-proof-lib.mjs';
 import {createEditorialFixture} from '../fixtures/editorial-fixture.mjs';
 import {FIXTURE_STYLE_PROFILE} from '../fixtures/motion-contract-fixture.mjs';
+
+const USAGE =
+  "用法：npm run sample:vox:verify -- [--preview=<值>]";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const SCRIPT_DIRECTORY = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIRECTORY, '..');

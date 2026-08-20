@@ -1,8 +1,13 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
 import {ROOT} from './project-lib.mjs';
 import {resolvePythonCommand} from './python-runtime.mjs';
+
+const USAGE =
+  "用法：npm run schema:v12 --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const runInherited = (command, args) =>
   new Promise((resolve, reject) => {

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -24,6 +25,9 @@ import {
 import {visualBlueprintPaths} from './visual-blueprint-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:visual-review -- <slug> make-receipt --decision=<approved|revise> ';
+printCliHelp(args, USAGE);
 const positionals = args.filter((argument) => !argument.startsWith('--'));
 const [slug, action] = positionals;
 const valueFor = (name) => parseCliValue(args, name);
@@ -52,7 +56,7 @@ const makeReceipt = async () => {
     !messageText.trim()
   ) {
     throw new Error(
-      '用法：project:visual-review -- <slug> make-receipt --decision=<approved|revise> ' +
+      USAGE +
         '--note=<用户原话> --reviewer=<human:id> --host=<host> --thread=<threadId> ' +
         '--message-ref=<消息引用> (--message=<原文>|--message-file=<路径>)',
     );

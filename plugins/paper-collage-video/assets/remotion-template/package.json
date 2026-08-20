@@ -69,6 +69,7 @@
     "project:failures": "node scripts/project-failures.mjs",
     "project:friction": "node scripts/project-friction.mjs",
     "project:storyboard-scaffold": "node scripts/project-storyboard-scaffold.mjs",
+    "project:materialize-execution": "node scripts/project-materialize-execution.mjs",
     "project:checkpoint": "node scripts/project-checkpoint.mjs",
     "project:asset-lifecycle": "node scripts/project-asset-lifecycle.mjs",
     "project:review-sync": "node scripts/project-review-sync.mjs",

@@ -2,6 +2,7 @@ import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {IDLE_PRESETS} from './production-vocabulary.mjs';
 import {
   collectSequenceProofCoverage,
   resolveSequenceLayers,
@@ -412,7 +413,7 @@ export const validateCompositionStructure = ({
       add('error', 'composition-node-visibility', 'visibility.initial 必须是 visible 或 hidden。', `${nodeLocation}.visibility.initial`);
     }
     if (node.motion?.idle) {
-      if (!['float', 'breathe', 'grind', 'drift', 'sway', 'still'].includes(node.motion.idle.preset)) add('error', 'composition-idle-preset', `未知 idle preset：${node.motion.idle.preset}`, `${nodeLocation}.motion.idle.preset`);
+      if (!IDLE_PRESETS.includes(node.motion.idle.preset)) add('error', 'composition-idle-preset', `未知 idle preset：${node.motion.idle.preset}；idle 只接受 ${IDLE_PRESETS.join('、')}，位移与镜头行为请用 keyframes 或 camera 表达。`, `${nodeLocation}.motion.idle.preset`);
       if (!(finite(node.motion.idle.intensity) && node.motion.idle.intensity >= 0 && node.motion.idle.intensity <= 3)) add('error', 'composition-idle-intensity', 'idle.intensity 必须位于 0..3。', `${nodeLocation}.motion.idle.intensity`);
       if (!(finite(node.motion.idle.cycleSeconds) && node.motion.idle.cycleSeconds > 0)) add('error', 'composition-idle-cycle', 'idle.cycleSeconds 必须大于 0。', `${nodeLocation}.motion.idle.cycleSeconds`);
     }

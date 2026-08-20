@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -29,6 +30,9 @@ import {hashFileStream} from './render-cache-lib.mjs';
 import {deriveTransitionProofSamples, summarizeSceneTransitions} from '../src/sceneTimeline.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  "用法：npm run project:report -- <slug> [--artifact=<值>] [--quality-report=<值>] [--validation-report=<值>]";
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const artifactArgument = args.find((arg) => arg.startsWith('--artifact='));
 const validationArgument = args.find((arg) =>

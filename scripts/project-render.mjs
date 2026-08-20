@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {spawn} from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -25,6 +26,10 @@ import {
   deliveryAudioFileForMode,
   muxAuthoritativeAudio,
 } from './audio-preflight-lib.mjs';
+
+const USAGE =
+  '用法：project-render.mjs <preview|render> <slug>';
+printCliHelp(process.argv.slice(2), USAGE);
 
 const [mode, slug] = process.argv.slice(2);
 let renderStartedAt = null;
@@ -76,7 +81,7 @@ const friendlyRenderError = (error) => {
 
 try {
   if (!['preview', 'render'].includes(mode)) {
-    throw new Error('用法：project-render.mjs <preview|render> <slug>');
+    throw new Error(USAGE);
   }
   renderStartedAt = new Date().toISOString();
   await writeRenderStatus({

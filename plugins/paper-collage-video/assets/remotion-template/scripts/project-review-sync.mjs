@@ -1,7 +1,11 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {formatProduction, loadProduction, syncReviewFromProduction} from './production-state.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  "用法：npm run project:review-sync -- <slug>";
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 
 try {

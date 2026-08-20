@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -24,6 +25,9 @@ import {
 import {motionLanguageCard} from './motion-contract-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:revise-preview-semantic -- <slug> --input=<storyboard.json> --authorization=<semantic-revision-authorization.json> [--execution=<candidate-project.json>] [--json]';
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 const input = valueFor('--input');
@@ -34,7 +38,7 @@ const json = args.includes('--json');
 try {
   if (!slug || !input || !authorizationInput) {
     throw new Error(
-      '用法：project:revise-preview-semantic -- <slug> --input=<storyboard.json> --authorization=<semantic-revision-authorization.json> [--execution=<candidate-project.json>] [--json]',
+      USAGE,
     );
   }
   const [

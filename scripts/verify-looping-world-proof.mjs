@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {createHash} from 'node:crypto';
 import {execFile} from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -17,6 +18,10 @@ import {
   inspectCompositeTechnical,
 } from './quality-lib.mjs';
 import {createRuntimeBuildFingerprint} from './runtime-build-lib.mjs';
+
+const USAGE =
+  "用法：npm run proof:looping-world:verify --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const execFileAsync = promisify(execFile);
 const ROOT = path.resolve(import.meta.dirname, '..');

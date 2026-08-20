@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {
@@ -9,6 +10,9 @@ import {
 } from './failure-circuit-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:failures -- <slug> summary | <slug> resolve --circuit=<id> --note=<人的决定>';
+printCliHelp(args, USAGE);
 const positionals = args.filter((argument) => !argument.startsWith('--'));
 const [slug, action = 'summary'] = positionals;
 const valueFor = (name) => parseCliValue(args, name);
@@ -16,7 +20,7 @@ const valueFor = (name) => parseCliValue(args, name);
 try {
   if (!slug || !['summary', 'resolve'].includes(action)) {
     throw new Error(
-      '用法：project:failures -- <slug> summary | <slug> resolve --circuit=<id> --note=<人的决定>',
+      USAGE,
     );
   }
   if (action === 'resolve') {

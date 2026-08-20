@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import path from 'node:path';
 import {
   PHASE2_PROOF_PROFILES,
@@ -44,6 +45,10 @@ import {
   computeRegisteredGeometryProof,
 } from './registered-geometry-lib.mjs';
 import {FIXTURE_STYLE_PROFILE} from '../fixtures/motion-contract-fixture.mjs';
+
+const USAGE =
+  "用法：npm run proof:phase2:prepare --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const inputsDirectory = path.join(PHASE2_PROOF_DIR, 'inputs');
 const reportsDirectory = path.join(PHASE2_PROOF_DIR, 'reports');

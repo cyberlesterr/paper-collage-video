@@ -46,6 +46,24 @@ wholesale fails on the extra keys. If you do rebuild it, take it from
 are by value, so key order does not matter, and a mismatch reports each field
 with its expected and received value.
 
+## Correcting Directing After Concept Approval
+
+Once concept approval is recorded, `project:storyboard` stops accepting input and
+`--replace-unconfirmed-plan` no longer applies, because a style sample has been
+spent. That is not a dead end. For a directing, proof, or state-execution error
+found before visual approval:
+
+```bash
+npm run project:revise-preview-directing -- <slug> --input=<storyboard.json> --source=style-review
+```
+
+Add `--execution=<candidate-project.json>` when the execution tree needs the
+matching edit. The command accepts timing, treatment, proof, and boundary
+changes, rejects arc/style/meaning drift, keeps the approved provider cap, and
+synchronizes the execution tree atomically. Never hand-edit `production.json` or
+`project.json` approval state to work around a contract error — if this command
+rejects the change, the change itself is out of scope for this gate.
+
 ## Cost Boundary
 
 - Before combined scenario/concept approval, use only the current host model for the common story and three scenarios; do not invoke an unconfirmed external/paid provider. Built-in style cards are versioned local text-to-image PNG assets and consume no provider calls when shown during intake.

@@ -90,3 +90,17 @@ export const CONTINUOUS_PRESETS = [
 ];
 
 export const STATE_FACINGS = ['left', 'right', 'front', 'back', 'neutral'];
+
+// Idle motion is a subtle self-loop, so it accepts a narrower set than the
+// continuous-transform presets: locomotion and camera behaviours (traverse,
+// parallax-camera, scroll-world-x, …) are expressed as keyframes or camera
+// settings instead. Both sides read this list so a preset that plans cleanly
+// cannot become an unknown idle preset at execution time.
+export const IDLE_PRESETS = [
+  'float',
+  'breathe',
+  'grind',
+  'drift',
+  'sway',
+  'still',
+];

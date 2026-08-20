@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {spawn} from 'node:child_process';
 import path from 'node:path';
 import {
@@ -19,6 +20,10 @@ import {assertMotionApprovalCurrent} from './motion-approval-lib.mjs';
 import {assertRuntimeBuildManifestCurrent} from './runtime-build-lib.mjs';
 import {assertVisualBlueprintApprovalCurrent} from './visual-blueprint-review-lib.mjs';
 
+const USAGE =
+  '用法：project:assets-ready -- <slug>';
+printCliHelp(process.argv.slice(2), USAGE);
+
 const [slug, ...args] = process.argv.slice(2);
 
 const run = (script, scriptArgs) =>
@@ -37,7 +42,7 @@ const run = (script, scriptArgs) =>
 
 try {
   if (!slug) {
-    throw new Error('用法：project:assets-ready -- <slug>');
+    throw new Error(USAGE);
   }
   const {state} = await loadProduction(slug);
   const mode = resolveAssetsReadyMode(state.stage);

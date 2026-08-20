@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -20,6 +21,10 @@ import {validateProject} from './project-lib.mjs';
 import {createRuntimeBuildFingerprint} from './runtime-build-lib.mjs';
 import {inspectSpatialContract} from './spatial-contract-lib.mjs';
 import {validateStoryboard} from './storyboard-lib.mjs';
+
+const USAGE =
+  "用法：npm run proof:path-locomotion:prepare --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const ROOT = path.resolve(import.meta.dirname, '..');
 const PUBLIC_DIRECTORY = path.join(

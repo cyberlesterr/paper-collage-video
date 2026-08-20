@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -21,8 +22,11 @@ import {
 } from './production-metrics-lib.mjs';
 
 const args = process.argv.slice(2);
-const usage =
+const USAGE =
   '用法：project:quality -- <slug> <prepare|status|scaffold|contact-sheet|accept-human|record|record-batch> [--scope=all|style|batch] [--assets=<id,...>] [--scene=<sceneId,...>] [--input=<reviews.json>] [--output=<path>] [--reviewer=human:<id>] [--note=<用户原话>] [--all] [--quiet] [--json]；也兼容 <action> <slug>。带 --assets/--scene 时生成批次早审脚手架（quality-review-scaffold.batch.json），早审记录直接计入最终审。';
+printCliHelp(args, USAGE);
+const usage =
+  USAGE;
 if (args.includes('--help') || args.includes('-h')) {
   console.log(usage);
   process.exit(0);

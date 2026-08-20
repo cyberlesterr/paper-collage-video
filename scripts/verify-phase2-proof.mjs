@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {execFile} from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -34,6 +35,10 @@ import {
   sha256File,
   writeJson,
 } from './phase2-proof-lib.mjs';
+
+const USAGE =
+  "用法：npm run proof:phase2:verify --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const execFileAsync = promisify(execFile);
 const reportsDirectory = path.join(PHASE2_PROOF_DIR, 'reports');

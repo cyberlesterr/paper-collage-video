@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue, stableStringify} from './contract-utils.mjs';
 import {
   buildCreativePlan,
@@ -19,6 +20,9 @@ import {
 import {loadProduction} from './production-state.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  "用法：npm run project:plan -- <slug> [--duration] [--json] [--narration-seconds] [--profile] [--rationale] [--requested-duration] [--requested-scenes] [--scenario] [--scenes]";
+printCliHelp(args, USAGE);
 const json = args.includes('--json');
 const slug = args.find((arg) => !arg.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);

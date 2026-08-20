@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {transactAssetManifest} from './asset-manifest-lib.mjs';
@@ -14,6 +15,10 @@ import {
   writeJson,
 } from './project-lib.mjs';
 
+const USAGE =
+  '用法：derive-looping-strip.mjs <looping-strip.json>';
+printCliHelp(process.argv.slice(2), USAGE);
+
 const workspacePath = (input, label) => {
   const resolved = path.resolve(ROOT, input);
   if (resolved !== ROOT && !resolved.startsWith(`${ROOT}${path.sep}`)) {
@@ -27,7 +32,7 @@ try {
     (argument) => !argument.startsWith('--'),
   );
   if (!specInput) {
-    throw new Error('用法：derive-looping-strip.mjs <looping-strip.json>');
+    throw new Error(USAGE);
   }
   const specFile = workspacePath(specInput, 'looping strip spec');
   const spec = await readJson(specFile);

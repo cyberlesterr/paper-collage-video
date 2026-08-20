@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {execFile} from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -7,6 +8,10 @@ import {
   LOOPING_WORLD_PROFILES,
   LOOPING_WORLD_SLUG,
 } from '../fixtures/looping-world-fixture.mjs';
+
+const USAGE =
+  "用法：npm run proof:looping-world:render --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const execFileAsync = promisify(execFile);
 const ROOT = path.resolve(import.meta.dirname, '..');

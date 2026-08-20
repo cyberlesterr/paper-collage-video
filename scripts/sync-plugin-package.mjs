@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -14,6 +15,10 @@ import {
   materializeStyleProfile,
 } from './style-catalog-lib.mjs';
 import {motionLanguageCard} from './motion-contract-lib.mjs';
+
+const USAGE =
+  '用法：npm run plugin:sync（无参数；把 scripts/ 与 skills/ 分发到 plugins/paper-collage-video）';
+printCliHelp(process.argv.slice(2), USAGE);
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -185,6 +190,8 @@ for (const entry of [
   'scripts/cli-help-lib.mjs',
   'scripts/contract-utils.mjs',
   'scripts/production-vocabulary.mjs',
+  'scripts/execution-scaffold-lib.mjs',
+  'scripts/project-materialize-execution.mjs',
   'scripts/selection-scaffold-lib.mjs',
   'scripts/phase2-proof-lib.mjs',
   'scripts/world-motion-proof-lib.mjs',
@@ -378,6 +385,7 @@ const workspacePackage = {
     'project:failures': rootPackage.scripts['project:failures'],
     'project:friction': rootPackage.scripts['project:friction'],
     'project:storyboard-scaffold': rootPackage.scripts['project:storyboard-scaffold'],
+    'project:materialize-execution': rootPackage.scripts['project:materialize-execution'],
     'project:checkpoint': rootPackage.scripts['project:checkpoint'],
     'project:asset-lifecycle': rootPackage.scripts['project:asset-lifecycle'],
     'project:review-sync': rootPackage.scripts['project:review-sync'],

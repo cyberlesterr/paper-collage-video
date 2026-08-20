@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -19,6 +20,10 @@ import {
   createAssetRecordId,
   transactAssetManifest,
 } from './asset-manifest-lib.mjs';
+
+const USAGE =
+  '用法：process-state-sheet.mjs <state-sheet.json>';
+printCliHelp(process.argv.slice(2), USAGE);
 
 const run = (command, args) => new Promise((resolve, reject) => {
   const child = spawn(command, args, {cwd: ROOT, stdio: 'inherit'});
@@ -117,7 +122,7 @@ const writeAnchorOverlay = async ({input, output, anchors, width, height}) => {
 
 try {
   const [specInput] = process.argv.slice(2).filter((argument) => !argument.startsWith('--'));
-  if (!specInput) throw new Error('用法：process-state-sheet.mjs <state-sheet.json>');
+  if (!specInput) throw new Error(USAGE);
   const specFile = workspacePath(specInput, 'state sheet spec');
   const spec = await readJson(specFile);
   const errors = validateStateSheetSpec(spec);

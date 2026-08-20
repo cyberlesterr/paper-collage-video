@@ -1,8 +1,12 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {ensureAudioCalibrationReady} from './audio-calibration-lib.mjs';
 import {loadProject} from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:audio-calibration -- <slug> run';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const action = args.find((argument, index) =>
   index > args.indexOf(slug) && !argument.startsWith('--')) ?? 'run';
@@ -10,7 +14,7 @@ const action = args.find((argument, index) =>
 try {
   if (!slug) {
     throw new Error(
-      '用法：project:audio-calibration -- <slug> run',
+      USAGE,
     );
   }
   if (action !== 'run') {

@@ -51,6 +51,7 @@
     "project:scenarios": "node scripts/project-scenarios.mjs",
     "project:plan": "node scripts/project-plan.mjs",
     "project:storyboard": "node scripts/project-storyboard.mjs",
+    "project:materialize-execution": "node scripts/project-materialize-execution.mjs",
     "project:storyboard-scaffold": "node scripts/project-storyboard-scaffold.mjs",
     "project:world-topology-proof": "node scripts/project-world-topology-proof.mjs",
     "project:revise-preview-directing": "node scripts/project-revise-preview-directing.mjs",

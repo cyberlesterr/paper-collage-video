@@ -1,6 +1,11 @@
+import {printCliHelp} from './cli-help-lib.mjs';
 import {readdir} from 'node:fs/promises';
 import {extname, join} from 'node:path';
 import sharp from 'sharp';
+
+const USAGE =
+  "用法：npm run assets:rasterize --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const assetDirectories = [
   {directory: 'public/textures', width: 960, height: 540, palette: true},

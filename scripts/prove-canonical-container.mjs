@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import path from 'node:path';
 import {
   buildCanonicalContainerProof,
@@ -11,13 +12,17 @@ import {
 } from './project-lib.mjs';
 import {assertAssetManifest} from './asset-manifest-lib.mjs';
 
+const USAGE =
+  '用法：prove-canonical-container.mjs <slug> <family-id>';
+printCliHelp(process.argv.slice(2), USAGE);
+
 try {
   const [slug, familyId] = process.argv
     .slice(2)
     .filter((argument) => !argument.startsWith('--'));
   if (!slug || !familyId) {
     throw new Error(
-      '用法：prove-canonical-container.mjs <slug> <family-id>',
+      USAGE,
     );
   }
   const projectFile = path.join(

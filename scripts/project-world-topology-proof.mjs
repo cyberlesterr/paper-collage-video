@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import path from 'node:path';
 import {
   ROOT,
@@ -8,6 +9,10 @@ import {
 } from './project-lib.mjs';
 import {storyboardFileFor} from './storyboard-lib.mjs';
 import {buildWorldTopologyProof} from './world-topology-proof-lib.mjs';
+
+const USAGE =
+  "用法：npm run project:world-topology-proof --";
+printCliHelp(process.argv.slice(2), USAGE);
 
 const slug = process.argv.slice(2).find((argument) => !argument.startsWith('--'));
 

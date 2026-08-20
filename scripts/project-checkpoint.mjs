@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {assertSlug} from './project-lib.mjs';
 import {
   advanceWorkItem,
@@ -7,6 +8,9 @@ import {
 } from './production-state.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project-checkpoint.mjs <slug> <id> <pending|in-progress|completed|blocked> [--label=说明] [--artifact=路径] [--note=说明]';
+printCliHelp(args, USAGE);
 const positional = args.filter((arg) => !arg.startsWith('--'));
 const [slug, id, status] = positional;
 const option = (name) =>
@@ -15,7 +19,7 @@ const option = (name) =>
 try {
   if (!slug || !id || !status) {
     throw new Error(
-      '用法：project-checkpoint.mjs <slug> <id> <pending|in-progress|completed|blocked> [--label=说明] [--artifact=路径] [--note=说明]',
+      USAGE,
     );
   }
   assertSlug(slug);

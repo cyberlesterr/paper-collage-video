@@ -1,10 +1,14 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {PROVIDER_CAPABILITIES, writeProviderSelection} from './provider-lib.mjs';
 import {ROOT} from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  `用法：provider:select -- <slug> <${PROVIDER_CAPABILITIES.join('|')}> <provider-id> `;
+printCliHelp(args, USAGE);
 const positionals = args.filter((arg) => !arg.startsWith('--'));
 const [slug, capability, providerId] = positionals;
 const valueFor = (name) => parseCliValue(args, name);
@@ -12,7 +16,7 @@ const valueFor = (name) => parseCliValue(args, name);
 try {
   if (!slug || !capability || !providerId) {
     throw new Error(
-      `用法：provider:select -- <slug> <${PROVIDER_CAPABILITIES.join('|')}> <provider-id> ` +
+      USAGE +
         '--note=<人的决定> [--scope=project|workspace] [--label=<名称>] [--adapter=host|manual] [--tool=<tool-name>] [--model=<model>] ' +
         '[--output-mode=local-file|public-download-url --output-evidence=<已验证的落盘证据>]',
     );
