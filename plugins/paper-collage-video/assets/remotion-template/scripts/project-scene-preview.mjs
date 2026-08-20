@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {spawn} from 'node:child_process';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -15,6 +16,9 @@ import {
 import {createVisualFingerprint} from './render-cache-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:scene-preview -- <slug> --scene=<sceneId>';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const sceneId = args.find((argument) => argument.startsWith('--scene='))?.slice('--scene='.length);
 
@@ -25,7 +29,7 @@ const run = (command, commandArgs) => new Promise((resolve, reject) => {
 });
 
 try {
-  if (!slug || !sceneId) throw new Error('用法：project:scene-preview -- <slug> --scene=<sceneId>');
+  if (!slug || !sceneId) throw new Error(USAGE);
   await runCommand(process.execPath, ['scripts/project-sync.mjs', slug]);
   const {project} = await loadProject(slug);
   const validation = await validateProject(project);

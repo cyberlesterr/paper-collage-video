@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -26,6 +27,9 @@ import {
 } from './visual-blueprint-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:visual-blueprint -- <slug>';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 
 const xmlEscape = (value) =>
@@ -244,7 +248,7 @@ const extractMotionClips = async ({
 
 try {
   if (!slug) {
-    throw new Error('用法：project:visual-blueprint -- <slug>');
+    throw new Error(USAGE);
   }
   const [{state}, {project}, storyboard] = await Promise.all([
     loadProduction(slug),

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {resolveWorkspacePath} from './provider-lib.mjs';
@@ -18,6 +19,9 @@ import {
 import {motionLanguageCard} from './motion-contract-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:revise-preview-directing -- <slug> --input=<storyboard.json> [--execution=<candidate-project.json>] [--source=style-review|preview|asset-production] [--json]';
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const input = args.find((arg) => arg.startsWith('--input='))?.slice('--input='.length);
 const executionInput = args
@@ -28,7 +32,7 @@ const json = args.includes('--json');
 
 try {
   if (!slug || !input) {
-    throw new Error('用法：project:revise-preview-directing -- <slug> --input=<storyboard.json> [--execution=<candidate-project.json>] [--source=style-review|preview|asset-production] [--json]');
+    throw new Error(USAGE);
   }
   const [{project}, {paths, state}, currentStoryboard] = await Promise.all([
     loadProject(slug),

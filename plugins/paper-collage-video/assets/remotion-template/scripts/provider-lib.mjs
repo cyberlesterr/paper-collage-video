@@ -497,14 +497,26 @@ export const findExecutable = async (executable) => {
   return null;
 };
 
+// image/voice/sound must hand back a file the workspace can register; text does
+// not. A host provider for those without a proven acquisition mode is a gate
+// failure waiting to happen, so it is labelled here rather than discovered at
+// the provider gate after the concept is already built around it.
+const ARTIFACT_CAPABILITIES = new Set(['image', 'voice', 'sound']);
+
 export const inspectProviderReadiness = async (provider) => {
   const missingEnv = (provider.requiredEnv ?? []).filter((name) => !process.env[name]);
   if (provider.adapter === 'host') {
+    const unprovenOutput =
+      ARTIFACT_CAPABILITIES.has(provider.capability) &&
+      !provider.outputAcquisition;
     return {
       status: missingEnv.length ? 'error' : 'agent-check-required',
+      outputAcquisitionProven: !unprovenOutput,
       message: missingEnv.length
         ? `缺少环境变量：${missingEnv.join(', ')}`
-        : provider.toolHint || '需要宿主环境选择并调用对应工具。',
+        : unprovenOutput
+          ? `${provider.toolHint || '需要宿主环境选择并调用对应工具。'} 尚未声明 outputAcquisition：确认前必须先证明宿主工具能返回 local-file 或 public-download-url，否则改用 command 或 manual provider（受登录保护的页面不算输出契约）。`
+          : provider.toolHint || '需要宿主环境选择并调用对应工具。',
       missingEnv,
     };
   }
@@ -541,7 +553,7 @@ export const assertSelectedProvidersReady = async (
   });
   for (const capability of capabilities) {
     const provider = resolveProvider(loaded.config, capability);
-    const readiness = await inspectProviderReadiness(provider);
+    const readiness = await inspectProviderReadiness({...provider, capability});
     if (readiness.status === 'error') {
       throw new Error(`${capability} provider ${provider.id} 不可用：${readiness.message}`);
     }

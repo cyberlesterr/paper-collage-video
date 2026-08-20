@@ -69,7 +69,7 @@ const makeScene = ({
     {length: localMotionCount},
     (_, motionIndex) => ({
       targetId: `target-${index + 1}-${motionIndex + 1}`,
-      preset: motionIndex === 0 ? 'translate' : 'breathe',
+      preset: motionIndex === 0 ? 'drift' : 'breathe',
     }),
   ),
 });
@@ -681,7 +681,7 @@ test('a selected one-take scenario raises motion capacity to its exact approved 
             ],
             localMotionTargets: Array.from({length: 8}, (_, index) => ({
               targetId: `target-${index}`,
-              preset: 'translate',
+              preset: 'drift',
             })),
           },
         ],
@@ -759,4 +759,26 @@ test('profile fulfillment turns selected production depth into a minimum, not on
   assert.equal(result.passed, false);
   assert.ok(result.issues.some((issue) => issue.startsWith('layeredScenes:')));
   assert.ok(result.issues.some((issue) => issue.startsWith('localMotionTargets:')));
+});
+
+test('planning schema enums stay bound to the executable vocabulary', async () => {
+  const {
+    CONTINUOUS_PRESETS,
+    SOURCE_PACKAGE_STRATEGIES,
+  } = await import('../scripts/production-vocabulary.mjs');
+  const schema = JSON.parse(
+    await fs.readFile(
+      path.join(ROOT, 'schemas/planning-scenarios.schema.json'),
+      'utf8',
+    ),
+  );
+  assert.deepEqual(
+    schema.$defs.sourcePackage.properties.strategy.enum,
+    Object.keys(SOURCE_PACKAGE_STRATEGIES),
+  );
+  assert.deepEqual(
+    schema.$defs.scene.properties.localMotionTargets.items.properties.preset
+      .enum,
+    CONTINUOUS_PRESETS,
+  );
 });

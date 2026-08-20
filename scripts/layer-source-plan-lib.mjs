@@ -1,3 +1,14 @@
+import {stableStringify} from './contract-utils.mjs';
+import {
+  LAYER_SOURCE_STRATEGIES,
+  STRATEGY_COSTS,
+} from './production-vocabulary.mjs';
+
+const sameValue = (left, right) =>
+  stableStringify(left ?? null) === stableStringify(right ?? null);
+
+export {LAYER_SOURCE_STRATEGIES};
+
 export const LAYER_ROLES = [
   'support-rear',
   'subject',
@@ -10,36 +21,12 @@ export const LAYER_COMPLETENESS = {
   'support-front': 'full-overlay',
 };
 
-export const LAYER_SOURCE_STRATEGIES = [
-  'rigid-master',
-  'registered-layer-sheet',
-  'context-preserving-layer-edits',
-];
-
 export const LAYER_MOTION_CAPABILITIES = [
   'rigid-locked',
   'bounded-relative',
 ];
 
 export const RESPONSIVE_LAYER_PROFILES = ['16:9', '9:16', '1:1'];
-
-const STRATEGY_COSTS = {
-  'rigid-master': {
-    expectedProviderImageCalls: 1,
-    localDerivatives: 0,
-    avoidedCalls: 0,
-  },
-  'registered-layer-sheet': {
-    expectedProviderImageCalls: 1,
-    localDerivatives: 3,
-    avoidedCalls: 3,
-  },
-  'context-preserving-layer-edits': {
-    expectedProviderImageCalls: 4,
-    localDerivatives: 3,
-    avoidedCalls: 0,
-  },
-};
 
 const finite = (value) =>
   typeof value === 'number' && Number.isFinite(value);
@@ -431,7 +418,7 @@ export const compileLayerStackPlan = ({
       composition.subjectTravelEnvelope
         ? normalizedEnvelope(composition.subjectTravelEnvelope)
         : null,
-    providerImageCalls: costs.expectedProviderImageCalls,
+    providerImageCalls: costs.providerCalls,
     localDerivatives: costs.localDerivatives,
     avoidedCalls: costs.avoidedCalls,
     proofTimeId: treatment.proofTimeId ?? null,
@@ -497,9 +484,34 @@ export const assertSourcePackageDecision = (
   directingSummary,
 ) => {
   const expected = sourcePackageDecisionFor(directingSummary);
-  if (JSON.stringify(decision) !== JSON.stringify(expected)) {
+  // Compared by value, not by serialization: key order in a hand-authored file
+  // is arbitrary. When it does differ, the caller needs to see which field,
+  // otherwise the only recoverable move is to guess.
+  const issues = [];
+  if (!decision || typeof decision !== 'object' || Array.isArray(decision)) {
     throw new Error(
-      'sourcePackageDecision 必须与当前 storyboard 的分层 source-package 计划和预算一致。',
+      'sourcePackageDecision 必须是对象；可用 project:confirm-concept -- <slug> --scaffold 直接生成。',
+    );
+  }
+  for (const key of Object.keys(expected)) {
+    if (!sameValue(decision[key], expected[key])) {
+      issues.push(
+        `sourcePackageDecision.${key}: expected ${JSON.stringify(expected[key])}, received ${JSON.stringify(decision[key] ?? null)}`,
+      );
+    }
+  }
+  for (const key of Object.keys(decision)) {
+    if (!Object.hasOwn(expected, key)) {
+      issues.push(
+        `sourcePackageDecision.${key}: 不属于本决定的字段（只比较 ${Object.keys(expected).join('、')}）`,
+      );
+    }
+  }
+  if (issues.length > 0) {
+    throw new Error(
+      'sourcePackageDecision 必须与当前 storyboard 的分层 source-package 计划和预算一致：\n' +
+        issues.map((line) => `- ${line}`).join('\n') +
+        '\n可用 project:storyboard -- <slug> --input=<storyboard.json> --json 或 project:confirm-concept -- <slug> --scaffold 取回 canonical 值。',
     );
   }
   return expected;

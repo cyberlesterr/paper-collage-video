@@ -11,6 +11,12 @@ import {
   intakeDecisionFingerprint,
 } from './intake-lib.mjs';
 import {buildProviderRootPlan} from './provider-root-plan-lib.mjs';
+import {stableStringify} from './contract-utils.mjs';
+import {
+  CANONICAL_CONTAINER_SOURCE_STRATEGY,
+  CONTINUOUS_PRESETS,
+  STRATEGY_COSTS,
+} from './production-vocabulary.mjs';
 
 export const STORY_SCOPE_BY_PROFILE = {
   draft: 'concise',
@@ -39,35 +45,37 @@ export const STORY_SCOPE_GUIDANCE = {
   },
 };
 
-const SOURCE_PACKAGE_COSTS = {
-  'single-background': {
-    providerCalls: 1,
-    localDerivatives: 0,
-    avoidedCalls: 0,
-  },
-  'rigid-master': {
-    providerCalls: 1,
-    localDerivatives: 0,
-    avoidedCalls: 0,
-  },
-  'registered-layer-sheet': {
-    providerCalls: 1,
-    localDerivatives: 3,
-    avoidedCalls: 3,
-  },
-  'context-preserving-layer-edits': {
-    providerCalls: 4,
-    localDerivatives: 3,
-    avoidedCalls: 0,
-  },
-};
-const CANONICAL_CONTAINER_SOURCE_STRATEGY =
-  'canonical-frame-with-content-sheet';
+const SOURCE_PACKAGE_COSTS = STRATEGY_COSTS;
 
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
 const isPositive = (value) =>
   typeof value === 'number' && Number.isFinite(value) && value > 0;
 const isPositiveInteger = (value) => Number.isInteger(value) && value > 0;
+
+// Authoring input is written by hand against a contract the author cannot see.
+// Reporting one violation per run turns that into a guess-and-retry loop, so
+// independent checks are collected and reported together. Checks that depend on
+// an earlier one holding stay in a later phase.
+const collectIssues = (checks) => {
+  const issues = [];
+  for (const check of checks) {
+    try {
+      check();
+    } catch (error) {
+      issues.push(error.message);
+    }
+  }
+  return issues;
+};
+
+const throwCollected = (issues) => {
+  if (issues.length === 0) return;
+  if (issues.length === 1) throw new Error(issues[0]);
+  throw new Error(
+    `发现 ${issues.length} 处问题，请一次性修正：\n` +
+      issues.map((message) => `- ${message}`).join('\n'),
+  );
+};
 
 export const deriveProfilePromise = ({
   productionProfile,
@@ -212,36 +220,57 @@ const validateCommonStory = (story) => {
   if (!story || typeof story !== 'object' || Array.isArray(story)) {
     throw new Error('commonStory 必须是对象。');
   }
-  for (const key of ['logline', 'audience', 'theme', 'ending']) {
-    if (typeof story[key] !== 'string' || !story[key].trim()) {
-      throw new Error(`commonStory.${key} 必须为非空字符串。`);
-    }
-  }
-  if (!Array.isArray(story.beats) || story.beats.length < 3) {
-    throw new Error('commonStory.beats 至少需要三个共同故事节拍。');
-  }
-  if (!Array.isArray(story.semanticActions) || story.semanticActions.length < 1) {
-    throw new Error('commonStory.semanticActions 至少需要一个必须被画面执行的关键动作。');
-  }
+  throwCollected([
+    ...collectIssues(
+      ['logline', 'audience', 'theme', 'ending'].map((key) => () => {
+        if (typeof story[key] !== 'string' || !story[key].trim()) {
+          throw new Error(`commonStory.${key} 必须为非空字符串。`);
+        }
+      }),
+    ),
+    ...collectIssues([
+      () => {
+        if (!Array.isArray(story.beats) || story.beats.length < 3) {
+          throw new Error('commonStory.beats 至少需要三个共同故事节拍。');
+        }
+      },
+      () => {
+        if (
+          !Array.isArray(story.semanticActions) ||
+          story.semanticActions.length < 1
+        ) {
+          throw new Error(
+            'commonStory.semanticActions 至少需要一个必须被画面执行的关键动作。',
+          );
+        }
+      },
+    ]),
+  ]);
   const ids = new Set();
-  for (const [index, action] of story.semanticActions.entries()) {
-    if (
-      !action ||
-      typeof action !== 'object' ||
-      typeof action.id !== 'string' ||
-      !action.id.trim() ||
-      ids.has(action.id)
-    ) {
-      throw new Error(`commonStory.semanticActions[${index}].id 缺失或重复。`);
-    }
-    if (typeof action.summary !== 'string' || !action.summary.trim()) {
-      throw new Error(`commonStory.semanticActions[${index}].summary 必须说明可见结果。`);
-    }
-    if (!['registered-state', 'local-motion', 'layer-package'].includes(action.requiredExecution)) {
-      throw new Error(`commonStory.semanticActions[${index}].requiredExecution 无效。`);
-    }
-    ids.add(action.id);
-  }
+  throwCollected(
+    collectIssues(
+      story.semanticActions.map((action, index) => () => {
+        if (
+          !action ||
+          typeof action !== 'object' ||
+          typeof action.id !== 'string' ||
+          !action.id.trim() ||
+          ids.has(action.id)
+        ) {
+          throw new Error(`commonStory.semanticActions[${index}].id 缺失或重复。`);
+        }
+        ids.add(action.id);
+        if (typeof action.summary !== 'string' || !action.summary.trim()) {
+          throw new Error(`commonStory.semanticActions[${index}].summary 必须说明可见结果。`);
+        }
+        if (!['registered-state', 'local-motion', 'layer-package'].includes(action.requiredExecution)) {
+          throw new Error(
+            `commonStory.semanticActions[${index}].requiredExecution 必须是 registered-state、local-motion 或 layer-package，当前为 ${action.requiredExecution ?? 'missing'}。`,
+          );
+        }
+      }),
+    ),
+  );
 };
 
 const compileSemanticActionCoverage = ({option, semanticActions}) => {
@@ -253,54 +282,58 @@ const compileSemanticActionCoverage = ({option, semanticActions}) => {
   }
   const actionById = new Map(semanticActions.map((action) => [action.id, action]));
   const seen = new Set();
-  for (const [index, coverage] of supplied.entries()) {
-    const action = actionById.get(coverage?.actionId);
-    if (!action || seen.has(coverage.actionId)) {
-      throw new Error(`${option.id}.semanticActionCoverage[${index}] 引用了未知或重复的 actionId。`);
-    }
-    if (coverage.execution !== action.requiredExecution) {
-      throw new Error(
-        `${option.id}.${coverage.actionId} 必须使用 ${action.requiredExecution}，不得用 ${coverage.execution ?? 'missing'} 替代。`,
-      );
-    }
-    const scene = option.scenes.find(({id}) => id === coverage.sceneId);
-    if (!scene) {
-      throw new Error(`${option.id}.${coverage.actionId} 必须绑定当前 scenario 的 sceneId。`);
-    }
-    if (typeof coverage.targetId !== 'string' || !coverage.targetId.trim()) {
-      throw new Error(`${option.id}.${coverage.actionId}.targetId 不能为空。`);
-    }
-    if (typeof coverage.visibleResult !== 'string' || !coverage.visibleResult.trim()) {
-      throw new Error(`${option.id}.${coverage.actionId}.visibleResult 必须说明观众实际看见什么。`);
-    }
-    if (coverage.execution === 'registered-state') {
-      const family = scene.stateFamilies?.find(
-        ({id}) => id === coverage.stateRef?.poseFamilyId,
-      );
-      if (!family || !family.states?.includes(coverage.stateRef?.stateId)) {
-        throw new Error(
-          `${option.id}.${coverage.actionId} 必须绑定 ${coverage.sceneId} 中真实规划的 poseFamilyId/stateId。`,
-        );
-      }
-    } else if (coverage.execution === 'local-motion') {
-      if (
-        !scene.localMotionTargets?.some(
-          ({targetId}) => targetId === coverage.localMotionTargetId,
-        )
-      ) {
-        throw new Error(
-          `${option.id}.${coverage.actionId} 必须绑定 ${coverage.sceneId} 中真实规划的 localMotionTargetId。`,
-        );
-      }
-    } else if (
-      !scene.sourcePackages?.some(({id}) => id === coverage.sourcePackageId)
-    ) {
-      throw new Error(
-        `${option.id}.${coverage.actionId} 必须绑定 ${coverage.sceneId} 中真实规划的 sourcePackageId。`,
-      );
-    }
-    seen.add(coverage.actionId);
-  }
+  throwCollected(
+    collectIssues(
+      supplied.map((coverage, index) => () => {
+        const action = actionById.get(coverage?.actionId);
+        if (!action || seen.has(coverage.actionId)) {
+          throw new Error(`${option.id}.semanticActionCoverage[${index}] 引用了未知或重复的 actionId。`);
+        }
+        seen.add(coverage.actionId);
+        if (coverage.execution !== action.requiredExecution) {
+          throw new Error(
+            `${option.id}.${coverage.actionId} 必须使用 ${action.requiredExecution}，不得用 ${coverage.execution ?? 'missing'} 替代。`,
+          );
+        }
+        const scene = option.scenes.find(({id}) => id === coverage.sceneId);
+        if (!scene) {
+          throw new Error(`${option.id}.${coverage.actionId} 必须绑定当前 scenario 的 sceneId。`);
+        }
+        if (typeof coverage.targetId !== 'string' || !coverage.targetId.trim()) {
+          throw new Error(`${option.id}.${coverage.actionId}.targetId 不能为空。`);
+        }
+        if (typeof coverage.visibleResult !== 'string' || !coverage.visibleResult.trim()) {
+          throw new Error(`${option.id}.${coverage.actionId}.visibleResult 必须说明观众实际看见什么。`);
+        }
+        if (coverage.execution === 'registered-state') {
+          const family = scene.stateFamilies?.find(
+            ({id}) => id === coverage.stateRef?.poseFamilyId,
+          );
+          if (!family || !family.states?.includes(coverage.stateRef?.stateId)) {
+            throw new Error(
+              `${option.id}.${coverage.actionId} 必须绑定 ${coverage.sceneId} 中真实规划的 poseFamilyId/stateId。`,
+            );
+          }
+        } else if (coverage.execution === 'local-motion') {
+          if (
+            !scene.localMotionTargets?.some(
+              ({targetId}) => targetId === coverage.localMotionTargetId,
+            )
+          ) {
+            throw new Error(
+              `${option.id}.${coverage.actionId} 必须绑定 ${coverage.sceneId} 中真实规划的 localMotionTargetId。`,
+            );
+          }
+        } else if (
+          !scene.sourcePackages?.some(({id}) => id === coverage.sourcePackageId)
+        ) {
+          throw new Error(
+            `${option.id}.${coverage.actionId} 必须绑定 ${coverage.sceneId} 中真实规划的 sourcePackageId。`,
+          );
+        }
+      }),
+    ),
+  );
   return supplied.map((coverage) => ({
     ...coverage,
     visibleResult: coverage.visibleResult.trim(),
@@ -313,37 +346,41 @@ const compileProviderEstimate = (option, assetBudget) => {
   const sourcePackages = option.scenes.flatMap(
     ({sourcePackages}) => sourcePackages ?? [],
   );
-  for (const source of sourcePackages) {
-    let expected = SOURCE_PACKAGE_COSTS[source.strategy];
-    if (source.strategy === CANONICAL_CONTAINER_SOURCE_STRATEGY) {
-      const family = allFamilies.get(source.stateFamilyId);
-      if (!family) {
-        throw new Error(
-          `${option.id}.${source.id}.stateFamilyId 必须绑定当前 scenario 中真实规划的状态家族。`,
-        );
-      }
-      expected = {
-        providerCalls: 3,
-        localDerivatives: family.states.size + 1,
-        avoidedCalls: Math.max(1, family.states.size - 1),
-      };
-    }
-    if (!expected) {
-      throw new Error(
-        `${option.id}.${source.id}.strategy 必须是 ${[
-          ...Object.keys(SOURCE_PACKAGE_COSTS),
-          CANONICAL_CONTAINER_SOURCE_STRATEGY,
-        ].join('、')}。`,
-      );
-    }
-    for (const key of ['providerCalls', 'localDerivatives', 'avoidedCalls']) {
-      if (source[key] !== expected[key]) {
-        throw new Error(
-          `${option.id}.${source.id}.${key} 必须与 ${source.strategy} 成本合同一致：expected ${expected[key]}, received ${source[key] ?? 'missing'}。`,
-        );
-      }
-    }
-  }
+  throwCollected(
+    collectIssues(
+      sourcePackages.map((source) => () => {
+        let expected = SOURCE_PACKAGE_COSTS[source.strategy];
+        if (source.strategy === CANONICAL_CONTAINER_SOURCE_STRATEGY) {
+          const family = allFamilies.get(source.stateFamilyId);
+          if (!family) {
+            throw new Error(
+              `${option.id}.${source.id}.stateFamilyId 必须绑定当前 scenario 中真实规划的状态家族。`,
+            );
+          }
+          expected = {
+            providerCalls: 3,
+            localDerivatives: family.states.size + 1,
+            avoidedCalls: Math.max(1, family.states.size - 1),
+          };
+        }
+        if (!expected) {
+          throw new Error(
+            `${option.id}.${source.id}.strategy 必须是 ${[
+              ...Object.keys(SOURCE_PACKAGE_COSTS),
+              CANONICAL_CONTAINER_SOURCE_STRATEGY,
+            ].join('、')}。`,
+          );
+        }
+        for (const key of ['providerCalls', 'localDerivatives', 'avoidedCalls']) {
+          if (source[key] !== expected[key]) {
+            throw new Error(
+              `${option.id}.${source.id}.${key} 必须与 ${source.strategy} 成本合同一致：expected ${expected[key]}, received ${source[key] ?? 'missing'}。`,
+            );
+          }
+        }
+      }),
+    ),
+  );
   const sourcePackageProviderCalls = sourcePackages.reduce(
     (sum, source) => sum + source.providerCalls,
     0,
@@ -384,10 +421,15 @@ const compileProviderEstimate = (option, assetBudget) => {
     expectedImageCalls,
     proposedImageAttemptLimit,
     hardCeiling: assetBudget.maxGeneratedImages,
-    localDerivatives: sourcePackages.reduce(
-      (sum, source) => sum + source.localDerivatives,
-      0,
-    ),
+    // Both metrics count source packages *and* pose-sheet families. Counting
+    // families only in avoidedCalls made a plan with 4 pose sheets report
+    // "0 local derivatives" while claiming 13 avoided calls.
+    localDerivatives:
+      sourcePackages.reduce((sum, source) => sum + source.localDerivatives, 0) +
+      [...families.values()].reduce(
+        (sum, family) => sum + family.states.size,
+        0,
+      ),
     avoidedCalls:
       sourcePackages.reduce((sum, source) => sum + source.avoidedCalls, 0) +
       [...families.values()].reduce(
@@ -430,6 +472,22 @@ const compileOption = ({
   ) {
     throw new Error(`${option.id}.estimatedNarrationSeconds 必须为正数且不超过成片时长。`);
   }
+  // A preset planned here becomes a continuous-transform preset at storyboard
+  // compile time; anything outside that enum would only fail after the whole
+  // storyboard was written.
+  throwCollected(
+    collectIssues(
+      option.scenes.flatMap((scene) =>
+        (scene.localMotionTargets ?? []).map((target) => () => {
+          if (!CONTINUOUS_PRESETS.includes(target?.preset)) {
+            throw new Error(
+              `${option.id}.${scene.id}.${target?.targetId ?? 'localMotionTarget'}.preset 必须是可执行的连续运动预设：${CONTINUOUS_PRESETS.join('、')}；当前为 ${target?.preset ?? 'missing'}。`,
+            );
+          }
+        }),
+      ),
+    ),
+  );
   if (requested.durationSeconds !== null && option.durationSeconds !== requested.durationSeconds) {
     throw new Error(`${option.id} 不得改写用户指定时长 ${requested.durationSeconds}s。`);
   }
@@ -613,8 +671,37 @@ export const scenarioDecisionFor = (scenarios, optionId) => {
 
 export const assertScenarioDecision = (decision, scenarios, optionId) => {
   const expected = scenarioDecisionFor(scenarios, optionId);
-  if (JSON.stringify(decision) !== JSON.stringify(expected)) {
-    throw new Error('scenarioDecision 必须与当前三档规划及所选档位完全一致。');
+  if (!decision || typeof decision !== 'object' || Array.isArray(decision)) {
+    throw new Error(
+      'scenarioDecision 必须是对象；可用 project:confirm-concept -- <slug> --scaffold 直接生成。',
+    );
+  }
+  // Compared by value so key order in a hand-authored file does not matter,
+  // and reported per field so the author can fix it without guessing.
+  const issues = [];
+  for (const key of Object.keys(expected)) {
+    if (
+      stableStringify(decision[key] ?? null) !==
+      stableStringify(expected[key] ?? null)
+    ) {
+      issues.push(
+        `scenarioDecision.${key}: expected ${JSON.stringify(expected[key])}, received ${JSON.stringify(decision[key] ?? null)}`,
+      );
+    }
+  }
+  for (const key of Object.keys(decision)) {
+    if (!Object.hasOwn(expected, key)) {
+      issues.push(
+        `scenarioDecision.${key}: 不属于本决定的字段（只比较 ${Object.keys(expected).join('、')}）`,
+      );
+    }
+  }
+  if (issues.length > 0) {
+    throw new Error(
+      'scenarioDecision 必须与当前三档规划及所选档位完全一致：\n' +
+        issues.map((line) => `- ${line}`).join('\n') +
+        '\n可用 project:scenarios -- <slug> --json 的 decisions[] 或 project:confirm-concept -- <slug> --scaffold 取回 canonical 值。',
+    );
   }
   return expected;
 };

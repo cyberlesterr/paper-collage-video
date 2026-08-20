@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
@@ -65,6 +66,9 @@ import {
 } from './canonical-container-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:composition-proof -- <slug>';
+printCliHelp(args, USAGE);
 const [slug] = args.filter((argument) => !argument.startsWith('--'));
 const force = args.includes('--force');
 const hashFile = async (file) =>
@@ -185,7 +189,7 @@ const debugOverlay = ({width, height, bounds, label}) => Buffer.from(`
 `);
 
 try {
-  if (!slug) throw new Error('用法：project:composition-proof -- <slug>');
+  if (!slug) throw new Error(USAGE);
   await runCommand(process.execPath, ['scripts/project-sync.mjs', slug]);
   const {project} = await loadProject(slug);
   const validation = await validateProject(project);

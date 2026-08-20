@@ -1,4 +1,8 @@
 import {stableValue} from './contract-utils.mjs';
+import {CANONICAL_CONTAINER_SOURCE_STRATEGY} from './production-vocabulary.mjs';
+
+export {CANONICAL_CONTAINER_SOURCE_STRATEGY};
+
 const finite = (value) =>
   typeof value === 'number' && Number.isFinite(value);
 
@@ -11,9 +15,6 @@ const addIssue = (issues, code, message, location) =>
 const sameValue = (left, right) =>
   JSON.stringify(stableValue(left)) ===
   JSON.stringify(stableValue(right));
-
-export const CANONICAL_CONTAINER_SOURCE_STRATEGY =
-  'canonical-frame-with-content-sheet';
 
 export const CANONICAL_CONTAINER_RECOVERY_POLICY = {
   strategy: 'preserve-content-sheet-context',

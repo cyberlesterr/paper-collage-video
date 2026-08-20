@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import path from 'node:path';
 import {
   assertSlug,
@@ -21,6 +22,9 @@ import {
 } from './sound-effect-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project-advance.mjs <slug> <action> [--note=说明]';
+printCliHelp(args, USAGE);
 const positional = args.filter((arg) => !arg.startsWith('--'));
 const [slug, action] = positional;
 const noteArgument = args.find((arg) => arg.startsWith('--note='));
@@ -41,7 +45,7 @@ const requirePassingArtifact = async (slugValue, filename) => {
 
 try {
   if (!slug || !action) {
-    throw new Error('用法：project-advance.mjs <slug> <action> [--note=说明]');
+    throw new Error(USAGE);
   }
   assertSlug(slug);
   if (

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -13,6 +14,9 @@ import {
 } from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:stitch-narration -- <slug> --scenes=<scene-a,scene-b,...> --target-scene=<new-scene-id> [--gap-seconds=0]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const sceneIds = (args.find((argument) => argument.startsWith('--scenes='))?.slice('--scenes='.length) ?? '').split(',').filter(Boolean);
 const targetSceneId = args.find((argument) => argument.startsWith('--target-scene='))?.slice('--target-scene='.length);
@@ -22,7 +26,7 @@ const sha256 = async (file) => createHash('sha256').update(await fs.readFile(fil
 
 try {
   if (!slug || sceneIds.length < 2 || !targetSceneId || !Number.isFinite(gapSeconds) || gapSeconds < 0 || gapSeconds > 2) {
-    throw new Error('用法：project:stitch-narration -- <slug> --scenes=<scene-a,scene-b,...> --target-scene=<new-scene-id> [--gap-seconds=0]');
+    throw new Error(USAGE);
   }
   const {project} = await loadProject(slug);
   const indexes = sceneIds.map((id) => project.scenes.findIndex((scene) => scene.id === id));

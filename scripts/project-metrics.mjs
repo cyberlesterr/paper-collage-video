@@ -1,13 +1,17 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {refreshProductionMetrics} from './production-metrics-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:metrics -- <slug> [--json]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 
 const seconds = (milliseconds) => Math.round(milliseconds / 100) / 10;
 
 try {
-  if (!slug) throw new Error('用法：project:metrics -- <slug> [--json]');
+  if (!slug) throw new Error(USAGE);
   const metrics = await refreshProductionMetrics(slug);
   if (args.includes('--json')) {
     console.log(JSON.stringify(metrics, null, 2));

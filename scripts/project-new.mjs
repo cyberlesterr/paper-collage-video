@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {
@@ -9,6 +10,9 @@ import {
 } from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:new -- <slug> [--title=<成片标题>] [--dry-run]';
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const titleArgument = args.find((arg) => arg.startsWith('--title='));
 const title = titleArgument?.slice('--title='.length) || slug;
@@ -59,7 +63,9 @@ try {
   ];
 
   console.log(`项目：${slug}`);
-  console.log(`标题：${title}`);
+  console.log(
+    `标题：${title}${titleArgument ? '' : '（未传 --title=，暂用 slug 占位；确定成片标题后重建或在 brief 阶段更正）'}`,
+  );
   console.log(`配置：projects/${slug}`);
   console.log(`素材：public/projects/${slug}`);
   if (dryRun) {

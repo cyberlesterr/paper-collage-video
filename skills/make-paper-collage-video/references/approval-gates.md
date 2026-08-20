@@ -31,6 +31,21 @@ story/style drift, records old/new concept fingerprints, recomputes only legal
 locked-static motion floors, preserves the approved provider cap, and
 invalidates all dependent style/proof/render evidence.
 
+## Recording the Combined Concept Decision
+
+Do not hand-author the selection file. `project:confirm-concept -- <slug>
+--scaffold` prints it complete: `planDecision`, `scenarioDecision`,
+`budgetDecision`, and the canonical `sourcePackageDecision` are derived from the
+current plan, scenario card, and compiled storyboard. Only two things are yours
+to supply — the human's own words in `note`, and each `selections[].providerId`.
+
+`sourcePackageDecision` is a four-key projection of
+`directingSummary.generationBudget`, not the whole object; copying the budget
+wholesale fails on the extra keys. If you do rebuild it, take it from
+`project:storyboard -- <slug> --input=<file> --json`. All decision comparisons
+are by value, so key order does not matter, and a mismatch reports each field
+with its expected and received value.
+
 ## Cost Boundary
 
 - Before combined scenario/concept approval, use only the current host model for the common story and three scenarios; do not invoke an unconfirmed external/paid provider. Built-in style cards are versioned local text-to-image PNG assets and consume no provider calls when shown during intake.

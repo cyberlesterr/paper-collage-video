@@ -42,6 +42,16 @@ npm run provider:status -- --compact-json
 
 The bootstrap owns npm installation and `.venv`; do not ask the human to activate Python manually.
 
+`npm install` may report dependency audit advisories. Those are not a production
+gate: `doctor -- --ready` is. Do not run `npm audit fix` on your own initiative —
+it can move the pinned runtime out from under `runtime-build.json` and invalidate
+every fingerprint the project has already recorded. Report the advisory and let
+the human decide.
+
+The bootstrap ignores OS bookkeeping entries (`.DS_Store`, `Thumbs.db`, and
+friends) when deciding whether a target directory is empty, and names the actual
+blocking entries when it refuses.
+
 For an existing workspace, inspect identity without writing:
 
 ```bash

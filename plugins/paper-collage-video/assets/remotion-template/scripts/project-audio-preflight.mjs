@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {runAudioPreflight} from './audio-preflight-lib.mjs';
@@ -10,13 +11,16 @@ import {
 } from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:audio-preflight -- <slug> [--strict] [--json]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const strict = args.includes('--strict');
 const json = args.includes('--json');
 
 try {
   if (!slug) {
-    throw new Error('用法：project:audio-preflight -- <slug> [--strict] [--json]');
+    throw new Error(USAGE);
   }
   const {project} = await loadProject(slug);
   const paths = projectPaths(slug);

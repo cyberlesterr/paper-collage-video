@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import {
@@ -29,10 +30,51 @@ import {readJson} from './project-lib.mjs';
 import {
   requiredProviderCapabilitiesForStoryboard,
 } from './sound-effect-lib.mjs';
+import {
+  buildSelectionScaffold,
+  selectionScaffoldPlaceholders,
+} from './selection-scaffold-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:confirm-concept -- <slug> --scaffold | --input=<selection.json> | --selection=<内联 JSON>';
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
+
+const printSelectionScaffold = async (slug) => {
+  const {paths} = await loadProduction(slug);
+  const {project} = await loadProject(slug);
+  assertCreativePlanReady(project.plan, {slug});
+  const scenarios = project.plan.scenarioBinding
+    ? assertPlanningScenariosReady(
+        await readJson(paths.planningScenariosFile),
+        {slug, intake: project.intake},
+      )
+    : null;
+  const storyboard = await assertStoryboardReady(
+    slug,
+    project.plan,
+    project.styleProfile,
+  );
+  const scaffold = buildSelectionScaffold({
+    project,
+    scenarios,
+    storyboard,
+    capabilities: requiredProviderCapabilitiesForStoryboard(storyboard),
+  });
+  console.log(JSON.stringify(scaffold, null, 2));
+  const pending = selectionScaffoldPlaceholders(scaffold);
+  if (pending.length > 0) {
+    console.error('');
+    console.error('以上决定已由当前 plan/scenario/storyboard 算好，只需补两类人工内容：');
+    for (const line of pending) console.error(`  - ${line}`);
+    console.error('');
+    console.error(
+      `补完后运行：npm run project:confirm-concept -- ${slug} --input=<selection.json>`,
+    );
+  }
+};
 
 const normalizeSelections = (value) => {
   if (Array.isArray(value)) return value;
@@ -47,14 +89,18 @@ const normalizeSelections = (value) => {
 
 try {
   if (!slug) {
-    throw new Error(
-      '用法：project:confirm-concept -- <slug> --input=<selection.json> 或 --selection=<json>',
-    );
+    throw new Error(USAGE);
+  }
+  if (args.includes('--scaffold')) {
+    await printSelectionScaffold(slug);
+    process.exit(0);
   }
   const input = valueFor('--input');
   const inline = valueFor('--selection');
   if (Boolean(input) === Boolean(inline)) {
-    throw new Error('--input 和 --selection 必须且只能提供一个。');
+    throw new Error(
+      '--input=<path> 与 --selection=<内联 JSON> 必须且只能提供一个；不确定结构时先运行 --scaffold。',
+    );
   }
   const payload = input
     ? JSON.parse(await fs.readFile(resolveWorkspacePath(input, 'selection 路径'), 'utf8'))

@@ -123,9 +123,21 @@ drift returns to this same gate with a revised exact card.
 
 The resulting Creative Plan remains schema v4 but adds `storyScope`,
 `scenarioBinding`, and `profilePromise`. The scenario and option fingerprints
-prevent a stale card from authorizing a changed plan. `project:plan --json`
-re-displays the exact decision. Direct `--duration/--scenes/--profile` planning
-remains a compatibility path, not the default title-only workflow.
+prevent a stale card from authorizing a changed plan. `project:plan -- <slug>
+--json` with no other flag is a read-only display of the resolved decision.
+Re-running it with `--scenario=` re-selects; when the option and its fingerprint
+are unchanged this is idempotent and preserves `resolvedAt`/`selectedAt`, so a
+`planDecision` already copied into a concept selection stays valid. Direct
+`--duration/--scenes/--profile` planning remains a compatibility path, not the
+default title-only workflow.
+
+Do not hand-author the scenario input from prose. `project:scenarios` reports
+every violation it finds in one run, and the exact per-option floors
+(`minLocalMotionTargets` and friends) come from `profilePromise` rather than a
+formula you have to rediscover. `localMotionTargets[].preset` and
+`sourcePackages[].strategy` are drawn from the same executable vocabulary the
+storyboard compiler uses, so a plan that passes this gate cannot become
+unexecutable at compile time.
 
 The profile has both ceilings and floors. Motion/image budgets cap spending and
 complexity. `profilePromise` requires the storyboard to meet the selected

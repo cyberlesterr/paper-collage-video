@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseCliValue} from './contract-utils.mjs';
@@ -9,14 +10,15 @@ import {
 } from './friction-report-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:friction -- <slug> [--json] [--output=<report.md>]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!slug) {
-    throw new Error(
-      '用法：project:friction -- <slug> [--json] [--output=<report.md>]',
-    );
+    throw new Error(USAGE);
   }
   assertSlug(slug);
   const report = await buildFrictionReport({slug});

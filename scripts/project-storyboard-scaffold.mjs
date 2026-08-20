@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {parseCliValue} from './contract-utils.mjs';
@@ -9,14 +10,15 @@ import {
 } from './storyboard-scaffold-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:storyboard-scaffold -- <slug> [--output=projects/<slug>/storyboard-input.json] [--force]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!slug) {
-    throw new Error(
-      '用法：project:storyboard-scaffold -- <slug> [--output=projects/<slug>/storyboard-input.json] [--force]',
-    );
+    throw new Error(USAGE);
   }
   const {project, paths} = await loadProject(slug);
   if (project.plan?.status !== 'resolved') {
@@ -43,7 +45,10 @@ try {
     }
   }
   await writeJson(file, scaffold);
-  const {markers, obligations} = scaffoldCompletionChecklist({scaffold, option});
+  const {markers, defaults, obligations} = scaffoldCompletionChecklist({
+    scaffold,
+    option,
+  });
   console.log(`✓ 分镜脚手架：${path.relative(ROOT, file)}`);
   console.log(
     `  场景 ${scaffold.scenes.length} · 边界 ${scaffold.sceneTransitions.length} · 待补创意字段 ${markers.length} 处`,
@@ -51,6 +56,11 @@ try {
   console.log('');
   console.log('待补字段（全部替换掉 TODO(author) 标记后才能编译）：');
   for (const marker of markers) console.log(`  - ${marker}`);
+  if (defaults.length > 0) {
+    console.log('');
+    console.log('脚手架代填的枚举默认值（可直接编译，但请按真实创作意图复核）：');
+    for (const line of defaults) console.log(`  ${line}`);
+  }
   if (obligations.length > 0) {
     console.log('');
     console.log('按已批准 scenario 推断的空间合同义务（补进 spatialContracts[]）：');

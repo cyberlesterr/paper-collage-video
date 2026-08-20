@@ -1,6 +1,8 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
+import path from 'node:path';
 import {assertIntakeConfirmed} from './intake-lib.mjs';
 import {
   assertPlanningScenariosReady,
@@ -13,10 +15,43 @@ import {resolveWorkspacePath} from './provider-lib.mjs';
 import {loadProduction} from './production-state.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:scenarios -- <slug> [--input=<scenarios.json> [--replace-unconfirmed-plan]|--json]';
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const json = args.includes('--json');
 const replaceUnconfirmedPlan = args.includes('--replace-unconfirmed-plan');
 const valueFor = (name) => parseCliValue(args, name);
+
+// Derived, unapproved storyboard artifacts. Budget approval and any generation
+// attempt are checked before this runs, so nothing here has been paid for.
+const DERIVED_STORYBOARD_ARTIFACTS = [
+  'storyboard.json',
+  'motion-language-card.json',
+  'sound-effect-plan.json',
+  'semantic-contracts.json',
+];
+
+const clearUnapprovedMotionContract = async ({project, paths}) => {
+  const cleared = [];
+  if (project.motionContract !== null && project.motionContract !== undefined) {
+    project.motionContract = null;
+    cleared.push('project.motionContract');
+  }
+  project.editorial = null;
+  project.spatialContracts = [];
+  for (const name of DERIVED_STORYBOARD_ARTIFACTS) {
+    const file = path.join(paths.projectDirectory, name);
+    const exists = await fs
+      .stat(file)
+      .then((stat) => stat.isFile())
+      .catch(() => false);
+    if (!exists) continue;
+    await fs.rm(file, {force: true});
+    cleared.push(name);
+  }
+  return cleared;
+};
 
 const printScenarios = (scenarios) => {
   const decisions = scenarios.options.map(({id}) =>
@@ -40,7 +75,7 @@ const printScenarios = (scenarios) => {
 };
 
 try {
-  if (!slug) throw new Error('用法：project:scenarios -- <slug> [--input=<scenarios.json> [--replace-unconfirmed-plan]|--json]');
+  if (!slug) throw new Error(USAGE);
   const {state} = await loadProduction(slug);
   if (state.stage !== 'capability-review') {
     throw new Error(`project:scenarios 只能在 capability-review 阶段运行；当前为 ${state.stage}。`);
@@ -62,9 +97,9 @@ try {
           '--replace-unconfirmed-plan 只能用于 concept approval 仍为 pending 的项目。',
         );
       }
-      if (project.plan.approvedImageBudget !== null || project.motionContract !== null) {
+      if (project.plan.approvedImageBudget !== null) {
         throw new Error(
-          '--replace-unconfirmed-plan 拒绝已批准预算或已有 motion contract 的项目。',
+          '--replace-unconfirmed-plan 拒绝已批准预算的项目。',
         );
       }
       const attempts = await fs.readFile(paths.generationAttemptsFile, 'utf8');
@@ -92,7 +127,20 @@ try {
     });
     if (project.plan?.status === 'resolved') {
       project.plan = resetUnconfirmedCreativePlan(project.plan, {slug});
+      // Reaching the scenario gate again always means a storyboard was already
+      // compiled — that is where material drift becomes visible. The motion
+      // contract it produced is derived and unapproved, so clearing it is what
+      // makes the documented "go back to the scenario gate" path executable.
+      const clearedArtifacts = await clearUnapprovedMotionContract({
+        project,
+        paths,
+      });
       await writeJson(paths.projectFile, project);
+      if (clearedArtifacts.length > 0) {
+        console.log(
+          `已清除未获批的 motion contract 与派生产物：${clearedArtifacts.join('、')}`,
+        );
+      }
     }
     await writeJson(paths.planningScenariosFile, scenarios);
   } else {

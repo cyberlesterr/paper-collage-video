@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import {parseCliValue} from './contract-utils.mjs';
+import {parseCliValue, stableStringify} from './contract-utils.mjs';
 import {
   buildCreativePlan,
   PRODUCTION_PROFILES,
@@ -101,12 +101,25 @@ try {
       await readJson(paths.planningScenariosFile),
       {slug, intake: project.intake},
     );
-    project.plan = buildCreativePlanFromScenario({
+    // Re-selecting the same option must be a no-op: a fresh resolvedAt/
+    // selectedAt would silently invalidate a planDecision the author already
+    // copied into their concept selection.
+    const priorBinding = project.plan?.scenarioBinding ?? null;
+    const unchanged =
+      priorBinding?.optionId === scenarioId &&
+      priorBinding?.scenarioSetFingerprint === scenarios.fingerprint &&
+      priorBinding?.optionFingerprint ===
+        scenarios.options.find(({id}) => id === scenarioId)?.fingerprint;
+    const rebuilt = buildCreativePlanFromScenario({
       slug,
       scenarios,
       optionId: scenarioId,
+      ...(unchanged ? {at: priorBinding.selectedAt} : {}),
     });
-    await writeJson(paths.projectFile, project);
+    if (!unchanged || stableStringify(rebuilt) !== stableStringify(project.plan)) {
+      project.plan = rebuilt;
+      await writeJson(paths.projectFile, project);
+    }
     printPlan({project, json});
   } else if (durationSeconds === null || sceneCount === null) {
     throw new Error(

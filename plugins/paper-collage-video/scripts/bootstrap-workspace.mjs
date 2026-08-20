@@ -7,6 +7,16 @@ import {fileURLToPath, pathToFileURL} from 'node:url';
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PLUGIN_ROOT = path.resolve(SCRIPT_DIR, '..');
 const TEMPLATE_ROOT = path.join(PLUGIN_ROOT, 'assets', 'remotion-template');
+const OS_METADATA_ENTRIES = new Set([
+  '.DS_Store',
+  '.localized',
+  'Thumbs.db',
+  'desktop.ini',
+  '.Spotlight-V100',
+  '.Trashes',
+  '.fseventsd',
+  '.TemporaryItems',
+]);
 const rawArgs = process.argv.slice(2);
 const valueFor = (name) =>
   rawArgs.find((value) => value.startsWith(`${name}=`))?.slice(name.length + 1);
@@ -249,8 +259,16 @@ try {
   const marker = path.join(target, '.paper-collage-video-workspace.json');
   const targetExists = await exists(target);
   const entries = targetExists ? await fs.readdir(target) : [];
-  if (entries.length > 0 && !(await exists(marker))) {
-    throw new Error(`目标目录不是纸片视频工作区且不为空：${target}`);
+  // A folder the user just created in Finder already holds .DS_Store, which is
+  // OS bookkeeping rather than their content. Refusing on it forced people to
+  // move a file they never made, and the old message never said which entry
+  // was blocking.
+  const blocking = entries.filter((entry) => !OS_METADATA_ENTRIES.has(entry));
+  if (blocking.length > 0 && !(await exists(marker))) {
+    throw new Error(
+      `目标目录不是纸片视频工作区且不为空：${target}\n` +
+        `阻塞条目（${blocking.length} 个）：${blocking.slice(0, 10).join('、')}${blocking.length > 10 ? ' …' : ''}`,
+    );
   }
   const currentMarker = (await exists(marker))
     ? JSON.parse(await fs.readFile(marker, 'utf8'))

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -18,6 +19,9 @@ import {
 } from './style-catalog-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:intake -- <slug> [--json --presentation-root=<loaded-plugin-template-root>|--input=<selection.json>|--selection=<json>]';
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const json = args.includes('--json');
 const valueFor = (name) => parseCliValue(args, name);
@@ -84,9 +88,7 @@ const printGate = ({project, catalog, presentationCatalog}) => {
 
 try {
   if (!slug) {
-    throw new Error(
-      '用法：project:intake -- <slug> [--json --presentation-root=<loaded-plugin-template-root>|--input=<selection.json>|--selection=<json>]',
-    );
+    throw new Error(USAGE);
   }
   const {state} = await loadProduction(slug);
   if (state.stage !== 'capability-review') {

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import path from 'node:path';
 import {
@@ -18,6 +19,9 @@ import {ROOT, loadProject} from './project-lib.mjs';
 import {assertProviderVisualBlueprintGate} from './visual-blueprint-review-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：provider:attempt -- <reserve|summary|close> ...';
+printCliHelp(args, USAGE);
 const action = args.find((arg) => !arg.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 const booleanFor = (name) => {
@@ -120,7 +124,7 @@ try {
       `${result.event.status} (${result.event.quotaConsumed ? 'counted' : 'not-counted'})`,
     );
   } else {
-    throw new Error('用法：provider:attempt -- <reserve|summary|close> ...');
+    throw new Error(USAGE);
   }
 } catch (error) {
   console.error(`provider:attempt failed: ${error.message}`);

@@ -324,16 +324,17 @@
               "targetId": {"type": "string", "minLength": 1},
               "preset": {
                 "enum": [
-                  "translate",
-                  "fade",
-                  "push-pull",
                   "breathe",
-                  "bob",
+                  "float",
+                  "drift",
+                  "bounce",
+                  "pulse",
+                  "camera",
+                  "settle",
+                  "traverse",
                   "sway",
-                  "jitter",
-                  "tilt",
-                  "transition",
-                  "motif-loop"
+                  "parallax-camera",
+                  "scroll-world-x"
                 ]
               }
             },

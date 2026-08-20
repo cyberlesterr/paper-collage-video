@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import path from 'node:path';
 import {
   readGenerationAttemptEvents,
@@ -8,11 +9,14 @@ import {ROOT, loadProject} from './project-lib.mjs';
 import {loadStoryboard} from './storyboard-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:budget -- <slug> [--json]';
+printCliHelp(args, USAGE);
 const slug = args.find((argument) => !argument.startsWith('--'));
 const json = args.includes('--json');
 
 try {
-  if (!slug) throw new Error('用法：project:budget -- <slug> [--json]');
+  if (!slug) throw new Error(USAGE);
   const [{project}, storyboard, ledger] = await Promise.all([
     loadProject(slug),
     loadStoryboard(slug),

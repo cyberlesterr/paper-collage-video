@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -22,13 +23,16 @@ import {
 import {assertProviderVisualBlueprintGate} from './visual-blueprint-review-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：provider:run -- --request=<request.json> [--provider=<id>]';
+printCliHelp(args, USAGE);
 const valueFor = (name) => parseCliValue(args, name);
 const requestInput = valueFor('--request');
 const requestedProvider = valueFor('--provider') ?? 'auto';
 
 try {
   if (!requestInput) {
-    throw new Error('用法：provider:run -- --request=<request.json> [--provider=<id>]');
+    throw new Error(USAGE);
   }
   const loadedRequest = await loadAssetRequest(requestInput);
   const loadedConfig = assertProviderConfig(

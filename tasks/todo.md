@@ -20,3 +20,20 @@
 - [x] T3 references 定向去重：源包成本模型从 4 个文档收敛到 layer-complete-assets.md 单源（story-planning/project-contract/motion-directing/providers 改为指针）；其余跨文档出现经核实为角色视图（授权/证据/登记/字段参考），非重复，保留
 - [x] T4 friction 报告：`project:friction -- <slug> [--json|--output=]` 只读汇总付费浪费/熔断史/时间分布 + 候选改进模板（真实项目冒烟：即刻呈现 14 次调用 7 次被拒的完整清单）
 - [x] 验证：tsc 通过；348/348 测试全绿（+6 新回归）；plugin:sync 已分发、副本一致；无 fixture 残留
+
+## Codex 黑盒实测 20 条缺陷（2026-08-20 · 已完成）
+
+来源：`/Users/lester/Desktop/Remotion/projects/lang-lai-le-final/process-friction-log.md`（F-001…F-022，独立 agent 只读文档跑完整流程，**在概念确认门彻底卡死**）。计划：`~/.claude/plans/glowing-dazzling-stearns.md`。用户定：枚举单源化、20 条全修、不做旧项目兼容。
+
+- [x] WP-A 词汇表单源化（F-012/F-013/F-010）：新建 `production-vocabulary.mjs` 一张表两视图（`SOURCE_PACKAGE_STRATEGIES` → `LAYER_SOURCE_STRATEGIES`/`STRATEGY_COSTS`）；planning/execution/container 三处重复定义全部收敛；schema 枚举与模块导出加漂移断言；scenario 门新增可执行 preset 校验（原 10 个规划 preset 只有 2 个可执行）；`localDerivatives` 与 `avoidedCalls` 统一计入姿态母版家族
+- [x] WP-B 重建 storyboard scaffold（F-012）：按 `routeForChangeClass` 真实路由表重写；枚举槽位填合法默认值 + 清单列出待复核项，只有自由文本留 `TODO(author)`；state-sequence 双拍播放（establish 初态 + action 变化态）满足"至少两态且从 at=0 开始"；每拍保底 treatment；id 加场景前缀；`editorial.sceneDirecting` 自动生成；分层包用 `parallax-camera` 同时满足视差下限与 `maxContinuousTargets`
+- [x] WP-C canonical 导出与 scaffold（F-015/F-020/F-022）：`project:storyboard --json` 输出 `directingSummary` + canonical `sourcePackageDecision`；新建 `selection-scaffold-lib.mjs` 支撑 `project:confirm-concept --scaffold`（只留 note 与 providerId 两处人工位）
+- [x] WP-D 契约对齐与逐项报错（F-006/F-008）：`assertSourcePackageDecision`/`assertScenarioDecision` 改按值比较（键序无关）+ 逐字段 expected/received + 点名多余字段；scenario 校验改为 `collectIssues`/`throwCollected` 一次报全（原为首错即停，Codex 因此猜了 15 轮）
+- [x] WP-E 流程闭环（F-016/F-017/F-018）：`--replace-unconfirmed-plan` 零消费前提下事务性清除未获批 motion contract 与派生产物，使文档要求的回退路径真正可执行；`assertStoryboardMatchesScenario` 前移到 storyboard 编译；`project:plan --scenario` 重选同档位幂等，不刷时间戳
+- [x] WP-F CLI 人机工程（F-001/F-003/F-005）：新建 `cli-help-lib.mjs`，22 个命令 `--help` 打印用法并 exit 0；bootstrap 忽略 `.DS_Store` 等系统元数据并列出真正阻塞条目；`project:new` 缺 `--title=` 时显式提示
+- [x] WP-G 能力证明与措辞（F-002/F-004/F-011/F-014）：host provider 缺 `outputAcquisition` 时 readiness 直接标注"确认前必须先证明能返回本地文件或公开下载地址，否则降级 command/manual"；`project-contract.md` 写明 Creative Plan 内嵌于 `project.json` 且 `sourcePackageDecision` 是 4 键投影；`setup.md` 说明依赖审计告警不是生产门、禁止擅自 `npm audit fix`
+- [x] WP-H 文档同步：SKILL.md 第 4/6 步改为 `--title=` 与 `--scaffold` 路径；`story-planning.md` 去掉 `--json re-displays` 误导并说明幂等与单源词汇表；`approval-gates.md` 新增「Recording the Combined Concept Decision」
+- [x] WP-I 端到端往返测试：新建 `tests/authoring-roundtrip.test.mjs` 复刻"不读 schema 只用命令输出"的边界，跑通 scenarios→plan→storyboard→confirm-concept 四门；另加按值比较/多余字段报错、bootstrap 元数据、`--help` exit 0 回归
+- [x] 验证：tsc 通过；354/354 测试全绿（348 + 6 新增/重写）；`plugin:sync` 已分发、副本一致；真实项目（《狼来了》5 幕）脚手架生成 42 个 treatment、128 处待填散文并**编译通过**，对比 Codex 手写 1872 行
+
+不属本 skill：F-019（人工批量改错）、F-021（ChatCut MCP 下载路径）。

@@ -51,7 +51,7 @@ try {
         invocation: provider.invocation ?? null,
         outputAcquisition: provider.outputAcquisition ?? null,
       },
-      readiness: await inspectProviderReadiness(provider),
+      readiness: await inspectProviderReadiness({...provider, capability}),
       candidates,
       required: requiredCapabilities.includes(capability),
       ...selections[capability],

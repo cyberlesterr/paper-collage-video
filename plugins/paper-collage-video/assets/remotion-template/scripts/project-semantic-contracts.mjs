@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import {ROOT, assertSlug, fileExists, loadProject} from './project-lib.mjs';
@@ -9,6 +10,9 @@ import {
 } from './semantic-contract-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:semantic-contracts -- <slug> --input=<contracts.json>';
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const inputArgument = args.find((arg) => arg.startsWith('--input='));
 
@@ -18,7 +22,7 @@ try {
     throw new Error(`项目不存在：${slug}；请先运行 project:new。`);
   }
   if (!inputArgument) {
-    throw new Error('用法：project:semantic-contracts -- <slug> --input=<contracts.json>');
+    throw new Error(USAGE);
   }
   const inputFile = path.resolve(ROOT, inputArgument.slice('--input='.length));
   if (inputFile !== ROOT && !inputFile.startsWith(`${ROOT}${path.sep}`)) {

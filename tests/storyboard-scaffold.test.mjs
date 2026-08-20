@@ -6,6 +6,11 @@ import {
   scaffoldCompletionChecklist,
   storyboardTodoMarker,
 } from '../scripts/storyboard-scaffold-lib.mjs';
+import {
+  compileStoryboardDirecting,
+  validateStoryboard,
+} from '../scripts/storyboard-lib.mjs';
+import {materializeSceneTransitionRecipes} from '../src/sceneTimeline.mjs';
 
 const fixtureProject = () => ({
   slug: 'scaffold-fixture',
@@ -13,15 +18,26 @@ const fixtureProject = () => ({
   video: {width: 1080, height: 1920, fps: 30},
   styleProfile: {
     id: 'paper',
+    profileFingerprint: 'a'.repeat(64),
     label: '纸艺拼贴',
-    motion: {pacing: 'playful'},
+    motion: {pacing: 'playful', transitionSet: 'paper-story'},
     generation: {compositionPrinciples: ['规则一', '规则二']},
   },
   plan: {
     status: 'resolved',
+    resolved: {durationSeconds: 60, sceneCount: 2},
     scenarioBinding: {
       optionId: 'balanced',
       optionFingerprint: 'f'.repeat(64),
+    },
+    profilePromise: {
+      minRequiredStateFamilies: 1,
+      minEnhancementStateFamilies: 0,
+      minTotalStates: 2,
+      minLocalMotionTargets: 1,
+      minLayeredScenes: 1,
+      minParallaxScenes: 1,
+      minAmbientScenes: 1,
     },
   },
 });
@@ -48,8 +64,9 @@ const fixtureScenarios = () => ({
           sourcePackages: [
             {id: 'race-world-package', strategy: 'registered-layer-sheet', providerCalls: 1},
           ],
+          parallax: true,
           ambientElements: ['飘落树叶'],
-          localMotionTargets: [{targetId: 'turtle-path', preset: 'translate'}],
+          localMotionTargets: [{targetId: 'turtle-path', preset: 'drift'}],
         },
         {
           id: 'scene-02',
@@ -58,7 +75,10 @@ const fixtureScenarios = () => ({
           characterActions: ['乌龟撞线'],
           stateFamilies: [],
           layers: {rear: ['终点拱门'], mid: [], front: [], near: []},
-          sourcePackages: [],
+          sourcePackages: [
+            {id: 'finish-plate', strategy: 'single-background', providerCalls: 1},
+            {id: 'finish-master', strategy: 'rigid-master', providerCalls: 1},
+          ],
           localMotionTargets: [],
         },
       ],
@@ -113,10 +133,23 @@ test('storyboard scaffold pre-fills approved scenario data and marks creative ga
   assert.ok(
     first.proofTimes[1].assertions.includes('乌龟持续向前，没有滑步或倒退。'),
   );
-  const treatmentIds = first.beats[0].treatments.map(({id}) => id);
-  assert.ok(treatmentIds.includes('race-world-package-treatment'));
-  assert.ok(treatmentIds.includes('turtle-walk-treatment'));
-  assert.ok(treatmentIds.includes('turtle-path-treatment'));
+  const establishIds = first.beats[0].treatments.map(({id}) => id);
+  const actionIds = first.beats[1].treatments.map(({id}) => id);
+  assert.ok(establishIds.includes('scene-01-race-world-package-layers'));
+  assert.ok(establishIds.includes('scene-01-turtle-walk-establish'));
+  assert.ok(actionIds.includes('scene-01-turtle-walk-action'));
+  assert.ok(actionIds.includes('scene-01-turtle-path-motion'));
+  // Every beat carries at least one treatment, and ids are scene-prefixed so a
+  // family reused across scenes cannot collide.
+  assert.ok(
+    scaffold.scenes.every((scene) =>
+      scene.beats.every(({treatments}) => treatments.length > 0),
+    ),
+  );
+  const allIds = scaffold.scenes.flatMap((scene) =>
+    scene.beats.flatMap(({treatments}) => treatments.map(({id}) => id)),
+  );
+  assert.equal(new Set(allIds).size, allIds.length);
   assert.equal(second.beats.length, 3);
   const markers = findStoryboardTodoMarkers(scaffold);
   assert.ok(markers.length > 0);
@@ -175,4 +208,52 @@ test('completion checklist dedupes inferred spatial-contract obligations', () =>
     1,
   );
   assert.ok(obligations.some((line) => line.includes('race-world')));
+});
+
+// The generator's only real contract: fill in the prose and the compiler must
+// accept it. Asserting that the scaffold "has all the fields" is what let a
+// scaffold full of invalid enums ship.
+test('a scaffold with its markers filled in compiles as a storyboard', () => {
+  const project = fixtureProject();
+  const scaffold = buildStoryboardScaffold({
+    project,
+    scenarios: fixtureScenarios(),
+  });
+  const fill = (value) => {
+    if (typeof value === 'string') {
+      return value.includes('TODO(author)') ? '作者补写的具体内容' : value;
+    }
+    if (Array.isArray(value)) return value.map(fill);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, child]) => [key, fill(child)]),
+      );
+    }
+    return value;
+  };
+  const filled = fill(scaffold);
+  assert.deepEqual(findStoryboardTodoMarkers(filled), []);
+  const authored = {
+    ...filled,
+    status: 'ready',
+    sceneTransitions: materializeSceneTransitionRecipes(
+      filled.sceneTransitions,
+      project.styleProfile.motion.transitionSet,
+    ),
+    updatedAt: '2026-08-20T00:00:00.000Z',
+  };
+  const storyboard = compileStoryboardDirecting(authored, {
+    plan: project.plan,
+    styleProfile: project.styleProfile,
+  });
+  assert.deepEqual(
+    validateStoryboard(storyboard, {
+      slug: project.slug,
+      plan: project.plan,
+      styleProfile: project.styleProfile,
+    }),
+    [],
+  );
+  // The profile floors the scenario gate promised are met by construction.
+  assert.equal(storyboard.directingSummary.profileFulfillment.passed, true);
 });

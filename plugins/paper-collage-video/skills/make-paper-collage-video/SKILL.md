@@ -12,7 +12,7 @@ Build an editable video while keeping the human in charge of concept, style/voic
 1. Treat the current directory as a workspace only when `package.json` exposes `project:new`, `project:resume`, `project:preview`, and `project:render`. Resolve this loaded Skill's plugin root and run its `bootstrap-workspace.mjs --target=<cwd> --status-json` once before the first project write or provider call. Require both `compatible=true` and `productionSessionCompatible=true`. If runtime compatibility is false, show the reported identities and managed/preserved scopes, obtain explicit upgrade approval (unless the current user message already authorizes it), then run `--upgrade` and repeat status plus doctor once. If only `session.targetMatchesCwd=false`, do not upgrade or copy anything: stop and require a new task whose primary local workspace is the target. Otherwise, or when no workspace exists, read [references/setup.md](references/setup.md), bootstrap a writable workspace, and run its doctor. If this Skill was injected from a versioned plugin-cache path that no longer exists, stop and report a stale task snapshot instead of guessing a cached version.
 2. Inspect `git status --short` in Git workspaces and preserve unrelated changes.
 3. For an existing slug, run only `npm run project:resume -- <slug>` and continue from `control.mode` and the remaining work items. Do not repeat recorded approvals or re-read full history unless diagnosing state.
-4. For a new project, derive a lowercase hyphenated slug and run `project:new`.
+4. For a new project, derive a lowercase hyphenated slug and run `project:new -- <slug> --title=<成片标题>`. The slug is an identifier, not the title; without `--title=` the project carries the slug as its display title.
 
 ## Load Only the Current Stage Reference
 
@@ -58,13 +58,13 @@ At `capability-review`, use only the current host model; do not call an unconfir
    - When narration names successive characters the traveler meets, author `scene.encounters[]` binding narration cues to physical `enter/approach/answer/exit` beats — opacity toggles are not an encounter lifecycle.
    - Add root `spatialContracts[]` for every support, continuity, gait, travel-facing, path-locomotion, occlusion, and action-sequence obligation (`motion-directing.md` defines each kind).
    - Never hand-author compiler-derived fields (motion contracts, summaries, fingerprints, sheet grids, world copies). `project:storyboard` compiles and rejects inconsistency, budget overflow, and `profilePromise` under-delivery with actionable errors.
-6. If the compiled storyboard preserves the approved scenario's exact state families, source packages, and complete expected-call count, write one selection JSON containing `scenarioDecision`, `planDecision`, `budgetDecision`, the compiled `sourcePackageDecision`, and provider selections copied exactly from the approved card, then run:
+6. Run `project:confirm-concept -- <slug> --scaffold` to emit the complete selection JSON: `planDecision`, `scenarioDecision`, `budgetDecision`, and the canonical `sourcePackageDecision` are all computed from the current plan/scenario/storyboard. Fill in only `note` (the human's own words) and each `selections[].providerId`; do not rebuild any decision by hand — `sourcePackageDecision` is a four-key projection of `generationBudget`, not a copy of it. Then run:
 
    ```bash
    npm run project:confirm-concept -- <slug> --input=<selection.json>
    ```
 
-   This records all providers plus `capabilities-ready`, `brief-ready`, and `approve-concept`. Never call an image provider before this command has recorded the exact cap (the style sample at the next gate is already counted). If compilation changed a material promise, return to the scenario gate with the revised card. If a custom provider or incompatible explicit duration/scenes cannot be resolved, stay at the gate and ask one concise question.
+   This records all providers plus `capabilities-ready`, `brief-ready`, and `approve-concept`. Never call an image provider before this command has recorded the exact cap (the style sample at the next gate is already counted). If compilation changed a material promise, return to the scenario gate with the revised card: `project:scenarios -- <slug> --input=<revised.json> --replace-unconfirmed-plan` is executable while the budget is unapproved and nothing has been generated — it clears the derived, unapproved motion contract for you. If a custom provider or incompatible explicit duration/scenes cannot be resolved, stay at the gate and ask one concise question.
 
 ## Style and Fictional Voice Gate
 

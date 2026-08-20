@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
@@ -15,6 +16,9 @@ import {
 import {ROOT, fileExists, readJson} from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：provider:reuse -- --request=<request.json>';
+printCliHelp(args, USAGE);
 const valueFor = (name) => parseCliValue(args, name);
 
 const hashFile = async (file) =>
@@ -23,7 +27,7 @@ const hashFile = async (file) =>
 try {
   const requestInput = valueFor('--request');
   if (!requestInput) {
-    throw new Error('用法：provider:reuse -- --request=<request.json>');
+    throw new Error(USAGE);
   }
   const loadedRequest = await loadAssetRequest(requestInput);
   const loadedConfig = assertProviderConfig(

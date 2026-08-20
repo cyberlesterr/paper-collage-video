@@ -140,12 +140,18 @@ pair.
 Schema v12 is the only supported Project, Storyboard Authoring, and Compiled
 Storyboard contract. Creative Plan v4 owns the approved profile, its planning
 ceiling, and `approvedImageBudget`: the narrower exact attempt cap authorized by
-the human. The storyboard compiler owns
+the human. Creative Plan v4 is a section **inside `project.json`** — there is no
+separate `creative-plan.json` file. The storyboard compiler owns
 `directingSummary.generationBudget`, including exact structural source-package
 calls, pose-sheet calls, reserve, local derivatives, and avoided calls. Concept
-approval copies the compiled `sourcePackageDecision` exactly and requires
-`budgetDecision.imageAttemptLimit`; it records expected calls and the profile
-ceiling at approval time. Provider requests cannot silently add or change a
+approval requires an exact `sourcePackageDecision`, which is a four-key
+projection of that budget (`requiredProviderImageCalls`,
+`expectedProviderImageCalls`, `hardCeiling`, `sourcePackagePlans`) — not the
+whole `generationBudget` object. Do not rebuild it by hand: take it from
+`project:storyboard -- <slug> --input=<file> --json`, or let
+`project:confirm-concept -- <slug> --scaffold` emit the entire selection file.
+Concept approval also requires `budgetDecision.imageAttemptLimit`; it records
+expected calls and the profile ceiling at approval time. Provider requests cannot silently add or change a
 layer package afterward, and storyboard call-count drift invalidates the budget
 approval. A scene has
 `composition.nodes`; nodes are recursive `asset`, `state-sequence`,

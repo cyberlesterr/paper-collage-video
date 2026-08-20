@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import {printCliHelp} from './cli-help-lib.mjs';
 import {parseCliValue} from './contract-utils.mjs';
 import {
   cuesFromTiming,
@@ -14,12 +15,15 @@ import {
 } from './project-lib.mjs';
 
 const args = process.argv.slice(2);
+const USAGE =
+  '用法：project:subtitles -- <slug> [--max-chars=<count>] [--gap-seconds=<seconds>]';
+printCliHelp(args, USAGE);
 const slug = args.find((arg) => !arg.startsWith('--'));
 const valueFor = (name) => parseCliValue(args, name);
 
 try {
   if (!slug) {
-    throw new Error('用法：project:subtitles -- <slug> [--max-chars=<count>] [--gap-seconds=<seconds>]');
+    throw new Error(USAGE);
   }
   const {paths, project} = await loadProject(slug);
   const maximumCharacters = Number(

@@ -172,7 +172,7 @@ try {
   if (providerErrors.length === 0) {
     for (const capability of PROVIDER_CAPABILITIES) {
       const provider = resolveProvider(loaded.config, capability);
-      const readiness = await inspectProviderReadiness(provider);
+      const readiness = await inspectProviderReadiness({...provider, capability});
       record(
         `provider-${capability}`,
         readiness.status === 'error' ? (ready ? 'error' : 'warning') : readiness.status === 'ready' ? 'ok' : 'warning',

@@ -15,3 +15,15 @@
 
 - **模式**：`scripts/` 与 `skills/` 是源，`plugins/paper-collage-video/` 是打包产物；新增脚本文件必须同时登记到 `sync-plugin-package.mjs` 的拷贝清单和 `runtime-surface-scope.test.mjs` 的静态闭包断言，否则打包一致性测试失败。
 - **规则**：任何 `scripts/*.mjs` / `skills/**` 改动后按序执行：`npm run check` → `npm test` → `npm run plugin:sync` → 复跑受影响测试；SKILL.md 含被 `plugin-package.test.mjs` 断言的语义锚点短语（如 "post-completion audit event"），精简文档前先 grep 测试中的字面断言。
+
+## 2026-08-20 · 生成器必须由"消费者接受产物"的往返测试守护
+
+- **纠正来源**：Codex 黑盒实测（`process-friction-log.md` F-012）发现我上一轮交付的 `project:storyboard-scaffold` 生成的骨架**根本无法编译**——写了枚举里不存在的 `state-replacement`/`local-motion`，state-sequence 缺六个必填字段，action/settle 两拍 treatments 为空，treatment id 跨场重复。
+- **模式**：我当时的测试只断言"生成物字段齐全、标记存在、数量正确"——全部是**生成器自比**。生成器唯一真实的契约是"产物能被下游消费者接受"，自比测试永远测不到这一点，还会给出虚假的安全感。
+- **规则**：任何生成器（scaffold/模板/导出）必须有一条往返测试：生成 → 机械填充占位 → **交给真实消费者**（编译器/校验器/下游命令）→ 断言零 issue。没有这条测试的生成器视为未验证。附带：占位标记只能放在自由文本槽位；枚举槽位必须填合法默认值并在清单里列出待复核项，否则产物结构性不可用。
+
+## 2026-08-20 · 手写输入面的契约必须可从命令获得
+
+- **模式**：`sourcePackageDecision` 的真值只存在于 `storyboard.json` 内部，且只取 `generationBudget` 的 4 键投影；`project:storyboard` 当时连 `--json` 都没有，报错只说"必须一致"。Codex 机械复制整个 budget（8 键）4 次全失败后彻底放弃，**整条流水线卡死、视频没做出来**——而他那 4 个被比较的值全是对的。
+- **规则**：凡是要求 agent 手写 JSON 去匹配机器计算值的门禁，必须同时具备三件事：(1) 有命令能打印 canonical 值或整份 scaffold；(2) 比较按值而非序列化（键序无关）；(3) 报错逐字段打印 expected/received 并指出多余字段。缺任何一件，正确答案就是不可达的。
+- **附带**：规划期词汇表与执行期词汇表必须单源。两者独立定义时（本仓库 preset 枚举只有 2/10 交集），方案能通过规划门却在编译期全部推倒重来。

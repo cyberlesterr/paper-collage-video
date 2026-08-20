@@ -25,29 +25,16 @@ import {
   compileSceneSoundEffects,
   soundEffectPlanFor,
 } from './sound-effect-lib.mjs';
+import {
+  CHANGE_CLASSES,
+  CONTINUOUS_PRESETS,
+  MOTION_KINDS,
+  STATE_FACINGS,
+} from './production-vocabulary.mjs';
 
 export const TREATMENT_IMPORTANCE = ['hero', 'supporting', 'ambient'];
 export const TREATMENT_NECESSITY = ['required', 'enhancement'];
-export const CHANGE_CLASSES = [
-  'ambient-motion',
-  'camera-change',
-  'pose-change',
-  'prop-state-change',
-  'contact-change',
-  'shared-boundary',
-  'graphic-emphasis',
-  'mechanism-state',
-  'static-hold',
-  'visibility-change',
-  'depth-parallax',
-  'depth-layer-separation',
-  'decorative-field',
-  'world-travel',
-  'path-travel',
-];
-export const MOTION_KINDS = ['static', 'continuous-transform', 'state-sequence', 'visibility-transition', 'motif-field', 'path-locomotion'];
-export const CONTINUOUS_PRESETS = ['breathe', 'float', 'drift', 'bounce', 'pulse', 'camera', 'settle', 'traverse', 'sway', 'parallax-camera', 'scroll-world-x'];
-export const STATE_FACINGS = ['left', 'right', 'front', 'back', 'neutral'];
+export {CHANGE_CLASSES, MOTION_KINDS, CONTINUOUS_PRESETS, STATE_FACINGS};
 export const MOTIF_FIELD_PRESETS = ['drift', 'fall-drift', 'rise-drift', 'burst', 'orbit'];
 export const MOTIF_FIELD_DISTRIBUTIONS = ['scattered', 'grid', 'edge'];
 export const COMPOSITION_PATTERNS = [
